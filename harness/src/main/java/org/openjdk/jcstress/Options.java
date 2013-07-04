@@ -74,13 +74,13 @@ public class Options {
     public boolean parse() throws IOException {
         OptionParser parser = new OptionParser();
 
-        OptionSpec<String> result = parser.accepts("r", "Destination to put the complete results into.")
+        OptionSpec<String> result = parser.accepts("r", "Destination to put the report into.")
                 .withRequiredArg().ofType(String.class).describedAs("dir");
 
-        OptionSpec<String> parse = parser.accepts("p", "Re-run parser on the result file, no test run.")
+        OptionSpec<String> parse = parser.accepts("p", "Re-run parser on the result file, skip running tests.")
                 .withOptionalArg().ofType(String.class);
 
-        OptionSpec<Boolean> list = parser.accepts("l", "List the available tests matching the regexp.")
+        OptionSpec<Boolean> list = parser.accepts("l", "List the available tests matching the requested settings.")
                 .withOptionalArg().ofType(Boolean.class);
 
         OptionSpec<String> testFilter = parser.accepts("t", "Regexp selector for tests")
@@ -104,7 +104,7 @@ public class Options {
         OptionSpec<Integer> sysCpus = parser.accepts("sc", "Number of CPUs in the system. Overrides auto-detection.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
-        OptionSpec<Boolean> shouldYield = parser.accepts("yield", "Make yields in busy-loops.")
+        OptionSpec<Boolean> shouldYield = parser.accepts("yield", "Call Thread.yield() in busy-loops.")
                 .withOptionalArg().ofType(Boolean.class);
 
         OptionSpec<Integer> forks = parser.accepts("f", "Should fork each test N times. (\"0\" to run in the embedded mode, \"-1\" to never fork)")
@@ -113,7 +113,7 @@ public class Options {
         OptionSpec<String> appendJvmArgs = parser.accepts("appendJvmArgs", "Append these arguments to the forked JVM.")
                 .withRequiredArg().ofType(String.class);
 
-        OptionSpec<String> modeStr = parser.accepts("m", "Test mode")
+        OptionSpec<String> modeStr = parser.accepts("m", "Test mode preset (available options: sanity, quick, default, tough, stress)")
                 .withRequiredArg().ofType(String.class);
 
         OptionSpec<String> hostName = parser.accepts("hostName", "(internal) Host VM address")
@@ -122,7 +122,7 @@ public class Options {
         OptionSpec<Integer> hostPort = parser.accepts("hostPort", "(internal) Host VM port")
                 .withRequiredArg().ofType(Integer.class);
 
-        parser.accepts("v", "Be verbose.");
+        parser.accepts("v", "Be extra verbose.");
         parser.accepts("h", "Print this help.");
 
         OptionSet set;
