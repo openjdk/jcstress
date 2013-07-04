@@ -35,6 +35,10 @@ questions.
     <name>Java Concurrency Stress Tests: All Tests</name>
     <url>http://maven.apache.org</url>
 
+    <scm>
+        <connection>scm:hg:http://hg.openjdk.java.net/code-tools/jcstress/</connection>
+    </scm>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -95,7 +99,40 @@ questions.
                     </execution>
                 </executions>
             </plugin>
-
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.1</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                    <shortRevisionLength>16</shortRevisionLength>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Implementation-Build>${buildNumber}</Implementation-Build>
+                            <Build-Time>${maven.build.timestamp}</Build-Time>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>

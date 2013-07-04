@@ -35,6 +35,10 @@ questions.
     <name>Java Concurrency Stress Tests: Harness</name>
     <url>http://maven.apache.org</url>
 
+    <scm>
+        <connection>scm:hg:http://hg.openjdk.java.net/code-tools/jcstress/</connection>
+    </scm>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -114,8 +118,6 @@ questions.
                     </execution>
                 </executions>
             </plugin>
-<!-- Temporarily disable before we have the actual SCM -->
-<!--
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
@@ -134,7 +136,6 @@ questions.
                     <shortRevisionLength>16</shortRevisionLength>
                 </configuration>
             </plugin>
--->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>

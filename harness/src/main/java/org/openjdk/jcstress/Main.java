@@ -73,7 +73,7 @@ public class Main {
             stream = new URL(manifestPath).openStream();
             Manifest manifest = new Manifest(stream);
             Attributes attr = manifest.getMainAttributes();
-            out.printf("Rev:%s, built by %s with %s at %s\n",
+            out.printf("Rev: %s, built by %s with %s at %s\n",
                     attr.getValue("Implementation-Build"),
                     attr.getValue("Built-By"),
                     attr.getValue("Build-Jdk"),
