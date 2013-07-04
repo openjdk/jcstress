@@ -1,0 +1,394 @@
+<!--
+
+    Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+    DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+    This code is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License version 2 only, as
+    published by the Free Software Foundation.  Oracle designates this
+    particular file as subject to the "Classpath" exception as provided
+    by Oracle in the LICENSE file that accompanied this code.
+
+    This code is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    version 2 for more details (a copy is included in the LICENSE file that
+    accompanied this code).
+
+    You should have received a copy of the GNU General Public License version
+    2 along with this work; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
+    Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+    or visit www.oracle.com if you need additional information or have any
+    questions.
+
+-->
+<testsuite>
+
+    <test name="org.openjdk.jcstress.tests.interrupt.CurrentThreadIsInterruptedBreakTest">
+        <contributed-by>Dr Heinz M. Kabutz (heinz@javaspecialists.eu)</contributed-by>
+        <description>
+            Tests the interruption of threads via Thread.currentThread().interrupt()
+        </description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The thread had sucessfully terminated
+            </description>
+        </case>
+        <case>
+            <match>STALE</match>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Thread had failed to respond.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Other cases are not expected.
+            </description>
+        </unmatched>
+    </test>
+
+
+    <test name="org.openjdk.jcstress.tests.interrupt.CurrentThreadIsInterruptedMethodTest">
+        <contributed-by>Dr Heinz M. Kabutz (heinz@javaspecialists.eu)</contributed-by>
+        <description>
+            Tests the interruption of threads via Thread.currentThread().interrupt() when test is done in separate method.
+        </description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The thread had sucessfully terminated
+            </description>
+        </case>
+        <case>
+            <match>STALE</match>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Thread had failed to respond.
+            </description>
+            <refs>
+                <url>http://cs.oswego.edu/pipermail/concurrency-interest/2012-November/010184.html</url>
+                <url>http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=8003135</url>
+            </refs>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Other cases are not expected.
+            </description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.interrupt.WeakReferenceTest">
+        <contributed-by>Dr Heinz M. Kabutz (heinz@javaspecialists.eu)</contributed-by>
+        <description>
+            Tests if spin-loop on WeakReferences terminates once weak reference is cleared.
+        </description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The thread had successfully terminated
+            </description>
+        </case>
+        <case>
+            <match>STALE</match>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Thread had failed to respond.
+            </description>
+            <refs>
+                <url>http://altair.cs.oswego.edu/pipermail/concurrency-interest/2012-August/009654.html</url>
+                <url>http://cs.oswego.edu/pipermail/concurrency-interest/attachments/20120808/cad656d6/attachment.html</url>
+                <url>http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7190310</url>
+                <url>http://mail.openjdk.java.net/pipermail/hotspot-compiler-dev/2012-August/008190.html</url>
+            </refs>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Other cases are not expected.
+            </description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.interrupt.CurrentThreadIsInterruptedTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the interruption of threads via Thread.currentThread().interrupt()
+        </description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>ACCEPTABLE</expect>
+            <description>The thread had successfully terminated</description>
+        </case>
+        <case>
+            <match>STALE</match>
+            <expect>FORBIDDEN</expect>
+            <description>Thread had failed to respond.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.interrupt.ThreadInterruptedTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the interruption of threads via Thread.currentThread().interrupt()
+        </description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>ACCEPTABLE</expect>
+            <description>The thread had successfully terminated</description>
+        </case>
+        <case>
+            <match>STALE</match>
+            <expect>FORBIDDEN</expect>
+            <description>Thread had failed to respond.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.interrupt.ThreadInterruptedBreakTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the interruption of threads via Thread.currentThread().interrupt() with a break statement
+        </description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>ACCEPTABLE</expect>
+            <description>The thread had successfully terminated</description>
+        </case>
+        <case>
+            <match>STALE</match>
+            <expect>FORBIDDEN</expect>
+            <description>Thread had failed to respond.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.interrupt.ThreadInterruptedMethodTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the interruption of threads via Thread.currentThread().interrupt() in the separate method
+        </description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>ACCEPTABLE</expect>
+            <description>The thread had successfully terminated</description>
+        </case>
+        <case>
+            <match>STALE</match>
+            <expect>FORBIDDEN</expect>
+            <description>Thread had failed to respond.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.interrupt.ObjectWaitInfiniteTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the interruption of the thread blocked on infinite Object.wait()
+        </description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>ACCEPTABLE</expect>
+            <description>The thread had successfully terminated</description>
+        </case>
+        <case>
+            <match>STALE</match>
+            <expect>FORBIDDEN</expect>
+            <description>Thread had failed to respond.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.interrupt.ObjectWaitTimedTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the interruption of the thread blocked on timed Object.wait()
+        </description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>ACCEPTABLE</expect>
+            <description>The thread had successfully terminated</description>
+        </case>
+        <case>
+            <match>STALE</match>
+            <expect>FORBIDDEN</expect>
+            <description>Thread had failed to respond.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.interrupt.VolatileBusyLoopTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the interruption of the thread awaiting notification on volatile field.
+        </description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>ACCEPTABLE</expect>
+            <description>The thread had successfully terminated</description>
+        </case>
+        <case>
+            <match>STALE</match>
+            <expect>FORBIDDEN</expect>
+            <description>Thread had failed to respond.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.interrupt.PlainBusyLoopTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the interruption of the thread awaiting notify on plain non-volatile field.
+        </description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>KNOWN_ACCEPTABLE</expect>
+            <description>The thread had successfully terminated, this might mean compiler is not aggressively optimizing.</description>
+        </case>
+        <case>
+            <match>STALE</match>
+            <expect>KNOWN_ACCEPTABLE</expect>
+            <description>Thread had failed to respond, this is acceptable behavior under JMM</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.interrupt.UnsafeBusyLoopTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the interruption of the thread awaiting notify on plain non-volatile field via Unsafe.
+        </description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>KNOWN_ACCEPTABLE</expect>
+            <description>The thread had successfully terminated, this might mean compiler is not aggressively optimizing.</description>
+        </case>
+        <case>
+            <match>STALE</match>
+            <expect>KNOWN_ACCEPTABLE</expect>
+            <description>Thread had failed to respond, this is acceptable behavior under JMM</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.interrupt.TimeUnitSleepTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the interruption of the thread blocked on TimeUnit.sleep()
+        </description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>ACCEPTABLE</expect>
+            <description>The thread had successfully terminated</description>
+        </case>
+        <case>
+            <match>STALE</match>
+            <expect>FORBIDDEN</expect>
+            <description>Thread had failed to respond.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.interrupt.ThreadSleepTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the interruption of the thread blocked on Thread.sleep()
+        </description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>ACCEPTABLE</expect>
+            <description>The thread had successfully terminated</description>
+        </case>
+        <case>
+            <match>STALE</match>
+            <expect>FORBIDDEN</expect>
+            <description>Thread had failed to respond.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.interrupt.ReentrantLockInterruptiblyTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the interruption of the thread blocked on ReentrantLock.lockInterruptibly()
+        </description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>ACCEPTABLE</expect>
+            <description>The thread had successfully terminated</description>
+        </case>
+        <case>
+            <match>STALE</match>
+            <expect>FORBIDDEN</expect>
+            <description>Thread had failed to respond.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.interrupt.ReentrantLockNonInterruptiblyTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the interruption of the thread blocked on ReentrantLock.lock()
+        </description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>KNOWN_ACCEPTABLE</expect>
+            <description>The thread had successfully terminated</description>
+        </case>
+        <case>
+            <match>STALE</match>
+            <expect>KNOWN_ACCEPTABLE</expect>
+            <description>Thread had failed to respond; this is allowed behavior under Lock API.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+</testsuite>

@@ -1,0 +1,437 @@
+<!--
+
+    Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+    DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+    This code is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License version 2 only, as
+    published by the Free Software Foundation.  Oracle designates this
+    particular file as subject to the "Classpath" exception as provided
+    by Oracle in the LICENSE file that accompanied this code.
+
+    This code is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    version 2 for more details (a copy is included in the LICENSE file that
+    accompanied this code).
+
+    You should have received a copy of the GNU General Public License version
+    2 along with this work; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
+    Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+    or visit www.oracle.com if you need additional information or have any
+    questions.
+
+-->
+<testsuite>
+
+    <template name="int_canSeeMost">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests what other threads can see for just-initialized values. This test allows to see anything, except out-of-thin-air values.
+        </description>
+        <case>
+            <match>[0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Seeing the default value for field. The update to the field in the constructor is lost.
+                This is a legal JMM behavior.
+            </description>
+        </case>
+        <case>
+            <match>[-1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The value set by the actor thread. Observer sees the complete update.
+            </description>
+        </case>
+        <case>
+            <match>[42]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The observer sees the empty shell.
+                This is a legal JMM behavior, since there is a race between actor and observer.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Other values are illegal.
+            </description>
+        </unmatched>
+    </template>
+
+    <template name="long_canSeeMost">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests what other threads can see for just-initialized values. This test allows to see anything including torn values.
+        </description>
+        <case>
+            <match>[0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Seeing the default value for the field. The update to the field in the constructor is lost.
+                This is a legal JMM behavior.
+            </description>
+        </case>
+        <case>
+            <match>[-1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The value set by the actor thread. Observer sees the complete update.
+            </description>
+        </case>
+        <case>
+            <match>[42]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The observer sees the empty shell.
+                This is a legal JMM behavior, since there is a race between actor and observer.
+            </description>
+        </case>
+        <unmatched>
+            <expect>KNOWN_ACCEPTABLE</expect>
+            <description>
+                Seeing the torn value. This is specifically allowed by JLS.
+                This is not a surprising behavior on some 32-bit systems which do not have full-width 64-bit instructions.
+            </description>
+            <refs>
+                <url>http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7</url>
+            </refs>
+        </unmatched>
+    </template>
+
+    <template name="float_canSeeMost">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests what other threads can see for just-initialized values. This test allows to see anything, except out-of-thin-air values.
+        </description>
+        <case>
+            <match>[0.0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Seeing the default value for long field. The update to the field in the constructor is lost.
+                This is a legal JMM behavior.
+            </description>
+        </case>
+        <case>
+            <match>[NaN]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The value set by the actor thread. Observer sees the complete update.
+            </description>
+        </case>
+        <case>
+            <match>[42.0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The observer sees the empty shell.
+                This is a legal JMM behavior, since there is a race between actor and observer.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Other values are forbidden.
+            </description>
+        </unmatched>
+    </template>
+
+    <template name="char_canSeeMost">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests what other threads can see for just-initialized values. This test allows to see anything, except out-of-thin-air values.
+        </description>
+        <case>
+            <match>[A]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Seeing the default value for field. The update to the field in the constructor is lost.
+                This is a legal JMM behavior.
+            </description>
+        </case>
+        <case>
+            <match>[B]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The value set by the actor thread. Observer sees the complete update.
+            </description>
+        </case>
+        <case>
+            <match>[N]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The observer sees the empty shell.
+                This is a legal JMM behavior, since there is a race between actor and observer.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Other values are forbidden.
+            </description>
+        </unmatched>
+    </template>
+
+    <template name="double_canSeeMost">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests what other threads can see for just-initialized values. This test allows to see anything including torn values.
+        </description>
+        <case>
+            <match>[0.0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Seeing the default value for field. The update to the field in the constructor is lost.
+                This is a legal JMM behavior.
+            </description>
+        </case>
+        <case>
+            <match>[NaN]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The value set by the actor thread. Observer sees the complete update.
+            </description>
+        </case>
+        <case>
+            <match>[42.0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The observer sees the empty shell.
+                This is a legal JMM behavior, since there is a race between actor and observer.
+            </description>
+        </case>
+        <unmatched>
+            <expect>KNOWN_ACCEPTABLE</expect>
+            <description>
+                Seeing the torn value. This is specifically allowed by JLS.
+                This is not a surprising behavior on some 32-bit systems which do not have full-width 64-bit instructions.
+            </description>
+            <refs>
+                <url>http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7</url>
+            </refs>
+        </unmatched>
+    </template>
+
+    <template name="int_canSeeDefault">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <case>
+            <match>[0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Seeing the default value for long field. The update to the field in the constructor is lost.
+                This is a legal JMM behavior.
+            </description>
+        </case>
+        <case>
+            <match>[-1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The value set by the actor thread. Observer sees the complete update.
+            </description>
+        </case>
+        <case>
+            <match>[42]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The observer sees the empty shell.
+                This is a legal JMM behavior, since there is a race between actor and observer.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Forbidden to see either default value.
+            </description>
+        </unmatched>
+    </template>
+
+    <template name="char_canSeeDefault">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <case>
+            <match>[A]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Seeing the default value for long field. The update to the field in the constructor is lost.
+                This is a legal JMM behavior.
+            </description>
+        </case>
+        <case>
+            <match>[B]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The value set by the actor thread. Observer sees the complete update.
+            </description>
+        </case>
+        <case>
+            <match>[N]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The observer sees the empty shell.
+                This is a legal JMM behavior, since there is a race between actor and observer.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Forbidden to see either default value.
+            </description>
+        </unmatched>
+    </template>
+
+    <template name="float_canSeeDefault">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <case>
+            <match>[0.0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Seeing the default value for long field. The update to the field in the constructor is lost.
+                This is a legal JMM behavior.
+            </description>
+        </case>
+        <case>
+            <match>[NaN]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The value set by the actor thread. Observer sees the complete update.
+            </description>
+        </case>
+        <case>
+            <match>[42.0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The observer sees the empty shell.
+                This is a legal JMM behavior, since there is a race between actor and observer.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Forbidden to see either default value.
+            </description>
+        </unmatched>
+    </template>
+
+    <template name="int_shouldSeeFull">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <case>
+            <match>[-1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The value set by the actor thread. Observer sees the complete update.
+            </description>
+        </case>
+        <case>
+            <match>[42]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The observer sees the empty shell.
+                This is a legal JMM behavior, since there is a race between actor and observer.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Forbidden to see other values.
+            </description>
+        </unmatched>
+    </template>
+
+    <template name="char_shouldSeeFull">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <case>
+            <match>[B]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The value set by the actor thread. Observer sees the complete update.
+            </description>
+        </case>
+        <case>
+            <match>[N]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The observer sees the empty shell.
+                This is a legal JMM behavior, since there is a race between actor and observer.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Forbidden to see other values.
+            </description>
+        </unmatched>
+    </template>
+
+    <template name="float_shouldSeeFull">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <case>
+            <match>[NaN]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The value set by the actor thread. Observer sees the complete update.
+            </description>
+        </case>
+        <case>
+            <match>[42.0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The observer sees the empty shell.
+                This is a legal JMM behavior, since there is a race between actor and observer.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Forbidden to see other values.
+            </description>
+        </unmatched>
+    </template>
+
+
+    <test name="org.openjdk.jcstress.tests.init.primitives.plain.BooleanPlainTest"    template="int_canSeeMost" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.plain.BytePlainTest"       template="int_canSeeMost" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.plain.ShortPlainTest"      template="int_canSeeMost" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.plain.IntPlainTest"        template="int_canSeeMost" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.plain.LongPlainTest"       template="long_canSeeMost" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.plain.CharPlainTest"       template="char_canSeeMost" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.plain.FloatPlainTest"      template="float_canSeeMost" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.plain.DoublePlainTest"     template="double_canSeeMost" />
+
+    <test name="org.openjdk.jcstress.tests.init.primitives.instance.BooleanInstanceInitializerTest"   template="int_canSeeMost" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.instance.ByteInstanceInitializerTest"      template="int_canSeeMost" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.instance.ShortInstanceInitializerTest"     template="int_canSeeMost" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.instance.IntInstanceInitializerTest"       template="int_canSeeMost" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.instance.LongInstanceInitializerTest"      template="long_canSeeMost" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.instance.CharInstanceInitializerTest"      template="char_canSeeMost" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.instance.DoubleInstanceInitializerTest"    template="float_canSeeMost" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.instance.FloatInstanceInitializerTest"     template="double_canSeeMost" />
+
+    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.BooleanVolatileTest"   template="int_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.ByteVolatileTest"      template="int_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.ShortVolatileTest"     template="int_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.IntVolatileTest"       template="int_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.LongVolatileTest"      template="int_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.CharVolatileTest"      template="char_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.DoubleVolatileTest"    template="float_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.FloatVolatileTest"     template="float_shouldSeeFull" />
+
+    <test name="org.openjdk.jcstress.tests.init.primitives.finals.BooleanFinalTest"   template="int_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.finals.ByteFinalTest"      template="int_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.finals.ShortFinalTest"     template="int_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.finals.IntFinalTest"       template="int_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.finals.LongFinalTest"      template="int_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.finals.CharFinalTest"      template="char_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.finals.DoubleFinalTest"    template="float_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.finals.FloatFinalTest"     template="float_shouldSeeFull" />
+
+    <test name="org.openjdk.jcstress.tests.init.primitives.fenced.BooleanFencedTest"    template="int_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.fenced.ByteFencedTest"      template="int_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.fenced.ShortFencedTest"     template="int_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.fenced.IntFencedTest"       template="int_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.fenced.LongFencedTest"      template="int_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.fenced.CharFencedTest"      template="char_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.fenced.DoubleFencedTest"    template="float_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.fenced.FloatFencedTest"     template="float_shouldSeeFull" />
+
+</testsuite>

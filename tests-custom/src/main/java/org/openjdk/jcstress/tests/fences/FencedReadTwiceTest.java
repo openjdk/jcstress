@@ -1,0 +1,68 @@
+/*
+ * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
+package org.openjdk.jcstress.tests.fences;
+
+import org.openjdk.jcstress.infra.results.IntResult3;
+import org.openjdk.jcstress.tests.Actor2_Test;
+import org.openjdk.jcstress.util.UnsafeHolder;
+
+/**
+ * Test if acquire/release forces re-read
+ *
+ * @author Doug Lea (dl@cs.oswego.edu)
+ */
+public class FencedReadTwiceTest implements Actor2_Test<FencedReadTwiceTest.State, IntResult3> {
+
+    static class State {
+        int x;
+        int y;
+    }
+
+    @Override
+    public void actor1(State s, IntResult3 r) {
+        s.x = 1;
+        UnsafeHolder.U.storeFence();
+        s.y = 1;
+    }
+
+    @Override
+    public void actor2(State s, IntResult3 r) {
+        r.r1 = s.x;
+        r.r2 = s.y;
+        UnsafeHolder.U.loadFence();
+        r.r3 = s.x;
+    }
+
+    @Override
+    public State newState() {
+        return new State();
+    }
+
+    @Override
+    public IntResult3 newResult() {
+        return new IntResult3();
+    }
+
+}

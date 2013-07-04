@@ -1,0 +1,1106 @@
+<!--
+
+    Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+    DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+    This code is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License version 2 only, as
+    published by the Free Software Foundation.  Oracle designates this
+    particular file as subject to the "Classpath" exception as provided
+    by Oracle in the LICENSE file that accompanied this code.
+
+    This code is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    version 2 for more details (a copy is included in the LICENSE file that
+    accompanied this code).
+
+    You should have received a copy of the GNU General Public License version
+    2 along with this work; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
+    Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+    or visit www.oracle.com if you need additional information or have any
+    questions.
+
+-->
+<testsuite>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerInitialValueTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the visibility of AtomicInteger initial value.
+        </description>
+        <case>
+            <match>[1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Required to see the initial value.
+            </description>
+        </case>
+        <case>
+            <match>[-1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Seeing the null AtomicInteger. This is a legal race.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Other cases are not expected.
+            </description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_AddAndGet">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[5, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[10, 5]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_DecAndGet">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[5, 4]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[4, -1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_CAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[5, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[25, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_WCAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[5, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution, or T2[fail] -> T1 execution.</description>
+        </case>
+        <case>
+            <match>[25, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_GetAndAdd">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[5, 5]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[10, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_GetAndDec">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[5, 5]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[4, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_GetAndInc">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[5, 5]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[6, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_GetAndSet">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[5, 5]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[15, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_IncAndGet">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[5, 6]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[6, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_Set">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[5, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[15, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_CAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[-1, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[19, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_WCAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[-1, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution, or T2[fail] -> T1 execution.</description>
+        </case>
+        <case>
+            <match>[19, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_DecAndGet">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[-1, -2]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[-2, -1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_GetAndAdd">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[-1, -2]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[-2, -1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_GetAndDec">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[-1, -1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[-2, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_GetAndInc">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[-1, -1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[0, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_GetAndSet">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[-1, -1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[9, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_IncAndGet">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[-1, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[0, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_Set">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[-1, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[9, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndAdd_CAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[20, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndAdd_WCAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution, or T2[fail] -> T1 execution.</description>
+        </case>
+        <case>
+            <match>[20, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndAdd_GetAndAdd">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 5]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[5, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndAdd_GetAndDec">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 5]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[-1, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndAdd_GetAndInc">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 5]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[1, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndAdd_GetAndSet">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 5]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[10, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndAdd_IncAndGet">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 6]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[1, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndAdd_Set">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[10, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndDec_CAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[20, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndDec_WCAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution, or T2[fail] -> T1 execution.</description>
+        </case>
+        <case>
+            <match>[20, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndDec_GetAndDec">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, -1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[-1, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndDec_GetAndInc">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, -1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[1, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndDec_GetAndSet">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, -1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[10, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndDec_IncAndGet">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[1, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndDec_Set">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[10, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndInc_CAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[20, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndInc_WCAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution, or T2[fail] -> T1 execution.</description>
+        </case>
+        <case>
+            <match>[20, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndInc_GetAndInc">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[1, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndInc_GetAndSet">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[10, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndInc_IncAndGet">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 2]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[1, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndInc_Set">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[10, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndSet_CAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[20, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndSet_WCAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution, or T2[fail] -> T1 execution.</description>
+        </case>
+        <case>
+            <match>[20, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndSet_GetAndSet">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 5]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[10, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndSet_IncAndGet">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 6]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[1, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndSet_Set">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[0, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[10, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$IncAndGet_CAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[1, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[21, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$IncAndGet_WCAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[1, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution, or T2[fail] -> T1 execution.</description>
+        </case>
+        <case>
+            <match>[21, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$IncAndGet_IncAndGet">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[1, 2]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[2, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$IncAndGet_Set">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[1, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[11, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$Set_Set">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[5]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$CAS_CAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[5, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[1, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$CAS_WCAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[5, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution, or T2[fail] -> T1 execution.</description>
+        </case>
+        <case>
+            <match>[1, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$CAS_Set">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[5, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[1, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$WCAS_WCAS">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[5, 10]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution, or T2[fail] -> T1 execution.</description>
+        </case>
+        <case>
+            <match>[1, 10]</match>
+            <expect>KNOWN_ACCEPTABLE</expect>
+            <description>Tx[fail] -> Tx[fail]</description>
+        </case>
+        <case>
+            <match>[1, 20]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$WCAS_Set">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
+        <case>
+            <match>[5, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T1 -> T2 execution.</description>
+        </case>
+        <case>
+            <match>[1, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>T2 -> T1 execution.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
+</testsuite>

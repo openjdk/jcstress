@@ -1,0 +1,293 @@
+<!--
+
+    Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+    DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+    This code is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License version 2 only, as
+    published by the Free Software Foundation.  Oracle designates this
+    particular file as subject to the "Classpath" exception as provided
+    by Oracle in the LICENSE file that accompanied this code.
+
+    This code is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    version 2 for more details (a copy is included in the LICENSE file that
+    accompanied this code).
+
+    You should have received a copy of the GNU General Public License version
+    2 along with this work; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
+    Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+    or visit www.oracle.com if you need additional information or have any
+    questions.
+
+-->
+<testsuite>
+
+    <test name="org.openjdk.jcstress.tests.volatiles.ReadAfterVolatileReadTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests if volatile write-read induce proper happens-before.
+        </description>
+        <case>
+            <match>[0, 0]</match>
+            <match>[0, 1]</match>
+            <match>[0, 2]</match>
+            <match>[0, 3]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Volatile write to $y did not yet happened, the observer is allowed to see any value for $x.
+            </description>
+        </case>
+        <case>
+            <match>[1, 0]</match>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Can't read the default value for $x after $y is effective.
+            </description>
+        </case>
+        <case>
+            <match>[1, 1]</match>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Can't read the stale value for $x after $y is effective.
+            </description>
+        </case>
+        <case>
+            <match>[1, 2]</match>
+            <match>[1, 3]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Can see either after volatile write to $y is in effect.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                This case is not expected.
+            </description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.volatiles.ReadTwiceOverVolatileReadTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Test if volatile write-read induces happens-before if in between two non-volatile reads.
+        </description>
+        <case>
+            <match>[0, 0, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Default value for the fields. Observers are allowed to see the default value for the field,
+                because there is the data race between reader and writer.
+            </description>
+        </case>
+        <case>
+            <match>[0, 1, 0]</match>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Volatile write to $y had happened, and update to $x had been lost.
+            </description>
+            <refs>
+                <url>http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7170145</url>
+            </refs>
+        </case>
+        <case>
+            <match>[1, 1, 0]</match>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Volatile write to $y had happened, and update to $x had been lost (this one is very weird).
+            </description>
+        </case>
+        <case>
+            <match>[0, 0, 1]</match>
+            <match>[1, 0, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Write to $y is still in flight, $x is arriving late.
+                This is the evidence the compiler had not merged the loads for $x.
+            </description>
+        </case>
+        <case>
+            <match>[0, 1, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                The writes appear the the writers' order.
+                This code also means the compiler had not merged the loads for $x.
+            </description>
+        </case>
+        <case>
+            <match>[1, 1, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Both updates are visible.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                This case is not expected.
+            </description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.volatiles.VolatileIncrementAtomicityTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the atomicity of volatile increment.
+        </description>
+        <case>
+            <match>[1, 1]</match>
+            <expect>KNOWN_ACCEPTABLE</expect>
+            <description>
+                Each thread sees the same value, regardless of the update. One update is lost.
+            </description>
+        </case>
+        <case>
+            <match>[1, 2]</match>
+            <match>[2, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Each thread sees its own increment, as if the increment is atomic.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Other cases are not expected.
+            </description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.volatiles.DekkerTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the sequential consistency on Dekker-like construction.
+        </description>
+        <case>
+            <match>[0, 1]</match>
+            <match>[1, 0]</match>
+            <match>[1, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Acceptable under sequential consistency
+            </description>
+        </case>
+        <case>
+            <match>[0, 0]</match>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Un-acceptable under sequential consistency
+            </description>
+            <refs>
+                <url>http://mail.openjdk.java.net/pipermail/hotspot-compiler-dev/2013-February/009604.html</url>
+                <url>http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=8007898</url>
+            </refs>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Other cases are not expected.
+            </description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.volatiles.DoubleVolatileTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            N/A
+        </description>
+        <case>
+            <match>[0, 0, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Legal: No updates had occured.
+            </description>
+        </case>
+        <case>
+            <match>[1, 0, 0]</match>
+            <match>[1, 0, 1]</match>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Illegal to see the stale $data once $guard1 is visible
+            </description>
+        </case>
+        <case>
+            <match>[0, 0, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Legal: Seeing the update for $guard2, but no other updates.
+            </description>
+        </case>
+        <case>
+            <match>[0, 1, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Legal: Seeing the early update for $data, while no updates for guards are visible.
+            </description>
+        </case>
+        <case>
+            <match>[0, 1, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Legal: Seeing the update for $data and $guard2.
+            </description>
+        </case>
+        <case>
+            <match>[1, 1, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Legal: Seeing all updates.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Other cases are not expected.
+            </description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.volatiles.LazySetTransitivityTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>
+            Tests the transitivity of A.lazySet(1) ---> B.set(A.get()) ---> B.get(); A.get();
+        </description>
+        <case>
+            <match>[1, 0, 1]</match>
+            <match>[1, 0, 0]</match>
+            <match>[0, 0, 0]</match>
+            <match>[0, 0, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Legal: T3 reads B=0, and there are no guarantees about the value of A.
+            </description>
+        </case>
+        <case>
+            <match>[1, 1, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Legal: T3 observes (B=1, A=1). This looks like the evidence for transitivity.
+            </description>
+        </case>
+        <case>
+            <match>[1, 1, 0]</match>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Illegal: T3 observes stale value for A.
+            </description>
+            <refs>
+                <url>http://cs.oswego.edu/pipermail/concurrency-interest/2013-January/010669.html</url>
+            </refs>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Other cases are not expected.
+            </description>
+        </unmatched>
+    </test>
+
+</testsuite>
