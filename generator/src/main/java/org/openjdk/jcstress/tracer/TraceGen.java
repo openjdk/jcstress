@@ -69,12 +69,15 @@ public class TraceGen {
             allTraces.addAll(traces);
         }
 
+        Set<String> generatedTraces = new HashSet<String>();
+
         List<Trace> newTraces = new ArrayList<Trace>();
         for (Trace trace : allTraces) {
             if (!trace.hasLoads()) continue;
             if (!trace.hasStores()) continue;
             if (trace.hasNonMatchingLoads()) continue;
             if (trace.hasNonMatchingStores()) continue;
+            if (!generatedTraces.add(trace.canonicalId())) continue;
 
             int constId = 0;
             int resId = 0;
@@ -371,6 +374,35 @@ public class TraceGen {
                         throw new IllegalStateException();
                 }
                 sb.append(op.getVarId() + 1);
+                sb.append("_");
+            }
+            return sb.toString();
+        }
+
+        public String canonicalId() {
+            int varId = 0;
+            Map<Integer, Integer> varMap = new HashMap<Integer, Integer>();
+            for (Op op : ops) {
+                Integer id = varMap.get(op.getVarId());
+                if (id == null) {
+                    id = varId++;
+                    varMap.put(op.getVarId(), id);
+                }
+            }
+
+            StringBuilder sb = new StringBuilder();
+            for (Op op : ops) {
+                switch (op.getType()) {
+                    case LOAD:
+                        sb.append("L");
+                        break;
+                    case STORE:
+                        sb.append("S");
+                        break;
+                    default:
+                        throw new IllegalStateException();
+                }
+                sb.append(varMap.get(op.getVarId()) + 1);
                 sb.append("_");
             }
             return sb.toString();
