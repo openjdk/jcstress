@@ -108,24 +108,34 @@ public class TraceGen {
 
         for (MultiTrace mt : multiTraces) {
             List<Trace> linearTraces = mt.linearize();
-            Set<Map<Integer, Integer>> resultSet = new HashSet<Map<Integer, Integer>>();
+            Set<Map<Integer, Integer>> scResults = new HashSet<Map<Integer, Integer>>();
+            Set<Map<Integer, Integer>> allResults = new HashSet<Map<Integer, Integer>>();
 
             for (Trace linear : linearTraces) {
-                Map<Integer, Integer> results = linear.interpret();
-                resultSet.add(results);
+                SortedMap<Integer, Integer> results = linear.interpret();
+                scResults.add(results);
             }
 
-            List<String> scResults = new ArrayList<String>();
-            for (Map<Integer, Integer> m : resultSet) {
+            for (Trace perm : mt.original.allPermutations()) {
+                SortedMap<Integer, Integer> results = perm.interpret();
+                allResults.add(results);
+            }
+
+            // regardless of the reorderings, all results appear SC.
+            //    => the violations are undetectable
+            if (scResults.equals(allResults)) continue;
+
+            List<String> mappedResult = new ArrayList<String>();
+            for (Map<Integer, Integer> m : scResults) {
                 List<String> mappedValues = new ArrayList<String>();
                 for (int v : m.values()) {
                     mappedValues.add(mapConst(v));
                 }
-                scResults.add(mappedValues.toString());
+                mappedResult.add(mappedValues.toString());
             }
 
             if (mt.traces.size() == 2) {
-                emit(mt, scResults);
+                emit(mt, mappedResult);
                 System.out.print(".");
             }
         }
@@ -276,6 +286,9 @@ public class TraceGen {
             ops = new ArrayList<Op>();
         }
 
+        public Trace(List<Op> extOps) {
+            ops = new ArrayList<Op>(extOps);
+        }
 
         public Trace pushHead(Op op) {
             Trace nT = new Trace();
@@ -329,6 +342,35 @@ public class TraceGen {
             }
 
             return resValues;
+        }
+
+        private <T> List<List<T>> permutate(List<T> src) {
+            if (src.size() <= 1) {
+                List<List<T>> al = new ArrayList<List<T>>();
+                al.add(src);
+                return al;
+            }
+
+            List<List<T>> result = new ArrayList<List<T>>();
+            for (int i = 0; i < src.size(); i++) {
+                List<T> copy = new ArrayList<T>(src);
+                T el = copy.remove(i);
+
+                for (List<T> perm : permutate(copy)) {
+                    perm.add(i, el);
+                    result.add(perm);
+                }
+            }
+
+            return result;
+        }
+
+        public List<Trace> allPermutations() {
+            List<Trace> traces = new ArrayList<Trace>();
+            for (List<Op> perm : permutate(ops)) {
+                traces.add(new Trace(perm));
+            }
+            return traces;
         }
 
         public Trace removeFirst() {
