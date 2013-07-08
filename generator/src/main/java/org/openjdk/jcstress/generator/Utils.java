@@ -22,21 +22,16 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress;
+package org.openjdk.jcstress.generator;
 
-import org.openjdk.jcstress.generator.TestGenerator;
-import org.openjdk.jcstress.tracer.TraceGen;
+import java.io.File;
 
-import java.io.FileNotFoundException;
-
-public class TraceGenMain {
-
-    public static void main(String[] args) throws FileNotFoundException {
-        if (args.length >= 2) {
-            new TraceGen(2, args[0], args[1]).generate();
-        } else {
-            throw new IllegalStateException("Please provide the destination dir");
+public class Utils {
+    public static String ensureDir(String path) {
+        File file = new File(path);
+        if (!file.exists()) {
+            file.mkdirs();
         }
+        return file.getAbsolutePath();
     }
-
 }

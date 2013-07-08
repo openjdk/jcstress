@@ -24,11 +24,8 @@
  */
 package org.openjdk.jcstress.generator;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
@@ -43,12 +40,13 @@ public class TestGenerator {
     private final String srcRoot;
     private final String resRoot;
 
-    private final Set<String> generatedResults = new HashSet<String>();
+    private final ResultGenerator resultGenerator;
     private PrintWriter resourceWriter;
 
     public TestGenerator(String srcRoot, String resRoot) {
         this.srcRoot = srcRoot;
         this.resRoot = resRoot;
+        this.resultGenerator = new ResultGenerator(srcRoot);
     }
 
     public void run() throws FileNotFoundException {
@@ -56,7 +54,7 @@ public class TestGenerator {
     }
 
     public void generateMemoryEffects() throws FileNotFoundException {
-        resourceWriter = new PrintWriter(ensureDir(resRoot + "/org/openjdk/jcstress/desc/") + "/memeffects.xml");
+        resourceWriter = new PrintWriter(Utils.ensureDir(resRoot + "/org/openjdk/jcstress/desc/") + "/memeffects.xml");
         resourceWriter.println("<testsuite>");
 
         for (Class<?> varType : Types.SUPPORTED_PRIMITIVES) {
@@ -105,131 +103,7 @@ public class TestGenerator {
         resourceWriter.close();
     }
 
-    public String ensureDir(String path) {
-        File file = new File(path);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        return file.getAbsolutePath();
-    }
-
-    public String generateResult(Types types) throws FileNotFoundException {
-        String name = "";
-        for (Class k : types.all()) {
-            if (k == boolean.class) name += "X";
-            if (k == byte.class)    name += "B";
-            if (k == short.class)   name += "S";
-            if (k == char.class)    name += "C";
-            if (k == int.class)     name += "I";
-            if (k == long.class)    name += "L";
-            if (k == float.class)   name += "F";
-            if (k == double.class)  name += "D";
-        }
-        name += "_Result";
-
-        // already generated
-        if (!generatedResults.add(name))
-            return name;
-
-        String pathname = ensureDir(srcRoot + "/" + "org.openjdk.jcstress.infra.results.".replaceAll("\\.", "/"));
-
-        PrintWriter pw = new PrintWriter(pathname + "/" + name + ".java");
-
-        pw.println("package org.openjdk.jcstress.infra.results;");
-        pw.println("");
-        pw.println("import java.io.Serializable;");
-        pw.println("");
-        pw.println("public class " + name + " implements Serializable {");
-
-        {
-            int n = 1;
-            for (Class k : types.all()) {
-                pw.println("    @sun.misc.Contended");
-                pw.println("    public " + k.getSimpleName() + " r" + n + ";");
-                pw.println();
-                n++;
-            }
-        }
-
-        pw.println("    public int hashCode() {");
-        pw.println("        int result = 0;");
-        {
-            int n = 1;
-            for (Class k : types.all()) {
-                if (k == boolean.class) {
-                    pw.println("        result = 31*result + (r" + n + " ? 1 : 0);");
-                }
-                if (k == byte.class || k == short.class || k == char.class || k == int.class) {
-                    pw.println("        result = 31*result + r" + n + ";");
-                }
-                if (k == long.class) {
-                    pw.println("        result = 31*result + (int) (r" + n + " ^ (r" + n + " >>> 32));");
-                }
-                if (k == double.class) {
-                    pw.println("        result = 31*result + (int) (Double.doubleToLongBits(r" + n + ") ^ (Double.doubleToLongBits(r" + n + ") >>> 32));");
-                }
-                if (k == float.class) {
-                    pw.println("        result = 31*result + (int) (Float.floatToIntBits(r" + n + ") ^ (Float.floatToIntBits(r" + n + ") >>> 32));");
-                }
-                n++;
-            }
-        }
-        pw.println("        return result;");
-        pw.println("    }");
-        pw.println();
-        pw.println("    public boolean equals(Object o) {");
-        pw.println("        if (this == o) return true;");
-        pw.println("        if (o == null || getClass() != o.getClass()) return false;");
-        pw.println();
-        pw.println("        " + name + " that = (" + name + ") o;\n");
-
-        {
-            int n = 1;
-            for (Class k : types.all()) {
-                if (k == boolean.class || k == byte.class || k == short.class || k == char.class
-                        || k == int.class || k == long.class ) {
-                    pw.println("        if (r" + n + " != that.r" + n + ") return false;");
-                }
-                if (k == double.class) {
-                    pw.println("        if (Double.compare(r" + n + ", that.r" + n + ") != 0) return false;");
-                }
-                if (k == float.class) {
-                    pw.println("        if (Float.compare(r" + n + ", that.r" + n + ") != 0) return false;");
-                }
-                n++;
-            }
-        }
-
-        pw.println("        return true;");
-        pw.println("    }");
-
-        pw.println("    public String toString() {");
-        pw.print("        return \"[\" + ");
-
-        {
-            int n = 1;
-            for (Class k : types.all()) {
-                if (n != 1)
-                    pw.print(" + \", \" + ");
-                if (k == char.class) {
-                    pw.print("(r" + n + " + 0)");
-                } else {
-                    pw.print("r" + n);
-                }
-                n++;
-            }
-            pw.println("+ \"]\";");
-        }
-
-        pw.println("    }");
-
-        pw.println("}");
-        pw.close();
-
-        return name;
-    }
-
-    public void generate(Types types, Primitive prim, String klass, String pkg) throws FileNotFoundException {
+   public void generate(Types types, Primitive prim, String klass, String pkg) throws FileNotFoundException {
 
         resourceWriter.println("    <test name=\"" + pkg + "." + klass + "\">\n" +
                 "        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>\n" +
@@ -256,9 +130,9 @@ public class TestGenerator {
                 "        </unmatched>\n" +
                 "    </test>");
 
-        String resultName = generateResult(types);
+        String resultName = resultGenerator.generateResult(types);
 
-        String pathname = ensureDir(srcRoot + "/" + pkg.replaceAll("\\.", "/"));
+        String pathname = Utils.ensureDir(srcRoot + "/" + pkg.replaceAll("\\.", "/"));
 
         PrintWriter pw = new PrintWriter(pathname + "/" + klass + ".java");
 

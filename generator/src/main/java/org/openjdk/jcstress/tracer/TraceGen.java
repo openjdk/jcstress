@@ -24,14 +24,24 @@
  */
 package org.openjdk.jcstress.tracer;
 
+import org.openjdk.jcstress.generator.ResultGenerator;
+import org.openjdk.jcstress.generator.TestGenerator;
+
+import java.io.PrintWriter;
 import java.util.*;
 
 public class TraceGen {
 
     private final int vars;
+    private final String srcDir;
+    private final String resDir;
+    private final ResultGenerator resultGenerator;
 
-    public TraceGen(int vars) {
+    public TraceGen(int vars, String srcDir, String resDir) {
         this.vars = vars;
+        this.srcDir = srcDir;
+        this.resDir = resDir;
+        this.resultGenerator = new ResultGenerator(srcDir);
     }
 
     public void generate() {
@@ -93,10 +103,16 @@ public class TraceGen {
     }
 
     private void emit(MultiTrace mt, Set<Map<Integer, String>> results) {
+
+        PrintWriter pw = new PrintWriter(System.out, true);
+
         System.out.println("Processing " + mt);
         for (Map<Integer, String> o : results) {
             System.out.println(o);
         }
+
+        String resultName = resultGenerator.generateResult(new TestGenerator.Types(int.class));
+
         System.out.println();
     }
 
