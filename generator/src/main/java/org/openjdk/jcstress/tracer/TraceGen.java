@@ -118,7 +118,10 @@ public class TraceGen {
             }
 
             emit(mt, scResults);
+
+            System.out.print(".");
         }
+        System.out.println();
 
         resourceWriter.println("</testsuite>");
         resourceWriter.close();
@@ -236,8 +239,6 @@ public class TraceGen {
         pw.println("}");
 
         pw.close();
-
-        System.out.println();
     }
 
     private String mapConst(int resId) {
