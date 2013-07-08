@@ -123,6 +123,7 @@ public class TraceGen {
 
             // regardless of the reorderings, all results appear SC.
             //    => the violations are undetectable
+            assert allResults.containsAll(scResults);
             if (scResults.equals(allResults)) continue;
 
             List<String> mappedResult = new ArrayList<String>();
@@ -344,30 +345,9 @@ public class TraceGen {
             return resValues;
         }
 
-        private <T> List<List<T>> permutate(List<T> src) {
-            if (src.size() <= 1) {
-                List<List<T>> al = new ArrayList<List<T>>();
-                al.add(src);
-                return al;
-            }
-
-            List<List<T>> result = new ArrayList<List<T>>();
-            for (int i = 0; i < src.size(); i++) {
-                List<T> copy = new ArrayList<T>(src);
-                T el = copy.remove(i);
-
-                for (List<T> perm : permutate(copy)) {
-                    perm.add(i, el);
-                    result.add(perm);
-                }
-            }
-
-            return result;
-        }
-
         public List<Trace> allPermutations() {
             List<Trace> traces = new ArrayList<Trace>();
-            for (List<Op> perm : permutate(ops)) {
+            for (List<Op> perm : Utils.permutate(ops)) {
                 traces.add(new Trace(perm));
             }
             return traces;

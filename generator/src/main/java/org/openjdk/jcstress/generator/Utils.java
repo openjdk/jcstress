@@ -25,6 +25,8 @@
 package org.openjdk.jcstress.generator;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Utils {
     public static String ensureDir(String path) {
@@ -34,4 +36,28 @@ public class Utils {
         }
         return file.getAbsolutePath();
     }
+
+    public static <T> List<List<T>> permutate(List<T> src) {
+        if (src.size() <= 1) {
+            List<List<T>> al = new ArrayList<List<T>>();
+            al.add(src);
+            return al;
+        }
+
+        List<List<T>> result = new ArrayList<List<T>>();
+        for (int i = 0; i < src.size(); i++) {
+            List<T> copy = new ArrayList<T>(src);
+            T el = copy.remove(i);
+
+            for (List<T> perm : permutate(copy)) {
+                List<T> c = new ArrayList<T>(perm);
+                c.add(0, el);
+                result.add(c);
+            }
+        }
+
+        return result;
+    }
+
+
 }
