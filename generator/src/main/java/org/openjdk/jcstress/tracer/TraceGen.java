@@ -131,7 +131,7 @@ public class TraceGen {
 
     private void emit(MultiTrace mt, List<String> results) {
 
-        final String pkg = "org.openjdk.jcstress.tests.seqconsistency.volatiles";
+        final String pkg = "org.openjdk.jcstress.tests.seqconst.volatiles";
 
         String pathname = Utils.ensureDir(srcDir + "/" + pkg.replaceAll("\\.", "/"));
 
