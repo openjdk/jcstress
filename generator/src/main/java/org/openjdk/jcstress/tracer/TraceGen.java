@@ -124,15 +124,13 @@ public class TraceGen {
         resourceWriter.close();
     }
 
-    private int klassId = 0;
-
     private void emit(MultiTrace mt, List<String> results) {
 
         final String pkg = "org.openjdk.jcstress.tests.seqconsistency.volatiles";
 
         String pathname = Utils.ensureDir(srcDir + "/" + pkg.replaceAll("\\.", "/"));
 
-        String klass = "Auto" + klassId++;
+        String klass = mt.id() + "Test";
 
         resourceWriter.println("    <test name=\"" + pkg + "." + klass + "\">\n" +
                 "        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>\n" +
@@ -352,6 +350,25 @@ public class TraceGen {
             }
             return count;
         }
+
+        public String id() {
+            StringBuilder sb = new StringBuilder();
+            for (Op op : ops) {
+                switch (op.getType()) {
+                    case LOAD:
+                        sb.append("L");
+                        break;
+                    case STORE:
+                        sb.append("S");
+                        break;
+                    default:
+                        throw new IllegalStateException();
+                }
+                sb.append(op.getVarId() + 1);
+                sb.append("_");
+            }
+            return sb.toString();
+        }
     }
 
     public class MultiTrace {
@@ -405,6 +422,15 @@ public class TraceGen {
         @Override
         public String toString() {
             return "{" + traces + '}';
+        }
+
+        public String id() {
+            StringBuilder sb = new StringBuilder();
+            for (Trace trace : traces) {
+                sb.append(trace.id());
+                sb.append("_");
+            }
+            return sb.toString();
         }
     }
 
