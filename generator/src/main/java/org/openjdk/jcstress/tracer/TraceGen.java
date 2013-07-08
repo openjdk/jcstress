@@ -73,6 +73,7 @@ public class TraceGen {
         for (Trace trace : allTraces) {
             if (!trace.hasLoads()) continue;
             if (!trace.hasStores()) continue;
+            if (trace.hasNonMatchingStores()) continue;
 
             int constId = 0;
             int resId = 0;
@@ -372,6 +373,42 @@ public class TraceGen {
             }
             return sb.toString();
         }
+
+        public boolean hasNonMatchingLoads() {
+            Set<Integer> stores = new HashSet<Integer>();
+            for (Op op : ops) {
+                if (op.getType() == Op.Type.STORE) {
+                    stores.add(op.getVarId());
+                }
+            }
+
+            for (Op op : ops) {
+                if (op.getType() == Op.Type.LOAD) {
+                    if (!stores.contains(op.getVarId()))
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        public boolean hasNonMatchingStores() {
+            Set<Integer> loads = new HashSet<Integer>();
+            for (Op op : ops) {
+                if (op.getType() == Op.Type.LOAD) {
+                    loads.add(op.getVarId());
+                }
+            }
+
+            for (Op op : ops) {
+                if (op.getType() == Op.Type.STORE) {
+                    if (!loads.contains(op.getVarId()))
+                        return false;
+                }
+            }
+
+            return true;
+        }
     }
 
     public class MultiTrace {
@@ -379,8 +416,7 @@ public class TraceGen {
         private final List<Trace> traces;
 
         public MultiTrace(Trace original, Trace... traces) {
-            this.original = original;
-            this.traces = Arrays.asList(traces);
+            this(original, Arrays.asList(traces));
         }
 
         public MultiTrace(Trace original, List<Trace> copy) {
