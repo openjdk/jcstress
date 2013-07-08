@@ -73,6 +73,7 @@ public class TraceGen {
         for (Trace trace : allTraces) {
             if (!trace.hasLoads()) continue;
             if (!trace.hasStores()) continue;
+            if (trace.hasNonMatchingLoads()) continue;
             if (trace.hasNonMatchingStores()) continue;
 
             int constId = 0;
@@ -385,11 +386,11 @@ public class TraceGen {
             for (Op op : ops) {
                 if (op.getType() == Op.Type.LOAD) {
                     if (!stores.contains(op.getVarId()))
-                        return false;
+                        return true;
                 }
             }
 
-            return true;
+            return false;
         }
 
         public boolean hasNonMatchingStores() {
@@ -403,11 +404,11 @@ public class TraceGen {
             for (Op op : ops) {
                 if (op.getType() == Op.Type.STORE) {
                     if (!loads.contains(op.getVarId()))
-                        return false;
+                        return true;
                 }
             }
 
-            return true;
+            return false;
         }
     }
 
