@@ -62,13 +62,15 @@ public class TraceGen {
             }
         }
 
+        List<Trace> allTraces = new ArrayList<Trace>();
         List<Trace> traces = Collections.singletonList(new Trace());
         for (int l = 0; l < possibleOps.size(); l++) {
             traces = product(traces, possibleOps);
+            allTraces.addAll(traces);
         }
 
         List<Trace> newTraces = new ArrayList<Trace>();
-        for (Trace trace : traces) {
+        for (Trace trace : allTraces) {
             if (!trace.hasLoads()) continue;
             if (!trace.hasStores()) continue;
 
