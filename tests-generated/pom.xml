@@ -60,6 +60,7 @@ questions.
                 <version>1.2.1</version>
                 <executions>
                     <execution>
+                        <id>memeffects</id>
                         <goals>
                             <goal>exec</goal>
                         </goals>
@@ -72,6 +73,25 @@ questions.
                             <arguments>
                                 <argument>-jar</argument>
                                 <argument>../generator/target/test-gen.jar</argument>
+                                <argument>${project.build.directory}/generated-sources/tests/</argument>
+                                <argument>${project.build.directory}/generated-resources/</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>volatiles</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>
+                            generate-sources
+                        </phase>
+                        <configuration>
+                            <!--<skip>true</skip>-->
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>-jar</argument>
+                                <argument>../generator/target/volatile-tracegen.jar</argument>
                                 <argument>${project.build.directory}/generated-sources/tests/</argument>
                                 <argument>${project.build.directory}/generated-resources/</argument>
                             </arguments>
