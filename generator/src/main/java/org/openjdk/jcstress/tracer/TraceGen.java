@@ -121,9 +121,10 @@ public class TraceGen {
                 scResults.add(mappedValues.toString());
             }
 
-            emit(mt, scResults);
-
-            System.out.print(".");
+            if (mt.traces.size() == 2) {
+                emit(mt, scResults);
+                System.out.print(".");
+            }
         }
         System.out.println();
 
@@ -422,7 +423,12 @@ public class TraceGen {
 
         public MultiTrace(Trace original, List<Trace> copy) {
             this.original = original;
-            this.traces = copy;
+
+            this.traces = new ArrayList<Trace>();
+            for (Trace t : copy) {
+                if (!t.ops.isEmpty())
+                    traces.add(t);
+            }
         }
 
         public List<Trace> linearize() {
