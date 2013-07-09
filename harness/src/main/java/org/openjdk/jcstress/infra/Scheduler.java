@@ -43,6 +43,7 @@ public class Scheduler {
         @Override
         public Thread newThread(Runnable r) {
             Thread t = new Thread(r);
+            t.setPriority(Thread.MAX_PRIORITY);
             t.setDaemon(true);
             return t;
         }
