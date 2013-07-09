@@ -110,6 +110,7 @@ public class TraceGen {
             }
         }
 
+        int testCount = 0;
         for (MultiTrace mt : multiTraces) {
             List<Trace> linearTraces = mt.linearize();
             Set<Map<Integer, Integer>> scResults = new HashSet<Map<Integer, Integer>>();
@@ -140,7 +141,8 @@ public class TraceGen {
             }
 
             emit(mt, mappedResult);
-            System.out.print(".");
+            if ((testCount++ % 1000) == 0)
+                System.out.print(".");
         }
         System.out.println();
 
