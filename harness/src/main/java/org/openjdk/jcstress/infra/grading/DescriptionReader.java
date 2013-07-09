@@ -57,7 +57,7 @@ public class DescriptionReader {
     private final Unmarshaller testSuiteUnmarshaller;
 
     public DescriptionReader() {
-        testDescriptions = new TreeMap<String, Test>();
+        testDescriptions = new HashMap<String, Test>();
         try {
             SchemaFactory sf = SchemaFactory.newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI);
 
