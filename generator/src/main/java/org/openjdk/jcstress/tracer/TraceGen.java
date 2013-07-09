@@ -100,9 +100,13 @@ public class TraceGen {
 
         List<MultiTrace> multiTraces = new ArrayList<MultiTrace>();
         for (Trace trace : traces) {
-            for (int l = 0; l < trace.getLength(); l++) {
-                MultiTrace mt = split(trace, l);
-                multiTraces.add(mt);
+            for (int l1 = 0; l1 < trace.getLength(); l1++) {
+                for (int l2 = l1; l2 < trace.getLength(); l2++) {
+                    for (int l3 = l2; l3 < trace.getLength(); l3++) {
+                        MultiTrace mt = split(trace, l1, l2, l3);
+                        multiTraces.add(mt);
+                    }
+                }
             }
         }
 
@@ -135,10 +139,8 @@ public class TraceGen {
                 mappedResult.add(mappedValues.toString());
             }
 
-            if (mt.traces.size() == 2) {
-                emit(mt, mappedResult);
-                System.out.print(".");
-            }
+            emit(mt, mappedResult);
+            System.out.print(".");
         }
         System.out.println();
 
@@ -183,61 +185,51 @@ public class TraceGen {
 
         String resultName = resultGenerator.generateResult(new TestGenerator.Types(klasses));
 
-        PrintWriter pw = null;
+        PrintWriter pw;
         try {
             pw = new PrintWriter(pathname + "/" + klass + ".java");
         } catch (FileNotFoundException e) {
             throw new IllegalStateException(e);
         }
 
+        int threads = mt.traces.size();
+
         pw.println("package " + pkg + ";\n" +
                 "\n" +
                 "import java.util.concurrent.*;\n" +
                 "import java.util.concurrent.atomic.*;\n" +
                 "import org.openjdk.jcstress.infra.results." + resultName + ";\n" +
-                "import org.openjdk.jcstress.tests.Actor2_Test;\n" +
+                "import org.openjdk.jcstress.tests.Actor" + threads + "_Test;\n" +
                 "\n" +
-                "public class " + klass + " implements Actor2_Test<" + klass + ".State, " + resultName + "> {\n" +
+                "public class " + klass + " implements Actor" + threads + "_Test<" + klass + ".State, " + resultName + "> {\n" +
                 "\n" +
                 "    @Override\n" +
                 "    public State newState() {\n" +
                 "        return new State();\n" +
                 "    }\n" +
-                "\n" +
-                "    @Override\n" +
-                "    public void actor1(State s, " + resultName + " r) {");
+                "\n");
 
-        for (Op op : mt.traces.get(0).ops) {
-            switch (op.getType()) {
-                case LOAD:
-                    pw.println("        r.r" + (op.getResId() + 1) + " = s.x" + op.getVarId() + ";");
-                    break;
-                case STORE:
-                    pw.println("        s.x" + op.getVarId() + " = " + mapConst(op.getResId()) + ";");
-                    break;
+
+        for (int t = 0; t < threads; t++) {
+            pw.println(
+                    "    @Override\n" +
+                            "    public void actor" + (t+1) + "(State s, " + resultName + " r) {");
+
+            for (Op op : mt.traces.get(t).ops) {
+                switch (op.getType()) {
+                    case LOAD:
+                        pw.println("        r.r" + (op.getResId() + 1) + " = s.x" + op.getVarId() + ";");
+                        break;
+                    case STORE:
+                        pw.println("        s.x" + op.getVarId() + " = " + mapConst(op.getResId()) + ";");
+                        break;
+                }
             }
+
+            pw.println("    }\n");
         }
 
         pw.println(
-                "    }\n" +
-                        "\n" +
-                        "    @Override\n" +
-                        "    public void actor2(State s, " + resultName + " r) {");
-
-        for (Op op : mt.traces.get(1).ops) {
-            switch (op.getType()) {
-                case LOAD:
-                    pw.println("        r.r" + (op.getResId() + 1) + " = s.x" + op.getVarId() + ";");
-                    break;
-                case STORE:
-                    pw.println("        s.x" + op.getVarId() + " = " + mapConst(op.getResId()) + ";");
-                    break;
-            }
-        }
-
-        pw.println(
-                "    }\n" +
-                        "\n" +
                         "    @Override\n" +
                         "    public " + resultName + " newResult() {\n" +
                         "        return new " + resultName + "();\n" +
@@ -246,13 +238,11 @@ public class TraceGen {
                         "    public static class State {");
 
         Set<Integer> exist = new HashSet<Integer>();
-        for (Op op : mt.traces.get(0).ops) {
-            if (exist.add(op.getVarId()))
-                pw.println("        public volatile int x" + op.getVarId() + ";");
-        }
-        for (Op op : mt.traces.get(1).ops) {
-            if (exist.add(op.getVarId()))
-                pw.println("        public volatile int x" + op.getVarId() + ";");
+        for (Trace trace : mt.traces)  {
+            for (Op op : trace.ops) {
+                if (exist.add(op.getVarId()))
+                    pw.println("        public volatile int x" + op.getVarId() + ";");
+            }
         }
         pw.println("    }");
         pw.println("}");
@@ -264,10 +254,12 @@ public class TraceGen {
         return String.valueOf(resId + 1);
     }
 
-    private MultiTrace split(Trace trace, int sentinel) {
-        Trace left = trace.sub(0, sentinel);
-        Trace right = trace.sub(sentinel, trace.getLength());
-        return new MultiTrace(trace, left, right);
+    private MultiTrace split(Trace trace, int s1, int s2, int s3) {
+        Trace t1 = trace.sub(0, s1);
+        Trace t2 = trace.sub(s1, s2);
+        Trace t3 = trace.sub(s2, s3);
+        Trace t4 = trace.sub(s3, trace.getLength());
+        return new MultiTrace(trace, t1, t2, t3, t4);
     }
 
     private List<Trace> product(List<Trace> traces, List<Op> ops) {
