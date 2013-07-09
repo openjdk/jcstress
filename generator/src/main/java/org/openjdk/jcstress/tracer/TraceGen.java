@@ -110,8 +110,12 @@ public class TraceGen {
             }
         }
 
+        Set<String> processedMultitraces = new HashSet<String>();
+
         int testCount = 0;
         for (MultiTrace mt : multiTraces) {
+            if (!processedMultitraces.add(mt.id())) continue;
+
             List<Trace> linearTraces = mt.linearize();
             Set<Map<Integer, Integer>> scResults = new HashSet<Map<Integer, Integer>>();
             Set<Map<Integer, Integer>> allResults = new HashSet<Map<Integer, Integer>>();
@@ -477,6 +481,13 @@ public class TraceGen {
                 if (!t.ops.isEmpty())
                     traces.add(t);
             }
+
+            Collections.sort(traces, new Comparator<Trace>() {
+                @Override
+                public int compare(Trace o1, Trace o2) {
+                    return o1.id().compareTo(o2.id());
+                }
+            });
         }
 
         public List<Trace> linearize() {
