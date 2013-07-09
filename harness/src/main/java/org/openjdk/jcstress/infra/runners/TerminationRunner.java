@@ -72,8 +72,6 @@ public class TerminationRunner<S> extends Runner {
                 warn("Have stale threads, forcing VM to exit");
                 hardExit();
             }
-
-            System.gc();
         }
         testLog.println();
     }

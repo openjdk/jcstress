@@ -71,8 +71,6 @@ public class Actor2_Arbiter1_Runner<S, R> extends Runner {
             Counter<R> runResult = run(time);
 
             dump(test, runResult);
-
-            System.gc();
         }
 
         testLog.println();
