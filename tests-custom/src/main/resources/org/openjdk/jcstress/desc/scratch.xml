@@ -55,6 +55,8 @@
     <test name="org.openjdk.jcstress.tests.scratch.basic.ThreadStartTest" template="scratch-main" />
     <test name="org.openjdk.jcstress.tests.scratch.basic.VolatileTest" template="scratch-main" />
     <test name="org.openjdk.jcstress.tests.scratch.FailingCASTest" template="scratch-main" />
+    <test name="org.openjdk.jcstress.tests.scratch.VW_Sync_1_Test" template="scratch-main" />
+    <test name="org.openjdk.jcstress.tests.scratch.VW_Sync_2_Test" template="scratch-main" />
 
     <test name="org.openjdk.jcstress.tests.scratch.AQSTest">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
