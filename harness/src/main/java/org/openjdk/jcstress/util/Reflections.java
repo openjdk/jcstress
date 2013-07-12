@@ -101,7 +101,8 @@ public class Reflections {
 
         final List<Class> newClasses = new ArrayList<Class>();
         for (String name : RESOURCES) {
-            name = name.replaceAll("\\" + File.separator, ".");
+            name = name.replaceAll("\\\\", ".");
+            name = name.replaceAll("/", ".");
             if (name.contains(filter) && name.endsWith(".class")) {
                 try {
                     newClasses.add(Class.forName(name.substring(name.indexOf(filter), name.length() - 6)));
