@@ -72,5 +72,18 @@
         </unmatched>
     </test>
 
+    <test name="org.openjdk.jcstress.tests.scratch.StaleReadTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Generated test</description>
+        <case>
+            <match>TERMINATED</match>
+            <expect>REQUIRED</expect>
+            <description>Default value</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
 
 </testsuite>
