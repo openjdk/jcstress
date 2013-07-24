@@ -172,7 +172,7 @@ public class Options {
         }
 
         if (!set.hasArgument(cpus)) {
-            this.userCPUs = this.systemCPUs;
+            this.userCPUs = Math.max(4, this.systemCPUs);
         } else {
             this.userCPUs = set.valueOf(cpus);
         }
