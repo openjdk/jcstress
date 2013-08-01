@@ -28,7 +28,7 @@ questions.
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.openjdk.jcstress</groupId>
-    <artifactId>parent</artifactId>
+    <artifactId>jcstress-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 

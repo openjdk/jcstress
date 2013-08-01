@@ -28,7 +28,7 @@ questions.
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.openjdk.jcstress</groupId>
-    <artifactId>generator</artifactId>
+    <artifactId>jcstress-generator</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 

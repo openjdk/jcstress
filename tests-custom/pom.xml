@@ -28,7 +28,7 @@ questions.
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.openjdk.jcstress</groupId>
-    <artifactId>tests-custom</artifactId>
+    <artifactId>jcstress-tests-custom</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
