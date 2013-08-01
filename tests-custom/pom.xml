@@ -163,7 +163,7 @@ questions.
     <dependencies>
         <dependency>
             <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>harness</artifactId>
+            <artifactId>jcstress-harness</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

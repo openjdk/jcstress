@@ -163,12 +163,12 @@ questions.
     <dependencies>
         <dependency>
             <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>tests-custom</artifactId>
+            <artifactId>jcstress-tests-custom</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>tests-generated</artifactId>
+            <artifactId>jcstress-tests-generated</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
