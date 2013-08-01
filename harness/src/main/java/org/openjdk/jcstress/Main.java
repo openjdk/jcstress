@@ -25,6 +25,7 @@
 package org.openjdk.jcstress;
 
 import org.openjdk.jcstress.tests.ConcurrencyTest;
+import org.openjdk.jcstress.util.VMSupport;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,6 +57,15 @@ public class Main {
                 System.out.println(test.getName());
             }
         } else {
+            if (!VMSupport.tryInit()) {
+                System.out.println("Non-fatal: VM support is not enabled. Possible reasons are:\n" +
+                        "  1) unsupported JDK, only JDK 8+ is supported; \n" +
+                        "  2) -XX:+UnlockDiagnosticVMOptions -XX:+WhiteBoxAPI VM options are missing; \n" +
+                        "  3) the jcstress JAR is not added to -Xbootclasspath/a\n");
+            } else {
+                System.out.println("VM support is initialized.\n");
+            }
+
             new JCStress().run(opts);
         }
     }

@@ -300,6 +300,10 @@ public class Options {
         out.println();
     }
 
+    public int getDeoptEachIter() {
+        return 5;
+    }
+
     public static class BurningTask implements Runnable {
 
         @Override

@@ -30,6 +30,7 @@ import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.tests.Actor2_Arbiter1_Test;
 import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.Counters;
+import org.openjdk.jcstress.util.VMSupport;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
@@ -66,6 +67,10 @@ public class Actor2_Arbiter1_Runner<S, R> extends Runner {
 
         testLog.print("Iterations ");
         for (int c = 0; c < iters; c++) {
+            if (c % deoptEachIter == 0) {
+                VMSupport.tryDeoptimizeAll();
+            }
+
             testLog.print(".");
             testLog.flush();
             Counter<R> runResult = run(time);

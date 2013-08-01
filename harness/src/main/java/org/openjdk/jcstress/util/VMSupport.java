@@ -22,29 +22,35 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress;
+package org.openjdk.jcstress.util;
 
-import org.openjdk.jcstress.infra.collectors.NetworkOutputCollector;
-import org.openjdk.jcstress.util.VMSupport;
+import sun.hotspot.WhiteBox;
 
-/**
- * Entry point for the forked VM run.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
- */
-public class ForkedMain {
+public class VMSupport {
 
-    public static void main(String[] args) throws Exception {
-        Options opts = new Options(args);
-        if (!opts.parse()) {
-            System.exit(1);
+    private static WhiteBox whiteBox;
+    private static volatile boolean inited;
+
+    public static boolean tryInit() {
+        if (inited) return true;
+        try {
+            WhiteBox w = WhiteBox.getWhiteBox();
+            w.deoptimizeAll();
+            whiteBox = w;
+            return true;
+        } catch (UnsatisfiedLinkError e) {
+            // expected
+            return false;
+        } finally {
+            inited = true;
         }
+    }
 
-        VMSupport.tryInit();
-
-        NetworkOutputCollector collector = new NetworkOutputCollector(opts.getHostName(), opts.getHostPort());
-        new JCStress().run(opts, true, collector);
-        collector.close();
+    public static void tryDeoptimizeAll() {
+        WhiteBox w = whiteBox;
+        if (w != null) {
+            w.deoptimizeAll();
+        }
     }
 
 }

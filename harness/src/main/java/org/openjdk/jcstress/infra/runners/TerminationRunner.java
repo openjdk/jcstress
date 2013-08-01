@@ -29,6 +29,7 @@ import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.tests.TerminationTest;
 import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.HashCounter;
+import org.openjdk.jcstress.util.VMSupport;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
@@ -62,6 +63,10 @@ public class TerminationRunner<S> extends Runner {
 
         testLog.print("Iterations ");
         for (int c = 0; c < iters; c++) {
+            if (c % deoptEachIter == 0) {
+                VMSupport.tryDeoptimizeAll();
+            }
+
             testLog.print(".");
             testLog.flush();
             run(time, results);

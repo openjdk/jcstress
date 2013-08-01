@@ -22,29 +22,46 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress;
+package sun.hotspot.parser;
 
-import org.openjdk.jcstress.infra.collectors.NetworkOutputCollector;
-import org.openjdk.jcstress.util.VMSupport;
+public class DiagnosticCommand {
 
-/**
- * Entry point for the forked VM run.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
- */
-public class ForkedMain {
-
-    public static void main(String[] args) throws Exception {
-        Options opts = new Options(args);
-        if (!opts.parse()) {
-            System.exit(1);
-        }
-
-        VMSupport.tryInit();
-
-        NetworkOutputCollector collector = new NetworkOutputCollector(opts.getHostName(), opts.getHostPort());
-        new JCStress().run(opts, true, collector);
-        collector.close();
+    public enum DiagnosticArgumentType {
+        JLONG, BOOLEAN, STRING, NANOTIME, STRINGARRAY, MEMORYSIZE
     }
 
+    private String name;
+    private String desc;
+    private DiagnosticArgumentType type;
+    private boolean mandatory;
+    private String defaultValue;
+
+    public DiagnosticCommand(String name, String desc, DiagnosticArgumentType type,
+            boolean mandatory, String defaultValue) {
+        this.name = name;
+        this.desc = desc;
+        this.type = type;
+        this.mandatory = mandatory;
+        this.defaultValue = defaultValue;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public DiagnosticArgumentType getType() {
+        return type;
+    }
+
+    public boolean isMandatory() {
+        return mandatory;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
 }
