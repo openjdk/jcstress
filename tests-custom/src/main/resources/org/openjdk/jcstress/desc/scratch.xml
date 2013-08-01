@@ -86,4 +86,19 @@
         </unmatched>
     </test>
 
+    <test name="org.openjdk.jcstress.tests.scratch.Unsafe_GetDoubleVolatileTest">
+        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
+        <description>Generated test</description>
+        <case>
+            <match>[0.0]</match>
+            <match>[-1.0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>Correct values</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>Other cases are not expected.</description>
+        </unmatched>
+    </test>
+
 </testsuite>
