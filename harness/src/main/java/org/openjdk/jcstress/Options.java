@@ -69,6 +69,7 @@ public class Options {
     private boolean forceYield;
     private boolean userYield;
     private String resultFile;
+    private int deoptEachIter;
 
     public Options(String[] args) {
         this.args = args;
@@ -125,6 +126,9 @@ public class Options {
         OptionSpec<Integer> hostPort = parser.accepts("hostPort", "(internal) Host VM port")
                 .withRequiredArg().ofType(Integer.class);
 
+        OptionSpec<Integer> deoptStride = parser.accepts("deoptStride", "Deoptimize every N-th iteration")
+                .withRequiredArg().ofType(Integer.class);
+
         parser.accepts("v", "Be extra verbose.");
         parser.accepts("h", "Print this help.");
 
@@ -153,6 +157,7 @@ public class Options {
         this.time = orDefault(set.valueOf(time), 1000);
         this.iters = orDefault(set.valueOf(iters), 5);
         this.testFilter = orDefault(set.valueOf(testFilter), ".*");
+        this.deoptEachIter = orDefault(set.valueOf(deoptStride), 5);
 
         this.forks = orDefault(set.valueOf(forks), 1);
         this.parse = orDefault(set.has(parse), false);
@@ -301,7 +306,7 @@ public class Options {
     }
 
     public int getDeoptEachIter() {
-        return 5;
+        return deoptEachIter;
     }
 
     public static class BurningTask implements Runnable {
