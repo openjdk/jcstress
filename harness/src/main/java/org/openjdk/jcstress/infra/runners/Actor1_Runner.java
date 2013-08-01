@@ -65,7 +65,7 @@ public class Actor1_Runner<S, R> extends Runner {
     public void run() throws ExecutionException, InterruptedException {
         testLog.println("Running " + test.getClass().getName());
 
-        Status status = checkRun(test);
+        Status status = checkRun();
         if (status != Status.NORMAL) {
             testLog.println("Test sanity check failed, skipping");
             testLog.println();
@@ -94,7 +94,7 @@ public class Actor1_Runner<S, R> extends Runner {
     }
 
 
-    private <S, R> Status checkRun(Actor1_Test<S, R> test) {
+    private Status checkRun() {
         try {
             R res1 = test.newResult();
             S state = test.newState();

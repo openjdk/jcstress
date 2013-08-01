@@ -57,7 +57,7 @@ public class Actor2_Arbiter1_Runner<S, R> extends Runner {
     public void run() throws InterruptedException, ExecutionException {
         testLog.println("Running " + test.getClass().getName());
 
-        Status status = checkRun(test);
+        Status status = checkRun();
         if (status != Status.NORMAL) {
             testLog.println("Test sanity check failed, skipping");
             testLog.println();
@@ -86,7 +86,7 @@ public class Actor2_Arbiter1_Runner<S, R> extends Runner {
         return 3;
     }
 
-    private <S, R> Status checkRun(Actor2_Arbiter1_Test<S, R> test) {
+    private Status checkRun() {
         try {
             R res = test.newResult();
             S state = test.newState();
