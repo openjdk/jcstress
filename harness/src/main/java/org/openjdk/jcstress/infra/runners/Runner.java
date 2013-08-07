@@ -52,7 +52,7 @@ public abstract class Runner {
     protected final int time;
     protected final int iters;
     protected final int minStride, maxStride;
-    protected final int deoptEachIter;
+    protected final int deoptRatio;
     protected final boolean verbose;
     protected final TestResultCollector collector;
     protected final ExecutorService pool;
@@ -72,7 +72,7 @@ public abstract class Runner {
         iters = opts.getIterations();
         shouldYield = opts.shouldYield();
         verbose = opts.isVerbose();
-        deoptEachIter = opts.getDeoptEachIter();
+        deoptRatio = opts.deoptRatio();
 
         if (verbose) {
             testLog = new PrintWriter(System.out, true);

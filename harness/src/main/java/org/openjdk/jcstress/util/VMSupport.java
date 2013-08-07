@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class VMSupport {
 
@@ -53,9 +54,12 @@ public class VMSupport {
         }
     }
 
-    public static void tryDeoptimizeAllInfra() {
+    public static void tryDeoptimizeAllInfra(int actionProbRatio) {
         WhiteBox w = whiteBox;
         if (w != null) {
+            if (ThreadLocalRandom.current().nextInt(actionProbRatio) != 0)
+                return;
+
             try {
                 Collection<Method> im = infraMethods;
                 if (im == null) {
