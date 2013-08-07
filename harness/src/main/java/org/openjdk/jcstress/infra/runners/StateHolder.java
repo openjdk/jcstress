@@ -30,13 +30,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class StateHolder<S, R> {
-    volatile S[] s;
-    volatile R[] r;
-    final int loops;
-    final int countWorkers;
-    final AtomicInteger started, ready, finished, consumed;
-    volatile boolean notAllStarted, notAllReady, notAllFinished, notAllConsumed;
-    volatile boolean hasLaggedWorkers;
+    public volatile S[] s;
+    public volatile R[] r;
+    public final int loops;
+    public final int countWorkers;
+    public final AtomicInteger started, ready, finished, consumed;
+    public volatile boolean notAllStarted, notAllReady, notAllFinished, notAllConsumed;
+    public volatile boolean hasLaggedWorkers;
 
     public StateHolder(S[] s, R[] r, int expectedWorkers) {
         this.s = s;
