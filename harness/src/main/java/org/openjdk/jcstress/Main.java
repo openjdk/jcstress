@@ -57,8 +57,17 @@ public class Main {
                 System.out.println(test.getName());
             }
         } else {
+            if (!VMSupport.tryContended()) {
+                System.out.println("Non-fatal: VM support for @Contended is not enabled. Possible reasons are:\n" +
+                        "  1) unsupported JDK, only JDK 8+ is supported; \n" +
+                        "  2) -XX:-RestrictContended is missing; \n" +
+                        "  3) the jcstress JAR is not added to -Xbootclasspath/a\n");
+            } else {
+                System.out.println("@Contended is in use.\n");
+            }
+
             if (!VMSupport.tryInit()) {
-                System.out.println("Non-fatal: VM support is not enabled. Possible reasons are:\n" +
+                System.out.println("Non-fatal: VM support for online deoptimization is not enabled. Possible reasons are:\n" +
                         "  1) unsupported JDK, only JDK 8+ is supported; \n" +
                         "  2) -XX:+UnlockDiagnosticVMOptions -XX:+WhiteBoxAPI VM options are missing; \n" +
                         "  3) the jcstress JAR is not added to -Xbootclasspath/a\n");

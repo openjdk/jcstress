@@ -24,6 +24,7 @@
  */
 package org.openjdk.jcstress.util;
 
+import org.openjdk.jcstress.infra.results.IntResult2;
 import sun.hotspot.WhiteBox;
 
 import java.io.IOException;
@@ -91,6 +92,17 @@ public class VMSupport {
         WhiteBox w = whiteBox;
         if (w != null) {
             w.deoptimizeAll();
+        }
+    }
+
+    public static boolean tryContended() {
+        try {
+            long o1 = UnsafeHolder.U.objectFieldOffset(IntResult2.class.getField("r1"));
+            long o2 = UnsafeHolder.U.objectFieldOffset(IntResult2.class.getField("r2"));
+
+            return Math.abs(o2 - o1) >= 64;
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException();
         }
     }
 
