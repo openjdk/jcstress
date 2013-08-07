@@ -24,6 +24,13 @@
  */
 package org.openjdk.jcstress.util;
 
+import org.openjdk.jcstress.infra.Result;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -42,9 +49,30 @@ public class HashCounter<T> implements Counter<T> {
         Holder holder = ms.get(result);
         if (holder == null) {
             holder = new Holder();
-            ms.put(result, holder);
+            ms.put(decouple(result), holder);
         }
         holder.value += count;
+    }
+
+    private T decouple(T result) {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(result);
+            oos.close();
+
+            ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bis);
+
+            @SuppressWarnings("unchecked")
+            T t = (T)ois.readObject();
+
+            return t;
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override

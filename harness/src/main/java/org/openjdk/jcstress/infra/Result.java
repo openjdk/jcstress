@@ -22,42 +22,8 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.infra.results;
+package org.openjdk.jcstress.infra;
 
-import org.openjdk.jcstress.infra.Result;
-import sun.misc.Contended;
-
-import java.io.Serializable;
-
-public class LongResult1 implements Serializable, Result {
-
-    @Contended
-    public long r1;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        LongResult1 that = (LongResult1) o;
-
-        if (r1 != that.r1) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return (int) (r1 ^ (r1 >>> 32));
-    }
-
-    @Override
-    public String toString() {
-        return "[" + r1 + ']';
-    }
-
-    @Override
-    public void reset() {
-        r1 = 0;
-    }
+public interface Result {
+    void reset();
 }

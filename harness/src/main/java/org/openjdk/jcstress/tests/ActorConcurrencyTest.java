@@ -24,6 +24,8 @@
  */
 package org.openjdk.jcstress.tests;
 
+import org.openjdk.jcstress.infra.Result;
+
 /**
  * Actor concurrency tests accept one or more:
  *   - actors:     threads actively mutating the state, and recording the current state
@@ -48,7 +50,7 @@ package org.openjdk.jcstress.tests;
  * @param <R> result object type
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public interface ActorConcurrencyTest<S, R> extends ConcurrencyTest {
+public interface ActorConcurrencyTest<S, R extends Result> extends ConcurrencyTest {
 
     /**
      * Produce new state holder.

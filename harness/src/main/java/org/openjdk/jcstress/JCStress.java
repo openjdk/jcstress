@@ -24,6 +24,7 @@
  */
 package org.openjdk.jcstress;
 
+import org.openjdk.jcstress.infra.Result;
 import org.openjdk.jcstress.infra.Scheduler;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.DiskReadCollector;
@@ -234,37 +235,38 @@ public class JCStress {
         });
     }
 
+    @SuppressWarnings("unchecked")
     public void run(Options opts, Set<Class<? extends ConcurrencyTest>> tests, boolean alreadyForked, TestResultCollector collector) throws Exception {
 
         for (Class<? extends ConcurrencyTest> test : tests) {
             if (Actor2_Arbiter1_Test.class.isAssignableFrom(test)) {
                 @SuppressWarnings("unchecked")
-                Actor2_Arbiter1_Test<Object, Object> obj = (Actor2_Arbiter1_Test<Object, Object>) test.newInstance();
-                async(new Actor2_Arbiter1_Runner<Object, Object>(opts, obj, collector, pool));
+                Actor2_Arbiter1_Test<Object, ? extends Result> obj = (Actor2_Arbiter1_Test<Object, ? extends Result>) test.newInstance();
+                async(new Actor2_Arbiter1_Runner(opts, obj, collector, pool));
             }
 
             if (Actor1_Test.class.isAssignableFrom(test)) {
                 @SuppressWarnings("unchecked")
-                Actor1_Test<Object, Object> obj = (Actor1_Test<Object, Object>) test.newInstance();
-                async(new Actor1_Runner<Object, Object>(opts, obj, collector, pool));
+                Actor1_Test<Object, ? extends Result> obj = (Actor1_Test<Object, ? extends Result>) test.newInstance();
+                async(new Actor1_Runner(opts, obj, collector, pool));
             }
 
             if (Actor2_Test.class.isAssignableFrom(test)) {
                 @SuppressWarnings("unchecked")
-                Actor2_Test<Object, Object> obj = (Actor2_Test<Object, Object>) test.newInstance();
-                async(new Actor2_Runner<Object, Object>(opts, obj, collector, pool));
+                Actor2_Test<Object, ? extends Result> obj = (Actor2_Test<Object, ? extends Result>) test.newInstance();
+                async(new Actor2_Runner(opts, obj, collector, pool));
             }
 
             if (Actor3_Test.class.isAssignableFrom(test)) {
                 @SuppressWarnings("unchecked")
-                Actor3_Test<Object, Object> obj = (Actor3_Test<Object, Object>) test.newInstance();
-                async(new Actor3_Runner<Object, Object>(opts, obj, collector, pool));
+                Actor3_Test<Object, ? extends Result> obj = (Actor3_Test<Object, ? extends Result>) test.newInstance();
+                async(new Actor3_Runner(opts, obj, collector, pool));
             }
 
             if (Actor4_Test.class.isAssignableFrom(test)) {
                 @SuppressWarnings("unchecked")
-                Actor4_Test<Object, Object> obj = (Actor4_Test<Object, Object>) test.newInstance();
-                async(new Actor4_Runner<Object, Object>(opts, obj, collector, pool));
+                Actor4_Test<Object, ? extends Result> obj = (Actor4_Test<Object, ? extends Result>) test.newInstance();
+                async(new Actor4_Runner(opts, obj, collector, pool));
             }
 
             if (TerminationTest.class.isAssignableFrom(test)) {

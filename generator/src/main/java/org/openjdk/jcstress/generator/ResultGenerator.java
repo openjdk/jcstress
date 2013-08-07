@@ -67,8 +67,9 @@ public class ResultGenerator {
         pw.println("package org.openjdk.jcstress.infra.results;");
         pw.println("");
         pw.println("import java.io.Serializable;");
+        pw.println("import org.openjdk.jcstress.infra.Result;");
         pw.println("");
-        pw.println("public class " + name + " implements Serializable {");
+        pw.println("public class " + name + " implements Serializable, Result {");
 
         {
             int n = 1;
@@ -148,6 +149,22 @@ public class ResultGenerator {
                 n++;
             }
             pw.println("+ \"]\";");
+        }
+
+        pw.println("    }");
+
+        pw.println("    public void reset() {");
+
+        {
+            int n = 1;
+            for (Class k : types.all()) {
+                if (k == boolean.class) {
+                    pw.println("r" + n + " = false;");
+                } else {
+                    pw.println("r" + n + " = 0;");
+                }
+                n++;
+            }
         }
 
         pw.println("    }");

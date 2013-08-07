@@ -30,8 +30,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class StateHolder<S, R> {
-    final S[] s;
-    final R[] r;
+    volatile S[] s;
+    volatile R[] r;
     final int loops;
     final int countWorkers;
     final AtomicInteger started, ready, finished, consumed;

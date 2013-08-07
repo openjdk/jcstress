@@ -25,6 +25,7 @@
 package org.openjdk.jcstress.infra.runners;
 
 import org.openjdk.jcstress.Options;
+import org.openjdk.jcstress.infra.Result;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.tests.Actor1_Test;
@@ -46,7 +47,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class Actor1_Runner<S, R> extends Runner {
+public class Actor1_Runner<S, R extends Result> extends Runner {
     private final Actor1_Test<S, R> test;
 
     public Actor1_Runner(Options opts, Actor1_Test<S, R> test, TestResultCollector collector, ExecutorService pool) throws FileNotFoundException, JAXBException {
@@ -130,7 +131,7 @@ public class Actor1_Runner<S, R> extends Runner {
         }
 
         @SuppressWarnings("unchecked")
-        R[] newResult = (R[]) new Object[minStride];
+        R[] newResult = (R[]) new Result[minStride];
         for (int c = 0; c < minStride; c++) {
             newResult[c] = test.newResult();
         }

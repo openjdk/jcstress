@@ -24,11 +24,12 @@
  */
 package org.openjdk.jcstress.infra.results;
 
+import org.openjdk.jcstress.infra.Result;
 import sun.misc.Contended;
 
 import java.io.Serializable;
 
-public class ShortResult1 implements Serializable {
+public class ShortResult1 implements Serializable, Result {
 
     @Contended
     public short r1;
@@ -53,5 +54,10 @@ public class ShortResult1 implements Serializable {
     @Override
     public String toString() {
         return "[" + r1 + ']';
+    }
+
+    @Override
+    public void reset() {
+        r1 = 0;
     }
 }

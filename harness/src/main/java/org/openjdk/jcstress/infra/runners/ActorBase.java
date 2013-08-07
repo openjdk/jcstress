@@ -24,8 +24,10 @@
  */
 package org.openjdk.jcstress.infra.runners;
 
+import org.openjdk.jcstress.infra.Result;
 import org.openjdk.jcstress.tests.ActorConcurrencyTest;
 import org.openjdk.jcstress.util.Counter;
+import org.openjdk.jcstress.util.UnsafeHolder;
 
 import java.util.Arrays;
 import java.util.concurrent.Callable;
@@ -41,7 +43,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public abstract class ActorBase<T extends ActorConcurrencyTest<S, R>, S, R> implements Callable<Void> {
+public abstract class ActorBase<T extends ActorConcurrencyTest<S, R>, S, R extends Result> implements Callable<Void> {
     private final int index;
     private final T test;
     private final AtomicReference<StateHolder<S, R>> version;
@@ -191,9 +193,6 @@ public abstract class ActorBase<T extends ActorConcurrencyTest<S, R>, S, R> impl
                     lCounter.record(r1);
                 }
 
-            }
-
-            if (epoch.compareAndSet(curEpoch + 1, curEpoch + 2)) {
                 // prepare the new chunk of work
                 StateHolder<S, R> newHolder;
                 if (control.isStopped) {
@@ -202,15 +201,24 @@ public abstract class ActorBase<T extends ActorConcurrencyTest<S, R>, S, R> impl
                     // feedback: should bump the stride size?
                     int newLoops = holder.hasLaggedWorkers ? Math.min(loops * 2, maxStride) : loops;
 
-                    S[] newStride = Arrays.copyOf(cur, newLoops);
+                    for (int c = 0; c < loops; c++) {
+                        res[c].reset();
+                    }
+
+                    S[] newStride = cur;
+                    R[] newRes = res;
+                    if (newLoops > loops) {
+                        newStride = Arrays.copyOf(cur, newLoops);
+                        newRes = Arrays.copyOf(res, newLoops);
+                        for (int c = loops; c < newLoops; c++) {
+                            newRes[c] = lt.newResult();
+                        }
+                    }
+
                     for (int c = 0; c < newLoops; c++) {
                         newStride[c] = lt.newState();
                     }
 
-                    R[] newRes = Arrays.copyOf(res, newLoops);
-                    for (int c = 0; c < newLoops; c++) {
-                        newRes[c] = lt.newResult();
-                    }
                     newHolder = new StateHolder<S, R>(newStride, newRes, holder.countWorkers);
                 }
 
@@ -218,7 +226,7 @@ public abstract class ActorBase<T extends ActorConcurrencyTest<S, R>, S, R> impl
             }
 
             // defensive cross-check against global
-            curEpoch += 2;
+            curEpoch += 1;
             while (curEpoch != epoch.get()) {
                 if (shouldYield) Thread.yield();
             }

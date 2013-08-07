@@ -24,7 +24,9 @@
  */
 package org.openjdk.jcstress.tests;
 
-public interface Actor2_Test<S, R> extends ActorConcurrencyTest<S, R> {
+import org.openjdk.jcstress.infra.Result;
+
+public interface Actor2_Test<S, R extends Result> extends ActorConcurrencyTest<S, R> {
 
     /**
      * Body for the actor 1.

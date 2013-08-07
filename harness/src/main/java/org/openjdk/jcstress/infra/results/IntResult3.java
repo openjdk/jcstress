@@ -24,11 +24,12 @@
  */
 package org.openjdk.jcstress.infra.results;
 
+import org.openjdk.jcstress.infra.Result;
 import sun.misc.Contended;
 
 import java.io.Serializable;
 
-public class IntResult3 implements Serializable {
+public class IntResult3 implements Serializable, Result {
 
     @Contended
     public int r1;
@@ -66,4 +67,8 @@ public class IntResult3 implements Serializable {
         return "[" + r1 + ", " + r2 + ", " + r3 + ']';
     }
 
+    @Override
+    public void reset() {
+        r1 = r2 = r3 = 0;
+    }
 }

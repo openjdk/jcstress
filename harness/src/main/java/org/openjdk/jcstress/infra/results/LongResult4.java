@@ -24,11 +24,12 @@
  */
 package org.openjdk.jcstress.infra.results;
 
+import org.openjdk.jcstress.infra.Result;
 import sun.misc.Contended;
 
 import java.io.Serializable;
 
-public class LongResult4 implements Serializable {
+public class LongResult4 implements Serializable, Result {
 
     @Contended
     public long r1;
@@ -69,5 +70,10 @@ public class LongResult4 implements Serializable {
         result = 31 * result + (int) (r3 ^ (r3 >>> 32));
         result = 31 * result + (int) (r4 ^ (r4 >>> 32));
         return result;
+    }
+
+    @Override
+    public void reset() {
+        r1 = r2 = r3 = r4 = 0;
     }
 }

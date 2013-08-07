@@ -24,11 +24,12 @@
  */
 package org.openjdk.jcstress.infra.results;
 
+import org.openjdk.jcstress.infra.Result;
 import sun.misc.Contended;
 
 import java.io.Serializable;
 
-public class ByteResult8 implements Serializable {
+public class ByteResult8 implements Serializable, Result {
 
     @Contended
     public byte r1;
@@ -89,5 +90,10 @@ public class ByteResult8 implements Serializable {
         result = 31 * result + (int) r7;
         result = 31 * result + (int) r8;
         return result;
+    }
+
+    @Override
+    public void reset() {
+        r1 = r2 = r3 = r4 = r5 = r6 = r7 = r8 = 0;
     }
 }
