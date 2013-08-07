@@ -96,19 +96,27 @@ public class Reflections {
         }
     }
 
-    private static Collection<Class> getClasses(final String filter) throws IOException {
+    public static Collection<Class> getClasses(final String filter) throws IOException {
+        final List<Class> newClasses = new ArrayList<Class>();
+        for (String name : getClassNames(filter)) {
+            try {
+                newClasses.add(Class.forName(name));
+            } catch (ClassNotFoundException e) {
+                throw new IllegalStateException(e.getMessage(), e);
+            }
+        }
+        return newClasses;
+    }
+
+    public static Collection<String> getClassNames(final String filter) throws IOException {
         ensureInited();
 
-        final List<Class> newClasses = new ArrayList<Class>();
+        final List<String> newClasses = new ArrayList<String>();
         for (String name : RESOURCES) {
             name = name.replaceAll("\\\\", ".");
             name = name.replaceAll("/", ".");
             if (name.contains(filter) && name.endsWith(".class")) {
-                try {
-                    newClasses.add(Class.forName(name.substring(name.indexOf(filter), name.length() - 6)));
-                } catch (ClassNotFoundException e) {
-                    throw new IllegalStateException(e.getMessage(), e);
-                }
+                newClasses.add(name.substring(name.indexOf(filter), name.length() - 6));
             }
         }
 

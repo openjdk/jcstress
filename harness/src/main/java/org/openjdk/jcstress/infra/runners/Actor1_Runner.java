@@ -76,7 +76,7 @@ public class Actor1_Runner<S, R> extends Runner {
         testLog.print("Iterations ");
         for (int c = 0; c < iters; c++) {
             if (c % deoptEachIter == 0) {
-                VMSupport.tryDeoptimizeAll();
+                VMSupport.tryDeoptimizeAllInfra();
             }
 
             testLog.print(".");

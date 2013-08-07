@@ -26,10 +26,17 @@ package org.openjdk.jcstress.util;
 
 import sun.hotspot.WhiteBox;
 
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+
 public class VMSupport {
 
     private static WhiteBox whiteBox;
     private static volatile boolean inited;
+    private static volatile Collection<Method> infraMethods;
 
     public static boolean tryInit() {
         if (inited) return true;
@@ -43,6 +50,36 @@ public class VMSupport {
             return false;
         } finally {
             inited = true;
+        }
+    }
+
+    public static void tryDeoptimizeAllInfra() {
+        WhiteBox w = whiteBox;
+        if (w != null) {
+            try {
+                Collection<Method> im = infraMethods;
+                if (im == null) {
+                    im = new ArrayList<Method>();
+                    Collection<String> infraNames = new ArrayList<String>();
+                    infraNames.addAll(Reflections.getClassNames("org.openjdk.jcstress.infra"));
+                    infraNames.addAll(Reflections.getClassNames("org.openjdk.jcstress.util"));
+                    for (String name : infraNames) {
+                        try {
+                            Class<?> aClass = Class.forName(name);
+                            Collections.addAll(im, aClass.getMethods());
+                        } catch (ClassNotFoundException e) {
+                            throw new IllegalStateException();
+                        }
+                    }
+                    infraMethods = im;
+                }
+
+                for (Method m : im) {
+                    w.deoptimizeMethod(m);
+                }
+            } catch (IOException e) {
+                throw new IllegalStateException();
+            }
         }
     }
 
