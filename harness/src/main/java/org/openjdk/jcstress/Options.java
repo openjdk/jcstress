@@ -238,7 +238,7 @@ public class Options {
     private int figureOutHotCPUs() {
         ExecutorService service = Executors.newCachedThreadPool();
 
-        System.out.print("Figuring out CPU count...");
+        System.out.print("Burning up to figure out the exact CPU count...");
 
         int warmupTime = 1000;
         long lastChange = System.currentTimeMillis();
@@ -278,9 +278,9 @@ public class Options {
 
     public void printSettingsOn(PrintStream out) {
         if (forks > 0) {
-            out.println("[FORKED MODE]");
+            out.println("FORKED MODE");
         } else {
-            out.println("[EMBEDDED MODE]");
+            out.println("EMBEDDED MODE");
         }
         out.printf("  Test preset mode: \"%s\"\n", mode);
         out.printf("  Writing the test results to \"%s\"\n", resultFile);

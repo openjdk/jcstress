@@ -58,7 +58,7 @@ public class Main {
             }
         } else {
             if (!VMSupport.tryContended()) {
-                System.out.println("Non-fatal: VM support for @Contended is not enabled. Possible reasons are:\n" +
+                System.out.println("Non-fatal: VM support for @Contended is not enabled, tests might run slower.\nPossible reasons are:\n" +
                         "  1) unsupported JDK, only JDK 8+ is supported; \n" +
                         "  2) -XX:-RestrictContended is missing; \n" +
                         "  3) the jcstress JAR is not added to -Xbootclasspath/a\n");
@@ -67,9 +67,9 @@ public class Main {
             }
 
             if (!VMSupport.tryInit()) {
-                System.out.println("Non-fatal: VM support for online deoptimization is not enabled. Possible reasons are:\n" +
+                System.out.println("Non-fatal: VM support for online deoptimization is not enabled, tests might miss some issues.\nPossible reasons are:\n" +
                         "  1) unsupported JDK, only JDK 8+ is supported; \n" +
-                        "  2) -XX:+UnlockDiagnosticVMOptions -XX:+WhiteBoxAPI VM options are missing; \n" +
+                        "  2) -XX:+UnlockDiagnosticVMOptions -XX:+WhiteBoxAPI are missing; \n" +
                         "  3) the jcstress JAR is not added to -Xbootclasspath/a\n");
             } else {
                 System.out.println("VM support is initialized.\n");
