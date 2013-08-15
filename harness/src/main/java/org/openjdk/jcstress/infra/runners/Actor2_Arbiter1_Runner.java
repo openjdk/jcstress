@@ -68,7 +68,11 @@ public class Actor2_Arbiter1_Runner<S, R extends Result> extends Runner {
 
         testLog.print("Iterations ");
         for (int c = 0; c < iters; c++) {
-            VMSupport.tryDeoptimizeAllInfra(deoptRatio);
+            try {
+                VMSupport.tryDeoptimizeAllInfra(deoptRatio);
+            } catch (NoClassDefFoundError err) {
+                // gracefully "handle"
+            }
 
             testLog.print(".");
             testLog.flush();

@@ -63,7 +63,11 @@ public class TerminationRunner<S> extends Runner {
 
         testLog.print("Iterations ");
         for (int c = 0; c < iters; c++) {
-            VMSupport.tryDeoptimizeAllInfra(deoptRatio);
+            try {
+                VMSupport.tryDeoptimizeAllInfra(deoptRatio);
+            } catch (NoClassDefFoundError err) {
+                // gracefully "handle"
+            }
 
             testLog.print(".");
             testLog.flush();

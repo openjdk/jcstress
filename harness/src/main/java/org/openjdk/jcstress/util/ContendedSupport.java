@@ -22,33 +22,20 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress;
+package org.openjdk.jcstress.util;
 
-import org.openjdk.jcstress.infra.collectors.NetworkOutputCollector;
-import org.openjdk.jcstress.util.VMSupport;
+import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.util.UnsafeHolder;
 
-/**
- * Entry point for the forked VM run.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
- */
-public class ForkedMain {
-
-    public static void main(String[] args) throws Exception {
-        Options opts = new Options(args);
-        if (!opts.parse()) {
-            System.exit(1);
-        }
-
+public class ContendedSupport {
+    public static boolean tryContended() {
         try {
-            VMSupport.tryInit();
-        } catch (NoClassDefFoundError e) {
-            // expected on JDK 7 and lower, parent should have printed the message for user
+            long o1 = UnsafeHolder.U.objectFieldOffset(IntResult2.class.getField("r1"));
+            long o2 = UnsafeHolder.U.objectFieldOffset(IntResult2.class.getField("r2"));
+
+            return Math.abs(o2 - o1) >= 64;
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException();
         }
-
-        NetworkOutputCollector collector = new NetworkOutputCollector(opts.getHostName(), opts.getHostPort());
-        new JCStress().run(opts, true, collector);
-        collector.close();
     }
-
 }

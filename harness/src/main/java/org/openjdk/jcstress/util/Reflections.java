@@ -100,6 +100,7 @@ public class Reflections {
         final List<Class> newClasses = new ArrayList<Class>();
         for (String name : getClassNames(filter)) {
             try {
+                if (name.contains("VMSupport")) continue;
                 newClasses.add(Class.forName(name));
             } catch (ClassNotFoundException e) {
                 throw new IllegalStateException(e.getMessage(), e);
