@@ -99,7 +99,7 @@ public class AtomicIntegerPairwiseTests {
 
     public static class DecAndGet_GetAndAdd extends AbstractTest {
         @Override public void actor1(AtomicInteger s, IntResult2 r) { r.r1 = s.decrementAndGet(); }
-        @Override public void actor2(AtomicInteger s, IntResult2 r) { r.r2 = s.decrementAndGet(); }
+        @Override public void actor2(AtomicInteger s, IntResult2 r) { r.r2 = s.getAndAdd(5); }
     }
 
     public static class DecAndGet_GetAndDec extends AbstractTest {

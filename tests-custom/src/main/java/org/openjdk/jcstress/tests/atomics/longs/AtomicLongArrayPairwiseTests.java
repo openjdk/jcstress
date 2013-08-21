@@ -106,7 +106,7 @@ public class AtomicLongArrayPairwiseTests {
 
     public static class DecAndGet_GetAndAdd extends AbstractTest {
         @Override public void actor1(State s, LongResult2 r) { r.r1 = s.a.decrementAndGet(s.idx); }
-        @Override public void actor2(State s, LongResult2 r) { r.r2 = s.a.decrementAndGet(s.idx); }
+        @Override public void actor2(State s, LongResult2 r) { r.r2 = s.a.getAndAdd(s.idx, 5); }
     }
 
     public static class DecAndGet_GetAndDec extends AbstractTest {

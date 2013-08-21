@@ -104,7 +104,7 @@ public class AtomicLongFieldUpdaterPairwiseTests {
 
     public static class DecAndGet_GetAndAdd extends AbstractTest {
         @Override public void actor1(State s, LongResult2 r) { r.r1 = s.u.decrementAndGet(s); }
-        @Override public void actor2(State s, LongResult2 r) { r.r2 = s.u.decrementAndGet(s); }
+        @Override public void actor2(State s, LongResult2 r) { r.r2 = s.u.getAndAdd(s, 5); }
     }
 
     public static class DecAndGet_GetAndDec extends AbstractTest {

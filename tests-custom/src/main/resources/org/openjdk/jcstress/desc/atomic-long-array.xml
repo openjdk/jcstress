@@ -324,12 +324,12 @@
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongArray pair-wise operations.</description>
         <case>
-            <match>[-1, -2]</match>
+            <match>[-1, -1]</match>
             <expect>ACCEPTABLE</expect>
             <description>T1 -> T2 execution.</description>
         </case>
         <case>
-            <match>[-2, -1]</match>
+            <match>[4, 0]</match>
             <expect>ACCEPTABLE</expect>
             <description>T2 -> T1 execution.</description>
         </case>
