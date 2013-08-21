@@ -101,31 +101,4 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.scratch.StampedLockConcReaderTest">
-        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
-        <description>Tests if readLock()-s are concurrent</description>
-        <case>
-            <match>[-1, -1]</match>
-            <match>[-1, 1]</match>
-            <match>[1, -1]</match>
-            <expect>ACCEPTABLE</expect>
-            <description>Some threads have not observed the write locked</description>
-        </case>
-        <case>
-            <match>[1, 1]</match>
-            <expect>ACCEPTABLE</expect>
-            <description>Both threads have succeeded in CAS, may indicate mutual exclusion</description>
-        </case>
-        <case>
-            <match>[0, 1]</match>
-            <match>[1, 0]</match>
-            <expect>REQUIRED</expect>
-            <description>One of the threads have failed to CAS, indicating concurrent read locks</description>
-        </case>
-        <unmatched>
-            <expect>FORBIDDEN</expect>
-            <description>Other cases are not expected.</description>
-        </unmatched>
-    </test>
-
 </testsuite>
