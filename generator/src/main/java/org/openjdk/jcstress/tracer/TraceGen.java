@@ -68,6 +68,7 @@ public class TraceGen {
             traces = product(traces, possibleOps);
             allTraces.addAll(traces);
         }
+        System.out.println(traces.size() + " basic traces");
 
         List<Trace> newTraces = new ArrayList<Trace>();
         for (Trace trace : allTraces) {
@@ -95,6 +96,7 @@ public class TraceGen {
             newTraces.add(trace);
         }
         traces = newTraces;
+        System.out.println(traces.size() + " interesting traces");
 
         List<MultiTrace> multiTraces = new ArrayList<MultiTrace>();
         for (Trace trace : traces) {
@@ -107,6 +109,7 @@ public class TraceGen {
                 }
             }
         }
+        System.out.println(multiTraces.size() + " basic multi-traces");
 
         Set<String> processedMultitraces = new HashSet<String>();
 
@@ -147,6 +150,7 @@ public class TraceGen {
                 System.out.print(".");
         }
         System.out.println();
+        System.out.println(testCount + " interesting multi-traces");
 
         resourceWriter.println("</testsuite>");
         resourceWriter.close();
