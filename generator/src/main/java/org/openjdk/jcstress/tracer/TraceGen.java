@@ -69,15 +69,13 @@ public class TraceGen {
             allTraces.addAll(traces);
         }
 
-        Set<String> generatedTraces = new HashSet<String>();
-
         List<Trace> newTraces = new ArrayList<Trace>();
         for (Trace trace : allTraces) {
             if (!trace.hasLoads()) continue;
             if (!trace.hasStores()) continue;
             if (trace.hasNonMatchingLoads()) continue;
             if (trace.hasNonMatchingStores()) continue;
-            if (!generatedTraces.add(trace.canonicalId())) continue;
+            if (!trace.canonicalId().equals(trace.id())) continue;
 
             int constId = 0;
             int resId = 0;
