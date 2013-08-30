@@ -3,3 +3,4 @@ syntax: glob
 *.iml
 target/
 jcstress.*
+results/
