@@ -220,6 +220,7 @@ public class Options {
             System.err.println("Unknown test mode: " + this.mode);
             System.err.println();
             parser.printHelpOn(System.err);
+            return false;
         }
 
         return true;
