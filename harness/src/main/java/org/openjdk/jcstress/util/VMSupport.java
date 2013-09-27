@@ -70,7 +70,7 @@ public class VMSupport {
                     for (String name : infraNames) {
                         try {
                             Class<?> aClass = Class.forName(name);
-                            Collections.addAll(im, aClass.getMethods());
+                            Collections.addAll(im, aClass.getDeclaredMethods());
                         } catch (ClassNotFoundException e) {
                             throw new IllegalStateException();
                         }
