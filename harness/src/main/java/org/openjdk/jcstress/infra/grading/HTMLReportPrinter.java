@@ -325,9 +325,12 @@ public class HTMLReportPrinter extends DescriptionReader {
                     output.println("<td class=\"special\">Sanity check failed, API mismatch?</td>");
                     break;
                 case CHECK_TEST_ERROR:
-                case TEST_ERROR:
                     output.println("<td class=\"failed\">ERROR</td>");
-                    output.println("<td class=\"failed\">Error running the test</td>");
+                    output.println("<td class=\"failed\">Error while running the test</td>");
+                    break;
+                case TIMEOUT_ERROR:
+                    output.println("<td class=\"failed\">ERROR</td>");
+                    output.println("<td class=\"failed\">Timeout while running the test</td>");
                     break;
                 case VM_ERROR:
                     output.println("<td class=\"failed\">VM ERROR</td>");

@@ -170,7 +170,7 @@ public class Actor2_Runner<S, R extends Result> extends Runner {
         controlHolder.isStopped = true;
 
         if (!waitFor(tasks)) {
-            dumpFailure(test, Status.TEST_ERROR);
+            dumpFailure(test, Status.TIMEOUT_ERROR);
         }
 
         return counter;

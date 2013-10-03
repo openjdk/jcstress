@@ -114,9 +114,9 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
 
     private void parseSummary(PrintWriter output, TestResult r) {
         switch (r.status()) {
-            case TEST_ERROR:
+            case TIMEOUT_ERROR:
                 output.println();
-                printLine(output, "ERROR", r);
+                printLine(output, "TIMEOUT", r);
                 parseVerbose(output, r);
                 output.println();
                 return;

@@ -125,8 +125,8 @@ public class ExceptionReportPrinter extends DescriptionReader {
             case CHECK_TEST_ERROR:
                 failures.add(result.getName() + " had failed the pre-test.");
                 break;
-            case TEST_ERROR:
-                failures.add(result.getName() + " had failed the test.");
+            case TIMEOUT_ERROR:
+                failures.add(result.getName() + " had timed out.");
                 break;
             case VM_ERROR:
                 failures.add(result.getName() + " had failed with the VM error.");
