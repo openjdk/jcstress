@@ -35,6 +35,7 @@ import org.openjdk.jcstress.util.NullOutputStream;
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -107,6 +108,16 @@ public abstract class Runner {
 
     protected void dumpFailure(ConcurrencyTest test, Status status) {
         TestResult result = new TestResult(test.getClass().getName(), status);
+        collector.add(result);
+    }
+
+    protected void dumpFailure(ConcurrencyTest test, Status status, Throwable aux) {
+        TestResult result = new TestResult(test.getClass().getName(), status);
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        aux.printStackTrace(pw);
+        pw.close();
+        result.addAuxData(sw.toString());
         collector.add(result);
     }
 

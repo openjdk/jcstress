@@ -58,11 +58,31 @@ public class Actor2_Arbiter1_Runner<S, R extends Result> extends Runner {
     public void run() throws InterruptedException, ExecutionException {
         testLog.println("Running " + test.getClass().getName());
 
-        Status status = checkRun();
-        if (status != Status.NORMAL) {
+        try {
+            R res = test.newResult();
+            S state = test.newState();
+            test.actor1(state, res);
+            test.actor2(state, res);
+            test.arbiter1(state, res);
+        } catch (NoClassDefFoundError e) {
             testLog.println("Test sanity check failed, skipping");
             testLog.println();
-            dumpFailure(test, status);
+            dumpFailure(test, Status.API_MISMATCH);
+            return;
+        } catch (NoSuchFieldError e) {
+            testLog.println("Test sanity check failed, skipping");
+            testLog.println();
+            dumpFailure(test, Status.API_MISMATCH);
+            return;
+        } catch (NoSuchMethodError e) {
+            testLog.println("Test sanity check failed, skipping");
+            testLog.println();
+            dumpFailure(test, Status.API_MISMATCH);
+            return;
+        } catch (Throwable e) {
+            testLog.println("Check test failed");
+            testLog.println();
+            dumpFailure(test, Status.CHECK_TEST_ERROR);
             return;
         }
 
@@ -87,26 +107,6 @@ public class Actor2_Arbiter1_Runner<S, R extends Result> extends Runner {
     @Override
     public int requiredThreads() {
         return 3;
-    }
-
-    private Status checkRun() {
-        try {
-            R res = test.newResult();
-            S state = test.newState();
-            test.actor1(state, res);
-            test.actor2(state, res);
-            test.arbiter1(state, res);
-            return Status.NORMAL;
-        } catch (NoClassDefFoundError e) {
-            return Status.API_MISMATCH;
-        } catch (NoSuchFieldError e) {
-            return Status.API_MISMATCH;
-        } catch (NoSuchMethodError e) {
-            return Status.API_MISMATCH;
-        } catch (Throwable e) {
-            e.printStackTrace();
-            return Status.CHECK_TEST_ERROR;
-        }
     }
 
     public Counter<R> run(int time) throws InterruptedException, ExecutionException {
