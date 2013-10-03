@@ -147,36 +147,6 @@ public class Options {
             return false;
         }
 
-        mode = orDefault(modeStr.value(set), "default");
-        if (this.mode.equalsIgnoreCase("sanity")) {
-            this.time = 50;
-            this.iters = 1;
-            this.forks = 0;
-        } else
-        if (this.mode.equalsIgnoreCase("quick")) {
-            this.time = 300;
-            this.iters = 5;
-            this.forks = 0;
-        } else
-        if (this.mode.equalsIgnoreCase("default")) {
-            // do nothing
-        } else
-        if (this.mode.equalsIgnoreCase("tough")) {
-            this.time = 5000;
-            this.iters = 10;
-            this.forks = 10;
-        } else
-        if (this.mode.equalsIgnoreCase("stress")) {
-            this.time = 1000;
-            this.iters = 5;
-            this.forks = 100;
-        } else {
-            System.err.println("Unknown test mode: " + this.mode);
-            System.err.println();
-            parser.printHelpOn(System.err);
-            return false;
-        }
-
         this.resultDir = orDefault(set.valueOf(result), "results/");
         if (!resultDir.endsWith("/")) {
             resultDir += "/";
@@ -222,6 +192,36 @@ public class Options {
 
         this.userYield = set.has(shouldYield);
         this.shouldYield = orDefault(set.valueOf(shouldYield), forceYield);
+
+        mode = orDefault(modeStr.value(set), "default");
+        if (this.mode.equalsIgnoreCase("sanity")) {
+            this.time = 50;
+            this.iters = 1;
+            this.forks = 0;
+        } else
+        if (this.mode.equalsIgnoreCase("quick")) {
+            this.time = 300;
+            this.iters = 5;
+            this.forks = 0;
+        } else
+        if (this.mode.equalsIgnoreCase("default")) {
+            // do nothing
+        } else
+        if (this.mode.equalsIgnoreCase("tough")) {
+            this.time = 5000;
+            this.iters = 10;
+            this.forks = 10;
+        } else
+        if (this.mode.equalsIgnoreCase("stress")) {
+            this.time = 1000;
+            this.iters = 5;
+            this.forks = 100;
+        } else {
+            System.err.println("Unknown test mode: " + this.mode);
+            System.err.println();
+            parser.printHelpOn(System.err);
+            return false;
+        }
 
         return true;
     }
