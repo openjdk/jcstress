@@ -84,7 +84,8 @@ public class HTMLReportPrinter extends DescriptionReader {
                 Collection<TestResult> mergeable = multiResults.get(name);
 
                 LongHashMultiset<State> stateCounts = new LongHashMultiset<State>();
-                Map<String, String> envs = new HashMap<String, String>();
+
+                List<String> auxData = new ArrayList<String>();
 
                 Status status = Status.NORMAL;
                 Environment env = null;
@@ -94,6 +95,7 @@ public class HTMLReportPrinter extends DescriptionReader {
                         stateCounts.add(s, s.getCount());
                     }
                     env = r.getEnv();
+                    auxData.addAll(r.getAuxData());
                 }
 
                 TestResult root = new TestResult(name, status);
@@ -103,6 +105,10 @@ public class HTMLReportPrinter extends DescriptionReader {
                 }
 
                 root.setEnv(env);
+
+                for (String data : auxData) {
+                    root.addAuxData(data);
+                }
 
                 results.put(name, root);
             }
@@ -324,6 +330,7 @@ public class HTMLReportPrinter extends DescriptionReader {
                     output.println("<td class=\"special\">SKIPPED</td>");
                     output.println("<td class=\"special\">Sanity check failed, API mismatch?</td>");
                     break;
+                case TEST_ERROR:
                 case CHECK_TEST_ERROR:
                     output.println("<td class=\"failed\">ERROR</td>");
                     output.println("<td class=\"failed\">Error while running the test</td>");
@@ -435,6 +442,16 @@ public class HTMLReportPrinter extends DescriptionReader {
         }
 
         output.println("</table>");
+
+        if (!r.getAuxData().isEmpty()) {
+            output.println("<p><b>Auxiliary data</b></p>");
+            output.println("<pre>");
+            for (String data : r.getAuxData()) {
+                output.println(data);
+            }
+            output.println("</pre>");
+            output.println();
+        }
     }
 
     private void parseTestWithoutDescription(PrintWriter output, TestResult r) {
