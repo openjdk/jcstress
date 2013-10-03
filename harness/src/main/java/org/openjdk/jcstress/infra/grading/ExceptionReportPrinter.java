@@ -123,7 +123,10 @@ public class ExceptionReportPrinter extends DescriptionReader {
     public void emitTest(TestResult result, Test description) throws FileNotFoundException, JAXBException {
         switch (result.status()) {
             case CHECK_TEST_ERROR:
-                failures.add(result.getName() + " had failed the pre-test.");
+                failures.add(result.getName() + " had failed with the pre-test error.");
+                break;
+            case TEST_ERROR:
+                failures.add(result.getName() + " had failed with the test error.");
                 break;
             case TIMEOUT_ERROR:
                 failures.add(result.getName() + " had timed out.");

@@ -37,7 +37,6 @@ import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -55,7 +54,7 @@ public class Actor2_Arbiter1_Runner<S, R extends Result> extends Runner {
         this.test = test;
     }
 
-    public void run() throws InterruptedException, ExecutionException {
+    public void run() {
         testLog.println("Running " + test.getClass().getName());
 
         try {
@@ -109,7 +108,7 @@ public class Actor2_Arbiter1_Runner<S, R extends Result> extends Runner {
         return 3;
     }
 
-    public Counter<R> run(int time) throws InterruptedException, ExecutionException {
+    public Counter<R> run(int time) {
         @SuppressWarnings("unchecked")
         final S[] poison = (S[]) new Object[0];
 
@@ -169,13 +168,15 @@ public class Actor2_Arbiter1_Runner<S, R extends Result> extends Runner {
         );
         tasks.add(a2);
 
-        TimeUnit.MILLISECONDS.sleep(time);
+        try {
+            TimeUnit.MILLISECONDS.sleep(time);
+        } catch (InterruptedException e) {
+            // do nothing
+        }
 
         controlHolder.isStopped = true;
 
-        if (!waitFor(tasks)) {
-            dumpFailure(test, Status.TIMEOUT_ERROR);
-        }
+        waitFor(test, tasks);
 
         return counter;
     }

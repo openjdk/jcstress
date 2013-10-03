@@ -115,19 +115,21 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
     private void parseSummary(PrintWriter output, TestResult r) {
         switch (r.status()) {
             case TIMEOUT_ERROR:
-                output.println();
                 printLine(output, "TIMEOUT", r);
-                parseVerbose(output, r);
-                output.println();
                 return;
             case CHECK_TEST_ERROR:
-                printLine(output, "CHECK ERROR", r);
+            case TEST_ERROR:
+                output.println();
+                printLine(output, "ERROR", r);
+                for (String data : r.getAuxData()) {
+                    output.println(data);
+                }
+                output.println();
                 return;
             case VM_ERROR:
                 output.println();
                 printLine(output, "VM ERROR", r);
-                List<String> auxData = r.getAuxData();
-                for (String data : auxData) {
+                for (String data : r.getAuxData()) {
                     output.println(data);
                 }
                 output.println();

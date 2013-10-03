@@ -230,13 +230,7 @@ public class JCStress {
 
             @Override
             public void run() {
-                try {
-                    runner.run();
-                } catch (InterruptedException e) {
-                    throw new IllegalStateException(e);
-                } catch (ExecutionException e) {
-                    throw new IllegalStateException(e);
-                }
+                runner.run();
             }
         });
     }

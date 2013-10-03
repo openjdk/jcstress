@@ -33,7 +33,6 @@ import org.openjdk.jcstress.util.VMSupport;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -51,12 +50,8 @@ public class TerminationRunner<S> extends Runner {
     /**
      * Run the test.
      * This method blocks until test is complete
-     *
-     * @throws InterruptedException
-     * @throws java.util.concurrent.ExecutionException
-     *
      */
-    public void run() throws ExecutionException, InterruptedException {
+    public void run() {
         testLog.println("Running " + test.getClass().getName());
 
         HashCounter<Outcome> results = new HashCounter<Outcome>();
@@ -100,7 +95,7 @@ public class TerminationRunner<S> extends Runner {
         ERROR,
     }
 
-    private void run(int time, Counter<Outcome> results) throws InterruptedException, ExecutionException {
+    private void run(int time, Counter<Outcome> results) {
         long target = System.currentTimeMillis() + time;
         while (System.currentTimeMillis() < target) {
 
@@ -120,14 +115,24 @@ public class TerminationRunner<S> extends Runner {
             });
             t1.start();
 
-            TimeUnit.MILLISECONDS.sleep(10);
+            try {
+                TimeUnit.MILLISECONDS.sleep(10);
+            } catch (InterruptedException e) {
+                // do nothing
+            }
+
             try {
                 test.signal(holder.state, t1);
             } catch (Exception e) {
                 holder.error = true;
             }
 
-            t1.join(1000);
+            try {
+                t1.join(1000);
+            } catch (InterruptedException e) {
+                // do nothing
+            }
+
             if (holder.terminated) {
                 if (holder.error) {
                     results.record(Outcome.ERROR);

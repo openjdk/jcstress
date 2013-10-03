@@ -131,7 +131,7 @@ public abstract class Runner {
         collector.add(result);
     }
 
-    public abstract void run() throws InterruptedException, ExecutionException;
+    public abstract void run();
 
     public abstract int requiredThreads();
 
@@ -154,19 +154,26 @@ public abstract class Runner {
         }
     }
 
-    protected boolean waitFor(Collection<Future<?>> tasks) throws ExecutionException, InterruptedException {
+    protected void waitFor(ConcurrencyTest test, Collection<Future<?>> tasks) {
         long startTime = System.nanoTime();
         boolean allStopped = false;
         while (!allStopped) {
             if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) > time * 2) {
-                return false;
+                dumpFailure(test, Status.TIMEOUT_ERROR);
+                return;
             }
 
             allStopped = true;
             for (Future<?> t : tasks) {
-                allStopped &= tryWaitFor(t);
+                try {
+                    allStopped &= tryWaitFor(t);
+                } catch (ExecutionException e) {
+                    dumpFailure(test, Status.TEST_ERROR, e.getCause());
+                    return;
+                } catch (InterruptedException e) {
+                    return;
+                }
             }
         }
-        return true;
     }
 }

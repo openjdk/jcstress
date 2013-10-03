@@ -35,7 +35,8 @@ public enum Status {
     API_MISMATCH(1),
     CHECK_TEST_ERROR(2),
     TIMEOUT_ERROR(3),
-    VM_ERROR(4);
+    TEST_ERROR(4),
+    VM_ERROR(5);
 
     private int severity;
 
