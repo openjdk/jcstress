@@ -124,7 +124,13 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
                 printLine(output, "CHECK ERROR", r);
                 return;
             case VM_ERROR:
+                output.println();
                 printLine(output, "VM ERROR", r);
+                List<String> auxData = r.getAuxData();
+                for (String data : auxData) {
+                    output.println(data);
+                }
+                output.println();
                 return;
             case API_MISMATCH:
                 printLine(output, "SKIPPED", r);

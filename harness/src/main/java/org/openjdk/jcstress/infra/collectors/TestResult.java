@@ -29,8 +29,10 @@ import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.util.Environment;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -46,12 +48,14 @@ public class TestResult implements Serializable {
     private final Map<State, State> states;
     private volatile Environment env;
     private final Status status;
+    private final List<String> auxData;
 
     public TestResult(String name, Status status) {
         this.vmID = VM_ID;
         this.name = name;
         this.status = status;
         this.states = new HashMap<State, State>();
+        this.auxData = new ArrayList<String>();
     }
 
     public void addState(Object result, long count) {
@@ -61,6 +65,10 @@ public class TestResult implements Serializable {
             ns = new State(result, count + os.getCount());
         }
         states.put(ns, ns);
+    }
+
+    public void addAuxData(String data) {
+        auxData.add(data);
     }
 
     public void setEnv(Environment e) {
@@ -85,5 +93,9 @@ public class TestResult implements Serializable {
 
     public String getVmID() {
         return vmID;
+    }
+
+    public List<String> getAuxData() {
+        return auxData;
     }
 }

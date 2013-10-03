@@ -54,6 +54,7 @@ import org.openjdk.jcstress.tests.TerminationTest;
 import org.openjdk.jcstress.util.InputStreamDrainer;
 import org.openjdk.jcstress.util.Reflections;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -183,21 +184,26 @@ public class JCStress {
             Collection<String> commandString = getSeparateExecutionCommand(opts, test.getName());
             Process p = Runtime.getRuntime().exec(commandString.toArray(new String[commandString.size()]));
 
-            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), out);
-            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), out);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), baos);
+            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), baos);
 
             errDrainer.start();
             outDrainer.start();
 
             int ecode = p.waitFor();
 
-            if (ecode != 0) {
-                // Test had failed, record this.
-                collector.add(new TestResult(test.getName(), Status.VM_ERROR));
-            }
-
             errDrainer.join();
             outDrainer.join();
+
+            if (ecode != 0) {
+                // Test had failed, record this.
+                TestResult result = new TestResult(test.getName(), Status.VM_ERROR);
+                String s = new String(baos.toByteArray()).trim();
+                result.addAuxData(s);
+                collector.add(result);
+            }
 
         } catch (IOException ex) {
             ex.printStackTrace();
