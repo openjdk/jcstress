@@ -98,9 +98,11 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
 
         observedResults.incrementAndGet();
 
+        int totalCount = 0;
         for (State s : r.getStates()) {
-            observedCount.addAndGet(s.getCount());
+            totalCount += s.getCount();
         }
+        observedCount.addAndGet(totalCount);
 
         if (verbose) {
             output.println();
@@ -111,40 +113,48 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
     }
 
     private void parseSummary(PrintWriter output, TestResult r) {
-        if (!r.isNormal()) {
-            if (r.isError()) {
+        switch (r.status()) {
+            case TEST_ERROR:
                 output.println();
                 printLine(output, "ERROR", r);
                 parseVerbose(output, r);
                 output.println();
                 return;
-            } else {
+            case CHECK_TEST_ERROR:
+                printLine(output, "CHECK ERROR", r);
+                return;
+            case VM_ERROR:
+                printLine(output, "VM ERROR", r);
+                return;
+            case API_MISMATCH:
                 printLine(output, "SKIPPED", r);
                 return;
-            }
-        }
-
-        Test test = testDescriptions.get(r.getName());
-        if (test == null) {
-            output.println();
-            printLine(output, "ERROR", r);
-            parseVerbose(output, r);
-            output.println();
-        } else {
-            TestGrading grading = new TestGrading(r, test);
-            if (grading.isPassed) {
-                printLine(output, "OK", r);
-            } else {
-                output.println();
-                printLine(output, "FAILED", r);
-                parseVerbose(output, r);
-                output.println();
-            }
+            case NORMAL:
+                Test test = testDescriptions.get(r.getName());
+                if (test == null) {
+                    output.println();
+                    printLine(output, "UNKNOWN", r);
+                    parseVerbose(output, r);
+                    output.println();
+                } else {
+                    TestGrading grading = new TestGrading(r, test);
+                    if (grading.isPassed) {
+                        printLine(output, "OK", r);
+                    } else {
+                        output.println();
+                        printLine(output, "FAILED", r);
+                        parseVerbose(output, r);
+                        output.println();
+                    }
+                }
+                break;
+            default:
+                throw new IllegalStateException("Illegal status: " + r.status());
         }
     }
 
     private PrintWriter printLine(PrintWriter output, String label, TestResult r) {
-        return output.printf(" (ETA: %10s) (R: %s) (T:%4d/%d) (F:%2d/%d) (I:%2d/%d) %9s %s\n",
+        return output.printf(" (ETA: %10s) (R: %s) (T:%4d/%d) (F:%2d/%d) (I:%2d/%d) %10s %s\n",
                 computeETA(),
                 computeSpeed(),
                 testsProgress.size(), expectedTests, testsProgress.get(r.getName()).getVMindex(r.getVmID()), expectedForks, testsProgress.get(r.getName()).getIteration(r.getVmID()), expectedIterations,

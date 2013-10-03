@@ -153,14 +153,14 @@ public class HTMLReportPrinter extends DescriptionReader {
                 for (String testName : testNames) {
                     Test test = testDescriptions.get(testName);
                     TestResult result = results.get(testName);
-                    if (result.isNormal()) {
+                    if (result.status() == Status.NORMAL) {
                         if (new TestGrading(result, test).isPassed) {
                             passedCount++;
                         } else {
                             failedCount++;
                         }
                     } else {
-                        if (result.isMismatch()) {
+                        if (result.status() == Status.API_MISMATCH) {
                             sanityFailedCount++;
                         } else {
                             failedCount++;
@@ -255,7 +255,7 @@ public class HTMLReportPrinter extends DescriptionReader {
             for (String testName : testNames) {
                 Test test = testDescriptions.get(testName);
                 TestResult result = results.get(testName);
-                if (result.isNormal()) {
+                if (result.status() == Status.NORMAL) {
                     emitTest(output, result, test);
                 } else {
                     emitTestFailure(output, result, test);
@@ -319,13 +319,20 @@ public class HTMLReportPrinter extends DescriptionReader {
         output.println("<td>&nbsp;&nbsp;&nbsp;<a href=\"" + result.getName() + ".html\">" + cutKlass(result.getName()) + "</a></td>");
         output.println("<td></td>");
         if (description != null) {
-            if (result.isMismatch()) {
-                output.println("<td class=\"special\">SKIPPED</td>");
-                output.println("<td class=\"special\">Sanity check failed, API mismatch?</td>");
-            }
-            if (result.isError()) {
-                output.println("<td class=\"failed\">ERROR</td>");
-                output.println("<td class=\"failed\">Error running the test</td>");
+            switch (result.status()) {
+                case API_MISMATCH:
+                    output.println("<td class=\"special\">SKIPPED</td>");
+                    output.println("<td class=\"special\">Sanity check failed, API mismatch?</td>");
+                    break;
+                case CHECK_TEST_ERROR:
+                case TEST_ERROR:
+                    output.println("<td class=\"failed\">ERROR</td>");
+                    output.println("<td class=\"failed\">Error running the test</td>");
+                    break;
+                case VM_ERROR:
+                    output.println("<td class=\"failed\">VM ERROR</td>");
+                    output.println("<td class=\"failed\">Error running the VM</td>");
+                    break;
             }
         } else {
             output.println("<td class=\"failed\">MISSING DESCRIPTION</td>");

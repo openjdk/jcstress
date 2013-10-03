@@ -75,18 +75,6 @@ public class TestResult implements Serializable {
         return states.values();
     }
 
-    public boolean isNormal() {
-        return status == Status.NORMAL;
-    }
-
-    public boolean isError() {
-        return status == Status.ERROR;
-    }
-
-    public boolean isMismatch() {
-        return status == Status.API_MISMATCH;
-    }
-
     public Environment getEnv() {
         return env;
     }

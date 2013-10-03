@@ -30,29 +30,21 @@ package org.openjdk.jcstress.infra;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public enum Status {
-    NORMAL {
-        @Override
-        public Status combine(Status other) {
-            return other;
-        }
-    },
-    API_MISMATCH {
-        @Override
-        public Status combine(Status other) {
-            if (other == ERROR) {
-                return other;
-            } else {
-                return this;
-            }
-        }
-    },
-    ERROR {
-        @Override
-        public Status combine(Status other) {
-            return this;
-        }
-    },;
 
-    public abstract Status combine(Status other);
+    NORMAL(0),
+    API_MISMATCH(1),
+    CHECK_TEST_ERROR(2),
+    TEST_ERROR(3),
+    VM_ERROR(4);
+
+    private int severity;
+
+    Status(int severity) {
+        this.severity = severity;
+    }
+
+    public Status combine(Status other) {
+        return severity >= other.severity ? this : other;
+    }
 
 }

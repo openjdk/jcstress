@@ -193,7 +193,7 @@ public class JCStress {
 
             if (ecode != 0) {
                 // Test had failed, record this.
-                collector.add(new TestResult(test.getName(), Status.ERROR));
+                collector.add(new TestResult(test.getName(), Status.VM_ERROR));
             }
 
             errDrainer.join();

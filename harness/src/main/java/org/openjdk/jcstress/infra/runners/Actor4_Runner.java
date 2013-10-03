@@ -115,7 +115,8 @@ public class Actor4_Runner<S, R extends Result> extends Runner {
         } catch (NoSuchMethodError e) {
             return Status.API_MISMATCH;
         } catch (Throwable e) {
-            return Status.ERROR;
+            e.printStackTrace();
+            return Status.CHECK_TEST_ERROR;
         }
     }
 
@@ -191,7 +192,7 @@ public class Actor4_Runner<S, R extends Result> extends Runner {
         controlHolder.isStopped = true;
 
         if (!waitFor(tasks)) {
-            dumpFailure(test, Status.ERROR);
+            dumpFailure(test, Status.TEST_ERROR);
         }
 
         return counter;

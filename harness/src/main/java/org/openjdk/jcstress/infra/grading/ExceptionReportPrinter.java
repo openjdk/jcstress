@@ -121,21 +121,33 @@ public class ExceptionReportPrinter extends DescriptionReader {
     }
 
     public void emitTest(TestResult result, Test description) throws FileNotFoundException, JAXBException {
-        if (result.isError()) {
-            failures.add(result.getName() + " is in error.");
-        }
-
-        if (result.isNormal()) {
-            if (description != null) {
-                TestGrading grading = new TestGrading(result, description);
-                if (!grading.failureMessages.isEmpty()) {
-                    for (String msg : grading.failureMessages) {
-                        failures.add(result.getName() + ": " + msg);
+        switch (result.status()) {
+            case CHECK_TEST_ERROR:
+                failures.add(result.getName() + " had failed the pre-test.");
+                break;
+            case TEST_ERROR:
+                failures.add(result.getName() + " had failed the test.");
+                break;
+            case VM_ERROR:
+                failures.add(result.getName() + " had failed with the VM error.");
+                break;
+            case NORMAL:
+                if (description != null) {
+                    TestGrading grading = new TestGrading(result, description);
+                    if (!grading.failureMessages.isEmpty()) {
+                        for (String msg : grading.failureMessages) {
+                            failures.add(result.getName() + ": " + msg);
+                        }
                     }
+                } else {
+                    failures.add("TEST BUG: " + result.getName() + " description is not found.");
                 }
-            } else {
-                failures.add("TEST BUG: " + result.getName() + " description is not found.");
-            }
+                break;
+            case API_MISMATCH:
+                // silently ignore
+                break;
+            default:
+                throw new IllegalStateException("Unhandled status: " + result.status());
         }
     }
 
