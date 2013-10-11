@@ -145,34 +145,27 @@ public abstract class Runner {
         testLog.println(s);
     }
 
-    public boolean tryWaitFor(Future<?> f) throws ExecutionException, InterruptedException {
-        try {
-            f.get(1, TimeUnit.SECONDS);
-            return true;
-        } catch (TimeoutException e) {
-            return false;
-        }
-    }
-
     protected void waitFor(ConcurrencyTest test, Collection<Future<?>> tasks) {
         long startTime = System.nanoTime();
         boolean allStopped = false;
         while (!allStopped) {
-            if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) > time * 2) {
-                dumpFailure(test, Status.TIMEOUT_ERROR);
-                return;
-            }
-
             allStopped = true;
             for (Future<?> t : tasks) {
                 try {
-                    allStopped &= tryWaitFor(t);
+                    t.get(1, TimeUnit.SECONDS);
+                } catch (TimeoutException e) {
+                    allStopped = false;
                 } catch (ExecutionException e) {
                     dumpFailure(test, Status.TEST_ERROR, e.getCause());
                     return;
                 } catch (InterruptedException e) {
                     return;
                 }
+            }
+
+            if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) > Math.max(time, 60*1000)) {
+                dumpFailure(test, Status.TIMEOUT_ERROR);
+                return;
             }
         }
     }
