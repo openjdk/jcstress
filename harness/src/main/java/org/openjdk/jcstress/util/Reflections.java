@@ -24,11 +24,13 @@
  */
 package org.openjdk.jcstress.util;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -39,15 +41,20 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+import java.util.regex.Pattern;
 
 public class Reflections {
 
-    private static volatile boolean INITED;
+    private static volatile boolean RESOURCE_INITED;
     private static Set<String> RESOURCES;
+
+    static String INTERFACE_LIST = "/META-INF/InterfaceList";
+    private static volatile boolean INTERFACE_INITED;
+    private static Multimap<String, String> INTERFACE_MAP;
 
     public static Collection<String> getResources(String filter, String postfix) {
         try {
-            ensureInited();
+            ensureResourceInited();
 
             List<String> res = new ArrayList<String>();
             for (String name : RESOURCES) {
@@ -60,6 +67,30 @@ public class Reflections {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    public static Collection<Class<?>> lookupClassesImplementing(Class<?> intf, String filter) {
+        ensureInterfacesInited();
+
+        Collection<Class<?>> s = new ArrayList<Class<?>>();
+        String canonicalName = intf.getCanonicalName();
+
+        Pattern pattern = Pattern.compile(filter);
+
+        for (String k : INTERFACE_MAP.keys()) {
+            if (!k.equals(canonicalName)) continue;
+            for (String klass : INTERFACE_MAP.get(k)) {
+                if (pattern.matcher(klass).matches()) {
+                    try {
+                        s.add(Class.forName(klass));
+                    } catch (ClassNotFoundException e) {
+                        // swallow
+                    }
+                }
+            }
+        }
+
+        return s;
     }
 
     public static Collection<Class> findAllClassesImplementing(Class<?> intf, String filter) {
@@ -78,8 +109,8 @@ public class Reflections {
         }
     }
 
-    private static void ensureInited() throws IOException {
-        if (!INITED) {
+    private static void ensureResourceInited() throws IOException {
+        if (!RESOURCE_INITED) {
             final SortedSet<String> newResources = new TreeSet<String>();
             try {
                 enumerate(new ResultCallback() {
@@ -92,7 +123,44 @@ public class Reflections {
                 throw new IOException(t);
             }
             RESOURCES = newResources;
-            INITED = true;
+            RESOURCE_INITED = true;
+        }
+    }
+
+    private static void ensureInterfacesInited() {
+        if (!INTERFACE_INITED) {
+            final Multimap<String, String> interfaceMap = new HashMultimap<String, String>();
+
+            InputStream list = null;
+            try {
+                list = Reflections.class.getResourceAsStream(INTERFACE_LIST);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(list));
+
+                String currentClass = null;
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (currentClass == null) {
+                        currentClass = line;
+                    } else if (!line.isEmpty()) {
+                        interfaceMap.put(line, currentClass);
+                    } else {
+                        currentClass = null;
+                    }
+                }
+            } catch (IOException e) {
+                System.err.println("Warning: " + e);
+            } finally {
+                if (list != null) {
+                    try {
+                        list.close();
+                    } catch (IOException e) {
+                        // swallow
+                    }
+                }
+            }
+
+            INTERFACE_MAP = interfaceMap;
+            INTERFACE_INITED = true;
         }
     }
 
@@ -110,7 +178,7 @@ public class Reflections {
     }
 
     public static Collection<String> getClassNames(final String filter) throws IOException {
-        ensureInited();
+        ensureResourceInited();
 
         final List<String> newClasses = new ArrayList<String>();
         for (String name : RESOURCES) {

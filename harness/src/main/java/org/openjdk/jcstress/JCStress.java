@@ -61,7 +61,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -76,7 +75,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
 
 /**
  * JCStress main entry point.
@@ -361,24 +359,13 @@ public class JCStress {
             // continue
         }
 
-        // God I miss both diamonds and lambdas here.
-
-        Pattern pattern = Pattern.compile(filter);
-
-        for (Class k : Reflections.findAllClassesImplementing(klass, "org.openjdk.jcstress")) {
-            if (!pattern.matcher(k.getName()).matches()) {
-                continue;
-            }
-            if (Modifier.isAbstract(k.getModifiers())) {
-                continue;
-            }
-
+        for (Class<?> c : Reflections.lookupClassesImplementing(klass, filter)) {
             @SuppressWarnings("unchecked")
-            Class<? extends T> k1 = k;
-
-            s.add(k1);
+            Class<? extends T> c1 = (Class<? extends T>) c;
+            s.add(c1);
         }
 
         return s;
     }
+
 }
