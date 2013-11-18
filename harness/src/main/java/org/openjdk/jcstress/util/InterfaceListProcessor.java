@@ -60,8 +60,8 @@ public class InterfaceListProcessor extends AbstractProcessor {
         try {
             if (!roundEnv.processingOver()) {
                 for (Element element : roundEnv.getElementsAnnotatedWith(Override.class)) {
-                    if (element.getModifiers().contains(Modifier.ABSTRACT)) continue;
                     TypeElement el = (TypeElement) element.getEnclosingElement();
+                    if (el.getModifiers().contains(Modifier.ABSTRACT)) continue;
                     if (visited.add(el)) {
                         lines.add(processingEnv.getElementUtils().getBinaryName(el).toString());
                         for (TypeElement intf : getAllInterfaces(el)) {
