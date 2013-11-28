@@ -37,9 +37,9 @@
             <description>
                 Possible to see the default value, since the instance is published via race.
             </description>
-            <urls>
+            <refs>
                 <url>http://cs.oswego.edu/pipermail/concurrency-interest/2013-November/011951.html</url>
-            </urls>
+            </refs>
         </case>
         <case>
             <match>[1]</match>
