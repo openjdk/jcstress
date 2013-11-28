@@ -407,14 +407,14 @@
     <test name="org.openjdk.jcstress.tests.init.primitives.instance.DoubleInstanceInitializerTest"    template="float_canSeeMost" />
     <test name="org.openjdk.jcstress.tests.init.primitives.instance.FloatInstanceInitializerTest"     template="double_canSeeMost" />
 
-    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.BooleanVolatileTest"   template="int_shouldSeeFull" />
-    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.ByteVolatileTest"      template="int_shouldSeeFull" />
-    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.ShortVolatileTest"     template="int_shouldSeeFull" />
-    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.IntVolatileTest"       template="int_shouldSeeFull" />
-    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.LongVolatileTest"      template="int_shouldSeeFull" />
-    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.CharVolatileTest"      template="char_shouldSeeFull" />
-    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.DoubleVolatileTest"    template="float_shouldSeeFull" />
-    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.FloatVolatileTest"     template="float_shouldSeeFull" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.BooleanVolatileTest"   template="int_canSeeDefault" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.ByteVolatileTest"      template="int_canSeeDefault" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.ShortVolatileTest"     template="int_canSeeDefault" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.IntVolatileTest"       template="int_canSeeDefault" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.LongVolatileTest"      template="int_canSeeDefault" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.CharVolatileTest"      template="char_canSeeDefault" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.DoubleVolatileTest"    template="float_canSeeDefault" />
+    <test name="org.openjdk.jcstress.tests.init.primitives.volatiles.FloatVolatileTest"     template="float_canSeeDefault" />
 
     <test name="org.openjdk.jcstress.tests.init.primitives.finals.BooleanFinalTest"   template="int_shouldSeeFull" />
     <test name="org.openjdk.jcstress.tests.init.primitives.finals.ByteFinalTest"      template="int_shouldSeeFull" />

@@ -32,6 +32,16 @@
             Tests the visibility of AtomicInteger initial value.
         </description>
         <case>
+            <match>[0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Possible to see the default value, since the instance is published via race.
+            </description>
+            <urls>
+                <url>http://cs.oswego.edu/pipermail/concurrency-interest/2013-November/011951.html</url>
+            </urls>
+        </case>
+        <case>
             <match>[1]</match>
             <expect>ACCEPTABLE</expect>
             <description>
