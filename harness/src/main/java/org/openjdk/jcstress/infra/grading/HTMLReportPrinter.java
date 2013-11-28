@@ -248,6 +248,116 @@ public class HTMLReportPrinter extends DescriptionReader {
         output.println("</tr>");
         output.println("</table>");
 
+        printFailedTests(results, packages, output);
+        printSpecTests(results, packages, output);
+        printInterestingTests(results, packages, output);
+        printAllTests(results, packages, output);
+
+        output.println("</body>");
+        output.println("</html>");
+
+        output.close();
+    }
+
+    private void printFailedTests(Map<String, TestResult> results, Multimap<String, String> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
+        output.println("<h3>Failed tests</h3>");
+        output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">");
+
+        boolean hadAnyTests = false;
+        for (String k : packages.keys()) {
+            Collection<String> testNames = packages.get(k);
+
+            boolean packageEmitted = false;
+            for (String testName : testNames) {
+                Test test = testDescriptions.get(testName);
+                TestResult result = results.get(testName);
+                if (result.status() != Status.NORMAL && result.status() != Status.API_MISMATCH) {
+                    if (!packageEmitted) {
+                        emitPackage(output, k);
+                        packageEmitted = true;
+                    }
+                    emitTestFailure(output, result, test);
+                    hadAnyTests = true;
+                }
+            }
+        }
+
+        output.println("</table>");
+        if (!hadAnyTests) {
+            output.println("None!");
+            output.println("<br>");
+        }
+
+        output.println("<br>");
+    }
+
+    private void printInterestingTests(Map<String, TestResult> results, Multimap<String, String> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
+        output.println("<h3>Tests with interesting results</h3>");
+        output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">");
+
+        boolean hadAnyTests = false;
+        for (String k : packages.keys()) {
+            Collection<String> testNames = packages.get(k);
+
+            boolean packageEmitted = false;
+            for (String testName : testNames) {
+                Test test = testDescriptions.get(testName);
+                TestResult result = results.get(testName);
+                TestGrading grading = new TestGrading(result, test);
+                if (grading.hasInteresting) {
+                    if (!packageEmitted) {
+                        emitPackage(output, k);
+                        packageEmitted = true;
+                    }
+                    emitTest(output, result, test);
+                    hadAnyTests = true;
+                }
+            }
+        }
+
+        output.println("</table>");
+        if (!hadAnyTests) {
+            output.println("None!");
+            output.println("<br>");
+        }
+        output.println("<br>");
+    }
+
+    private void printSpecTests(Map<String, TestResult> results, Multimap<String, String> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
+        output.println("<h3>Tests with formally acceptable, but surprising results:</h3>");
+        output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">");
+
+        boolean hadAnyTests = false;
+        for (String k : packages.keys()) {
+            Collection<String> testNames = packages.get(k);
+
+            boolean packageEmitted = false;
+            for (String testName : testNames) {
+                Test test = testDescriptions.get(testName);
+                TestResult result = results.get(testName);
+                TestGrading grading = new TestGrading(result, test);
+                if (grading.hasSpec) {
+                    if (!packageEmitted) {
+                        emitPackage(output, k);
+                        packageEmitted = true;
+                    }
+                    emitTest(output, result, test);
+                    hadAnyTests = true;
+                }
+            }
+        }
+
+        output.println("</table>");
+        if (!hadAnyTests) {
+            output.println("None!");
+            output.println("<br>");
+        }
+
+        output.println("<br>");
+    }
+
+    private void printAllTests(Map<String, TestResult> results, Multimap<String, String> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
+        output.println("<h3>All tests</h3>");
         output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">\n" +
                 "<tr>\n" +
                 " <th class=\"header\">Test</th>\n" +
@@ -275,16 +385,12 @@ public class HTMLReportPrinter extends DescriptionReader {
         }
 
         output.println("</table>");
-
-        output.println("</body>");
-        output.println("</html>");
-
-        output.close();
     }
 
     private void emitPackage(PrintWriter pw, String pack) {
         pw.println("<tr class=\"section2\">\n" +
                 "   <td><b>" + pack + "</b></td>\n" +
+                "   <td>&nbsp;</td>\n" +
                 "   <td>&nbsp;</td>\n" +
                 "   <td>&nbsp;</td>\n" +
                 "   <td>&nbsp;</td>\n" +
@@ -319,9 +425,12 @@ public class HTMLReportPrinter extends DescriptionReader {
             } else {
                 output.println("<td class=\"spec\"></td>");
             }
+            output.println("<td class=\"passed\"></td>");
         } else {
             output.println("<td class=\"failed\">MISSING DESCRIPTION</td>");
-            output.println("<td class=\"special\"></td>");
+            output.println("<td class=\"failed\"></td>");
+            output.println("<td class=\"failed\"></td>");
+            output.println("<td class=\"failed\"></td>");
         }
         output.println("</tr>");
     }
@@ -334,26 +443,36 @@ public class HTMLReportPrinter extends DescriptionReader {
         if (description != null) {
             switch (result.status()) {
                 case API_MISMATCH:
-                    output.println("<td class=\"special\">SKIPPED</td>");
-                    output.println("<td class=\"special\">Sanity check failed, API mismatch?</td>");
+                    output.println("<td class=\"interesting\">API MISMATCH</td>");
+                    output.println("<td class=\"interesting\"></td>");
+                    output.println("<td class=\"interesting\"></td>");
+                    output.println("<td class=\"interesting\">Sanity check failed, API mismatch?</td>");
                     break;
                 case TEST_ERROR:
                 case CHECK_TEST_ERROR:
                     output.println("<td class=\"failed\">ERROR</td>");
+                    output.println("<td class=\"failed\"></td>");
+                    output.println("<td class=\"failed\"></td>");
                     output.println("<td class=\"failed\">Error while running the test</td>");
                     break;
                 case TIMEOUT_ERROR:
                     output.println("<td class=\"failed\">ERROR</td>");
+                    output.println("<td class=\"failed\"></td>");
+                    output.println("<td class=\"failed\"></td>");
                     output.println("<td class=\"failed\">Timeout while running the test</td>");
                     break;
                 case VM_ERROR:
                     output.println("<td class=\"failed\">VM ERROR</td>");
+                    output.println("<td class=\"failed\"></td>");
+                    output.println("<td class=\"failed\"></td>");
                     output.println("<td class=\"failed\">Error running the VM</td>");
                     break;
             }
         } else {
             output.println("<td class=\"failed\">MISSING DESCRIPTION</td>");
-            output.println("<td class=\"special\"></td>");
+            output.println("<td class=\"failed\"></td>");
+            output.println("<td class=\"failed\"></td>");
+            output.println("<td class=\"failed\"></td>");
         }
         output.println("</tr>");
     }
