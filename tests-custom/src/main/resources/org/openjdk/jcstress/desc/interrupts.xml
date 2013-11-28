@@ -272,12 +272,12 @@
         </description>
         <case>
             <match>TERMINATED</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>The thread had successfully terminated, this might mean compiler is not aggressively optimizing.</description>
         </case>
         <case>
             <match>STALE</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>Thread had failed to respond, this is acceptable behavior under JMM</description>
         </case>
         <unmatched>
@@ -293,12 +293,12 @@
         </description>
         <case>
             <match>TERMINATED</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>The thread had successfully terminated, this might mean compiler is not aggressively optimizing.</description>
         </case>
         <case>
             <match>STALE</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>Thread had failed to respond, this is acceptable behavior under JMM</description>
         </case>
         <unmatched>
@@ -377,12 +377,12 @@
         </description>
         <case>
             <match>TERMINATED</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>The thread had successfully terminated</description>
         </case>
         <case>
             <match>STALE</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>Thread had failed to respond; this is allowed behavior under Lock API.</description>
         </case>
         <unmatched>

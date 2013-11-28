@@ -32,7 +32,7 @@
         <case>
             <match>[0, 1]</match>
             <match>[1, 0]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>
                 There is the race on the field. Second read can still read the default value.
             </description>
@@ -58,7 +58,7 @@
         <case>
             <match>[0.0, 1.0]</match>
             <match>[1.0, 0.0]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>
                 There is the race on the field. Second read can still read the default value.
             </description>
@@ -84,7 +84,7 @@
         <case>
             <match>[A, B]</match>
             <match>[B, A]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>
                 There is the race on the field. Second read can still read the default value.
             </description>
@@ -110,7 +110,7 @@
         <case>
             <match>[true, false]</match>
             <match>[false, true]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>
                 There is the race on the field. Second read can still read the default value.
             </description>

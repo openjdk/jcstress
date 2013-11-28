@@ -54,7 +54,7 @@
             </description>
         </case>
         <unmatched>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>
                 This should be under-uninitialized case. This is a correct JMM behavior.
             </description>
@@ -65,7 +65,7 @@
         <description>Tests the broken DCL-style singleton.</description>
         <case>
             <match>[1]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>
                 The reference field in singleton is null.
                 This is the violation of singleton contract, but legal JMM behavior.
@@ -73,7 +73,7 @@
         </case>
         <case>
             <match>[0]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>
                 Singleton return the null instance. This is counter-intuitive, but there is the race on $instance,
                 and second read in the return can indeed return the null reference.
@@ -85,7 +85,7 @@
         <description>Tests the broken DCL-style singleton.</description>
         <case>
             <match>[1]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>
                 The reference field in singleton is null.
                 This is the violation of singleton contract, but legal JMM behavior.

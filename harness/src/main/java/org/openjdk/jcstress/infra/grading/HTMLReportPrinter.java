@@ -140,7 +140,8 @@ public class HTMLReportPrinter extends DescriptionReader {
                 "   .failedProgress { background-color: #FF0000; color: #FFFFFF; text-align: center; font-weight: bold; }\n" +
                 "   .passed { color: #00AA00; text-align: center; font-weight: bold; }\n" +
                 "   .failed { color: #FF0000; text-align: center; font-weight: bold; }\n" +
-                "   .special{ color: #0000FF; text-align: center; font-weight: bold; }\n" +
+                "   .interesting { color: #0000FF; text-align: center; font-weight: bold; }\n" +
+                "   .spec { color: #AAAA00; text-align: center; font-weight: bold; }\n" +
                 "   .endResult { font-size: 48pt; text-align: center; font-weight: bold; }\n" +
                 " </style>\n" +
                 "</head>\n" +
@@ -286,6 +287,7 @@ public class HTMLReportPrinter extends DescriptionReader {
                 "   <td><b>" + pack + "</b></td>\n" +
                 "   <td>&nbsp;</td>\n" +
                 "   <td>&nbsp;</td>\n" +
+                "   <td>&nbsp;</td>\n" +
                 "   <td></td>" +
                 "</tr>");
     }
@@ -307,10 +309,15 @@ public class HTMLReportPrinter extends DescriptionReader {
                 output.println("<td class=\"failed\">FAILED</td>");
             }
 
-            if (grading.isSpecial) {
-                output.println("<td class=\"special\">INTERESTING</td>");
+            if (grading.hasInteresting) {
+                output.println("<td class=\"interesting\">INTERESTING</td>");
             } else {
-                output.println("<td class=\"special\"></td>");
+                output.println("<td class=\"interesting\"></td>");
+            }
+            if (grading.hasSpec) {
+                output.println("<td class=\"spec\">SPEC</td>");
+            } else {
+                output.println("<td class=\"spec\"></td>");
             }
         } else {
             output.println("<td class=\"failed\">MISSING DESCRIPTION</td>");
@@ -486,15 +493,13 @@ public class HTMLReportPrinter extends DescriptionReader {
 
     public Color selectColor(ExpectType type, boolean isZero) {
         switch (type) {
-            case REQUIRED:
-                return isZero ? Color.RED : Color.GREEN;
             case ACCEPTABLE:
                 return isZero ? Color.LIGHT_GRAY : Color.GREEN;
             case FORBIDDEN:
                 return isZero ? Color.LIGHT_GRAY : Color.RED;
-            case KNOWN_ACCEPTABLE:
+            case ACCEPTABLE_INTERESTING:
                 return isZero ? Color.LIGHT_GRAY : Color.CYAN;
-            case KNOWN_FORBIDDEN:
+            case ACCEPTABLE_SPEC:
                 return isZero ? Color.LIGHT_GRAY : Color.YELLOW;
             case UNKNOWN:
                 return Color.RED;

@@ -39,7 +39,7 @@
         </case>
         <case>
             <match>[1, 0, 0, 1]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>Threads see the updates in the inconsistent order</description>
         </case>
         <unmatched>

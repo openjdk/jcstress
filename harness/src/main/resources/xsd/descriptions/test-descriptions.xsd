@@ -31,11 +31,22 @@
 
     <xsd:simpleType name="expectType">
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="REQUIRED"/>
+            <!-- Acceptable by spec, acceptable by common sense -->
             <xsd:enumeration value="ACCEPTABLE"/>
+
+            <!-- Acceptable by spec, acceptable by common sense, still interesting -->
+            <xsd:enumeration value="ACCEPTABLE_INTERESTING"/>
+
+            <!--
+                Acceptable by spec, forbidden by common sense;
+                Some implementations avoid these behaviors, even though formally allowed.
+            -->
+            <xsd:enumeration value="ACCEPTABLE_SPEC"/>
+
+            <!-- Forbidden by spec -->
             <xsd:enumeration value="FORBIDDEN"/>
-            <xsd:enumeration value="KNOWN_ACCEPTABLE"/>
-            <xsd:enumeration value="KNOWN_FORBIDDEN"/>
+
+            <!-- Synthetic unknown -->
             <xsd:enumeration value="UNKNOWN"/>
         </xsd:restriction>
     </xsd:simpleType>

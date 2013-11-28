@@ -1043,7 +1043,7 @@
         </case>
         <case>
             <match>[1, 10]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>Tx[fail] -> Tx[fail]</description>
         </case>
         <case>

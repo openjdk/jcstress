@@ -159,7 +159,7 @@
             </description>
         </case>
         <unmatched>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_SPEC</expect>
             <description>
                 Seeing the torn value. This is specifically allowed by JLS.
                 This is not a surprising behavior on some 32-bit systems which do not have full-width 64-bit instructions.
@@ -333,7 +333,7 @@
         <case>
             <match>[4294967295]</match>
             <match>[-4294967296]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_SPEC</expect>
             <description>
                 Seeing the torn value. This is specifically allowed by JLS.
                 This is not a surprising behavior on some 32-bit systems which do not have full-width 64-bit instructions.

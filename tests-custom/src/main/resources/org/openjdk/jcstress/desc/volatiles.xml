@@ -140,7 +140,7 @@
         </description>
         <case>
             <match>[1, 1]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>
                 Each thread sees the same value, regardless of the update. One update is lost.
             </description>

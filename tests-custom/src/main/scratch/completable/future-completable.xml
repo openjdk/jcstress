@@ -31,12 +31,12 @@
         <description>Tests if CompletableFuture is racy.</description>
         <case>
             <match>[0, 43, 1, 43]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>T2 had claimed the Future. T1 reads the consistent value</description>
         </case>
         <case>
             <match>[1, 42, 0, 42]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>T1 had claimed the Future. T2 reads the consistent value</description>
         </case>
         <unmatched>
@@ -52,12 +52,12 @@
         <description>Tests if CompletableFuture is racy.</description>
         <case>
             <match>[0, -2, 1, -2]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>T2 had claimed the Future. T1 reads the consistent exception</description>
         </case>
         <case>
             <match>[1, 42, 0, 42]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>T1 had claimed the Future. T2 reads the consistent value</description>
         </case>
         <unmatched>
@@ -73,12 +73,12 @@
         <description>Tests if CompletableFuture is racy.</description>
         <case>
             <match>[0, -2, 1, -2]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>T2 had claimed the Future. T1 reads the consistent exception</description>
         </case>
         <case>
             <match>[1, -1, 0, -1]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>T1 had claimed the Future. T2 reads the consistent exception</description>
         </case>
         <unmatched>
@@ -103,7 +103,7 @@
         <description>Tests if CompletableFuture is racy.</description>
         <case>
             <match>[42]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>Observing the consistent value.</description>
         </case>
         <unmatched>
@@ -122,7 +122,7 @@
         </case>
         <case>
             <match>[42]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>Observing the consistent value.</description>
         </case>
         <unmatched>
@@ -136,7 +136,7 @@
         <description>Tests if CompletableFuture is racy.</description>
         <case>
             <match>[42]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>Observing the consistent value.</description>
         </case>
         <unmatched>
@@ -155,7 +155,7 @@
         </case>
         <case>
             <match>[42]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>Observing the consistent value.</description>
         </case>
         <unmatched>
@@ -169,7 +169,7 @@
         <description>Tests if CompletableFuture is racy.</description>
         <case>
             <match>[-1]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>Observing the correct exception.</description>
         </case>
         <unmatched>
@@ -188,7 +188,7 @@
         </case>
         <case>
             <match>[-1]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>Observing the correct exception.</description>
         </case>
         <unmatched>
@@ -207,7 +207,7 @@
         </case>
         <case>
             <match>[1, -1, 1, 43]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>T1 observes it's exception; T2 observes the forced value.</description>
         </case>
         <case>
@@ -231,7 +231,7 @@
         </case>
         <case>
             <match>[1, -1, 1, 43]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>T1 observes it's exception; T2 observes the forced value.</description>
         </case>
         <case>
@@ -255,7 +255,7 @@
         </case>
         <case>
             <match>[1, 42, 1, 43]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>T1 observes it's completed value; T2 observes the forced value.</description>
         </case>
         <case>
@@ -279,7 +279,7 @@
         </case>
         <case>
             <match>[1, 42, 1, 43]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>T1 observes it's completed value; T2 observes the forced value.</description>
         </case>
         <case>
@@ -303,7 +303,7 @@
         </case>
         <case>
             <match>[1, 42, 1, 43]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>T1 observes it's completed value; T2 observes the forced value.</description>
         </case>
         <case>
@@ -327,7 +327,7 @@
         </case>
         <case>
             <match>[1, 42, 1, 43]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>T1 observes it's completed value; T2 observes the forced value.</description>
         </case>
         <case>

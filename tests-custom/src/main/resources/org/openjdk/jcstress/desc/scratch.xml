@@ -77,7 +77,7 @@
         <description>Generated test</description>
         <case>
             <match>TERMINATED</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>Default value</description>
         </case>
         <unmatched>

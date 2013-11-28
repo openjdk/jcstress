@@ -39,7 +39,8 @@ import java.util.List;
  */
 public class TestGrading {
     public boolean isPassed;
-    public boolean isSpecial;
+    public boolean hasInteresting;
+    public boolean hasSpec;
     public final List<String> failureMessages;
 
     public TestGrading(TestResult r, Test test) {
@@ -47,13 +48,15 @@ public class TestGrading {
 
         if (test == null) {
             isPassed = false;
-            isSpecial = false;
+            hasInteresting = false;
+            hasSpec = false;
             failureMessages.add("No test.");
             return;
         }
 
         isPassed = true;
-        isSpecial = false;
+        hasInteresting = false;
+        hasSpec = false;
 
         List<State> unmatchedStates = new ArrayList<State>();
         unmatchedStates.addAll(r.getStates());
@@ -63,7 +66,8 @@ public class TestGrading {
             for (State s : r.getStates()) {
                 if (c.getMatch().contains(s.getId())) {
                     isPassed &= passed(c.getExpect(), s.getCount());
-                    isSpecial |= special(c.getExpect(), s.getCount());
+                    hasInteresting |= hasInteresting(c.getExpect(), s.getCount());
+                    hasSpec |= hasSpec(c.getExpect(), s.getCount());
                     failureMessages.add(failureMessage(s.getId(), c.getExpect(), s.getCount()));
                     matched = true;
                     unmatchedStates.remove(s);
@@ -72,14 +76,16 @@ public class TestGrading {
 
             if (!matched) {
                 isPassed &= passed(c.getExpect(), 0);
-                isSpecial |= special(c.getExpect(), 0);
+                hasInteresting |= hasInteresting(c.getExpect(), 0);
+                hasSpec |= hasSpec(c.getExpect(), 0);
                 failureMessages.add(failureMessage("N/A", c.getExpect(), 0));
             }
         }
 
         for (State s : unmatchedStates) {
             isPassed &= passed(test.getUnmatched().getExpect(), s.getCount());
-            isSpecial |= special(test.getUnmatched().getExpect(), s.getCount());
+            hasInteresting |= hasInteresting(test.getUnmatched().getExpect(), s.getCount());
+            hasSpec |= hasSpec(test.getUnmatched().getExpect(), s.getCount());
             failureMessages.add(failureMessage(s.getId(), test.getUnmatched().getExpect(), s.getCount()));
         }
     }
@@ -90,13 +96,11 @@ public class TestGrading {
         } else {
             switch (expect) {
                 case ACCEPTABLE:
-                case KNOWN_ACCEPTABLE:
+                case ACCEPTABLE_INTERESTING:
+                case ACCEPTABLE_SPEC:
                     return null;
                 case FORBIDDEN:
-                case KNOWN_FORBIDDEN:
                     return "Observed forbidden state: " + id;
-                case REQUIRED:
-                    return "Have not observed required state" + id;
                 case UNKNOWN:
                     return "Missing description";
                 default:
@@ -108,12 +112,25 @@ public class TestGrading {
     public static boolean passed(ExpectType expect, long count) {
         switch (expect) {
             case ACCEPTABLE:
-            case KNOWN_ACCEPTABLE:
+            case ACCEPTABLE_INTERESTING:
+            case ACCEPTABLE_SPEC:
                 return true;
             case FORBIDDEN:
-            case KNOWN_FORBIDDEN:
                 return count == 0;
-            case REQUIRED:
+            case UNKNOWN:
+                return false;
+            default:
+                throw new IllegalStateException("No grading for expect type = " + expect);
+        }
+    }
+
+    private static boolean hasInteresting(ExpectType expect, long count) {
+        switch (expect) {
+            case ACCEPTABLE:
+            case ACCEPTABLE_SPEC:
+            case FORBIDDEN:
+                return false;
+            case ACCEPTABLE_INTERESTING:
                 return count != 0;
             case UNKNOWN:
                 return false;
@@ -122,16 +139,14 @@ public class TestGrading {
         }
     }
 
-    public static boolean special(ExpectType expect, long count) {
+    private static boolean hasSpec(ExpectType expect, long count) {
         switch (expect) {
             case ACCEPTABLE:
-            case REQUIRED:
+            case ACCEPTABLE_INTERESTING:
             case FORBIDDEN:
                 return false;
-            case KNOWN_ACCEPTABLE:
+            case ACCEPTABLE_SPEC:
                 return count != 0;
-            case KNOWN_FORBIDDEN:
-                return count == 0;
             case UNKNOWN:
                 return false;
             default:

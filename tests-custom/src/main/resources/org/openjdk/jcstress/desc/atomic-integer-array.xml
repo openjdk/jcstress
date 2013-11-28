@@ -60,7 +60,7 @@
         </description>
         <case>
             <match>[0, 128, 128]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>
                 Seeing all updates intact.
             </description>
@@ -1090,7 +1090,7 @@
         </case>
         <case>
             <match>[1, 10]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>Tx[fail] -> Tx[fail]</description>
         </case>
         <case>

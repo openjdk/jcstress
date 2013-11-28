@@ -33,7 +33,7 @@
         </description>
         <case>
             <match>[-1431655766, 1431655765]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>
                 Seeing both updates intact.
             </description>
@@ -53,7 +53,7 @@
         </description>
         <case>
             <match>[0, 128, 128]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>
                 Seeing all updates intact.
             </description>
@@ -73,7 +73,7 @@
         </description>
         <case>
             <match>[0, 128, 128]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>
                 Seeing all updates intact.
             </description>

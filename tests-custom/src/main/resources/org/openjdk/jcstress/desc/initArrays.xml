@@ -98,7 +98,7 @@
     <template name="allZeroesBoolean">
         <case>
             <match>[false, false, false, false]</match>
-            <expect>REQUIRED</expect>
+            <expect>ACCEPTABLE</expect>
             <description>
                 Seeing the completely initialized array, and all elements are with default values.
             </description>

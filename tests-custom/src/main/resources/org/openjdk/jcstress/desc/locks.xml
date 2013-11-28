@@ -48,7 +48,7 @@
         </case>
         <case>
             <match>[1, 0]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>
                 The write to $b is observed, but write to $a is not. This is the counter-intuitive behavior,
                 but the coding pattern is incorrect: alone "sync" barrier is not enough to get the proper

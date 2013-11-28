@@ -137,7 +137,7 @@
         </case>
         <case>
             <match>[0, 0]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>
                 Acceptable without sequential consistency enforced.
             </description>
@@ -246,7 +246,7 @@
         <case>
             <match>[1, 0]</match>
             <match>[1, 1]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>
                 Without fence or volatile can read the default or old value for $x after $y is observed.
             </description>
@@ -317,7 +317,7 @@
         </case>
         <case>
             <match>[1, 0]</match>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_INTERESTING</expect>
             <description>
                 Reads the default value for field $x after publication.
             </description>

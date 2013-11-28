@@ -64,7 +64,7 @@
             Tests if Unsafe breaks the atomicity while doing cross cache-line reads/writes.
         </description>
         <unmatched>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_SPEC</expect>
             <description>All other cases are unexpected, but legal.</description>
             <refs>
                 <url>http://cs.oswego.edu/pipermail/concurrency-interest/2012-December/010390.html</url>
@@ -78,7 +78,7 @@
             Tests if Unsafe breaks the atomicity while doing cross cache-line reads/writes.
         </description>
         <unmatched>
-            <expect>KNOWN_ACCEPTABLE</expect>
+            <expect>ACCEPTABLE_SPEC</expect>
             <description>All other cases are unexpected, but legal.</description>
             <refs>
                 <url>http://cs.oswego.edu/pipermail/concurrency-interest/2012-December/010390.html</url>
