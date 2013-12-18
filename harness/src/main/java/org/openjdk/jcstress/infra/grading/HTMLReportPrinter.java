@@ -249,6 +249,7 @@ public class HTMLReportPrinter extends DescriptionReader {
         output.println("</table>");
 
         printFailedTests(results, packages, output);
+        printErrorTests(results, packages, output);
         printSpecTests(results, packages, output);
         printInterestingTests(results, packages, output);
         printAllTests(results, packages, output);
@@ -260,7 +261,43 @@ public class HTMLReportPrinter extends DescriptionReader {
     }
 
     private void printFailedTests(Map<String, TestResult> results, Multimap<String, String> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
-        output.println("<h3>Failed tests</h3>");
+        output.println("<h3>FAILED tests:<br>");
+        output.println("&nbsp;Some asserts have been violated.<br>&nbsp;Correct implementations should have none.</h3>");
+        output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">");
+
+        boolean hadAnyTests = false;
+        for (String k : packages.keys()) {
+            Collection<String> testNames = packages.get(k);
+
+            boolean packageEmitted = false;
+            for (String testName : testNames) {
+                Test test = testDescriptions.get(testName);
+                TestResult result = results.get(testName);
+                TestGrading grading = new TestGrading(result, test);
+                if (result.status() == Status.NORMAL && !grading.isPassed) {
+                    if (!packageEmitted) {
+                        emitPackage(output, k);
+                        packageEmitted = true;
+                    }
+                    emitTest(output, result, test);
+                    hadAnyTests = true;
+                }
+            }
+        }
+
+        output.println("</table>");
+        if (!hadAnyTests) {
+            output.println("None!");
+            output.println("<br>");
+        }
+
+        output.println("<br>");
+    }
+
+
+    private void printErrorTests(Map<String, TestResult> results, Multimap<String, String> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
+        output.println("<h3>ERROR tests:<br>");
+        output.println("&nbsp;Tests break for some reason, other than failing the assert.<br>&nbsp;Correct implementations should have none.</h3>");
         output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">");
 
         boolean hadAnyTests = false;
@@ -292,7 +329,8 @@ public class HTMLReportPrinter extends DescriptionReader {
     }
 
     private void printInterestingTests(Map<String, TestResult> results, Multimap<String, String> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
-        output.println("<h3>Tests with interesting results</h3>");
+        output.println("<h3>INTERESTING tests:<br>");
+        output.println("&nbsp;Some interesting behaviors observed.<br>&nbsp;This is for the plain curiosity.</h3>");
         output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">");
 
         boolean hadAnyTests = false;
@@ -324,7 +362,8 @@ public class HTMLReportPrinter extends DescriptionReader {
     }
 
     private void printSpecTests(Map<String, TestResult> results, Multimap<String, String> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
-        output.println("<h3>Tests with formally acceptable, but surprising results:</h3>");
+        output.println("<h3>SPEC tests:<br>");
+        output.println("&nbsp;Formally acceptable, but surprising results are observed.<br>&nbsp;Implementations going beyond the minimal requirements should have none.</h3>");
         output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">");
 
         boolean hadAnyTests = false;
@@ -357,7 +396,7 @@ public class HTMLReportPrinter extends DescriptionReader {
     }
 
     private void printAllTests(Map<String, TestResult> results, Multimap<String, String> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
-        output.println("<h3>All tests</h3>");
+        output.println("<h3>ALL tests:</h3>");
         output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">\n" +
                 "<tr>\n" +
                 " <th class=\"header\">Test</th>\n" +
