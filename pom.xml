@@ -40,8 +40,8 @@ questions.
     </properties>
 
     <modules>
-        <module>generator</module>
-        <module>harness</module>
+        <module>jcstress-test-gen</module>
+        <module>jcstress-core</module>
         <module>tests-custom</module>
         <module>tests-generated</module>
         <module>tests-all</module>

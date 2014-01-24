@@ -75,7 +75,7 @@ questions.
                             <executable>java</executable>
                             <arguments>
                                 <argument>-jar</argument>
-                                <argument>../generator/target/test-gen.jar</argument>
+                                <argument>../jcstress-test-gen/target/test-gen.jar</argument>
                                 <argument>${project.build.directory}/generated-sources/tests/</argument>
                                 <argument>${project.build.directory}/generated-resources/</argument>
                             </arguments>
@@ -94,7 +94,7 @@ questions.
                             <executable>java</executable>
                             <arguments>
                                 <argument>-jar</argument>
-                                <argument>../generator/target/volatile-tracegen.jar</argument>
+                                <argument>../jcstress-test-gen/target/volatile-tracegen.jar</argument>
                                 <argument>${project.build.directory}/generated-sources/tests/</argument>
                                 <argument>${project.build.directory}/generated-resources/</argument>
                             </arguments>
@@ -248,7 +248,7 @@ questions.
                     <validationSets>
                         <validationSet>
                             <dir>src/main/resources</dir>
-                            <systemId>${project.basedir}/../harness/src/main/resources/xsd/descriptions/test-descriptions.xsd</systemId>
+                            <systemId>${project.basedir}/../jcstress-core/src/main/resources/xsd/descriptions/test-descriptions.xsd</systemId>
                         </validationSet>
                     </validationSets>
                 </configuration>
@@ -260,7 +260,7 @@ questions.
     <dependencies>
         <dependency>
             <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>jcstress-harness</artifactId>
+            <artifactId>jcstress-core</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
