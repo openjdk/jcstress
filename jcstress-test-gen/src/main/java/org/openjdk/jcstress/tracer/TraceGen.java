@@ -115,7 +115,7 @@ public class TraceGen {
 
         int testCount = 0;
         for (MultiTrace mt : multiTraces) {
-            if (!processedMultitraces.add(mt.id())) continue;
+            if (!processedMultitraces.add(mt.canonicalId())) continue;
 
             List<Trace> linearTraces = mt.linearize();
             Set<Map<Integer, Integer>> scResults = new HashSet<Map<Integer, Integer>>();
@@ -382,6 +382,14 @@ public class TraceGen {
             return count;
         }
 
+        public int getStoreCount() {
+            int count = 0;
+            for (Op op : ops) {
+                if (op.getType() == Op.Type.STORE) count++;
+            }
+            return count;
+        }
+
         public String id() {
             StringBuilder sb = new StringBuilder();
             for (Op op : ops) {
@@ -534,6 +542,16 @@ public class TraceGen {
         public String id() {
             StringBuilder sb = new StringBuilder();
             for (Trace trace : traces) {
+                sb.append(trace.id());
+                sb.append("_");
+            }
+            return sb.toString();
+        }
+
+        public String canonicalId() {
+            StringBuilder sb = new StringBuilder();
+            for (Trace trace : traces) {
+                if (trace.getLoadCount() == 1 && trace.getStoreCount() == 0) continue;
                 sb.append(trace.id());
                 sb.append("_");
             }

@@ -263,5 +263,10 @@ questions.
             <artifactId>jcstress-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjdk.jcstress</groupId>
+            <artifactId>jcstress-test-gen</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>
