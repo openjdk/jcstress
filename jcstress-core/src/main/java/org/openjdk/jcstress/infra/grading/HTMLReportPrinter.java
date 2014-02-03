@@ -64,9 +64,14 @@ public class HTMLReportPrinter extends DescriptionReader {
     private final InProcessCollector collector;
     private int cellStyle = 1;
 
+    private final ConsoleReportPrinter printer;
+    private final boolean verbose;
+
     public HTMLReportPrinter(Options opts, InProcessCollector collector) throws JAXBException, FileNotFoundException {
         this.collector = collector;
-        resultDir = opts.getResultDest();
+        this.printer = new ConsoleReportPrinter(opts, new PrintWriter(System.out, true), 0);
+        this.resultDir = opts.getResultDest();
+        this.verbose = opts.isVerbose();
         new File(resultDir).mkdirs();
     }
 
@@ -258,6 +263,13 @@ public class HTMLReportPrinter extends DescriptionReader {
         output.println("</html>");
 
         output.close();
+
+        if (verbose) {
+            for (String k : results.keySet()) {
+                TestResult result = results.get(k);
+                printer.add(result);
+            }
+        }
     }
 
     private void printFailedTests(Map<String, TestResult> results, Multimap<String, String> packages, PrintWriter output) throws FileNotFoundException, JAXBException {

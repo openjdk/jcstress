@@ -104,10 +104,10 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
         }
         observedCount.addAndGet(totalCount);
 
-        printResult(output, r, verbose);
+        printResult(r, verbose);
     }
 
-    private void printResult(PrintWriter output, TestResult r, boolean isVerbose) {
+    public void printResult(TestResult r, boolean isVerbose) {
         switch (r.status()) {
             case TIMEOUT_ERROR:
                 printLine(output, "TIMEOUT", r);
