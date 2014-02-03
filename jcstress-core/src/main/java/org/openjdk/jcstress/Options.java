@@ -28,6 +28,7 @@ import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import org.openjdk.jcstress.util.OptionFormatter;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -77,48 +78,55 @@ public class Options {
 
     public boolean parse() throws IOException {
         OptionParser parser = new OptionParser();
+        parser.formatHelpWith(new OptionFormatter());
 
-        OptionSpec<String> result = parser.accepts("r", "Destination to put the report into.")
+        OptionSpec<String> result = parser.accepts("r", "Target destination to put the report into.")
                 .withRequiredArg().ofType(String.class).describedAs("dir");
 
-        OptionSpec<String> parse = parser.accepts("p", "Re-run parser on the result file, skip running tests.")
-                .withOptionalArg().ofType(String.class);
+        OptionSpec<String> parse = parser.accepts("p", "Re-run parser on the result file. This will not run any tests.")
+                .withRequiredArg().ofType(String.class).describedAs("result file");
 
         OptionSpec<Boolean> list = parser.accepts("l", "List the available tests matching the requested settings.")
-                .withOptionalArg().ofType(Boolean.class);
+                .withOptionalArg().ofType(Boolean.class).describedAs("bool");
 
-        OptionSpec<String> testFilter = parser.accepts("t", "Regexp selector for tests")
+        OptionSpec<String> testFilter = parser.accepts("t", "Regexp selector for tests.")
                 .withRequiredArg().ofType(String.class).describedAs("regexp");
 
-        OptionSpec<Integer> minStride = parser.accepts("minStride", "Min internal stride size: balances the synchronization overhead vs. accuracy.")
+        OptionSpec<Integer> minStride = parser.accepts("minStride", "Minimum internal stride size. Larger value decreases " +
+                "the synchronization overhead, but also reduces accuracy.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
-        OptionSpec<Integer> maxStride = parser.accepts("maxStride", "Max internal stride size: balances the synchronization overhead vs. accuracy.")
+        OptionSpec<Integer> maxStride = parser.accepts("maxStride", "Maximum internal stride size. Larger value decreases " +
+                "the synchronization overhead, but also reduces accuracy.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
-        OptionSpec<Integer> time = parser.accepts("time", "Time per iteration.")
+        OptionSpec<Integer> time = parser.accepts("time", "Time to spend in single test iteration. Larger value improves " +
+                "test reliability, since schedulers do better job in the long run.")
                 .withRequiredArg().ofType(Integer.class).describedAs("ms");
 
         OptionSpec<Integer> iters = parser.accepts("iters", "Iterations per test.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
-        OptionSpec<Integer> cpus = parser.accepts("c", "Number of CPUs to use. This value can exceed real CPU count.")
+        OptionSpec<Integer> cpus = parser.accepts("c", "Concurrency level for tests. This value can be greater " +
+                "than number of CPUs available.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
-        OptionSpec<Integer> sysCpus = parser.accepts("sc", "Number of CPUs in the system. Overrides auto-detection.")
+        OptionSpec<Integer> sysCpus = parser.accepts("sc", "Number of CPUs in the system. Setting this value overrides " +
+                "the autodetection.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
-        OptionSpec<Boolean> shouldYield = parser.accepts("yield", "Call Thread.yield() in busy-loops.")
-                .withOptionalArg().ofType(Boolean.class);
+        OptionSpec<Boolean> shouldYield = parser.accepts("yield", "Call Thread.yield() in busy loops.")
+                .withOptionalArg().ofType(Boolean.class).describedAs("bool");
 
-        OptionSpec<Integer> forks = parser.accepts("f", "Should fork each test N times. (\"0\" to run in the embedded mode, \"-1\" to never fork)")
-                .withOptionalArg().ofType(Integer.class);
+        OptionSpec<Integer> forks = parser.accepts("f", "Should fork each test N times. \"0\" to run in the embedded mode " +
+                "with occasional forking, \"-1\" to never ever fork.")
+                .withOptionalArg().ofType(Integer.class).describedAs("count");
 
-        OptionSpec<String> appendJvmArgs = parser.accepts("appendJvmArgs", "Append these arguments to the forked JVM.")
-                .withRequiredArg().ofType(String.class);
+        OptionSpec<String> appendJvmArgs = parser.accepts("jvmArgs", "Append these JVM arguments for the forked runs.")
+                .withRequiredArg().ofType(String.class).describedAs("opts");
 
-        OptionSpec<String> modeStr = parser.accepts("m", "Test mode preset (available options: sanity, quick, default, tough, stress)")
-                .withRequiredArg().ofType(String.class);
+        OptionSpec<String> modeStr = parser.accepts("m", "Test mode preset: sanity, quick, default, tough, stress.")
+                .withRequiredArg().ofType(String.class).describedAs("mode");
 
         OptionSpec<String> hostName = parser.accepts("hostName", "(internal) Host VM address")
                 .withRequiredArg().ofType(String.class);
@@ -126,8 +134,9 @@ public class Options {
         OptionSpec<Integer> hostPort = parser.accepts("hostPort", "(internal) Host VM port")
                 .withRequiredArg().ofType(Integer.class);
 
-        OptionSpec<Integer> deoptRatio = parser.accepts("deoptRatio", "Deoptimize (roughly) every N-th iteration")
-                .withRequiredArg().ofType(Integer.class);
+        OptionSpec<Integer> deoptRatio = parser.accepts("deoptRatio", "De-optimize (roughly) every N-th iteration. Larger " +
+                "value improves test performance, but decreases the chance we hit unlucky compilation.")
+                .withRequiredArg().ofType(Integer.class).describedAs("N");
 
         parser.accepts("v", "Be extra verbose.");
         parser.accepts("h", "Print this help.");
