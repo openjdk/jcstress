@@ -104,15 +104,10 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
         }
         observedCount.addAndGet(totalCount);
 
-        if (verbose) {
-            output.println();
-            parseVerbose(output, r);
-        } else {
-            parseSummary(output, r);
-        }
+        printResult(output, r, verbose);
     }
 
-    private void parseSummary(PrintWriter output, TestResult r) {
+    private void printResult(PrintWriter output, TestResult r, boolean isVerbose) {
         switch (r.status()) {
             case TIMEOUT_ERROR:
                 printLine(output, "TIMEOUT", r);
@@ -142,8 +137,7 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
                 if (test == null) {
                     output.println();
                     printLine(output, "UNKNOWN", r);
-                    parseVerbose(output, r);
-                    output.println();
+                    isVerbose = true;
                 } else {
                     TestGrading grading = new TestGrading(r, test);
                     if (grading.isPassed) {
@@ -151,13 +145,85 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
                     } else {
                         output.println();
                         printLine(output, "FAILED", r);
-                        parseVerbose(output, r);
-                        output.println();
+                        isVerbose = true;
                     }
                 }
                 break;
             default:
                 throw new IllegalStateException("Illegal status: " + r.status());
+        }
+
+        if (isVerbose) {
+            int len = 35;
+
+            Test test = testDescriptions.get(r.getName());
+            if (test == null) {
+                output.printf("%" + len + "s %15s %18s %-20s\n", "Observed state", "Occurrences", "Expectation", "Interpretation");
+                for (State s : r.getStates()) {
+                    output.printf("%" + len + "s (%,13d) %18s %-40s\n",
+                            cutoff(s.getId(), len),
+                            s.getCount(),
+                            ExpectType.UNKNOWN,
+                            "N/A");
+                }
+
+                return;
+            }
+
+            output.printf("%" + len + "s %15s %18s %-20s\n", "Observed state", "Occurrences", "Expectation", "Interpretation");
+
+            List<State> unmatchedStates = new ArrayList<State>();
+            unmatchedStates.addAll(r.getStates());
+            for (Case c : test.getCase()) {
+
+                boolean matched = false;
+
+                for (State s : r.getStates()) {
+                    if (c.getMatch().contains(s.getId())) {
+                        // match!
+                        output.printf("%" + len + "s (%,13d) %18s %-60s\n",
+                                cutoff(s.getId(), len),
+                                s.getCount(),
+                                c.getExpect(),
+                                cutoff(c.getDescription(), 60));
+                        matched = true;
+                        unmatchedStates.remove(s);
+                    }
+                }
+
+                if (!matched) {
+                    for (String m : c.getMatch()) {
+                        output.printf("%" + len + "s (%,13d) %18s %-60s\n",
+                                cutoff(m, len),
+                                0,
+                                c.getExpect(),
+                                cutoff(c.getDescription(), 60));
+                    }
+                }
+            }
+
+            for (State s : unmatchedStates) {
+                output.printf("%" + len + "s (%,13d) %18s %-60s\n",
+                        cutoff(s.getId(), len),
+                        s.getCount(),
+                        test.getUnmatched().getExpect(),
+                        cutoff(test.getUnmatched().getDescription(), 60));
+            }
+
+            output.println();
+        }
+    }
+
+    private static String cutoff(String src, int len) {
+        while (src.contains("  ")) {
+            src = src.replaceAll("  ", " ");
+        }
+        String trim = src.replaceAll("\n", "").trim();
+        String substring = trim.substring(0, Math.min(len - 3, trim.length()));
+        if (!substring.equals(trim)) {
+            return substring + "...";
+        } else {
+            return substring;
         }
     }
 
@@ -201,79 +267,6 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
 
     private String chunkName(String name) {
         return name.replace("org.openjdk.jcstress.tests", "o.o.j.t");
-    }
-
-    private void parseVerbose(PrintWriter output, TestResult r) {
-        int len = 35;
-
-        Test test = testDescriptions.get(r.getName());
-        if (test == null) {
-            output.printf("%" + len + "s %15s %18s %-20s\n", "Observed state", "Occurrences", "Expectation", "Interpretation");
-            for (State s : r.getStates()) {
-                    output.printf("%" + len + "s (%,13d) %18s %-40s\n",
-                            cutoff(s.getId(), len),
-                            s.getCount(),
-                            ExpectType.UNKNOWN,
-                            "N/A");
-            }
-
-            return;
-        }
-
-        output.printf("%" + len + "s %15s %18s %-20s\n", "Observed state", "Occurrences", "Expectation", "Interpretation");
-
-        List<State> unmatchedStates = new ArrayList<State>();
-        unmatchedStates.addAll(r.getStates());
-        for (Case c : test.getCase()) {
-
-            boolean matched = false;
-
-            for (State s : r.getStates()) {
-                if (c.getMatch().contains(s.getId())) {
-                    // match!
-                    output.printf("%" + len + "s (%,13d) %18s %-60s\n",
-                            cutoff(s.getId(), len),
-                            s.getCount(),
-                            c.getExpect(),
-                            cutoff(c.getDescription(), 60));
-                    matched = true;
-                    unmatchedStates.remove(s);
-                }
-            }
-
-            if (!matched) {
-                for (String m : c.getMatch()) {
-                    output.printf("%" + len + "s (%,13d) %18s %-60s\n",
-                            cutoff(m, len),
-                            0,
-                            c.getExpect(),
-                            cutoff(c.getDescription(), 60));
-                }
-            }
-        }
-
-        for (State s : unmatchedStates) {
-            output.printf("%" + len + "s (%,13d) %18s %-60s\n",
-                    cutoff(s.getId(), len),
-                    s.getCount(),
-                    test.getUnmatched().getExpect(),
-                    cutoff(test.getUnmatched().getDescription(), 60));
-        }
-
-        output.println();
-    }
-
-    private static String cutoff(String src, int len) {
-        while (src.contains("  ")) {
-            src = src.replaceAll("  ", " ");
-        }
-        String trim = src.replaceAll("\n", "").trim();
-        String substring = trim.substring(0, Math.min(len - 3, trim.length()));
-        if (!substring.equals(trim)) {
-            return substring + "...";
-        } else {
-            return substring;
-        }
     }
 
     private static class TestProgress {
