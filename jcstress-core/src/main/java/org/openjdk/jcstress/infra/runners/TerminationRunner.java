@@ -41,10 +41,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class TerminationRunner<S> extends Runner {
     final TerminationTest<S> test;
+    final String testName;
 
     public TerminationRunner(Options opts,  TerminationTest<S> test, TestResultCollector collector, ExecutorService pool) throws FileNotFoundException, JAXBException {
         super(opts, collector, pool);
         this.test = test;
+        this.testName = test.getClass().getName();
     }
 
     /**
@@ -52,7 +54,7 @@ public class TerminationRunner<S> extends Runner {
      * This method blocks until test is complete
      */
     public void run() {
-        testLog.println("Running " + test.getClass().getName());
+        testLog.println("Running " + testName);
 
         HashCounter<Outcome> results = new HashCounter<Outcome>();
 
@@ -68,7 +70,7 @@ public class TerminationRunner<S> extends Runner {
             testLog.flush();
             run(time, results);
 
-            dump(test, results);
+            dump(testName, results);
 
             if (results.count(Outcome.STALE) > 0) {
                 warn("Have stale threads, forcing VM to exit");

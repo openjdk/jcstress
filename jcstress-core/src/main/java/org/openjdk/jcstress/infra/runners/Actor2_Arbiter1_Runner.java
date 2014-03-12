@@ -47,15 +47,17 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class Actor2_Arbiter1_Runner<S, R extends Result> extends Runner {
-    private Actor2_Arbiter1_Test<S, R> test;
+    private final Actor2_Arbiter1_Test<S, R> test;
+    private final String testName;
 
     public Actor2_Arbiter1_Runner(Options opts, Actor2_Arbiter1_Test<S, R> test, TestResultCollector collector, ExecutorService pool) throws FileNotFoundException, JAXBException {
         super(opts, collector, pool);
         this.test = test;
+        this.testName = test.getClass().getName();
     }
 
     public void run() {
-        testLog.println("Running " + test.getClass().getName());
+        testLog.println("Running " + testName);
 
         try {
             R res = test.newResult();
@@ -66,22 +68,22 @@ public class Actor2_Arbiter1_Runner<S, R extends Result> extends Runner {
         } catch (NoClassDefFoundError e) {
             testLog.println("Test sanity check failed, skipping");
             testLog.println();
-            dumpFailure(test, Status.API_MISMATCH);
+            dumpFailure(testName, Status.API_MISMATCH);
             return;
         } catch (NoSuchFieldError e) {
             testLog.println("Test sanity check failed, skipping");
             testLog.println();
-            dumpFailure(test, Status.API_MISMATCH);
+            dumpFailure(testName, Status.API_MISMATCH);
             return;
         } catch (NoSuchMethodError e) {
             testLog.println("Test sanity check failed, skipping");
             testLog.println();
-            dumpFailure(test, Status.API_MISMATCH);
+            dumpFailure(testName, Status.API_MISMATCH);
             return;
         } catch (Throwable e) {
             testLog.println("Check test failed");
             testLog.println();
-            dumpFailure(test, Status.CHECK_TEST_ERROR);
+            dumpFailure(testName, Status.CHECK_TEST_ERROR);
             return;
         }
 
@@ -97,7 +99,7 @@ public class Actor2_Arbiter1_Runner<S, R extends Result> extends Runner {
             testLog.flush();
             Counter<R> runResult = run(time);
 
-            dump(test, runResult);
+            dump(testName, runResult);
         }
 
         testLog.println();
@@ -176,7 +178,7 @@ public class Actor2_Arbiter1_Runner<S, R extends Result> extends Runner {
 
         controlHolder.isStopped = true;
 
-        waitFor(test, tasks);
+        waitFor(testName, tasks);
 
         return counter;
     }

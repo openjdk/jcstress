@@ -106,13 +106,13 @@ public abstract class Runner {
         return res;
     }
 
-    protected void dumpFailure(ConcurrencyTest test, Status status) {
-        TestResult result = new TestResult(test.getClass().getName(), status);
+    protected void dumpFailure(String testName, Status status) {
+        TestResult result = new TestResult(testName, status);
         collector.add(result);
     }
 
-    protected void dumpFailure(ConcurrencyTest test, Status status, Throwable aux) {
-        TestResult result = new TestResult(test.getClass().getName(), status);
+    protected void dumpFailure(String testName, Status status, Throwable aux) {
+        TestResult result = new TestResult(testName, status);
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         aux.printStackTrace(pw);
@@ -121,8 +121,8 @@ public abstract class Runner {
         collector.add(result);
     }
 
-    protected <R> void dump(ConcurrencyTest test, Counter<R> results) {
-        TestResult result = new TestResult(test.getClass().getName(), Status.NORMAL);
+    protected <R> void dump(String testName, Counter<R> results) {
+        TestResult result = new TestResult(testName, Status.NORMAL);
 
         for (R e : results.elementSet()) {
             result.addState(e, results.count(e));
@@ -145,7 +145,7 @@ public abstract class Runner {
         testLog.println(s);
     }
 
-    protected void waitFor(ConcurrencyTest test, Collection<Future<?>> tasks) {
+    protected void waitFor(String testName, Collection<Future<?>> tasks) {
         long startTime = System.nanoTime();
         boolean allStopped = false;
         while (!allStopped) {
@@ -156,7 +156,7 @@ public abstract class Runner {
                 } catch (TimeoutException e) {
                     allStopped = false;
                 } catch (ExecutionException e) {
-                    dumpFailure(test, Status.TEST_ERROR, e.getCause());
+                    dumpFailure(testName, Status.TEST_ERROR, e.getCause());
                     return;
                 } catch (InterruptedException e) {
                     return;
@@ -164,7 +164,7 @@ public abstract class Runner {
             }
 
             if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) > Math.max(time, 60*1000)) {
-                dumpFailure(test, Status.TIMEOUT_ERROR);
+                dumpFailure(testName, Status.TIMEOUT_ERROR);
                 return;
             }
         }
