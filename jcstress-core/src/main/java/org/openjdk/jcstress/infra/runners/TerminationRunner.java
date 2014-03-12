@@ -73,8 +73,10 @@ public class TerminationRunner<S> extends Runner {
             dump(testName, results);
 
             if (results.count(Outcome.STALE) > 0) {
-                warn("Have stale threads, forcing VM to exit");
-                hardExit();
+                testLog.println("Have stale threads, forcing VM to exit");
+                testLog.flush();
+                testLog.close();
+                System.exit(0);
             }
         }
         testLog.println();

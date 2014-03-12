@@ -119,16 +119,6 @@ public abstract class Runner {
 
     public abstract int requiredThreads();
 
-    protected void hardExit() {
-        testLog.flush();
-        testLog.close();
-        System.exit(0);
-    }
-
-    public void warn(String s) {
-        testLog.println(s);
-    }
-
     protected void waitFor(String testName, Collection<Future<?>> tasks) {
         long startTime = System.nanoTime();
         boolean allStopped = false;
