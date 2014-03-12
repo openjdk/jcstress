@@ -30,14 +30,14 @@ import org.openjdk.jcstress.Options;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class Control {
-    volatile boolean isStopped;
-    final boolean shouldYield;
-    final boolean verbose;
-    final int minStride;
-    final int maxStride;
-    final int time;
-    final int iters;
-    final int deoptRatio;
+    public volatile boolean isStopped;
+    public final boolean shouldYield;
+    public final boolean verbose;
+    public final int minStride;
+    public final int maxStride;
+    public final int time;
+    public final int iters;
+    public final int deoptRatio;
 
     public Control(Options opts) {
         time = opts.getTime();
