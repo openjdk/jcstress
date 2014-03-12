@@ -283,49 +283,32 @@ public class JCStress {
     }
 
     public Collection<String> getSeparateExecutionCommand(Options opts, String test) {
-        Properties props = System.getProperties();
-        String javaHome = (String) props.get("java.home");
-        String separator = File.separator;
-        String osName = props.getProperty("os.name");
-        boolean isOnWindows = osName.contains("indows");
-        String platformSpecificBinaryPostfix = isOnWindows ? ".exe" : "";
+        List<String> command = new ArrayList<String>();
 
-        String classPath = (String) props.get("java.class.path");
+        // jvm path
+        command.add(getDefaultJvm());
 
-        if (isOnWindows) {
-            classPath = '"' + classPath + '"';
+        // jvm classpath
+        command.add("-cp");
+        if (isWindows()) {
+            command.add('"' + System.getProperty("java.class.path") + '"');
+        } else {
+            command.add(System.getProperty("java.class.path"));
         }
 
-        // else find out which one parent is and use that
-        StringBuilder javaExecutable = new StringBuilder();
-        javaExecutable.append(javaHome);
-        javaExecutable.append(separator);
-        javaExecutable.append("bin");
-        javaExecutable.append(separator);
-        javaExecutable.append("java");
-        javaExecutable.append(platformSpecificBinaryPostfix);
-        String javaExecutableString = javaExecutable.toString();
+        // jvm args
+        command.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
 
-
-        // else use same jvm args given to this runner
-        RuntimeMXBean RuntimemxBean = ManagementFactory.getRuntimeMXBean();
-        List<String> args = RuntimemxBean.getInputArguments();
-
-        // assemble final process command
-
-        List<String> command = new ArrayList<String>();
-        command.add(javaExecutableString);
-
-        command.addAll(args);
-
-        command.add("-cp");
-        command.add(classPath);
         String appendJvmArgs = opts.getAppendJvmArgs();
         if (appendJvmArgs.length() > 0) {
             command.addAll(Arrays.asList(appendJvmArgs.split("\\s")));
         }
+
         command.add(ForkedMain.class.getName());
+
+        // add jcstress options
         command.addAll(opts.buildForkedCmdLine());
+
         command.add("-t");
         command.add(test);
 
@@ -336,6 +319,21 @@ public class JCStress {
         command.add(String.valueOf(networkCollector.getPort()));
 
         return command;
+    }
+
+    private String getDefaultJvm() {
+        StringBuilder javaExecutable = new StringBuilder();
+        javaExecutable.append(System.getProperty("java.home"));
+        javaExecutable.append(File.separator);
+        javaExecutable.append("bin");
+        javaExecutable.append(File.separator);
+        javaExecutable.append("java");
+        javaExecutable.append(isWindows() ? ".exe" : "");
+        return javaExecutable.toString();
+    }
+
+    private boolean isWindows() {
+        return System.getProperty("os.name").contains("indows");
     }
 
     static <T> SortedSet<Class<? extends T>> filterTests(final String filter, Class<T> klass) {
