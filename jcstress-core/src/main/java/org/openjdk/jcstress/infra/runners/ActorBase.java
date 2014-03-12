@@ -27,7 +27,6 @@ package org.openjdk.jcstress.infra.runners;
 import org.openjdk.jcstress.infra.Result;
 import org.openjdk.jcstress.tests.ActorConcurrencyTest;
 import org.openjdk.jcstress.util.Counter;
-import org.openjdk.jcstress.util.UnsafeHolder;
 
 import java.util.Arrays;
 import java.util.concurrent.Callable;
@@ -49,10 +48,10 @@ public abstract class ActorBase<T extends ActorConcurrencyTest<S, R>, S, R exten
     private final AtomicReference<StateHolder<S, R>> version;
     private final AtomicInteger epoch;
     private final Counter<R> counter;
-    private final ControlHolder control;
+    private final Control control;
     private final S[] poison;
 
-    public ActorBase(int index, T test, AtomicReference<StateHolder<S,R>> version, AtomicInteger epoch, Counter<R> counter, ControlHolder control, S[] poison) {
+    public ActorBase(int index, T test, AtomicReference<StateHolder<S,R>> version, AtomicInteger epoch, Counter<R> counter, Control control, S[] poison) {
         this.index = index;
         this.test = test;
         this.version = version;

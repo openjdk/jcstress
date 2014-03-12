@@ -28,7 +28,6 @@ import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
-import org.openjdk.jcstress.tests.ConcurrencyTest;
 import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.NullOutputStream;
 
@@ -50,7 +49,7 @@ import java.util.concurrent.TimeoutException;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public abstract class Runner {
-    protected final ControlHolder control;
+    protected final Control control;
     protected final TestResultCollector collector;
     protected final ExecutorService pool;
     protected final PrintWriter testLog;
@@ -58,7 +57,7 @@ public abstract class Runner {
     public Runner(Options opts, TestResultCollector collector, ExecutorService pool) throws FileNotFoundException, JAXBException {
         this.collector = collector;
         this.pool = pool;
-        this.control = new ControlHolder(opts);
+        this.control = new Control(opts);
 
         if (control.verbose) {
             testLog = new PrintWriter(System.out, true);

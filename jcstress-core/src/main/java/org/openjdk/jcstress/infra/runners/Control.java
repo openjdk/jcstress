@@ -29,7 +29,7 @@ import org.openjdk.jcstress.Options;
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class ControlHolder {
+public class Control {
     volatile boolean isStopped;
     final boolean shouldYield;
     final boolean verbose;
@@ -39,7 +39,7 @@ public class ControlHolder {
     final int iters;
     final int deoptRatio;
 
-    public ControlHolder(Options opts) {
+    public Control(Options opts) {
         time = opts.getTime();
         minStride = opts.getMinStride();
         maxStride = opts.getMaxStride();
