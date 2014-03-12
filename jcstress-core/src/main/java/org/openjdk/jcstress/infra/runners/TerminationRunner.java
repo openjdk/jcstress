@@ -59,16 +59,16 @@ public class TerminationRunner<S> extends Runner {
         HashCounter<Outcome> results = new HashCounter<Outcome>();
 
         testLog.print("Iterations ");
-        for (int c = 0; c < iters; c++) {
+        for (int c = 0; c < control.iters; c++) {
             try {
-                VMSupport.tryDeoptimizeAllInfra(deoptRatio);
+                VMSupport.tryDeoptimizeAllInfra(control.deoptRatio);
             } catch (NoClassDefFoundError err) {
                 // gracefully "handle"
             }
 
             testLog.print(".");
             testLog.flush();
-            run(time, results);
+            run(results);
 
             dump(testName, results);
 
@@ -97,8 +97,8 @@ public class TerminationRunner<S> extends Runner {
         ERROR,
     }
 
-    private void run(int time, Counter<Outcome> results) {
-        long target = System.currentTimeMillis() + time;
+    private void run(Counter<Outcome> results) {
+        long target = System.currentTimeMillis() + control.time;
         while (System.currentTimeMillis() < target) {
 
             final Holder<S> holder = new Holder<S>();

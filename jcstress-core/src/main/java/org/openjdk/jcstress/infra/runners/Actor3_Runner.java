@@ -94,16 +94,16 @@ public class Actor3_Runner<S, R extends Result> extends Runner {
         }
 
         testLog.print("Iterations ");
-        for (int c = 0; c < iters; c++) {
+        for (int c = 0; c < control.iters; c++) {
             try {
-                VMSupport.tryDeoptimizeAllInfra(deoptRatio);
+                VMSupport.tryDeoptimizeAllInfra(control.deoptRatio);
             } catch (NoClassDefFoundError err) {
                 // gracefully "handle"
             }
 
             testLog.print(".");
             testLog.flush();
-            Counter<R> runResult = run(time);
+            Counter<R> runResult = internalRun();
 
             dump(testName, runResult);
         }
@@ -115,12 +115,10 @@ public class Actor3_Runner<S, R extends Result> extends Runner {
         return 3;
     }
 
-    private Counter<R> run(int time) {
+    private Counter<R> internalRun() {
 
         @SuppressWarnings("unchecked")
         final S[] poison = (S[]) new Object[0];
-
-        ControlHolder controlHolder = new ControlHolder(minStride, maxStride, shouldYield);
 
         Collection<Future<?>> tasks = new ArrayList<Future<?>>();
 
@@ -130,14 +128,14 @@ public class Actor3_Runner<S, R extends Result> extends Runner {
         final Counter<R> counter = Counters.newCounter((Class<R>) test.newResult().getClass());
 
         @SuppressWarnings("unchecked")
-        S[] newStride = (S[]) new Object[minStride];
-        for (int c = 0; c < minStride; c++) {
+        S[] newStride = (S[]) new Object[control.minStride];
+        for (int c = 0; c < control.minStride; c++) {
             newStride[c] = test.newState();
         }
 
         @SuppressWarnings("unchecked")
-        R[] newResult = (R[]) new Result[minStride];
-        for (int c = 0; c < minStride; c++) {
+        R[] newResult = (R[]) new Result[control.minStride];
+        for (int c = 0; c < control.minStride; c++) {
             newResult[c] = test.newResult();
         }
 
@@ -147,7 +145,7 @@ public class Actor3_Runner<S, R extends Result> extends Runner {
         AtomicInteger epoch = new AtomicInteger();
 
         tasks.add(pool.submit(
-                new ActorBase<Actor3_Test<S, R>, S, R>(1, test, version, epoch, counter, controlHolder, poison) {
+                new ActorBase<Actor3_Test<S, R>, S, R>(1, test, version, epoch, counter, control, poison) {
                     @Override
                     protected void work1(Actor3_Test<S, R> test, S state, R result) {
                         test.actor1(state, result);
@@ -156,7 +154,7 @@ public class Actor3_Runner<S, R extends Result> extends Runner {
         ));
 
         tasks.add(pool.submit(
-                new ActorBase<Actor3_Test<S, R>, S, R>(2, test, version, epoch, counter, controlHolder, poison) {
+                new ActorBase<Actor3_Test<S, R>, S, R>(2, test, version, epoch, counter, control, poison) {
                     @Override
                     protected void work2(Actor3_Test<S, R> test, S state, R result) {
                         test.actor2(state, result);
@@ -165,7 +163,7 @@ public class Actor3_Runner<S, R extends Result> extends Runner {
         ));
 
         tasks.add(pool.submit(
-                new ActorBase<Actor3_Test<S, R>, S, R>(3, test, version, epoch, counter, controlHolder, poison) {
+                new ActorBase<Actor3_Test<S, R>, S, R>(3, test, version, epoch, counter, control, poison) {
                     @Override
                     protected void work3(Actor3_Test<S, R> test, S state, R result) {
                         test.actor3(state, result);
@@ -174,12 +172,12 @@ public class Actor3_Runner<S, R extends Result> extends Runner {
         ));
 
         try {
-            TimeUnit.MILLISECONDS.sleep(time);
+            TimeUnit.MILLISECONDS.sleep(control.time);
         } catch (InterruptedException e) {
             // do nothing
         }
 
-        controlHolder.isStopped = true;
+        control.isStopped = true;
 
         waitFor(testName, tasks);
 

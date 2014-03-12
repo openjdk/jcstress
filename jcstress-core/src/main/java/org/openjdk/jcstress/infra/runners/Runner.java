@@ -50,32 +50,17 @@ import java.util.concurrent.TimeoutException;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public abstract class Runner {
-    protected final int time;
-    protected final int iters;
-    protected final int minStride, maxStride;
-    protected final int deoptRatio;
-    protected final boolean verbose;
+    protected final ControlHolder control;
     protected final TestResultCollector collector;
     protected final ExecutorService pool;
-    protected volatile boolean shouldYield;
-
-    protected volatile boolean isStopped;
-
     protected final PrintWriter testLog;
 
     public Runner(Options opts, TestResultCollector collector, ExecutorService pool) throws FileNotFoundException, JAXBException {
         this.collector = collector;
         this.pool = pool;
+        this.control = new ControlHolder(opts);
 
-        time = opts.getTime();
-        minStride = opts.getMinStride();
-        maxStride = opts.getMaxStride();
-        iters = opts.getIterations();
-        shouldYield = opts.shouldYield();
-        verbose = opts.isVerbose();
-        deoptRatio = opts.deoptRatio();
-
-        if (verbose) {
+        if (control.verbose) {
             testLog = new PrintWriter(System.out, true);
         } else {
             testLog = new PrintWriter(new NullOutputStream(), true);
@@ -163,7 +148,7 @@ public abstract class Runner {
                 }
             }
 
-            if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) > Math.max(time, 60*1000)) {
+            if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) > Math.max(control.time, 60*1000)) {
                 dumpFailure(testName, Status.TIMEOUT_ERROR);
                 return;
             }

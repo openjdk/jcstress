@@ -24,18 +24,28 @@
  */
 package org.openjdk.jcstress.infra.runners;
 
+import org.openjdk.jcstress.Options;
+
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class ControlHolder {
     volatile boolean isStopped;
     final boolean shouldYield;
+    final boolean verbose;
     final int minStride;
     final int maxStride;
+    final int time;
+    final int iters;
+    final int deoptRatio;
 
-    public ControlHolder(int minStride, int maxStride, boolean shouldYield) {
-        this.shouldYield = shouldYield;
-        this.minStride = minStride;
-        this.maxStride = maxStride;
+    public ControlHolder(Options opts) {
+        time = opts.getTime();
+        minStride = opts.getMinStride();
+        maxStride = opts.getMaxStride();
+        iters = opts.getIterations();
+        shouldYield = opts.shouldYield();
+        verbose = opts.isVerbose();
+        deoptRatio = opts.deoptRatio();
     }
 }
