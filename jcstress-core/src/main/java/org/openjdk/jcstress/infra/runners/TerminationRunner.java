@@ -25,6 +25,7 @@
 package org.openjdk.jcstress.infra.runners;
 
 import org.openjdk.jcstress.Options;
+import org.openjdk.jcstress.infra.Result;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.tests.TerminationTest;
 import org.openjdk.jcstress.util.Counter;
@@ -39,12 +40,12 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class TerminationRunner<S> extends Runner {
+public class TerminationRunner<S> extends Runner<TerminationRunner.OutcomeResult> {
     final TerminationTest<S> test;
     final String testName;
 
     public TerminationRunner(Options opts,  TerminationTest<S> test, TestResultCollector collector, ExecutorService pool) throws FileNotFoundException, JAXBException {
-        super(opts, collector, pool);
+        super(opts, collector, pool, test.getClass().getName());
         this.test = test;
         this.testName = test.getClass().getName();
     }
@@ -56,7 +57,7 @@ public class TerminationRunner<S> extends Runner {
     public void run() {
         testLog.println("Running " + testName);
 
-        HashCounter<Outcome> results = new HashCounter<Outcome>();
+        Counter<OutcomeResult> results = new HashCounter<OutcomeResult>();
 
         testLog.print("Iterations ");
         for (int c = 0; c < control.iters; c++) {
@@ -72,7 +73,7 @@ public class TerminationRunner<S> extends Runner {
 
             dump(testName, results);
 
-            if (results.count(Outcome.STALE) > 0) {
+            if (results.count(OutcomeResult.of(OutcomeResult.Outcome.STALE)) > 0) {
                 testLog.println("Have stale threads, forcing VM to exit");
                 testLog.flush();
                 testLog.close();
@@ -80,6 +81,16 @@ public class TerminationRunner<S> extends Runner {
             }
         }
         testLog.println();
+    }
+
+    @Override
+    public void sanityCheck() throws Throwable {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Counter<OutcomeResult> internalRun() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -93,13 +104,47 @@ public class TerminationRunner<S> extends Runner {
         volatile boolean error;
     }
 
-    private enum Outcome {
-        TERMINATED,
-        STALE,
-        ERROR,
+    public static class OutcomeResult implements Result {
+        private Outcome outcome;
+
+        public OutcomeResult(Outcome outcome) {
+            this.outcome = outcome;
+        }
+
+        @Override
+        public void reset() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            OutcomeResult that = (OutcomeResult) o;
+
+            if (outcome != that.outcome) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return outcome != null ? outcome.hashCode() : 0;
+        }
+
+        private enum Outcome {
+            TERMINATED,
+            STALE,
+            ERROR,
+        }
+
+        public static OutcomeResult of(Outcome outcome) {
+            return new OutcomeResult(outcome);
+        }
     }
 
-    private void run(Counter<Outcome> results) {
+    private void run(Counter<OutcomeResult> results) {
         long target = System.currentTimeMillis() + control.time;
         while (System.currentTimeMillis() < target) {
 
@@ -139,12 +184,12 @@ public class TerminationRunner<S> extends Runner {
 
             if (holder.terminated) {
                 if (holder.error) {
-                    results.record(Outcome.ERROR);
+                    results.record(OutcomeResult.of(OutcomeResult.Outcome.ERROR));
                 } else {
-                    results.record(Outcome.TERMINATED);
+                    results.record(OutcomeResult.of(OutcomeResult.Outcome.TERMINATED));
                 }
             } else {
-                results.record(Outcome.STALE);
+                results.record(OutcomeResult.of(OutcomeResult.Outcome.STALE));
                 return;
             }
         }

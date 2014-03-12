@@ -25,11 +25,13 @@
 package org.openjdk.jcstress.infra.runners;
 
 import org.openjdk.jcstress.Options;
+import org.openjdk.jcstress.infra.Result;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.NullOutputStream;
+import org.openjdk.jcstress.util.VMSupport;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
@@ -48,15 +50,17 @@ import java.util.concurrent.TimeoutException;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public abstract class Runner {
+public abstract class Runner<R extends Result> {
     protected final Control control;
     protected final TestResultCollector collector;
     protected final ExecutorService pool;
     protected final PrintWriter testLog;
+    protected final String testName;
 
-    public Runner(Options opts, TestResultCollector collector, ExecutorService pool) throws FileNotFoundException, JAXBException {
+    public Runner(Options opts, TestResultCollector collector, ExecutorService pool, String testName) throws FileNotFoundException, JAXBException {
         this.collector = collector;
         this.pool = pool;
+        this.testName = testName;
         this.control = new Control(opts);
 
         if (control.verbose) {
@@ -68,6 +72,53 @@ public abstract class Runner {
         int totalThreads = requiredThreads();
         testLog.printf("Executing with %d threads\n", totalThreads);
     }
+
+    /**
+     * Run the test.
+     * This method blocks until test is complete
+     */
+    public void run() {
+        testLog.println("Running " + testName);
+
+        try {
+            sanityCheck();
+        } catch (NoClassDefFoundError e) {
+            testLog.println("Test sanity check failed, skipping");
+            testLog.println();
+            dumpFailure(testName, Status.API_MISMATCH, e);
+            return;
+        } catch (NoSuchFieldError e) {
+            testLog.println("Test sanity check failed, skipping");
+            testLog.println();
+            dumpFailure(testName, Status.API_MISMATCH, e);
+            return;
+        } catch (NoSuchMethodError e) {
+            testLog.println("Test sanity check failed, skipping");
+            testLog.println();
+            dumpFailure(testName, Status.API_MISMATCH, e);
+            return;
+        } catch (Throwable e) {
+            testLog.println("Check test failed");
+            testLog.println();
+            dumpFailure(testName, Status.CHECK_TEST_ERROR, e);
+            return;
+        }
+
+        testLog.print("Iterations ");
+        for (int c = 0; c < control.iters; c++) {
+            try {
+                VMSupport.tryDeoptimizeAllInfra(control.deoptRatio);
+            } catch (NoClassDefFoundError err) {
+                // gracefully "handle"
+            }
+
+            testLog.print(".");
+            testLog.flush();
+            dump(testName, internalRun());
+        }
+        testLog.println();
+    }
+
 
     protected void dumpFailure(String testName, Status status) {
         TestResult result = new TestResult(testName, status);
@@ -84,7 +135,7 @@ public abstract class Runner {
         collector.add(result);
     }
 
-    protected <R> void dump(String testName, Counter<R> results) {
+    protected void dump(String testName, Counter<R> results) {
         TestResult result = new TestResult(testName, Status.NORMAL);
 
         for (R e : results.elementSet()) {
@@ -94,7 +145,9 @@ public abstract class Runner {
         collector.add(result);
     }
 
-    public abstract void run();
+    public abstract void sanityCheck() throws Throwable;
+
+    public abstract Counter<R> internalRun();
 
     public abstract int requiredThreads();
 

@@ -46,68 +46,25 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class Actor3_Runner<S, R extends Result> extends Runner {
+public class Actor3_Runner<S, R extends Result> extends Runner<R> {
     final Actor3_Test<S, R> test;
     final String testName;
 
     public Actor3_Runner(Options opts, Actor3_Test<S, R> test, TestResultCollector collector, ExecutorService pool) throws FileNotFoundException, JAXBException {
-        super(opts, collector, pool);
+        super(opts, collector, pool, test.getClass().getName());
         this.test = test;
         this.testName = test.getClass().getName();
     }
 
-    /**
-     * Run the test.
-     * This method blocks until test is complete
-     */
-    public void run() {
-        testLog.println("Running " + testName);
-
-        try {
-            R res1 = test.newResult();
-            R res2 = test.newResult();
-            R res3 = test.newResult();
-            S state = test.newState();
-            test.actor1(state, res1);
-            test.actor2(state, res2);
-            test.actor3(state, res3);
-        } catch (NoClassDefFoundError e) {
-            testLog.println("Test sanity check failed, skipping");
-            testLog.println();
-            dumpFailure(testName, Status.API_MISMATCH);
-            return;
-        } catch (NoSuchFieldError e) {
-            testLog.println("Test sanity check failed, skipping");
-            testLog.println();
-            dumpFailure(testName, Status.API_MISMATCH);
-            return;
-        } catch (NoSuchMethodError e) {
-            testLog.println("Test sanity check failed, skipping");
-            testLog.println();
-            dumpFailure(testName, Status.API_MISMATCH);
-            return;
-        } catch (Throwable e) {
-            testLog.println("Check test failed");
-            testLog.println();
-            dumpFailure(testName, Status.CHECK_TEST_ERROR);
-            return;
-        }
-
-        testLog.print("Iterations ");
-        for (int c = 0; c < control.iters; c++) {
-            try {
-                VMSupport.tryDeoptimizeAllInfra(control.deoptRatio);
-            } catch (NoClassDefFoundError err) {
-                // gracefully "handle"
-            }
-
-            testLog.print(".");
-            testLog.flush();
-            Counter<R> runResult = internalRun();
-
-            dump(testName, runResult);
-        }
-        testLog.println();
+    @Override
+    public void sanityCheck() throws Throwable {
+        R res1 = test.newResult();
+        R res2 = test.newResult();
+        R res3 = test.newResult();
+        S state = test.newState();
+        test.actor1(state, res1);
+        test.actor2(state, res2);
+        test.actor3(state, res3);
     }
 
     @Override
@@ -115,7 +72,8 @@ public class Actor3_Runner<S, R extends Result> extends Runner {
         return 3;
     }
 
-    private Counter<R> internalRun() {
+    @Override
+    public Counter<R> internalRun() {
 
         @SuppressWarnings("unchecked")
         final S[] poison = (S[]) new Object[0];

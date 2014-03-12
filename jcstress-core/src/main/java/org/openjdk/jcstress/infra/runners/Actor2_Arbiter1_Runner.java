@@ -46,63 +46,23 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class Actor2_Arbiter1_Runner<S, R extends Result> extends Runner {
+public class Actor2_Arbiter1_Runner<S, R extends Result> extends Runner<R> {
     private final Actor2_Arbiter1_Test<S, R> test;
     private final String testName;
 
     public Actor2_Arbiter1_Runner(Options opts, Actor2_Arbiter1_Test<S, R> test, TestResultCollector collector, ExecutorService pool) throws FileNotFoundException, JAXBException {
-        super(opts, collector, pool);
+        super(opts, collector, pool, test.getClass().getName());
         this.test = test;
         this.testName = test.getClass().getName();
     }
 
-    public void run() {
-        testLog.println("Running " + testName);
-
-        try {
-            R res = test.newResult();
-            S state = test.newState();
-            test.actor1(state, res);
-            test.actor2(state, res);
-            test.arbiter1(state, res);
-        } catch (NoClassDefFoundError e) {
-            testLog.println("Test sanity check failed, skipping");
-            testLog.println();
-            dumpFailure(testName, Status.API_MISMATCH);
-            return;
-        } catch (NoSuchFieldError e) {
-            testLog.println("Test sanity check failed, skipping");
-            testLog.println();
-            dumpFailure(testName, Status.API_MISMATCH);
-            return;
-        } catch (NoSuchMethodError e) {
-            testLog.println("Test sanity check failed, skipping");
-            testLog.println();
-            dumpFailure(testName, Status.API_MISMATCH);
-            return;
-        } catch (Throwable e) {
-            testLog.println("Check test failed");
-            testLog.println();
-            dumpFailure(testName, Status.CHECK_TEST_ERROR);
-            return;
-        }
-
-        testLog.print("Iterations ");
-        for (int c = 0; c < control.iters; c++) {
-            try {
-                VMSupport.tryDeoptimizeAllInfra(control.deoptRatio);
-            } catch (NoClassDefFoundError err) {
-                // gracefully "handle"
-            }
-
-            testLog.print(".");
-            testLog.flush();
-            Counter<R> runResult = internalRun();
-
-            dump(testName, runResult);
-        }
-
-        testLog.println();
+    @Override
+    public void sanityCheck() throws Throwable {
+        R res = test.newResult();
+        S state = test.newState();
+        test.actor1(state, res);
+        test.actor2(state, res);
+        test.arbiter1(state, res);
     }
 
     @Override
