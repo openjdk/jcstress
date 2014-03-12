@@ -151,7 +151,7 @@ public abstract class Runner<R extends Result> {
 
     public abstract int requiredThreads();
 
-    protected void waitFor(String testName, Collection<Future<?>> tasks) {
+    protected void waitFor(Collection<Future<?>> tasks) {
         long startTime = System.nanoTime();
         boolean allStopped = false;
         while (!allStopped) {

@@ -42,12 +42,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class TerminationRunner<S> extends Runner<TerminationRunner.OutcomeResult> {
     final TerminationTest<S> test;
-    final String testName;
 
     public TerminationRunner(Options opts,  TerminationTest<S> test, TestResultCollector collector, ExecutorService pool) throws FileNotFoundException, JAXBException {
         super(opts, collector, pool, test.getClass().getName());
         this.test = test;
-        this.testName = test.getClass().getName();
     }
 
     /**

@@ -48,12 +48,10 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class Actor1_Runner<S, R extends Result> extends Runner<R> {
     private final Actor1_Test<S, R> test;
-    private final String testName;
 
     public Actor1_Runner(Options opts, Actor1_Test<S, R> test, TestResultCollector collector, ExecutorService pool) throws FileNotFoundException, JAXBException {
         super(opts, collector, pool, test.getClass().getName());
         this.test = test;
-        this.testName = test.getClass().getName();
     }
 
     @Override
@@ -114,7 +112,7 @@ public class Actor1_Runner<S, R extends Result> extends Runner<R> {
 
         control.isStopped = true;
 
-        waitFor(testName, tasks);
+        waitFor(tasks);
 
         return counter;
     }
