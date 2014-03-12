@@ -74,13 +74,8 @@ public class Actor4_Runner<S, R extends Result> extends Runner<R> {
 
     @Override
     public Counter<R> internalRun() {
-
         @SuppressWarnings("unchecked")
         final S[] poison = (S[]) new Object[0];
-
-        Collection<Future<?>> tasks = new ArrayList<Future<?>>();
-
-        final AtomicReference<StateHolder<S, R>> version = new AtomicReference<StateHolder<S, R>>();
 
         @SuppressWarnings("unchecked")
         final Counter<R> counter = Counters.newCounter((Class<R>) test.newResult().getClass());
@@ -98,9 +93,13 @@ public class Actor4_Runner<S, R extends Result> extends Runner<R> {
         }
 
         StateHolder<S, R> holder = new StateHolder<S, R>(newStride, newResult, 4);
+
+        final AtomicReference<StateHolder<S, R>> version = new AtomicReference<StateHolder<S, R>>();
         version.set(holder);
 
         AtomicInteger epoch = new AtomicInteger();
+
+        Collection<Future<?>> tasks = new ArrayList<Future<?>>();
 
         tasks.add(pool.submit(
                 new ActorBase<Actor4_Test<S, R>, S, R>(1, test, version, epoch, counter, control, poison) {

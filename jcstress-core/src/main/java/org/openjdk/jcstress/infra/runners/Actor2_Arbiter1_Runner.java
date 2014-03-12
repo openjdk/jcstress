@@ -72,10 +72,6 @@ public class Actor2_Arbiter1_Runner<S, R extends Result> extends Runner<R> {
         @SuppressWarnings("unchecked")
         final S[] poison = (S[]) new Object[0];
 
-        Collection<Future<?>> tasks = new ArrayList<Future<?>>();
-
-        final AtomicReference<StateHolder<S, R>> version = new AtomicReference<StateHolder<S, R>>();
-
         @SuppressWarnings("unchecked")
         final Counter<R> counter = Counters.newCounter((Class<R>) test.newResult().getClass());
 
@@ -92,11 +88,15 @@ public class Actor2_Arbiter1_Runner<S, R extends Result> extends Runner<R> {
         }
 
         StateHolder<S, R> holder = new StateHolder<S, R>(newStride, newResult, 2);
+
+        final AtomicReference<StateHolder<S, R>> version = new AtomicReference<StateHolder<S, R>>();
         version.set(holder);
 
         AtomicInteger epoch = new AtomicInteger();
 
-        Future<?> a1 = pool.submit(
+        Collection<Future<?>> tasks = new ArrayList<Future<?>>();
+
+        tasks.add(pool.submit(
                 new ActorBase<Actor2_Arbiter1_Test<S, R>, S, R>(1, test, version, epoch, counter, control, poison) {
                     @Override
                     protected void work1(Actor2_Arbiter1_Test<S, R> test, S state, R result) {
@@ -108,10 +108,9 @@ public class Actor2_Arbiter1_Runner<S, R extends Result> extends Runner<R> {
                         test.arbiter1(state, result);
                     }
                 }
-        );
-        tasks.add(a1);
+        ));
 
-        Future<?> a2 = pool.submit(
+        tasks.add(pool.submit(
                 new ActorBase<Actor2_Arbiter1_Test<S, R>, S, R>(2, test, version, epoch, counter, control, poison) {
                     @Override
                     protected void work2(Actor2_Arbiter1_Test<S, R> test, S state, R result) {
@@ -123,8 +122,7 @@ public class Actor2_Arbiter1_Runner<S, R extends Result> extends Runner<R> {
                         test.arbiter1(state, result);
                     }
                 }
-        );
-        tasks.add(a2);
+        ));
 
         try {
             TimeUnit.MILLISECONDS.sleep(control.time);
