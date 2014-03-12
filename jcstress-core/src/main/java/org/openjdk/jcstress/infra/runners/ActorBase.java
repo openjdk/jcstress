@@ -26,6 +26,7 @@ package org.openjdk.jcstress.infra.runners;
 
 import org.openjdk.jcstress.infra.Result;
 import org.openjdk.jcstress.tests.ActorConcurrencyTest;
+import org.openjdk.jcstress.util.ArrayUtils;
 import org.openjdk.jcstress.util.Counter;
 
 import java.util.Arrays;
@@ -116,7 +117,7 @@ public abstract class ActorBase<T extends ActorConcurrencyTest<S, R>, S, R exten
             // check if we need to refit our collections
             if (loops != lastLoops) {
                 lastLoops = loops;
-                indices = Runner.generatePermutation(loops);
+                indices = ArrayUtils.generatePermutation(loops);
             }
 
             holder.announceReady();

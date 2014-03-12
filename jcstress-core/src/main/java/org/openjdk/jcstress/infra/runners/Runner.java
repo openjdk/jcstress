@@ -69,27 +69,6 @@ public abstract class Runner {
         testLog.printf("Executing with %d threads\n", totalThreads);
     }
 
-    public static int[] generatePermutation(int len) {
-        int[] res = new int[len];
-        for (int i = 0; i < len; i++) {
-            res[i] = i;
-        }
-        return shuffle(res);
-    }
-
-    public static int[] shuffle(int[] arr) {
-        Random r = new Random();
-        int[] res = arr.clone();
-        for (int i = arr.length; i > 1; i--) {
-            int i1 = i - 1;
-            int i2 = r.nextInt(i);
-            int t = res[i1];
-            res[i1] = res[i2];
-            res[i2] = t;
-        }
-        return res;
-    }
-
     protected void dumpFailure(String testName, Status status) {
         TestResult result = new TestResult(testName, status);
         collector.add(result);
