@@ -24,21 +24,30 @@
  */
 package org.openjdk.jcstress.tests.atomicity.buffers;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
+import java.nio.CharBuffer;
 import java.nio.DoubleBuffer;
 
 public class DoubleBufferAtomicityTests {
 
-    public abstract static class DoubleBufferTest implements Actor2_Test<DoubleBuffer, LongResult1> {
-        @Override public DoubleBuffer newState()                     { return DoubleBuffer.allocate(16);                   }
-        @Override public LongResult1 newResult()                     { return new LongResult1();                           }
+    @State
+    public static class MyState {
+        private final DoubleBuffer b;
+
+        public MyState() {
+            b = DoubleBuffer.allocate(16);
+        }
     }
 
-    public static class DoubleTest extends DoubleBufferTest {
-        @Override public void actor1(DoubleBuffer b, LongResult1 r)  { b.put(0, -1D);                                      }
-        @Override public void actor2(DoubleBuffer b, LongResult1 r)  { r.r1 = Double.doubleToRawLongBits(b.get());         }
+    @ConcurrencyStressTest
+    public static class DoubleTest {
+        @Actor public void actor1(MyState s)                { s.b.put(0, -1D);                              }
+        @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = Double.doubleToRawLongBits(s.b.get()); }
     }
 
 }

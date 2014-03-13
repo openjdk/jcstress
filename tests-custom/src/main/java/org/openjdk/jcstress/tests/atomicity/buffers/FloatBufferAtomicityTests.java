@@ -24,21 +24,30 @@
  */
 package org.openjdk.jcstress.tests.atomicity.buffers;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
+import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 
 public class FloatBufferAtomicityTests {
 
-    public abstract static class FloatBufferTest implements Actor2_Test<FloatBuffer, LongResult1> {
-        @Override public FloatBuffer newState()                { return FloatBuffer.allocate(16);                  }
-        @Override public LongResult1 newResult()               { return new LongResult1();                         }
+    @State
+    public static class MyState {
+        private final FloatBuffer b;
+
+        public MyState() {
+            b = FloatBuffer.allocate(16);
+        }
     }
 
-    public static class FloatTest extends FloatBufferTest {
-        @Override public void actor1(FloatBuffer b, LongResult1 r)  { b.put(0, -1F);                                    }
-        @Override public void actor2(FloatBuffer b, LongResult1 r)  { r.r1 = Float.floatToRawIntBits(b.get());          }
+    @ConcurrencyStressTest
+    public static class FloatTest {
+        @Actor public void actor1(MyState s)                { s.b.put(0, -1F);                                    }
+        @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = Float.floatToRawIntBits(s.b.get());          }
     }
 
 }

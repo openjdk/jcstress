@@ -24,62 +24,56 @@
  */
 package org.openjdk.jcstress.tests.atomicity.crosscache;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.ByteResult4;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
 import java.util.Random;
 
-public class UnsafeIntAtomicityTest implements Actor2_Test<UnsafeIntAtomicityTest.State, ByteResult4> {
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public void actor1(State s, ByteResult4 r) {
-        UnsafeHolder.U.putInt(s.bytes, s.offset, 0xFFFFFFFF);
-    }
-
-    @Override
-    public void actor2(State s, ByteResult4 r) {
-        int t = UnsafeHolder.U.getInt(s.bytes, s.offset);
-        r.r1 = (byte) ((t >> 0) & 0xFF);
-        r.r2 = (byte) ((t >> 8) & 0xFF);
-        r.r3 = (byte) ((t >> 16) & 0xFF);
-        r.r4 = (byte) ((t >> 24) & 0xFF);
-    }
-
-    @Override
-    public ByteResult4 newResult() {
-        return new ByteResult4();
-    }
+@ConcurrencyStressTest
+@State
+public class UnsafeIntAtomicityTest {
 
     /**
      * We don't have the alignment information, so we would try to read/write to the
      * random offset within the byte array.
      */
-    public static class State {
-        /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
-        public static final int SIZE = 256;
 
-        public static final Random RANDOM = new Random();
-        public static final int ARRAY_BASE_OFFSET = UnsafeHolder.U.arrayBaseOffset(byte[].class);
-        public static final int ARRAY_BASE_SCALE = UnsafeHolder.U.arrayIndexScale(byte[].class);
-        public static final int COMPONENT_SIZE = 4;
+    /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
+    public static final int SIZE = 256;
 
-        /** Alignment constraint: 4-bytes is default, for integers */
-        public static final int ALIGN = Integer.getInteger("align", COMPONENT_SIZE);
+    public static final Random RANDOM = new Random();
+    public static final int ARRAY_BASE_OFFSET = UnsafeHolder.U.arrayBaseOffset(byte[].class);
+    public static final int ARRAY_BASE_SCALE = UnsafeHolder.U.arrayIndexScale(byte[].class);
+    public static final int COMPONENT_SIZE = 4;
 
-        public final byte[] bytes;
-        public final long offset;
+    /** Alignment constraint: 4-bytes is default, for integers */
+    public static final int ALIGN = Integer.getInteger("align", COMPONENT_SIZE);
 
-        public State() {
-            bytes = new byte[SIZE];
-            int index = RANDOM.nextInt((SIZE - COMPONENT_SIZE)/ALIGN)*ALIGN;
-            offset = ARRAY_BASE_OFFSET + ARRAY_BASE_SCALE*index;
-        }
+    public final byte[] bytes;
+    public final long offset;
+
+    public UnsafeIntAtomicityTest() {
+        bytes = new byte[SIZE];
+        int index = RANDOM.nextInt((SIZE - COMPONENT_SIZE)/ALIGN)*ALIGN;
+        offset = ARRAY_BASE_OFFSET + ARRAY_BASE_SCALE*index;
+    }
+
+    @Actor
+    public void actor1() {
+        UnsafeHolder.U.putInt(bytes, offset, 0xFFFFFFFF);
+    }
+
+    @Actor
+    public void actor2(ByteResult4 r) {
+        int t = UnsafeHolder.U.getInt(bytes, offset);
+        r.r1 = (byte) ((t >> 0) & 0xFF);
+        r.r2 = (byte) ((t >> 8) & 0xFF);
+        r.r3 = (byte) ((t >> 16) & 0xFF);
+        r.r4 = (byte) ((t >> 24) & 0xFF);
     }
 
 }

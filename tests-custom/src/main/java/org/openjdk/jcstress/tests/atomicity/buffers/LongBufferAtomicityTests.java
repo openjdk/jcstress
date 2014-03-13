@@ -24,21 +24,28 @@
  */
 package org.openjdk.jcstress.tests.atomicity.buffers;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
+import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
 public class LongBufferAtomicityTests {
 
-    public abstract static class LongBufferTest implements Actor2_Test<LongBuffer, LongResult1> {
-        @Override public LongBuffer newState()                { return LongBuffer.allocate(16);                  }
-        @Override public LongResult1 newResult()              { return new LongResult1();                        }
+    @State
+    public static class MyState {
+        private final LongBuffer b;
+
+        public MyState() {
+            b = LongBuffer.allocate(16);
+        }
     }
 
-    public static class LongTest extends LongBufferTest {
-        @Override public void actor1(LongBuffer b, LongResult1 r)  { b.put(0, -1L);                                   }
-        @Override public void actor2(LongBuffer b, LongResult1 r)  { r.r1 = b.get();                                  }
+    public static class LongTest {
+        @Actor public void actor1(MyState s)                 { s.b.put(0, -1L);                                   }
+        @Actor public void actor2(MyState s, LongResult1 r)  { r.r1 = s.b.get();                                  }
     }
 
 }

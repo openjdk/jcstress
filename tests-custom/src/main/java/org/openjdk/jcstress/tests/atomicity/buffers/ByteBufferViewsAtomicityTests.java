@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomicity.buffers;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
@@ -38,48 +41,62 @@ import java.nio.ShortBuffer;
 
 public class ByteBufferViewsAtomicityTests {
 
-    public static ByteBuffer order(ByteBuffer b) { b.order(ByteOrder.nativeOrder()); return b; }
+    @State
+    public static class MyState {
+        private final ByteBuffer b;
+        private final IntBuffer ib;
+        private final CharBuffer cb;
+        private final DoubleBuffer db;
+        private final FloatBuffer fb;
+        private final LongBuffer lb;
+        private final ShortBuffer sb;
 
-    public static class IntViewTest implements Actor2_Test<IntBuffer, LongResult1> {
-        @Override public IntBuffer newState()                        { return order(ByteBuffer.allocate(16)).asIntBuffer(); }
-        @Override public LongResult1 newResult()                     { return new LongResult1();                         }
-        @Override public void actor1(IntBuffer b, LongResult1 r)     { b.put(0, -1);                                     }
-        @Override public void actor2(IntBuffer b, LongResult1 r)     { r.r1 = b.get(0);                                  }
+        public MyState() {
+            b = ByteBuffer.allocate(16);
+            b.order(ByteOrder.nativeOrder());
+            ib = b.asIntBuffer();
+            cb = b.asCharBuffer();
+            db = b.asDoubleBuffer();
+            fb = b.asFloatBuffer();
+            lb = b.asLongBuffer();
+            sb = b.asShortBuffer();
+        }
     }
 
-    public static class CharViewTest implements Actor2_Test<CharBuffer, LongResult1> {
-        @Override public CharBuffer newState()                       { return order(ByteBuffer.allocate(16)).asCharBuffer();    }
-        @Override public LongResult1 newResult()                     { return new LongResult1();                         }
-        @Override public void actor1(CharBuffer b, LongResult1 r)    { b.put(0, 'a');                                    }
-        @Override public void actor2(CharBuffer b, LongResult1 r)    { r.r1 = b.get(0);                                  }
+    @ConcurrencyStressTest
+    public static class IntViewTest {
+        @Actor public void actor1(MyState s)                { s.ib.put(0, -1);                                  }
+        @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = s.ib.get(0);                               }
     }
 
-    public static class DoubleViewTest implements Actor2_Test<DoubleBuffer, LongResult1> {
-        @Override public DoubleBuffer newState()                     { return order(ByteBuffer.allocate(16)).asDoubleBuffer();  }
-        @Override public LongResult1 newResult()                     { return new LongResult1();                         }
-        @Override public void actor1(DoubleBuffer b, LongResult1 r)  { b.put(0, -1D);                                    }
-        @Override public void actor2(DoubleBuffer b, LongResult1 r)  { r.r1 = Double.doubleToRawLongBits(b.get(0));      }
+    @ConcurrencyStressTest
+    public static class CharViewTest {
+        @Actor public void actor1(MyState s)                { s.cb.put(0, 'a');                                 }
+        @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = s.cb.get(0);                               }
     }
 
-    public static class FloatViewTest implements Actor2_Test<FloatBuffer, LongResult1> {
-        @Override public FloatBuffer newState()                      { return order(ByteBuffer.allocate(16)).asFloatBuffer();   }
-        @Override public LongResult1 newResult()                     { return new LongResult1();                         }
-        @Override public void actor1(FloatBuffer b, LongResult1 r)   { b.put(0, -1F);                                    }
-        @Override public void actor2(FloatBuffer b, LongResult1 r)   { r.r1 = Float.floatToRawIntBits(b.get(0));         }
+    @ConcurrencyStressTest
+    public static class DoubleViewTest {
+        @Actor public void actor1(MyState s)                { s.db.put(0, -1D);                                 }
+        @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = Double.doubleToRawLongBits(s.db.get(0));   }
     }
 
-    public static class LongViewTest implements Actor2_Test<LongBuffer, LongResult1> {
-        @Override public LongBuffer newState()                       { return order(ByteBuffer.allocate(16)).asLongBuffer();    }
-        @Override public LongResult1 newResult()                     { return new LongResult1();                         }
-        @Override public void actor1(LongBuffer b, LongResult1 r)    { b.put(0, -1);                                     }
-        @Override public void actor2(LongBuffer b, LongResult1 r)    { r.r1 = b.get(0);                                  }
+    @ConcurrencyStressTest
+    public static class FloatViewTest {
+        @Actor public void actor1(MyState s)                { s.fb.put(0, -1F);                                 }
+        @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = Float.floatToRawIntBits(s.fb.get(0));      }
     }
 
-    public static class ShortViewTest implements Actor2_Test<ShortBuffer, LongResult1> {
-        @Override public ShortBuffer newState()                      { return order(ByteBuffer.allocate(16)).asShortBuffer();   }
-        @Override public LongResult1 newResult()                     { return new LongResult1();                         }
-        @Override public void actor1(ShortBuffer b, LongResult1 r)   { b.put(0, (short) -1);                             }
-        @Override public void actor2(ShortBuffer b, LongResult1 r)   { r.r1 = b.get(0);                                  }
+    @ConcurrencyStressTest
+    public static class LongViewTest {
+        @Actor public void actor1(MyState s)                { s.lb.put(0, -1);                                  }
+        @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = s.lb.get(0);                               }
+    }
+
+    @ConcurrencyStressTest
+    public static class ShortViewTest {
+        @Actor public void actor1(MyState s)                { s.sb.put(0, (short) -1);                          }
+        @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = s.sb.get(0);                               }
     }
 
 }

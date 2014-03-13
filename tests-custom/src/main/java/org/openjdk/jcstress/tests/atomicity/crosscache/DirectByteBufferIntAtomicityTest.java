@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomicity.crosscache;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.ByteResult4;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
@@ -31,54 +34,45 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Random;
 
-public class DirectByteBufferIntAtomicityTest implements Actor2_Test<DirectByteBufferIntAtomicityTest.State, ByteResult4> {
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public void actor1(State s, ByteResult4 r) {
-        s.bytes.putInt(s.offset, 0xFFFFFFFF);
-    }
-
-    @Override
-    public void actor2(State s, ByteResult4 r) {
-        int t = s.bytes.getInt(s.offset);
-        r.r1 = (byte) ((t >> 0) & 0xFF);
-        r.r2 = (byte) ((t >> 8) & 0xFF);
-        r.r3 = (byte) ((t >> 16) & 0xFF);
-        r.r4 = (byte) ((t >> 24) & 0xFF);
-    }
-
-    @Override
-    public ByteResult4 newResult() {
-        return new ByteResult4();
-    }
+@ConcurrencyStressTest
+@State
+public class DirectByteBufferIntAtomicityTest {
 
     /**
      * We don't have the alignment information, so we would try to read/write to the
      * random offset within the byte array.
      */
-    public static class State {
-        /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
-        public static final int SIZE = 256;
 
-        public static final Random RANDOM = new Random();
-        public static final int COMPONENT_SIZE = 4;
+    /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
+    public static final int SIZE = 256;
 
-        /** Alignment constraint: 4-bytes is default, for integers */
-        public static final int ALIGN = Integer.getInteger("align", COMPONENT_SIZE);
+    public static final Random RANDOM = new Random();
+    public static final int COMPONENT_SIZE = 4;
 
-        public final ByteBuffer bytes;
-        public final int offset;
+    /** Alignment constraint: 4-bytes is default, for integers */
+    public static final int ALIGN = Integer.getInteger("align", COMPONENT_SIZE);
 
-        public State() {
-            bytes = ByteBuffer.allocateDirect(SIZE);
-            bytes.order(ByteOrder.nativeOrder());
-            offset = RANDOM.nextInt((SIZE - COMPONENT_SIZE)/ALIGN)*ALIGN;
-        }
+    public final ByteBuffer bytes;
+    public final int offset;
+
+    public DirectByteBufferIntAtomicityTest() {
+        bytes = ByteBuffer.allocateDirect(SIZE);
+        bytes.order(ByteOrder.nativeOrder());
+        offset = RANDOM.nextInt((SIZE - COMPONENT_SIZE)/ALIGN)*ALIGN;
+    }
+
+    @Actor
+    public void actor1() {
+        bytes.putInt(offset, 0xFFFFFFFF);
+    }
+
+    @Actor
+    public void actor2(ByteResult4 r) {
+        int t = bytes.getInt(offset);
+        r.r1 = (byte) ((t >> 0) & 0xFF);
+        r.r2 = (byte) ((t >> 8) & 0xFF);
+        r.r3 = (byte) ((t >> 16) & 0xFF);
+        r.r4 = (byte) ((t >> 24) & 0xFF);
     }
 
 }
