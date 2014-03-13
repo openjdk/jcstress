@@ -199,7 +199,7 @@ public class JCStress {
     }
 
     public void run(Options opts, boolean alreadyForked, TestResultCollector collector) throws Exception {
-        run(opts, TestList.tests(), alreadyForked, collector);
+        run(opts, getTests(opts.getTestFilter()), alreadyForked, collector);
     }
 
     public void async(final Runner runner) throws ExecutionException, InterruptedException {
