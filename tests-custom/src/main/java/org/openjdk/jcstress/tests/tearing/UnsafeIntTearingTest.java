@@ -25,6 +25,7 @@
 package org.openjdk.jcstress.tests.tearing;
 
 import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.Arbiter;
 import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
 import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
@@ -74,7 +75,7 @@ public class UnsafeIntTearingTest {
         UnsafeHolder.U.putInt(bytes, offset2, 0x55555555);
     }
 
-    @Actor
+    @Arbiter
     public void arbiter1(IntResult2 r) {
         r.r1 = UnsafeHolder.U.getInt(bytes, offset1);
         r.r2 = UnsafeHolder.U.getInt(bytes, offset2);
