@@ -24,15 +24,18 @@
  */
 package org.openjdk.jcstress.tests.init.primitives.fenced;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
-public class BooleanFencedTest implements Actor2_Test<BooleanFencedTest.State, IntResult1> {
+@ConcurrencyStressTest
+@State
+public class BooleanFencedTest {
 
-    public static class State {
-        Shell shell;
-    }
+    Shell shell;
 
     public static class Shell {
         boolean x;
@@ -43,25 +46,15 @@ public class BooleanFencedTest implements Actor2_Test<BooleanFencedTest.State, I
         }
     }
 
-    @Override
-    public State newState() {
-        return new State();
+    @Actor
+    public void actor1() {
+        shell = new Shell();
     }
 
-    @Override
-    public void actor1(State s, IntResult1 r) {
-        s.shell = new Shell();
-    }
-
-    @Override
-    public void actor2(State s, IntResult1 r) {
-        Shell sh = s.shell;
+    @Actor
+    public void actor2(IntResult1 r) {
+        Shell sh = shell;
         r.r1 = (sh == null) ? 42 : (sh.x ? -1 : 0);
-    }
-
-    @Override
-    public IntResult1 newResult() {
-        return new IntResult1();
     }
 
 }

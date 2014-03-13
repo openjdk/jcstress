@@ -24,14 +24,17 @@
  */
 package org.openjdk.jcstress.tests.init.primitives.plain;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.FloatResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class FloatPlainTest implements Actor2_Test<FloatPlainTest.State, FloatResult1> {
+@ConcurrencyStressTest
+@State
+public class FloatPlainTest {
 
-    public static class State {
-        Shell shell;
-    }
+    Shell shell;
 
     public static class Shell {
         float x;
@@ -41,25 +44,15 @@ public class FloatPlainTest implements Actor2_Test<FloatPlainTest.State, FloatRe
         }
     }
 
-    @Override
-    public State newState() {
-        return new State();
+    @Actor
+    public void actor1() {
+        shell = new Shell();
     }
 
-    @Override
-    public void actor1(State s, FloatResult1 r) {
-        s.shell = new Shell();
-    }
-
-    @Override
-    public void actor2(State s, FloatResult1 r) {
-        Shell sh = s.shell;
+    @Actor
+    public void actor2(FloatResult1 r) {
+        Shell sh = shell;
         r.r1 = (sh == null) ? 42 : sh.x;
-    }
-
-    @Override
-    public FloatResult1 newResult() {
-        return new FloatResult1();
     }
 
 }

@@ -24,14 +24,17 @@
  */
 package org.openjdk.jcstress.tests.init.primitives.plain;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.ShortResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class ShortPlainTest implements Actor2_Test<ShortPlainTest.State, ShortResult1> {
+@ConcurrencyStressTest
+@State
+public class ShortPlainTest {
 
-    public static class State {
-        Shell shell;
-    }
+    Shell shell;
 
     public static class Shell {
         short x;
@@ -41,25 +44,15 @@ public class ShortPlainTest implements Actor2_Test<ShortPlainTest.State, ShortRe
         }
     }
 
-    @Override
-    public State newState() {
-        return new State();
+    @Actor
+    public void actor1() {
+        shell = new Shell();
     }
 
-    @Override
-    public void actor1(State s, ShortResult1 r) {
-        s.shell = new Shell();
-    }
-
-    @Override
-    public void actor2(State s, ShortResult1 r) {
-        Shell sh = s.shell;
+    @Actor
+    public void actor2(ShortResult1 r) {
+        Shell sh = shell;
         r.r1 = (sh == null) ? 42 : sh.x;
-    }
-
-    @Override
-    public ShortResult1 newResult() {
-        return new ShortResult1();
     }
 
 }

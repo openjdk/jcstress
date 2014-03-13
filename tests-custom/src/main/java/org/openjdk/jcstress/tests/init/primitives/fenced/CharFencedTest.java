@@ -24,15 +24,18 @@
  */
 package org.openjdk.jcstress.tests.init.primitives.fenced;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.CharResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
-public class CharFencedTest implements Actor2_Test<CharFencedTest.State, CharResult1> {
+@ConcurrencyStressTest
+@State
+public class CharFencedTest {
 
-    public static class State {
-        Shell shell;
-    }
+    Shell shell;
 
     public static class Shell {
         char x;
@@ -43,25 +46,15 @@ public class CharFencedTest implements Actor2_Test<CharFencedTest.State, CharRes
         }
     }
 
-    @Override
-    public State newState() {
-        return new State();
+    @Actor
+    public void actor1() {
+        shell = new Shell();
     }
 
-    @Override
-    public void actor1(State s, CharResult1 r) {
-        s.shell = new Shell();
-    }
-
-    @Override
-    public void actor2(State s, CharResult1 r) {
-        Shell sh = s.shell;
+    @Actor
+    public void actor2(CharResult1 r) {
+        Shell sh = shell;
         r.r1 = (sh == null) ? 'N' : (char) ('A' + sh.x);
-    }
-
-    @Override
-    public CharResult1 newResult() {
-        return new CharResult1();
     }
 
 }
