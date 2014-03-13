@@ -24,50 +24,43 @@
  */
 package org.openjdk.jcstress.tests.unsafe;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.util.UnsafeHolder;
 import sun.misc.Contended;
 
-public class UnsafeAddLong1 implements Actor2_Test<UnsafeAddLong1.State, LongResult2> {
+@ConcurrencyStressTest
+@State
+public class UnsafeAddLong1 {
 
-    @Override
-    public State newState() {
-        return new State();
-    }
+    public static long OFFSET;
 
-    @Override
-    public void actor1(State s, LongResult2 r) {
-        UnsafeHolder.U.getAndAddLong(s, State.OFFSET, 1L << 1);
-        s.written = 1;
-    }
-
-    @Override
-    public void actor2(State s, LongResult2 r) {
-        r.r1 = s.written;
-        r.r2 = s.x;
-    }
-
-    @Override
-    public LongResult2 newResult() {
-        return new LongResult2();
-    }
-
-    public static class State {
-        public static long OFFSET;
-
-        static {
-            try {
-                OFFSET = UnsafeHolder.U.objectFieldOffset(State.class.getDeclaredField("x"));
-            } catch (NoSuchFieldException e) {
-                throw new IllegalStateException(e);
-            }
+    static {
+        try {
+            OFFSET = UnsafeHolder.U.objectFieldOffset(UnsafeAddLong1.class.getDeclaredField("x"));
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException(e);
         }
+    }
 
-        long x;
+    long x;
 
-        @Contended
-        volatile int written;
+    @Contended
+    volatile int written;
+
+    @Actor
+    public void actor1() {
+        UnsafeHolder.U.getAndAddLong(this, OFFSET, 1L << 1);
+        written = 1;
+    }
+
+    @Actor
+    public void actor2(LongResult2 r) {
+        r.r1 = written;
+        r.r2 = x;
     }
 
 }
