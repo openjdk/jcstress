@@ -47,14 +47,14 @@
         </unmatched>
     </template>
 
-    <test template="atomicBoolean" name="org.openjdk.jcstress.tests.atomics.booleans.AtomicBooleanPairwiseTests$CAS_CAS" />
-    <test template="atomicBoolean" name="org.openjdk.jcstress.tests.atomics.booleans.AtomicBooleanPairwiseTests$CAS_GetAndSet" />
-    <test template="atomicBoolean" name="org.openjdk.jcstress.tests.atomics.booleans.AtomicBooleanPairwiseTests$CAS_WCAS" />
+    <test template="atomicBoolean" name="org.openjdk.jcstress.tests.atomics.booleans.AtomicBooleanPairwiseTests.CAS_CAS" />
+    <test template="atomicBoolean" name="org.openjdk.jcstress.tests.atomics.booleans.AtomicBooleanPairwiseTests.CAS_GetAndSet" />
+    <test template="atomicBoolean" name="org.openjdk.jcstress.tests.atomics.booleans.AtomicBooleanPairwiseTests.CAS_WCAS" />
 
-    <test template="atomicBoolean" name="org.openjdk.jcstress.tests.atomics.booleans.AtomicBooleanPairwiseTests$GetAndSet_GetAndSet" />
-    <test template="atomicBoolean" name="org.openjdk.jcstress.tests.atomics.booleans.AtomicBooleanPairwiseTests$GetAndSet_WCAS" />
+    <test template="atomicBoolean" name="org.openjdk.jcstress.tests.atomics.booleans.AtomicBooleanPairwiseTests.GetAndSet_GetAndSet" />
+    <test template="atomicBoolean" name="org.openjdk.jcstress.tests.atomics.booleans.AtomicBooleanPairwiseTests.GetAndSet_WCAS" />
 
-    <test template="atomicBoolean" name="org.openjdk.jcstress.tests.atomics.booleans.AtomicBooleanPairwiseTests$WCAS_WCAS" />
+    <test template="atomicBoolean" name="org.openjdk.jcstress.tests.atomics.booleans.AtomicBooleanPairwiseTests.WCAS_WCAS" />
 
     <test name="org.openjdk.jcstress.tests.atomics.booleans.AtomicBooleanInitialValueTest">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>

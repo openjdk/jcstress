@@ -63,7 +63,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_AddAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.AddAndGet_AddAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -82,7 +82,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_DecAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.AddAndGet_DecAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -101,7 +101,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_CAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.AddAndGet_CAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -120,7 +120,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.AddAndGet_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -139,7 +139,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_GetAndAdd">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.AddAndGet_GetAndAdd">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -158,7 +158,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_GetAndDec">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.AddAndGet_GetAndDec">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -177,7 +177,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_GetAndInc">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.AddAndGet_GetAndInc">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -196,7 +196,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_GetAndSet">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.AddAndGet_GetAndSet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -215,7 +215,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_IncAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.AddAndGet_IncAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -234,7 +234,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$AddAndGet_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.AddAndGet_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -253,7 +253,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_CAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.DecAndGet_CAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -272,7 +272,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.DecAndGet_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -291,7 +291,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_DecAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.DecAndGet_DecAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -310,7 +310,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_GetAndAdd">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.DecAndGet_GetAndAdd">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -329,7 +329,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_GetAndDec">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.DecAndGet_GetAndDec">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -348,7 +348,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_GetAndInc">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.DecAndGet_GetAndInc">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -367,7 +367,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_GetAndSet">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.DecAndGet_GetAndSet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -386,7 +386,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_IncAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.DecAndGet_IncAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -405,7 +405,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$DecAndGet_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.DecAndGet_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -424,7 +424,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndAdd_CAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndAdd_CAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -443,7 +443,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndAdd_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndAdd_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -462,7 +462,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndAdd_GetAndAdd">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndAdd_GetAndAdd">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -481,7 +481,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndAdd_GetAndDec">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndAdd_GetAndDec">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -500,7 +500,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndAdd_GetAndInc">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndAdd_GetAndInc">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -519,7 +519,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndAdd_GetAndSet">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndAdd_GetAndSet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -538,7 +538,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndAdd_IncAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndAdd_IncAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -557,7 +557,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndAdd_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndAdd_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -576,7 +576,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndDec_CAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndDec_CAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -595,7 +595,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndDec_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndDec_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -614,7 +614,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndDec_GetAndDec">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndDec_GetAndDec">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -633,7 +633,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndDec_GetAndInc">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndDec_GetAndInc">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -652,7 +652,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndDec_GetAndSet">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndDec_GetAndSet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -671,7 +671,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndDec_IncAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndDec_IncAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -690,7 +690,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndDec_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndDec_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -709,7 +709,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndInc_CAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndInc_CAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -728,7 +728,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndInc_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndInc_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -747,7 +747,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndInc_GetAndInc">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndInc_GetAndInc">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -766,7 +766,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndInc_GetAndSet">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndInc_GetAndSet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -785,7 +785,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndInc_IncAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndInc_IncAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -804,7 +804,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndInc_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndInc_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -823,7 +823,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndSet_CAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndSet_CAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -842,7 +842,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndSet_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndSet_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -861,7 +861,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndSet_GetAndSet">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndSet_GetAndSet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -880,7 +880,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndSet_IncAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndSet_IncAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -899,7 +899,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$GetAndSet_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.GetAndSet_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -918,7 +918,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$IncAndGet_CAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.IncAndGet_CAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -937,7 +937,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$IncAndGet_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.IncAndGet_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -956,7 +956,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$IncAndGet_IncAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.IncAndGet_IncAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -975,7 +975,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$IncAndGet_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.IncAndGet_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -994,7 +994,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$Set_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.Set_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -1013,7 +1013,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$CAS_CAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.CAS_CAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -1032,7 +1032,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$CAS_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.CAS_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -1051,7 +1051,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$CAS_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.CAS_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -1070,7 +1070,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$WCAS_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.WCAS_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
@@ -1094,7 +1094,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests$WCAS_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.integer.AtomicIntegerPairwiseTests.WCAS_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicInteger pair-wise operations.</description>
         <case>
