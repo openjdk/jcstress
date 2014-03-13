@@ -101,6 +101,8 @@ public class Actor4_Runner<S, R extends Result> extends Runner<R> {
 
         Collection<Future<?>> tasks = new ArrayList<Future<?>>();
 
+        control.isStopped = false;
+
         tasks.add(pool.submit(
                 new ActorBase<Actor4_Test<S, R>, S, R>(1, test, version, epoch, counter, control, poison) {
                     @Override
