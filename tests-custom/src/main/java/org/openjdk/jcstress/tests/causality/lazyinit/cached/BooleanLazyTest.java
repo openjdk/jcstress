@@ -24,42 +24,36 @@
  */
 package org.openjdk.jcstress.tests.causality.lazyinit.cached;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.BooleanResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class BooleanLazyTest implements Actor2_Test<BooleanLazyTest.State, BooleanResult2> {
+@ConcurrencyStressTest
+@State
+public class BooleanLazyTest {
 
-    @Override
-    public void actor1(State s, BooleanResult2 r) {
-        boolean f = s.f;
+    boolean f;
+
+    @Actor
+    public void actor1(BooleanResult2 r) {
+        boolean f = this.f;
         if (!f) {
             f = true;
-            s.f = f;
+            this.f = f;
         }
         r.r1 = f;
     }
 
-    @Override
-    public void actor2(State s, BooleanResult2 r) {
-        boolean f = s.f;
+    @Actor
+    public void actor2(BooleanResult2 r) {
+        boolean f = this.f;
         if (!f) {
             f = true;
-            s.f = f;
+            this.f = f;
         }
         r.r2 = f;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public BooleanResult2 newResult() {
-        return new BooleanResult2();
-    }
-
-    public static class State {
-        boolean f;
-    }
 }

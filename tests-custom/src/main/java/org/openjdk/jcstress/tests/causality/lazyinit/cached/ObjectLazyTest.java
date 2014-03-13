@@ -24,42 +24,36 @@
  */
 package org.openjdk.jcstress.tests.causality.lazyinit.cached;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class ObjectLazyTest implements Actor2_Test<ObjectLazyTest.State, IntResult2> {
+@ConcurrencyStressTest
+@State
+public class ObjectLazyTest {
 
-    @Override
-    public void actor1(State s, IntResult2 r) {
-        Object f = s.f;
+    Object f;
+
+    @Actor
+    public void actor1(IntResult2 r) {
+        Object f = this.f;
         if (f == null) {
             f = new Object();
-            s.f = f;
+            this.f = f;
         }
         r.r1 = (f == null) ? 0 : 1;
     }
 
-    @Override
-    public void actor2(State s, IntResult2 r) {
-        Object f = s.f;
+    @Actor
+    public void actor2(IntResult2 r) {
+        Object f = this.f;
         if (f == null) {
             f = new Object();
-            s.f = f;
+            this.f = f;
         }
         r.r2 = (f == null) ? 0 : 1;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public IntResult2 newResult() {
-        return new IntResult2();
-    }
-
-    public static class State {
-        Object f;
-    }
 }

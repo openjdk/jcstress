@@ -24,42 +24,36 @@
  */
 package org.openjdk.jcstress.tests.causality.lazyinit.cached;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.ByteResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class ByteLazyTest implements Actor2_Test<ByteLazyTest.State, ByteResult2> {
+@ConcurrencyStressTest
+@State
+public class ByteLazyTest {
 
-    @Override
-    public void actor1(State s, ByteResult2 r) {
-        byte f = s.f;
+    byte f;
+
+    @Actor
+    public void actor1(ByteResult2 r) {
+        byte f = this.f;
         if (f == 0) {
             f = 1;
-            s.f = f;
+            this.f = f;
         }
         r.r1 = f;
     }
 
-    @Override
-    public void actor2(State s, ByteResult2 r) {
-        byte f = s.f;
+    @Actor
+    public void actor2(ByteResult2 r) {
+        byte f = this.f;
         if (f == 0) {
             f = 1;
-            s.f = f;
+            this.f = f;
         }
         r.r2 = f;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public ByteResult2 newResult() {
-        return new ByteResult2();
-    }
-
-    public static class State {
-        byte f;
-    }
 }

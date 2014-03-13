@@ -24,42 +24,37 @@
  */
 package org.openjdk.jcstress.tests.causality.lazyinit.cached;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.FloatResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
+import org.openjdk.jcstress.tests.Actor4_Test;
 
-public class FloatLazyTest implements Actor2_Test<FloatLazyTest.State, FloatResult2> {
+@ConcurrencyStressTest
+@State
+public class FloatLazyTest {
 
-    @Override
-    public void actor1(State s, FloatResult2 r) {
-        float f = s.f;
+    float f;
+
+    @Actor
+    public void actor1(FloatResult2 r) {
+        float f = this.f;
         if (f == 0F) {
             f = 1F;
-            s.f = f;
+            this.f = f;
         }
         r.r1 = f;
     }
 
-    @Override
-    public void actor2(State s, FloatResult2 r) {
-        float f = s.f;
+    @Actor
+    public void actor2(FloatResult2 r) {
+        float f = this.f;
         if (f == 0F) {
             f = 1F;
-            s.f = f;
+            this.f = f;
         }
         r.r2 = f;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public FloatResult2 newResult() {
-        return new FloatResult2();
-    }
-
-    public static class State {
-        float f;
-    }
 }

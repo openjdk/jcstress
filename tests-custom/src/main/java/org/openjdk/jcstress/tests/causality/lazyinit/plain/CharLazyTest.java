@@ -24,38 +24,32 @@
  */
 package org.openjdk.jcstress.tests.causality.lazyinit.plain;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.CharResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class CharLazyTest implements Actor2_Test<CharLazyTest.State, CharResult2> {
+@ConcurrencyStressTest
+@State
+public class CharLazyTest {
 
-    @Override
-    public void actor1(State s, CharResult2 r) {
-        if (s.f == 0) {
-            s.f = 1;
+    char f;
+
+    @Actor
+    public void actor1(CharResult2 r) {
+        if (f == 0) {
+            f = 1;
         }
-        r.r1 = (char) (s.f + 'A');
+        r.r1 = (char) (f + 'A');
     }
 
-    @Override
-    public void actor2(State s, CharResult2 r) {
-        if (s.f == 0) {
-            s.f = 1;
+    @Actor
+    public void actor2(CharResult2 r) {
+        if (f == 0) {
+            f = 1;
         }
-        r.r2 = (char) (s.f + 'A');
+        r.r2 = (char) (f + 'A');
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public CharResult2 newResult() {
-        return new CharResult2();
-    }
-
-    public static class State {
-        char f;
-    }
 }

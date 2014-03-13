@@ -24,38 +24,31 @@
  */
 package org.openjdk.jcstress.tests.causality.lazyinit.volatiles;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.ShortResult2;
-import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class ShortLazyTest implements Actor2_Test<ShortLazyTest.State, ShortResult2> {
+@ConcurrencyStressTest
+@State
+public class ShortLazyTest {
 
-    @Override
-    public void actor1(State s, ShortResult2 r) {
-        if (s.f == 0) {
-            s.f = 1;
+    volatile short f;
+
+    @Actor
+    public void actor1(ShortResult2 r) {
+        if (f == 0) {
+            f = 1;
         }
-        r.r1 = s.f;
+        r.r1 = f;
     }
 
-    @Override
-    public void actor2(State s, ShortResult2 r) {
-        if (s.f == 0) {
-            s.f = 1;
+    @Actor
+    public void actor2(ShortResult2 r) {
+        if (f == 0) {
+            f = 1;
         }
-        r.r2 = s.f;
+        r.r2 = f;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public ShortResult2 newResult() {
-        return new ShortResult2();
-    }
-
-    public static class State {
-        volatile short f;
-    }
 }
