@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomicity.buffers;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
@@ -32,46 +35,50 @@ import java.nio.ByteOrder;
 
 public class ByteBufferAtomicityTests {
 
-    public static ByteBuffer order(ByteBuffer b) { b.order(ByteOrder.nativeOrder()); return b; }
+    @State
+    public static class MyState {
+        private final ByteBuffer b;
 
-    public abstract static class ByteBufferTest implements Actor2_Test<ByteBuffer, LongResult1> {
-        @Override public ByteBuffer newState()                { return order(ByteBuffer.allocate(16));              }
-        @Override public LongResult1 newResult()              { return new LongResult1();                           }
+        public MyState() {
+            b = ByteBuffer.allocate(16);
+            b.order(ByteOrder.nativeOrder());
+        }
     }
 
-    public static class IntTest extends ByteBufferTest {
-        @Override public void actor1(ByteBuffer b, LongResult1 r)  { b.putInt(0, -1);                                    }
-        @Override public void actor2(ByteBuffer b, LongResult1 r)  { r.r1 = b.getInt(0);                                 }
+    @ConcurrencyStressTest
+    public static class IntTest {
+        @Actor public void actor1(MyState s)                 { s.b.putInt(0, -1);                                    }
+        @Actor public void actor2(MyState s, LongResult1 r)  { r.r1 = s.b.getInt(0);                                 }
     }
 
-    public static class ShortTest extends ByteBufferTest {
-        @Override public void actor1(ByteBuffer b, LongResult1 r)  { b.putShort(0, (short) -1);                          }
-        @Override public void actor2(ByteBuffer b, LongResult1 r)  { r.r1 = b.getShort(0);                               }
+    public static class ShortTest {
+        @Actor public void actor1(MyState s, LongResult1 r)  { s.b.putShort(0, (short) -1);                          }
+        @Actor public void actor2(MyState s, LongResult1 r)  { r.r1 = s.b.getShort(0);                               }
     }
 
-    public static class CharTest extends ByteBufferTest {
-        @Override public void actor1(ByteBuffer b, LongResult1 r)  { b.putChar(0, 'a');                                  }
-        @Override public void actor2(ByteBuffer b, LongResult1 r)  { r.r1 = b.getChar(0);                                }
+    public static class CharTest {
+        @Actor public void actor1(MyState s, LongResult1 r)  { s.b.putChar(0, 'a');                                  }
+        @Actor public void actor2(MyState s, LongResult1 r)  { r.r1 = s.b.getChar(0);                                }
     }
 
-    public static class LongTest extends ByteBufferTest {
-        @Override public void actor1(ByteBuffer b, LongResult1 r)  { b.putLong(0, -1L);                                  }
-        @Override public void actor2(ByteBuffer b, LongResult1 r)  { r.r1 = b.getLong(0);                                }
+    public static class LongTest {
+        @Actor public void actor1(MyState s, LongResult1 r)  { s.b.putLong(0, -1L);                                  }
+        @Actor public void actor2(MyState s, LongResult1 r)  { r.r1 = s.b.getLong(0);                                }
     }
 
-    public static class DoubleTest extends ByteBufferTest {
-        @Override public void actor1(ByteBuffer b, LongResult1 r)  { b.putDouble(0, -1D);                                }
-        @Override public void actor2(ByteBuffer b, LongResult1 r)  { r.r1 = Double.doubleToRawLongBits(b.getDouble(0));  }
+    public static class DoubleTest {
+        @Actor public void actor1(MyState s, LongResult1 r)  { s.b.putDouble(0, -1D);                                }
+        @Actor public void actor2(MyState s, LongResult1 r)  { r.r1 = Double.doubleToRawLongBits(s.b.getDouble(0));  }
     }
 
-    public static class FloatTest extends ByteBufferTest {
-        @Override public void actor1(ByteBuffer b, LongResult1 r)  { b.putFloat(0, -1F);                                 }
-        @Override public void actor2(ByteBuffer b, LongResult1 r)  { r.r1 = Float.floatToRawIntBits(b.getFloat(0));      }
+    public static class FloatTest {
+        @Actor public void actor1(MyState s, LongResult1 r)  { s.b.putFloat(0, -1F);                                 }
+        @Actor public void actor2(MyState s, LongResult1 r)  { r.r1 = Float.floatToRawIntBits(s.b.getFloat(0));      }
     }
 
-    public static class ByteTest extends ByteBufferTest {
-        @Override public void actor1(ByteBuffer b, LongResult1 r)  { b.put(0, (byte) -1);                                }
-        @Override public void actor2(ByteBuffer b, LongResult1 r)  { r.r1 = b.get();                                     }
+    public static class ByteTest {
+        @Actor public void actor1(MyState s, LongResult1 r)  { s.b.put(0, (byte) -1);                                }
+        @Actor public void actor2(MyState s, LongResult1 r)  { r.r1 = s.b.get();                                     }
     }
 
 }

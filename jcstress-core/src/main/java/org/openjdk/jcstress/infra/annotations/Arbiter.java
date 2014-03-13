@@ -29,6 +29,21 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Actor concurrency tests accept one or more:
+ *   - actors:     threads actively mutating the state, and recording the current state
+ *   - arbiters:   threads arbitrating the results *after* actors finish
+ *
+ * Shared state is represented by state object. Runners will ensure enough fresh state objects would
+ * be provided to the tests methods to unfold even the finest races.
+ *
+ * Conventions for arbiters:
+ *   - everything applicable to actors, EXCEPT:
+ *   - for any given state, arbiter visits the state the last, with all actor memory effects visible
+ *
+ * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
+ */
+
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Arbiter {

@@ -24,37 +24,44 @@
  */
 package org.openjdk.jcstress.tests.atomics.integer;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.Arbiter;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 import org.openjdk.jcstress.tests.Actor2_Arbiter1_Test;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-public class AtomicIntegerArrayInterleaveTest implements Actor2_Arbiter1_Test<AtomicIntegerArray, IntResult3> {
+@ConcurrencyStressTest
+public class AtomicIntegerArrayInterleaveTest {
 
     /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
     public static final int SIZE = 256;
 
-    @Override
-    public AtomicIntegerArray newState() {
-        return new AtomicIntegerArray(SIZE);
+    @State
+    public static class MyState extends AtomicIntegerArray {
+        public MyState() {
+            super(SIZE);
+        }
     }
 
-    @Override
-    public void actor1(AtomicIntegerArray s, IntResult3 r) {
+    @Actor
+    public void actor1(MyState s) {
         for (int i = 0; i < SIZE; i += 2) {
             s.set(i, 1);
         }
     }
 
-    @Override
-    public void actor2(AtomicIntegerArray s, IntResult3 r) {
+    @Actor
+    public void actor2(MyState s) {
         for (int i = 1; i < SIZE; i += 2) {
             s.set(i, 2);
         }
     }
 
-    @Override
-    public void arbiter1(AtomicIntegerArray  state, IntResult3 r) {
+    @Arbiter
+    public void arbiter1(MyState state, IntResult3 r) {
         r.r1 = r.r2 = r.r3 = 0;
         for (int i = 0; i < SIZE; i++) {
             int s = state.get(i);
@@ -72,11 +79,6 @@ public class AtomicIntegerArrayInterleaveTest implements Actor2_Arbiter1_Test<At
                     throw new IllegalStateException(String.valueOf(s));
             }
         }
-    }
-
-    @Override
-    public IntResult3 newResult() {
-        return new IntResult3();
     }
 
 }

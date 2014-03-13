@@ -24,16 +24,23 @@
  */
 package org.openjdk.jcstress.tests.scratch.basic;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import org.openjdk.jcstress.tests.Actor1_Test;
 
-public class ThreadJoinTest implements Actor1_Test<ThreadJoinTest.State, IntResult2> {
+@ConcurrencyStressTest
+@State
+public class ThreadJoinTest {
 
-    @Override
-    public void actor1(final State s, IntResult2 r) {
+    private int a;
+
+    @Actor
+    public void actor1(IntResult2 r) {
         Thread t = new Thread() {
             public void run() {
-                s.a = 1;
+                a = 1;
             }
         };
         t.start();
@@ -43,21 +50,7 @@ public class ThreadJoinTest implements Actor1_Test<ThreadJoinTest.State, IntResu
             e.printStackTrace();
         }
         r.r1 = 1;
-        r.r2 = s.a;
-    }
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public IntResult2 newResult() {
-        return new IntResult2();
-    }
-
-    public static class State {
-        private int a;
+        r.r2 = a;
     }
 
 }

@@ -429,6 +429,7 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
         for (Class<?> c : imports) {
             pw.println("import " + c.getName() + ';');
         }
+        pw.println("import " + info.getTest().getQualifiedName() + ";");
         pw.println("import " + info.getState().getQualifiedName() + ";");
         pw.println("import " + info.getResult().getQualifiedName() + ";");
         pw.println();

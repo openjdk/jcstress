@@ -24,46 +24,39 @@
  */
 package org.openjdk.jcstress.tests.volatiles;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult4;
 import org.openjdk.jcstress.tests.Actor4_Test;
 
-public class VolatileIRIWTest implements Actor4_Test<VolatileIRIWTest.State, IntResult4> {
+@ConcurrencyStressTest
+@State
+public class VolatileIRIWTest {
 
-    @Override
-    public State newState() {
-        return new State();
+    public volatile int x;
+    public volatile int y;
+
+    @Actor
+    public void actor1() {
+        x = 1;
     }
 
-    @Override
-    public void actor1(State s, IntResult4 r) {
-        s.x = 1;
+    @Actor
+    public void actor2() {
+        y = 1;
     }
 
-    @Override
-    public void actor2(State s, IntResult4 r) {
-        s.y = 1;
+    @Actor
+    public void actor3(IntResult4 r) {
+        r.r1 = x;
+        r.r2 = y;
     }
 
-    @Override
-    public void actor3(State s, IntResult4 r) {
-        r.r1 = s.x;
-        r.r2 = s.y;
-    }
-
-    @Override
-    public void actor4(State s, IntResult4 r) {
-        r.r4 = s.y;
-        r.r3 = s.x;
-    }
-
-    @Override
-    public IntResult4 newResult() {
-        return new IntResult4();
-    }
-
-    public static class State {
-        public volatile int x;
-        public volatile int y;
+    @Actor
+    public void actor4(IntResult4 r) {
+        r.r4 = y;
+        r.r3 = x;
     }
 
 }

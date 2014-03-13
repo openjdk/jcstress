@@ -24,45 +24,36 @@
  */
 package org.openjdk.jcstress.tests.volatiles;
 
-
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
-import org.openjdk.jcstress.tests.Actor3_Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LazySetTransitivityTest implements Actor3_Test<LazySetTransitivityTest.State, IntResult3> {
+@ConcurrencyStressTest
+@State
+public class LazySetTransitivityTest {
 
-    @Override
-    public State newState() {
-        return new State();
+    public final AtomicInteger a = new AtomicInteger();
+    public final AtomicInteger b = new AtomicInteger();
+
+    @Actor
+    public void actor1() {
+        a.lazySet(1);
     }
 
-    @Override
-    public void actor1(State s, IntResult3 r) {
-        s.a.lazySet(1);
-    }
-
-    @Override
-    public void actor2(State s, IntResult3 r) {
-        int aValue = s.a.get();
-        s.b.set(aValue);
+    @Actor
+    public void actor2(IntResult3 r) {
+        int aValue = a.get();
+        b.set(aValue);
         r.r1 = aValue;
     }
 
-    @Override
-    public void actor3(State s, IntResult3 r) {
-        r.r2 = s.b.get();
-        r.r3 = s.a.get();
+    @Actor
+    public void actor3(IntResult3 r) {
+        r.r2 = b.get();
+        r.r3 = a.get();
     }
 
-    @Override
-    public IntResult3 newResult() {
-        return new IntResult3();
-    }
-
-    // TODO: Should have used volatiles, but lazySet is conveniently exposed by Atomics.
-    public static class State {
-        public final AtomicInteger a = new AtomicInteger();
-        public final AtomicInteger b = new AtomicInteger();
-    }
 }
