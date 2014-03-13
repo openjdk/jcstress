@@ -159,24 +159,33 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
         }
 
         String packageName = getPackageName(info.getTest()) + ".generated";
-        String testName = info.getTest().getSimpleName().toString() + "_jcstress";
+        String testName = getGeneratedName(info.getTest());
 
         info.setGeneratedName(packageName + "." + testName);
 
         return info;
     }
 
+    public static String getGeneratedName(Element ci) {
+        String name = "";
+        do {
+            name = ci.getSimpleName() + (name.isEmpty() ? "" : "_" + name);
+            ci = ci.getEnclosingElement();
+        } while (ci != null && ci.getKind() != ElementKind.PACKAGE);
+        return name + "_jcstress";
+    }
+
     private void generate(TestInfo info) {
         PrintWriter pw;
         Writer writer;
         try {
-            writer = processingEnv.getFiler().createSourceFile(info.getTest().getQualifiedName().toString() + "_jcstress").openWriter();
+            writer = processingEnv.getFiler().createSourceFile(getPackageName(info.getTest()) + ".generated." + getGeneratedName(info.getTest())).openWriter();
             pw = new PrintWriter(writer, true);
         } catch (IOException e) {
-            throw new GenerationException("IOException", info.getTest());
+            throw new GenerationException("IOException: " + e.getMessage(), info.getTest());
         }
 
-        String t = info.getTest().getSimpleName().toString();
+        String t = info.getTest().getQualifiedName().toString();
         String s = info.getState().getSimpleName().toString();
         String r = info.getResult().getSimpleName().toString();
 
@@ -184,10 +193,10 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
 
         printImports(pw, info);
 
-        pw.println("public class " + t + "_jcstress extends Runner<" + r + "> {");
+        pw.println("public class " + getGeneratedName(info.getTest()) + " extends Runner<" + r + "> {");
         pw.println();
 
-        pw.println("    public " + t + "_jcstress(Options opts, TestResultCollector collector, ExecutorService pool) {");
+        pw.println("    public " + getGeneratedName(info.getTest()) + "(Options opts, TestResultCollector collector, ExecutorService pool) {");
         pw.println("        super(opts, collector, pool, \"" + info.getTest().getQualifiedName() + "\");");
         pw.println("    }");
         pw.println();
