@@ -24,43 +24,49 @@
  */
 package org.openjdk.jcstress.tests.tearing.buffers;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.Arbiter;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 import org.openjdk.jcstress.tests.Actor2_Arbiter1_Test;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class ByteBufferInterleaveTest implements Actor2_Arbiter1_Test<ByteBuffer, IntResult3> {
+@ConcurrencyStressTest
+@State
+public class ByteBufferInterleaveTest {
 
     /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
     public static final int SIZE = 256;
 
-    @Override
-    public ByteBuffer newState() {
-        ByteBuffer buffer = ByteBuffer.allocate(SIZE);
+    private final ByteBuffer buffer;
+
+    public ByteBufferInterleaveTest() {
+        buffer = ByteBuffer.allocate(SIZE);
         buffer.order(ByteOrder.nativeOrder());
-        return buffer;
     }
 
-    @Override
-    public void actor1(ByteBuffer s, IntResult3 r) {
+    @Actor
+    public void actor1() {
         for (int i = 0; i < SIZE; i += 2) {
-            s.put(i, (byte)1);
+            buffer.put(i, (byte)1);
         }
     }
 
-    @Override
-    public void actor2(ByteBuffer s, IntResult3 r) {
+    @Actor
+    public void actor2() {
         for (int i = 1; i < SIZE; i += 2) {
-            s.put(i, (byte)2);
+            buffer.put(i, (byte)2);
         }
     }
 
-    @Override
-    public void arbiter1(ByteBuffer state, IntResult3 r) {
+    @Arbiter
+    public void arbiter1(IntResult3 r) {
         r.r1 = r.r2 = r.r3 = 0;
         for (int i = 0; i < SIZE; i++) {
-            byte s = state.get(i);
+            byte s = buffer.get(i);
             switch (s) {
                 case 0:
                     r.r1++;
@@ -75,11 +81,6 @@ public class ByteBufferInterleaveTest implements Actor2_Arbiter1_Test<ByteBuffer
                     throw new IllegalStateException(String.valueOf(s));
             }
         }
-    }
-
-    @Override
-    public IntResult3 newResult() {
-        return new IntResult3();
     }
 
 }

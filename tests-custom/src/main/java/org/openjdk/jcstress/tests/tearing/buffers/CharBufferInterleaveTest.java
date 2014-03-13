@@ -24,50 +24,48 @@
  */
 package org.openjdk.jcstress.tests.tearing.buffers;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.Arbiter;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 import org.openjdk.jcstress.tests.Actor2_Arbiter1_Test;
 
 import java.nio.CharBuffer;
 
-public class CharBufferInterleaveTest implements Actor2_Arbiter1_Test<CharBuffer, IntResult3> {
+@ConcurrencyStressTest
+@State
+public class CharBufferInterleaveTest {
 
     /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
     public static final int SIZE = 256;
 
-    @Override
-    public CharBuffer newState() {
-        return CharBuffer.allocate(SIZE);
-    }
+    private final CharBuffer buffer = CharBuffer.allocate(SIZE);
 
-    @Override
-    public void actor1(CharBuffer s, IntResult3 r) {
+    @Actor
+    public void actor1() {
         for (int i = 0; i < SIZE; i += 2) {
-            s.put(i, 'a');
+            buffer.put(i, 'a');
         }
     }
 
-    @Override
-    public void actor2(CharBuffer s, IntResult3 r) {
+    @Actor
+    public void actor2() {
         for (int i = 1; i < SIZE; i += 2) {
-            s.put(i, 'b');
+            buffer.put(i, 'b');
         }
     }
 
-    @Override
-    public void arbiter1(CharBuffer s, IntResult3 r) {
+    @Arbiter
+    public void arbiter1(IntResult3 r) {
         r.r1 = r.r2 = r.r3 = 0;
         for (int i = 0; i < SIZE; i++) {
-            switch (s.get(i)) {
+            switch (buffer.get(i)) {
                 case 'a': r.r2++; break;
                 case 'b': r.r3++; break;
                 default: r.r1++; break;
             }
         }
-    }
-
-    @Override
-    public IntResult3 newResult() {
-        return new IntResult3();
     }
 
 }

@@ -24,13 +24,18 @@
  */
 package org.openjdk.jcstress.tests.tearing.buffers;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.Arbiter;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 import org.openjdk.jcstress.tests.Actor2_Arbiter1_Test;
 
 import java.nio.DoubleBuffer;
 
-
-public class DoubleBufferInterleaveTest implements Actor2_Arbiter1_Test<DoubleBuffer, IntResult3> {
+@ConcurrencyStressTest
+@State
+public class DoubleBufferInterleaveTest {
 
     /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
     public static final int SIZE = 256;
@@ -38,30 +43,27 @@ public class DoubleBufferInterleaveTest implements Actor2_Arbiter1_Test<DoubleBu
     public static final double D1 = Math.PI * 1;
     public static final double D2 = Math.PI * 2;
 
-    @Override
-    public DoubleBuffer newState() {
-        return DoubleBuffer.allocate(SIZE);
-    }
+    private final DoubleBuffer buffer = DoubleBuffer.allocate(SIZE);
 
-    @Override
-    public void actor1(DoubleBuffer s, IntResult3 r) {
+    @Actor
+    public void actor1() {
         for (int i = 0; i < SIZE; i += 2) {
-            s.put(i, D1);
+            buffer.put(i, D1);
         }
     }
 
-    @Override
-    public void actor2(DoubleBuffer s, IntResult3 r) {
+    @Actor
+    public void actor2() {
         for (int i = 1; i < SIZE; i += 2) {
-            s.put(i, D2);
+            buffer.put(i, D2);
         }
     }
 
-    @Override
-    public void arbiter1(DoubleBuffer s, IntResult3 r) {
+    @Arbiter
+    public void arbiter1(IntResult3 r) {
         r.r1 = r.r2 = r.r3 = 0;
         for (int i = 0; i < SIZE; i++) {
-            double d = s.get(i);
+            double d = buffer.get(i);
             if (d == D1)
                 r.r2++;
             else if (d == D2)
@@ -69,11 +71,6 @@ public class DoubleBufferInterleaveTest implements Actor2_Arbiter1_Test<DoubleBu
             else
                 r.r1++;
         }
-    }
-
-    @Override
-    public IntResult3 newResult() {
-        return new IntResult3();
     }
 
 }

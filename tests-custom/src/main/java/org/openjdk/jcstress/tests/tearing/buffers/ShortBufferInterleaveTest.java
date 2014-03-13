@@ -24,40 +24,43 @@
  */
 package org.openjdk.jcstress.tests.tearing.buffers;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.Arbiter;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 import org.openjdk.jcstress.tests.Actor2_Arbiter1_Test;
 
 import java.nio.ShortBuffer;
 
-public class ShortBufferInterleaveTest implements Actor2_Arbiter1_Test<ShortBuffer, IntResult3> {
+@ConcurrencyStressTest
+@State
+public class ShortBufferInterleaveTest {
 
     /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
     public static final int SIZE = 256;
 
-    @Override
-    public ShortBuffer newState() {
-        return ShortBuffer.allocate(SIZE);
-    }
+    private final ShortBuffer buffer = ShortBuffer.allocate(SIZE);
 
-    @Override
-    public void actor1(ShortBuffer s, IntResult3 r) {
+    @Actor
+    public void actor1() {
         for (int i = 0; i < SIZE; i += 2) {
-            s.put(i, (short)1);
+            buffer.put(i, (short) 1);
         }
     }
 
-    @Override
-    public void actor2(ShortBuffer s, IntResult3 r) {
+    @Actor
+    public void actor2() {
         for (int i = 1; i < SIZE; i += 2) {
-            s.put(i, (short)2);
+            buffer.put(i, (short) 2);
         }
     }
 
-    @Override
-    public void arbiter1(ShortBuffer state, IntResult3 r) {
+    @Arbiter
+    public void arbiter1(IntResult3 r) {
         r.r1 = r.r2 = r.r3 = 0;
         for (int i = 0; i < SIZE; i++) {
-            short s = state.get(i);
+            short s = buffer.get(i);
             switch (s) {
                 case 0:
                     r.r1++;
@@ -73,10 +76,4 @@ public class ShortBufferInterleaveTest implements Actor2_Arbiter1_Test<ShortBuff
             }
         }
     }
-
-    @Override
-    public IntResult3 newResult() {
-        return new IntResult3();
-    }
-
 }

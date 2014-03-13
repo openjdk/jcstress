@@ -24,12 +24,18 @@
  */
 package org.openjdk.jcstress.tests.tearing.buffers;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.Arbiter;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 import org.openjdk.jcstress.tests.Actor2_Arbiter1_Test;
 
 import java.nio.FloatBuffer;
 
-public class FloatBufferInterleaveTest implements Actor2_Arbiter1_Test<FloatBuffer, IntResult3> {
+@ConcurrencyStressTest
+@State
+public class FloatBufferInterleaveTest {
 
     /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
     public static final int SIZE = 256;
@@ -37,30 +43,27 @@ public class FloatBufferInterleaveTest implements Actor2_Arbiter1_Test<FloatBuff
     public static final float F1 = (float) (Math.PI * 1);
     public static final float F2 = (float) (Math.PI * 2);
 
-    @Override
-    public FloatBuffer newState() {
-        return FloatBuffer.allocate(SIZE);
-    }
+    private final FloatBuffer buffer = FloatBuffer.allocate(SIZE);
 
-    @Override
-    public void actor1(FloatBuffer s, IntResult3 r) {
+    @Actor
+    public void actor1() {
         for (int i = 0; i < SIZE; i += 2) {
-            s.put(i, F1);
+            buffer.put(i, F1);
         }
     }
 
-    @Override
-    public void actor2(FloatBuffer s, IntResult3 r) {
+    @Actor
+    public void actor2() {
         for (int i = 1; i < SIZE; i += 2) {
-            s.put(i, F2);
+            buffer.put(i, F2);
         }
     }
 
-    @Override
-    public void arbiter1(FloatBuffer s, IntResult3 r) {
+    @Arbiter
+    public void arbiter1(IntResult3 r) {
         r.r1 = r.r2 = r.r3 = 0;
         for (int i = 0; i < SIZE; i++) {
-            float f = s.get(i);
+            float f = buffer.get(i);
             if (f == F1)
                 r.r2++;
             else if (f == F2)
@@ -68,11 +71,6 @@ public class FloatBufferInterleaveTest implements Actor2_Arbiter1_Test<FloatBuff
             else
                 r.r1++;
         }
-    }
-
-    @Override
-    public IntResult3 newResult() {
-        return new IntResult3();
     }
 
 }

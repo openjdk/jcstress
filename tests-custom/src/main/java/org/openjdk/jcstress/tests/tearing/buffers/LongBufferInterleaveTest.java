@@ -24,41 +24,43 @@
  */
 package org.openjdk.jcstress.tests.tearing.buffers;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.Arbiter;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 import org.openjdk.jcstress.tests.Actor2_Arbiter1_Test;
 
 import java.nio.LongBuffer;
 
-
-public class LongBufferInterleaveTest implements Actor2_Arbiter1_Test<LongBuffer, IntResult3> {
+@ConcurrencyStressTest
+@State
+public class LongBufferInterleaveTest {
 
     /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
     public static final int SIZE = 256;
 
-    @Override
-    public LongBuffer newState() {
-        return LongBuffer.allocate(SIZE);
-    }
+    private final LongBuffer buffer = LongBuffer.allocate(SIZE);
 
-    @Override
-    public void actor1(LongBuffer s, IntResult3 r) {
+    @Actor
+    public void actor1() {
         for (int i = 0; i < SIZE; i += 2) {
-            s.put(i, 1);
+            buffer.put(i, 1);
         }
     }
 
-    @Override
-    public void actor2(LongBuffer s, IntResult3 r) {
+    @Actor
+    public void actor2() {
         for (int i = 1; i < SIZE; i += 2) {
-            s.put(i, 2);
+            buffer.put(i, 2);
         }
     }
 
-    @Override
-    public void arbiter1(LongBuffer state, IntResult3 r) {
+    @Arbiter
+    public void arbiter1(IntResult3 r) {
         r.r1 = r.r2 = r.r3 = 0;
         for (int i = 0; i < SIZE; i++) {
-            long s = state.get(i);
+            long s = buffer.get(i);
             if (s == 0)
                 r.r1++;
             else if (s == 1)
@@ -66,11 +68,6 @@ public class LongBufferInterleaveTest implements Actor2_Arbiter1_Test<LongBuffer
             else
                 r.r3++;
         }
-    }
-
-    @Override
-    public IntResult3 newResult() {
-        return new IntResult3();
     }
 
 }

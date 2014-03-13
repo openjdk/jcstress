@@ -24,40 +24,43 @@
  */
 package org.openjdk.jcstress.tests.tearing.buffers;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.Arbiter;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 import org.openjdk.jcstress.tests.Actor2_Arbiter1_Test;
 
 import java.nio.IntBuffer;
 
-public class IntBufferInterleaveTest implements Actor2_Arbiter1_Test<IntBuffer, IntResult3> {
+@ConcurrencyStressTest
+@State
+public class IntBufferInterleaveTest {
 
     /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
     public static final int SIZE = 256;
 
-    @Override
-    public IntBuffer newState() {
-        return IntBuffer.allocate(SIZE);
-    }
+    private final IntBuffer buffer = IntBuffer.allocate(SIZE);
 
-    @Override
-    public void actor1(IntBuffer s, IntResult3 r) {
+    @Actor
+    public void actor1() {
         for (int i = 0; i < SIZE; i += 2) {
-            s.put(i, 1);
+            buffer.put(i, 1);
         }
     }
 
-    @Override
-    public void actor2(IntBuffer s, IntResult3 r) {
+    @Actor
+    public void actor2() {
         for (int i = 1; i < SIZE; i += 2) {
-            s.put(i, 2);
+            buffer.put(i, 2);
         }
     }
 
-    @Override
-    public void arbiter1(IntBuffer state, IntResult3 r) {
+    @Arbiter
+    public void arbiter1(IntResult3 r) {
         r.r1 = r.r2 = r.r3 = 0;
         for (int i = 0; i < SIZE; i++) {
-            int s = state.get(i);
+            int s = buffer.get(i);
             switch (s) {
                 case 0:
                     r.r1++;
@@ -72,11 +75,6 @@ public class IntBufferInterleaveTest implements Actor2_Arbiter1_Test<IntBuffer, 
                     throw new IllegalStateException(String.valueOf(s));
             }
         }
-    }
-
-    @Override
-    public IntResult3 newResult() {
-        return new IntResult3();
     }
 
 }
