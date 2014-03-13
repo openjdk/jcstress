@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.future;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
@@ -33,19 +36,15 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class FutureTaskSetTest implements Actor2_Test<FutureTaskSetTest.MyFutureTask, IntResult1> {
+@ConcurrencyStressTest
+public class FutureTaskSetTest {
 
-    @Override
-    public MyFutureTask newState() {
-        return new MyFutureTask();
-    }
-
-    @Override
-    public void actor1(MyFutureTask s, IntResult1 r) {
+    @Actor
+    public void actor1(MyFutureTask s) {
         s.set(42);
     }
 
-    @Override
+    @Actor
     public void actor2(MyFutureTask s, IntResult1 r) {
         try {
             Integer key = s.get(1, TimeUnit.HOURS);
@@ -59,11 +58,7 @@ public class FutureTaskSetTest implements Actor2_Test<FutureTaskSetTest.MyFuture
         }
     }
 
-    @Override
-    public IntResult1 newResult() {
-        return new IntResult1();
-    }
-
+    @State
     public static class MyFutureTask extends FutureTask<Integer> {
         private static final Callable<Integer> EMPTY_CALLABLE = new Callable<Integer>() {
             @Override
