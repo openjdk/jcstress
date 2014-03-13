@@ -24,36 +24,29 @@
  */
 package org.openjdk.jcstress.tests.atomics.longs;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class AtomicLongInitialValueTest implements Actor2_Test<AtomicLongInitialValueTest.Shell, LongResult1> {
+@ConcurrencyStressTest
+@State
+public class AtomicLongInitialValueTest {
 
-    public static class Shell {
-        public AtomicLong ai;
+    public AtomicLong ai;
+
+    @Actor
+    public void actor1(LongResult1 r) {
+        ai = new AtomicLong(1);
     }
 
-    @Override
-    public void actor1(Shell s, LongResult1 r) {
-        s.ai = new AtomicLong(1);
-    }
-
-    @Override
-    public void actor2(Shell s, LongResult1 r) {
-        AtomicLong ai = s.ai;
+    @Actor
+    public void actor2(LongResult1 r) {
+        AtomicLong ai = this.ai;
         r.r1 = (ai == null) ? -1 : ai.get();
-    }
-
-    @Override
-    public Shell newState() {
-        return new Shell();
-    }
-
-    @Override
-    public LongResult1 newResult() {
-        return new LongResult1();
     }
 
 }

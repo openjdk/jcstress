@@ -24,36 +24,29 @@
  */
 package org.openjdk.jcstress.tests.atomics.integer;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class AtomicIntegerInitialValueTest implements Actor2_Test<AtomicIntegerInitialValueTest.Shell, IntResult1> {
+@ConcurrencyStressTest
+@State
+public class AtomicIntegerInitialValueTest {
 
-    public static class Shell {
-        public AtomicInteger ai;
+    public AtomicInteger ai;
+
+    @Actor
+    public void actor1() {
+        ai = new AtomicInteger(1);
     }
 
-    @Override
-    public void actor1(Shell s, IntResult1 r) {
-        s.ai = new AtomicInteger(1);
-    }
-
-    @Override
-    public void actor2(Shell s, IntResult1 r) {
-        AtomicInteger ai = s.ai;
+    @Actor
+    public void actor2(IntResult1 r) {
+        AtomicInteger ai = this.ai;
         r.r1 = (ai == null) ? -1 : ai.get();
-    }
-
-    @Override
-    public Shell newState() {
-        return new Shell();
-    }
-
-    @Override
-    public IntResult1 newResult() {
-        return new IntResult1();
     }
 
 }

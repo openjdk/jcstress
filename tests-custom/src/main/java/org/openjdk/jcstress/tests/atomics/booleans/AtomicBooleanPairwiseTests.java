@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomics.booleans;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
@@ -31,40 +34,44 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AtomicBooleanPairwiseTests {
 
-    public abstract static class AbstractTest implements Actor2_Test<AtomicBoolean, IntResult2> {
-        @Override public AtomicBoolean newState() { return new AtomicBoolean(); }
-        @Override public IntResult2 newResult() { return new IntResult2(); }
+    @State
+    public static class MyState extends AtomicBoolean {
     }
 
-    public static class CAS_CAS extends AbstractTest {
-        @Override public void actor1(AtomicBoolean s, IntResult2 r) { r.r1 = s.compareAndSet(false, true) ? 1 : 0; }
-        @Override public void actor2(AtomicBoolean s, IntResult2 r) { r.r2 = s.compareAndSet(false, true) ? 1 : 0; }
+    @ConcurrencyStressTest
+    public static class CAS_CAS {
+        @Actor public void actor1(MyState s, IntResult2 r) { r.r1 = s.compareAndSet(false, true) ? 1 : 0; }
+        @Actor public void actor2(MyState s, IntResult2 r) { r.r2 = s.compareAndSet(false, true) ? 1 : 0; }
     }
 
-    public static class CAS_GetAndSet extends AbstractTest {
-        @Override public void actor1(AtomicBoolean s, IntResult2 r) { r.r1 = s.compareAndSet(false, true) ? 1 : 0; }
-        @Override public void actor2(AtomicBoolean s, IntResult2 r) { r.r2 = s.getAndSet(true) ? 0 : 1; }
+    @ConcurrencyStressTest
+    public static class CAS_GetAndSet {
+        @Actor public void actor1(MyState s, IntResult2 r) { r.r1 = s.compareAndSet(false, true) ? 1 : 0; }
+        @Actor public void actor2(MyState s, IntResult2 r) { r.r2 = s.getAndSet(true) ? 0 : 1; }
     }
 
-    public static class CAS_WCAS extends AbstractTest {
-        @Override public void actor1(AtomicBoolean s, IntResult2 r) { r.r1 = s.compareAndSet(false, true) ? 1 : 0; }
-        @Override public void actor2(AtomicBoolean s, IntResult2 r) { r.r2 = s.weakCompareAndSet(false, true) ? 1 : 0; }
+    @ConcurrencyStressTest
+    public static class CAS_WCAS {
+        @Actor public void actor1(MyState s, IntResult2 r) { r.r1 = s.compareAndSet(false, true) ? 1 : 0; }
+        @Actor public void actor2(MyState s, IntResult2 r) { r.r2 = s.weakCompareAndSet(false, true) ? 1 : 0; }
     }
 
-    public static class GetAndSet_GetAndSet extends AbstractTest {
-        @Override public void actor1(AtomicBoolean s, IntResult2 r) { r.r1 = s.getAndSet(true) ? 0 : 1; }
-        @Override public void actor2(AtomicBoolean s, IntResult2 r) { r.r2 = s.getAndSet(true) ? 0 : 1; }
+    @ConcurrencyStressTest
+    public static class GetAndSet_GetAndSet {
+        @Actor public void actor1(MyState s, IntResult2 r) { r.r1 = s.getAndSet(true) ? 0 : 1; }
+        @Actor public void actor2(MyState s, IntResult2 r) { r.r2 = s.getAndSet(true) ? 0 : 1; }
     }
 
-    public static class GetAndSet_WCAS extends AbstractTest {
-        @Override public void actor1(AtomicBoolean s, IntResult2 r) { r.r1 = s.getAndSet(true) ? 0 : 1; }
-        @Override public void actor2(AtomicBoolean s, IntResult2 r) { r.r2 = s.weakCompareAndSet(false, true) ? 1 : 0; }
+    @ConcurrencyStressTest
+    public static class GetAndSet_WCAS {
+        @Actor public void actor1(MyState s, IntResult2 r) { r.r1 = s.getAndSet(true) ? 0 : 1; }
+        @Actor public void actor2(MyState s, IntResult2 r) { r.r2 = s.weakCompareAndSet(false, true) ? 1 : 0; }
     }
 
-    public static class WCAS_WCAS extends AbstractTest {
-        @Override public void actor1(AtomicBoolean s, IntResult2 r) { r.r1 = s.weakCompareAndSet(false, true) ? 1 : 0; }
-        @Override public void actor2(AtomicBoolean s, IntResult2 r) { r.r2 = s.weakCompareAndSet(false, true) ? 1 : 0; }
+    @ConcurrencyStressTest
+    public static class WCAS_WCAS {
+        @Actor public void actor1(MyState s, IntResult2 r) { r.r1 = s.weakCompareAndSet(false, true) ? 1 : 0; }
+        @Actor public void actor2(MyState s, IntResult2 r) { r.r2 = s.weakCompareAndSet(false, true) ? 1 : 0; }
     }
-
 
 }

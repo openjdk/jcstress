@@ -24,36 +24,29 @@
  */
 package org.openjdk.jcstress.tests.atomics.booleans;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class AtomicBooleanInitialValueTest implements Actor2_Test<AtomicBooleanInitialValueTest.Shell, IntResult1> {
+@ConcurrencyStressTest
+@State
+public class AtomicBooleanInitialValueTest {
 
-    public static class Shell {
-        public AtomicBoolean ai;
+    public AtomicBoolean ai;
+
+    @Actor
+    public void actor1() {
+        ai = new AtomicBoolean(true);
     }
 
-    @Override
-    public void actor1(Shell s, IntResult1 r) {
-        s.ai = new AtomicBoolean(true);
-    }
-
-    @Override
-    public void actor2(Shell s, IntResult1 r) {
-        AtomicBoolean ai = s.ai;
+    @Actor
+    public void actor2(IntResult1 r) {
+        AtomicBoolean ai = this.ai;
         r.r1 = (ai == null) ? -1 : (ai.get() ? 1 : 0);
-    }
-
-    @Override
-    public Shell newState() {
-        return new Shell();
-    }
-
-    @Override
-    public IntResult1 newResult() {
-        return new IntResult1();
     }
 
 }

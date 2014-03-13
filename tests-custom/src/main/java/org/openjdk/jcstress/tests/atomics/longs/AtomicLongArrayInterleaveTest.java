@@ -24,40 +24,43 @@
  */
 package org.openjdk.jcstress.tests.atomics.longs;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.Arbiter;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 import org.openjdk.jcstress.tests.Actor2_Arbiter1_Test;
 
 import java.util.concurrent.atomic.AtomicLongArray;
 
-public class AtomicLongArrayInterleaveTest implements Actor2_Arbiter1_Test<AtomicLongArray, IntResult3> {
+@ConcurrencyStressTest
+@State
+public class AtomicLongArrayInterleaveTest {
 
     /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
     public static final int SIZE = 256;
 
-    @Override
-    public AtomicLongArray newState() {
-        return new AtomicLongArray(SIZE);
-    }
+    AtomicLongArray ala = new AtomicLongArray(SIZE);
 
-    @Override
-    public void actor1(AtomicLongArray s, IntResult3 r) {
+    @Actor
+    public void actor1() {
         for (int i = 0; i < SIZE; i += 2) {
-            s.set(i, 1);
+            ala.set(i, 1);
         }
     }
 
-    @Override
-    public void actor2(AtomicLongArray s, IntResult3 r) {
+    @Actor
+    public void actor2() {
         for (int i = 1; i < SIZE; i += 2) {
-            s.set(i, 2);
+            ala.set(i, 2);
         }
     }
 
-    @Override
-    public void arbiter1(AtomicLongArray  state, IntResult3 r) {
+    @Arbiter
+    public void arbiter1(IntResult3 r) {
         r.r1 = r.r2 = r.r3 = 0;
         for (int i = 0; i < SIZE; i++) {
-            long s = state.get(i);
+            long s = ala.get(i);
             switch ((int) s) {
                 case 0:
                     r.r1++;
@@ -72,11 +75,6 @@ public class AtomicLongArrayInterleaveTest implements Actor2_Arbiter1_Test<Atomi
                     throw new IllegalStateException(String.valueOf(s));
             }
         }
-    }
-
-    @Override
-    public IntResult3 newResult() {
-        return new IntResult3();
     }
 
 }

@@ -24,6 +24,10 @@
  */
 package org.openjdk.jcstress.tests.atomics.integer;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.Arbiter;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult1;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import org.openjdk.jcstress.tests.Actor2_Arbiter1_Test;
@@ -33,313 +37,361 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 public class AtomicIntegerFieldUpdaterPairwiseTests {
 
-    public static class State {
+    @State
+    public static class S {
         public volatile int v;
-        public final AtomicIntegerFieldUpdater<State> u = AtomicIntegerFieldUpdater.newUpdater(State.class, "v");
-    }
-
-    public abstract static class AbstractTest implements Actor2_Test<State, IntResult2> {
-        @Override public State newState() { return new State(); }
-        @Override public IntResult2 newResult() { return new IntResult2(); }
+        public final AtomicIntegerFieldUpdater<S> u = AtomicIntegerFieldUpdater.newUpdater(S.class, "v");
     }
 
     // ------------------- first is addAndGet
 
-    public static class AddAndGet_AddAndGet extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.addAndGet(s, 5); }
+    @ConcurrencyStressTest
+    public static class AddAndGet_AddAndGet {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.addAndGet(s, 5); }
     }
 
-    public static class AddAndGet_DecAndGet extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.decrementAndGet(s); }
+    @ConcurrencyStressTest
+    public static class AddAndGet_DecAndGet {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.decrementAndGet(s); }
     }
 
-    public static class AddAndGet_GetAndAdd extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndAdd(s, 5); }
+    @ConcurrencyStressTest
+    public static class AddAndGet_GetAndAdd {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndAdd(s, 5); }
     }
 
-    public static class AddAndGet_GetAndDec extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndDecrement(s); }
+    @ConcurrencyStressTest
+    public static class AddAndGet_GetAndDec {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndDecrement(s); }
     }
 
-    public static class AddAndGet_GetAndInc extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndIncrement(s); }
+    @ConcurrencyStressTest
+    public static class AddAndGet_GetAndInc {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndIncrement(s); }
     }
 
-    public static class AddAndGet_GetAndSet extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndSet(s, 10); }
+    @ConcurrencyStressTest
+    public static class AddAndGet_GetAndSet {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndSet(s, 10); }
     }
 
-    public static class AddAndGet_IncAndGet extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.incrementAndGet(s); }
+    @ConcurrencyStressTest
+    public static class AddAndGet_IncAndGet {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.incrementAndGet(s); }
     }
 
-    public static class AddAndGet_CAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.compareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class AddAndGet_CAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.compareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class AddAndGet_WCAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class AddAndGet_WCAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class AddAndGet_Set extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
+    @ConcurrencyStressTest
+    public static class AddAndGet_Set {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.addAndGet(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
     }
 
     // ------------------- first is decAndGet
 
-    public static class DecAndGet_DecAndGet extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.decrementAndGet(s); }
+    @ConcurrencyStressTest
+    public static class DecAndGet_DecAndGet {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.decrementAndGet(s); }
     }
 
-    public static class DecAndGet_GetAndAdd extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndAdd(s, 5); }
+    @ConcurrencyStressTest
+    public static class DecAndGet_GetAndAdd {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndAdd(s, 5); }
     }
 
-    public static class DecAndGet_GetAndDec extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndDecrement(s); }
+    @ConcurrencyStressTest
+    public static class DecAndGet_GetAndDec {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndDecrement(s); }
     }
 
-    public static class DecAndGet_GetAndInc extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndIncrement(s); }
+    @ConcurrencyStressTest
+    public static class DecAndGet_GetAndInc {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndIncrement(s); }
     }
 
-    public static class DecAndGet_GetAndSet extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndSet(s, 10); }
+    @ConcurrencyStressTest
+    public static class DecAndGet_GetAndSet {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndSet(s, 10); }
     }
 
-    public static class DecAndGet_IncAndGet extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.incrementAndGet(s); }
+    @ConcurrencyStressTest
+    public static class DecAndGet_IncAndGet {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.incrementAndGet(s); }
     }
 
-    public static class DecAndGet_CAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.compareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class DecAndGet_CAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.compareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class DecAndGet_WCAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class DecAndGet_WCAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class DecAndGet_Set extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
-        @Override public void actor2(State s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
+    @ConcurrencyStressTest
+    public static class DecAndGet_Set {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.decrementAndGet(s); }
+        @Actor public void actor2(S s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
     }
 
     // ------------------- first is getAndAdd
 
-    public static class GetAndAdd_GetAndAdd extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndAdd(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndAdd(s, 5); }
+    @ConcurrencyStressTest
+    public static class GetAndAdd_GetAndAdd {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndAdd(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndAdd(s, 5); }
     }
 
-    public static class GetAndAdd_GetAndDec extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndAdd(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndDecrement(s); }
+    @ConcurrencyStressTest
+    public static class GetAndAdd_GetAndDec {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndAdd(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndDecrement(s); }
     }
 
-    public static class GetAndAdd_GetAndInc extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndAdd(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndIncrement(s); }
+    @ConcurrencyStressTest
+    public static class GetAndAdd_GetAndInc {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndAdd(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndIncrement(s); }
     }
 
-    public static class GetAndAdd_GetAndSet extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndAdd(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndSet(s, 10); }
+    @ConcurrencyStressTest
+    public static class GetAndAdd_GetAndSet {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndAdd(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndSet(s, 10); }
     }
 
-    public static class GetAndAdd_IncAndGet extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndAdd(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.incrementAndGet(s); }
+    @ConcurrencyStressTest
+    public static class GetAndAdd_IncAndGet {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndAdd(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.incrementAndGet(s); }
     }
 
-    public static class GetAndAdd_CAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndAdd(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.compareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class GetAndAdd_CAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndAdd(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.compareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class GetAndAdd_WCAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndAdd(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class GetAndAdd_WCAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndAdd(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class GetAndAdd_Set extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndAdd(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
+    @ConcurrencyStressTest
+    public static class GetAndAdd_Set {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndAdd(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
     }
 
     // ------------------- first is getAndDec
 
-    public static class GetAndDec_GetAndDec extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndDecrement(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndDecrement(s); }
+    @ConcurrencyStressTest
+    public static class GetAndDec_GetAndDec {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndDecrement(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndDecrement(s); }
     }
 
-    public static class GetAndDec_GetAndInc extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndDecrement(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndIncrement(s); }
+    @ConcurrencyStressTest
+    public static class GetAndDec_GetAndInc {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndDecrement(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndIncrement(s); }
     }
 
-    public static class GetAndDec_GetAndSet extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndDecrement(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndSet(s, 10); }
+    @ConcurrencyStressTest
+    public static class GetAndDec_GetAndSet {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndDecrement(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndSet(s, 10); }
     }
 
-    public static class GetAndDec_IncAndGet extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndDecrement(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.incrementAndGet(s); }
+    @ConcurrencyStressTest
+    public static class GetAndDec_IncAndGet {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndDecrement(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.incrementAndGet(s); }
     }
 
-    public static class GetAndDec_CAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndDecrement(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.compareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class GetAndDec_CAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndDecrement(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.compareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class GetAndDec_WCAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndDecrement(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class GetAndDec_WCAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndDecrement(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class GetAndDec_Set extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndDecrement(s); }
-        @Override public void actor2(State s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
+    @ConcurrencyStressTest
+    public static class GetAndDec_Set {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndDecrement(s); }
+        @Actor public void actor2(S s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
     }
 
     // ------------------- first is getAndInc
 
-    public static class GetAndInc_GetAndInc extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndIncrement(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndIncrement(s); }
+    @ConcurrencyStressTest
+    public static class GetAndInc_GetAndInc {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndIncrement(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndIncrement(s); }
     }
 
-    public static class GetAndInc_GetAndSet extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndIncrement(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndSet(s, 10); }
+    @ConcurrencyStressTest
+    public static class GetAndInc_GetAndSet {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndIncrement(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndSet(s, 10); }
     }
 
-    public static class GetAndInc_IncAndGet extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndIncrement(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.incrementAndGet(s); }
+    @ConcurrencyStressTest
+    public static class GetAndInc_IncAndGet {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndIncrement(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.incrementAndGet(s); }
     }
 
-    public static class GetAndInc_CAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndIncrement(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.compareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class GetAndInc_CAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndIncrement(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.compareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class GetAndInc_WCAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndIncrement(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class GetAndInc_WCAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndIncrement(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class GetAndInc_Set extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndIncrement(s); }
-        @Override public void actor2(State s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
+    @ConcurrencyStressTest
+    public static class GetAndInc_Set {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndIncrement(s); }
+        @Actor public void actor2(S s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
     }
 
     // ------------------- first is getAndSet
 
-    public static class GetAndSet_GetAndSet extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndSet(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.getAndSet(s, 10); }
+    @ConcurrencyStressTest
+    public static class GetAndSet_GetAndSet {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndSet(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.getAndSet(s, 10); }
     }
 
-    public static class GetAndSet_IncAndGet extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndSet(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.incrementAndGet(s); }
+    @ConcurrencyStressTest
+    public static class GetAndSet_IncAndGet {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndSet(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.incrementAndGet(s); }
     }
 
-    public static class GetAndSet_CAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndSet(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.compareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class GetAndSet_CAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndSet(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.compareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class GetAndSet_WCAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndSet(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class GetAndSet_WCAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndSet(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class GetAndSet_Set extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.getAndSet(s, 5); }
-        @Override public void actor2(State s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
+    @ConcurrencyStressTest
+    public static class GetAndSet_Set {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.getAndSet(s, 5); }
+        @Actor public void actor2(S s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
     }
 
     // ------------------- first is incAndGet
 
-    public static class IncAndGet_IncAndGet extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.incrementAndGet(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.incrementAndGet(s); }
+    @ConcurrencyStressTest
+    public static class IncAndGet_IncAndGet {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.incrementAndGet(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.incrementAndGet(s); }
     }
 
-    public static class IncAndGet_CAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.incrementAndGet(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.compareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class IncAndGet_CAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.incrementAndGet(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.compareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class IncAndGet_WCAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.incrementAndGet(s); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class IncAndGet_WCAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.incrementAndGet(s); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class IncAndGet_Set extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.incrementAndGet(s); }
-        @Override public void actor2(State s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
+    @ConcurrencyStressTest
+    public static class IncAndGet_Set {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.incrementAndGet(s); }
+        @Actor public void actor2(S s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
     }
 
     // ------------------- first is CAS
 
-    public static class CAS_CAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.compareAndSet(s, 0, 5) ? 5 : 1; }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.compareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class CAS_CAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.compareAndSet(s, 0, 5) ? 5 : 1; }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.compareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class CAS_WCAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.compareAndSet(s, 0, 5) ? 5 : 1; }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class CAS_WCAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.compareAndSet(s, 0, 5) ? 5 : 1; }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class CAS_Set extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.compareAndSet(s, 0, 5) ? 5 : 1; }
-        @Override public void actor2(State s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
+    @ConcurrencyStressTest
+    public static class CAS_Set {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.compareAndSet(s, 0, 5) ? 5 : 1; }
+        @Actor public void actor2(S s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
     }
 
     // ------------------- first is WCAS
 
-    public static class WCAS_WCAS extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.weakCompareAndSet(s, 0, 5) ? 5 : 1; }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
+    @ConcurrencyStressTest
+    public static class WCAS_WCAS {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.weakCompareAndSet(s, 0, 5) ? 5 : 1; }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }
     }
 
-    public static class WCAS_Set extends AbstractTest {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = s.u.weakCompareAndSet(s, 0, 5) ? 5 : 1; }
-        @Override public void actor2(State s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
+    @ConcurrencyStressTest
+    public static class WCAS_Set {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.weakCompareAndSet(s, 0, 5) ? 5 : 1; }
+        @Actor public void actor2(S s, IntResult2 r) { s.u.set(s, 10); r.r2 = 0; }
     }
 
     // ------------------- first is set
 
-    public static class Set_Set implements Actor2_Arbiter1_Test<State, IntResult1> {
-        @Override public void actor1(State s, IntResult1 r) { s.u.set(s, 5); }
-        @Override public void actor2(State s, IntResult1 r) { s.u.set(s, 10); }
-        @Override public void arbiter1(State s, IntResult1 r) { r.r1 = s.u.get(s); }
-
-        @Override public State newState() { return new State();  }
-        @Override public IntResult1 newResult() { return new IntResult1(); }
+    @ConcurrencyStressTest
+    public static class Set_Set {
+        @Actor   public void actor1(S s, IntResult1 r) { s.u.set(s, 5); }
+        @Actor   public void actor2(S s, IntResult1 r) { s.u.set(s, 10); }
+        @Arbiter public void arbiter1(S s, IntResult1 r) { r.r1 = s.u.get(s); }
     }
 
 }

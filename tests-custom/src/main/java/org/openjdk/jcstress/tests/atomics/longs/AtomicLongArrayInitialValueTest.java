@@ -24,39 +24,32 @@
  */
 package org.openjdk.jcstress.tests.atomics.longs;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult4;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
 import java.util.concurrent.atomic.AtomicLongArray;
 
-public class AtomicLongArrayInitialValueTest implements Actor2_Test<AtomicLongArrayInitialValueTest.Shell, LongResult4> {
+@ConcurrencyStressTest
+@State
+public class AtomicLongArrayInitialValueTest {
 
-    public static class Shell {
-        public AtomicLongArray ai;
+    public AtomicLongArray ai;
+
+    @Actor
+    public void actor1() {
+        ai = new AtomicLongArray(4);
     }
 
-    @Override
-    public void actor1(Shell s, LongResult4 r) {
-        s.ai = new AtomicLongArray(4);
-    }
-
-    @Override
-    public void actor2(Shell s, LongResult4 r) {
-        AtomicLongArray ai = s.ai;
+    @Actor
+    public void actor2(LongResult4 r) {
+        AtomicLongArray ai = this.ai;
         r.r1 = (ai == null) ? -1 : ai.get(0);
         r.r2 = (ai == null) ? -1 : ai.get(1);
         r.r3 = (ai == null) ? -1 : ai.get(2);
         r.r4 = (ai == null) ? -1 : ai.get(3);
-    }
-
-    @Override
-    public Shell newState() {
-        return new Shell();
-    }
-
-    @Override
-    public LongResult4 newResult() {
-        return new LongResult4();
     }
 
 }

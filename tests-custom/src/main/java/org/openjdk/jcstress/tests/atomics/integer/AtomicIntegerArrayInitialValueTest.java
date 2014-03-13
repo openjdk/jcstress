@@ -24,39 +24,32 @@
  */
 package org.openjdk.jcstress.tests.atomics.integer;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult4;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-public class AtomicIntegerArrayInitialValueTest implements Actor2_Test<AtomicIntegerArrayInitialValueTest.Shell, IntResult4> {
+@ConcurrencyStressTest
+@State
+public class AtomicIntegerArrayInitialValueTest {
 
-    public static class Shell {
-        public AtomicIntegerArray ai;
+    public AtomicIntegerArray ai;
+
+    @Actor
+    public void actor1() {
+        ai = new AtomicIntegerArray(4);
     }
 
-    @Override
-    public void actor1(Shell s, IntResult4 r) {
-        s.ai = new AtomicIntegerArray(4);
-    }
-
-    @Override
-    public void actor2(Shell s, IntResult4 r) {
-        AtomicIntegerArray ai = s.ai;
+    @Actor
+    public void actor2(IntResult4 r) {
+        AtomicIntegerArray ai = this.ai;
         r.r1 = (ai == null) ? -1 : ai.get(0);
         r.r2 = (ai == null) ? -1 : ai.get(1);
         r.r3 = (ai == null) ? -1 : ai.get(2);
         r.r4 = (ai == null) ? -1 : ai.get(3);
-    }
-
-    @Override
-    public Shell newState() {
-        return new Shell();
-    }
-
-    @Override
-    public IntResult4 newResult() {
-        return new IntResult4();
     }
 
 }
