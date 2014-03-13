@@ -24,28 +24,25 @@
  */
 package org.openjdk.jcstress.tests.init.arrays.volatiles;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.ShortResult4;
-import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class ShortArrayInitTest implements Actor2_Test<ShortArrayInitTest.State, ShortResult4> {
+@ConcurrencyStressTest
+@State
+public class ShortArrayInitTest {
 
-    public static class State {
-        volatile short[] arr;
+    volatile short[] arr;
+
+    @Actor
+    public void actor1() {
+        arr = new short[4];
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public void actor1(State s, ShortResult4 r) {
-        s.arr = new short[4];
-    }
-
-    @Override
-    public void actor2(State s, ShortResult4 r) {
-        short[] arr = s.arr;
+    @Actor
+    public void actor2(ShortResult4 r) {
+        short[] arr = this.arr;
         if (arr == null) {
             r.r1 = r.r2 = r.r3 = r.r4 = -1;
         } else {
@@ -54,11 +51,6 @@ public class ShortArrayInitTest implements Actor2_Test<ShortArrayInitTest.State,
             r.r3 = arr[2];
             r.r4 = arr[3];
         }
-    }
-
-    @Override
-    public ShortResult4 newResult() {
-        return new ShortResult4();
     }
 
 }

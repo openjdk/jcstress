@@ -24,32 +24,30 @@
  */
 package org.openjdk.jcstress.tests.init.objects.plain;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult4;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class LongFieldsTest implements Actor2_Test<LongFieldsTest.State, LongResult4> {
+@ConcurrencyStressTest
+@State
+public class LongFieldsTest {
 
-    public static class State {
-        Data data;
-    }
+    Data data;
 
     public static class Data {
         long v0, v1, v2, v3;
     }
 
-    @Override
-    public State newState() {
-        return new State();
+    @Actor
+    public void actor1() {
+        data = new Data();
     }
 
-    @Override
-    public void actor1(State s, LongResult4 r) {
-        s.data = new Data();
-    }
-
-    @Override
-    public void actor2(State s, LongResult4 r) {
-        Data d = s.data;
+    @Actor
+    public void actor2(LongResult4 r) {
+        Data d = this.data;
         if (d == null) {
             r.r1 = r.r2 = r.r3 = r.r4 = -1;
         } else {
@@ -58,11 +56,6 @@ public class LongFieldsTest implements Actor2_Test<LongFieldsTest.State, LongRes
             r.r3 = d.v2;
             r.r4 = d.v3;
         }
-    }
-
-    @Override
-    public LongResult4 newResult() {
-        return new LongResult4();
     }
 
 }

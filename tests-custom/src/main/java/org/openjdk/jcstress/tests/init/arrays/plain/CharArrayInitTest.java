@@ -24,28 +24,26 @@
  */
 package org.openjdk.jcstress.tests.init.arrays.plain;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.CharResult4;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class CharArrayInitTest implements Actor2_Test<CharArrayInitTest.State, CharResult4> {
+@ConcurrencyStressTest
+@State
+public class CharArrayInitTest {
 
-    public static class State {
-        char[] arr;
+    char[] arr;
+
+    @Actor
+    public void actor1() {
+        arr = new char[4];
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public void actor1(State s, CharResult4 r) {
-        s.arr = new char[4];
-    }
-
-    @Override
-    public void actor2(State s, CharResult4 r) {
-        char[] arr = s.arr;
+    @Actor
+    public void actor2(CharResult4 r) {
+        char[] arr = this.arr;
         if (arr == null) {
             r.r1 = r.r2 = r.r3 = r.r4 = 'N';
         } else {
@@ -54,11 +52,6 @@ public class CharArrayInitTest implements Actor2_Test<CharArrayInitTest.State, C
             r.r3 = (char)(arr[2] + 'A');
             r.r4 = (char)(arr[3] + 'A');
         }
-    }
-
-    @Override
-    public CharResult4 newResult() {
-        return new CharResult4();
     }
 
 }

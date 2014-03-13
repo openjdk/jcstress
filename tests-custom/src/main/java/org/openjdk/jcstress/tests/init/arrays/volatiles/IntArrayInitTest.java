@@ -24,28 +24,26 @@
  */
 package org.openjdk.jcstress.tests.init.arrays.volatiles;
 
+
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult4;
-import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class IntArrayInitTest implements Actor2_Test<IntArrayInitTest.State, IntResult4> {
+@ConcurrencyStressTest
+@State
+public class IntArrayInitTest {
 
-    public static class State {
-        volatile int[] arr;
+    volatile int[] arr;
+
+    @Actor
+    public void actor1() {
+        arr = new int[4];
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public void actor1(State s, IntResult4 r) {
-        s.arr = new int[4];
-    }
-
-    @Override
-    public void actor2(State s, IntResult4 r) {
-        int[] arr = s.arr;
+    @Actor
+    public void actor2(IntResult4 r) {
+        int[] arr = this.arr;
         if (arr == null) {
             r.r1 = r.r2 = r.r3 = r.r4 = -1;
         } else {
@@ -54,11 +52,6 @@ public class IntArrayInitTest implements Actor2_Test<IntArrayInitTest.State, Int
             r.r3 = arr[2];
             r.r4 = arr[3];
         }
-    }
-
-    @Override
-    public IntResult4 newResult() {
-        return new IntResult4();
     }
 
 }

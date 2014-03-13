@@ -24,28 +24,26 @@
  */
 package org.openjdk.jcstress.tests.init.arrays.plain;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.BooleanResult4;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class BooleanArrayInitTest implements Actor2_Test<BooleanArrayInitTest.State, BooleanResult4> {
+@ConcurrencyStressTest
+@State
+public class BooleanArrayInitTest {
 
-    public static class State {
-        boolean[] arr;
+    boolean[] arr;
+
+    @Actor
+    public void actor1(BooleanResult4 r) {
+        arr = new boolean[4];
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public void actor1(State s, BooleanResult4 r) {
-        s.arr = new boolean[4];
-    }
-
-    @Override
-    public void actor2(State s, BooleanResult4 r) {
-        boolean[] arr = s.arr;
+    @Actor
+    public void actor2(BooleanResult4 r) {
+        boolean[] arr = this.arr;
         if (arr == null) {
             r.r1 = r.r2 = r.r3 = r.r4 = false;
         } else {
@@ -54,11 +52,6 @@ public class BooleanArrayInitTest implements Actor2_Test<BooleanArrayInitTest.St
             r.r3 = arr[2];
             r.r4 = arr[3];
         }
-    }
-
-    @Override
-    public BooleanResult4 newResult() {
-        return new BooleanResult4();
     }
 
 }

@@ -24,32 +24,29 @@
  */
 package org.openjdk.jcstress.tests.init.objects.volatiles;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.ByteResult4;
-import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class ByteFieldsTest implements Actor2_Test<ByteFieldsTest.State, ByteResult4> {
+@ConcurrencyStressTest
+@State
+public class ByteFieldsTest {
 
-    public static class State {
-        Data data;
-    }
+    Data data;
 
     public static class Data {
         volatile byte v0, v1, v2, v3;
     }
 
-    @Override
-    public State newState() {
-        return new State();
+    @Actor
+    public void actor1() {
+        data = new Data();
     }
 
-    @Override
-    public void actor1(State s, ByteResult4 r) {
-        s.data = new Data();
-    }
-
-    @Override
-    public void actor2(State s, ByteResult4 r) {
-        Data d = s.data;
+    @Actor
+    public void actor2(ByteResult4 r) {
+        Data d = this.data;
         if (d == null) {
             r.r1 = r.r2 = r.r3 = r.r4 = -1;
         } else {
@@ -60,9 +57,5 @@ public class ByteFieldsTest implements Actor2_Test<ByteFieldsTest.State, ByteRes
         }
     }
 
-    @Override
-    public ByteResult4 newResult() {
-        return new ByteResult4();
-    }
-
 }
+
