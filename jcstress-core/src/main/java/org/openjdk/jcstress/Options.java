@@ -45,11 +45,6 @@ import java.util.concurrent.Future;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class Options {
-    public static final String STATE_FILE = "test.state";
-
-    // the largest test it 4 threads wide
-    private static final int MIN_THREADS = 4;
-
     private String resultDir;
     private String testFilter;
     private int minStride, maxStride;
@@ -193,7 +188,6 @@ public class Options {
         } else {
             this.userCPUs = set.valueOf(cpus);
         }
-        this.userCPUs = Math.max(MIN_THREADS, this.userCPUs);
 
         if (userCPUs > systemCPUs) {
             forceYield = true;

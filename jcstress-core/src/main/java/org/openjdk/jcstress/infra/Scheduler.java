@@ -48,20 +48,24 @@ public class Scheduler {
             return t;
         }
     });
+    private final int totalTokens;
 
     public Scheduler(int totalTokens) {
+        this.totalTokens = totalTokens;
         this.sentinel = new Semaphore(totalTokens);
     }
 
     public void schedule(final ScheduledTask task) throws InterruptedException {
-        sentinel.acquire(task.getTokens());
+        // Make fat tasks bypass in exclusive mode
+        final int tokensAcquired = Math.min(task.getTokens(), totalTokens);
+        sentinel.acquire(tokensAcquired);
         services.submit(new Runnable() {
             @Override
             public void run() {
                 try {
                     task.run();
                 } finally {
-                    sentinel.release(task.getTokens());
+                    sentinel.release(tokensAcquired);
                 }
             }
         });

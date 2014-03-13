@@ -83,9 +83,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class JCStress {
     final ExecutorService pool;
-    private final PrintStream out;
-    NetworkInputCollector networkCollector;
-    Scheduler scheduler;
+    final PrintStream out;
+    volatile NetworkInputCollector networkCollector;
+    volatile Scheduler scheduler;
 
     public JCStress() {
         this.pool = Executors.newCachedThreadPool(new ThreadFactory() {
@@ -114,7 +114,6 @@ public class JCStress {
 
             networkCollector = new NetworkInputCollector(sink);
 
-            // FIXME: Scheduler will stuck itself if there is a test requiring more than $userCPUs.
             scheduler = new Scheduler(opts.getUserCPUs());
 
             if (opts.shouldFork()) {
