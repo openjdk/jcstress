@@ -24,43 +24,39 @@
  */
 package org.openjdk.jcstress.tests.fences;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
+import org.openjdk.jcstress.util.UnsafeHolder;
 
 /**
  * Baseline for FencedAcquireReleaseTest
  *
  *  @author Doug Lea (dl@cs.oswego.edu)
  */
-public class UnfencedAcquireReleaseTest implements Actor2_Test<UnfencedAcquireReleaseTest.State, IntResult2> {
+@ConcurrencyStressTest
+@State
+public class UnfencedAcquireReleaseTest {
 
-    static class State {
-        int x;
-        int y; // acq/rel var
+    int x;
+    int y; // acq/rel var
+
+    @Actor
+    public void actor1() {
+        x = 1;
+        x = 2;
+        y = 1;
+        x = 3;
     }
 
-    @Override
-    public void actor1(State s, IntResult2 r) {
-        s.x = 1;
-        s.x = 2;
-        s.y = 1;
-        s.x = 3;
-    }
-
-    @Override
-    public void actor2(State s, IntResult2 r) {
-        r.r1 = s.y;
-        r.r2 = s.x;
-    }
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public IntResult2 newResult() {
-        return new IntResult2();
+    @Actor
+    public void actor2(IntResult2 r) {
+        int sy = y;
+        int sx = x;
+        r.r1 = sy;
+        r.r2 = sx;
     }
 
 }

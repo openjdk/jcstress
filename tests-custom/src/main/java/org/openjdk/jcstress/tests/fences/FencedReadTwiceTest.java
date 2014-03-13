@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.fences;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.util.UnsafeHolder;
@@ -33,36 +36,26 @@ import org.openjdk.jcstress.util.UnsafeHolder;
  *
  * @author Doug Lea (dl@cs.oswego.edu)
  */
-public class FencedReadTwiceTest implements Actor2_Test<FencedReadTwiceTest.State, IntResult3> {
+@ConcurrencyStressTest
+@State
+public class FencedReadTwiceTest {
 
-    static class State {
-        int x;
-        int y;
-    }
+    int x;
+    int y;
 
-    @Override
-    public void actor1(State s, IntResult3 r) {
-        s.x = 1;
+    @Actor
+    public void actor1() {
+        x = 1;
         UnsafeHolder.U.storeFence();
-        s.y = 1;
+        y = 1;
     }
 
-    @Override
-    public void actor2(State s, IntResult3 r) {
-        r.r1 = s.x;
-        r.r2 = s.y;
+    @Actor
+    public void actor2(IntResult3 r) {
+        r.r1 = x;
+        r.r2 = y;
         UnsafeHolder.U.loadFence();
-        r.r3 = s.x;
-    }
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public IntResult3 newResult() {
-        return new IntResult3();
+        r.r3 = x;
     }
 
 }

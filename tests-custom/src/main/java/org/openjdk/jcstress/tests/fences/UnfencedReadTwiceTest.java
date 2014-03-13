@@ -24,42 +24,36 @@
  */
 package org.openjdk.jcstress.tests.fences;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 import org.openjdk.jcstress.tests.Actor2_Test;
+import org.openjdk.jcstress.util.UnsafeHolder;
 
 /**
  * Test if intervening write breaks reordering.
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class UnfencedReadTwiceTest implements Actor2_Test<UnfencedReadTwiceTest.State, IntResult3> {
+@ConcurrencyStressTest
+@State
+public class UnfencedReadTwiceTest {
 
-    static class State {
-        int x;
-        int y;
+    int x;
+    int y;
+
+    @Actor
+    public void actor1() {
+        x = 1;
+        y = 1;
     }
 
-    @Override
-    public void actor1(State s, IntResult3 r) {
-        s.x = 1;
-        s.y = 1;
-    }
-
-    @Override
-    public void actor2(State s, IntResult3 r) {
-        r.r1 = s.x;
-        r.r2 = s.y;
-        r.r3 = s.x;
-    }
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public IntResult3 newResult() {
-        return new IntResult3();
+    @Actor
+    public void actor2(IntResult3 r) {
+        r.r1 = x;
+        r.r2 = y;
+        r.r3 = x;
     }
 
 }

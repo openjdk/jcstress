@@ -24,8 +24,10 @@
  */
 package org.openjdk.jcstress.tests.fences;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
-import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
 /**
@@ -33,28 +35,28 @@ import org.openjdk.jcstress.util.UnsafeHolder;
  *
  *  @author Doug Lea (dl@cs.oswego.edu)
  */
-public class FencedPublicationTest implements Actor2_Test<FencedPublicationTest.State, IntResult2> {
+@ConcurrencyStressTest
+@State
+public class FencedPublicationTest {
+
+    Data data;
 
     static class Data {
         int x;
     }
 
-    static class State {
-        Data data;
-    }
-
-    @Override
-    public void actor1(State s, IntResult2 r) {
+    @Actor
+    public void actor1() {
         Data d = new Data();
         d.x = 1;
         UnsafeHolder.U.storeFence();
-        s.data = d;
+        data = d;
     }
 
-    @Override
-    public void actor2(State s, IntResult2 r) {
+    @Actor
+    public void actor2(IntResult2 r) {
         int sy, sx;
-        Data d = s.data;
+        Data d = data;
         if (d == null) {
             sy = 0;
             sx = 0;
@@ -65,16 +67,6 @@ public class FencedPublicationTest implements Actor2_Test<FencedPublicationTest.
         }
         r.r1 = sy;
         r.r2 = sx;
-    }
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public IntResult2 newResult() {
-        return new IntResult2();
     }
 
 }

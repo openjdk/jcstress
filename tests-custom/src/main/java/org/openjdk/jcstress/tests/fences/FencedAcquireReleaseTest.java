@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.fences;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.util.UnsafeHolder;
@@ -33,39 +36,29 @@ import org.openjdk.jcstress.util.UnsafeHolder;
  *
  *  @author Doug Lea (dl@cs.oswego.edu)
  */
-public class FencedAcquireReleaseTest implements Actor2_Test<FencedAcquireReleaseTest.State, IntResult2> {
+@ConcurrencyStressTest
+@State
+public class FencedAcquireReleaseTest {
 
-    public static class State {
-        int x;
-        int y; // acq/rel var
-    }
+    int x;
+    int y; // acq/rel var
 
-    @Override
-    public void actor1(State s, IntResult2 r) {
-        s.x = 1;
-        s.x = 2;
+    @Actor
+    public void actor1() {
+        x = 1;
+        x = 2;
         UnsafeHolder.U.storeFence();
-        s.y = 1;
-        s.x = 3;
+        y = 1;
+        x = 3;
     }
 
-    @Override
-    public void actor2(State s, IntResult2 r) {
-        int sy = s.y;
+    @Actor
+    public void actor2(IntResult2 r) {
+        int sy = y;
         UnsafeHolder.U.loadFence();
-        int sx = s.x;
+        int sx = x;
         r.r1 = sy;
         r.r2 = sx;
-    }
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public IntResult2 newResult() {
-        return new IntResult2();
     }
 
 }
