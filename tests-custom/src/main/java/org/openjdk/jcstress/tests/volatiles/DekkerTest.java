@@ -24,36 +24,30 @@
  */
 package org.openjdk.jcstress.tests.volatiles;
 
-
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
-import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class DekkerTest implements Actor2_Test<DekkerTest.State, IntResult2> {
+@ConcurrencyStressTest
+public class DekkerTest  {
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public void actor1(State s, IntResult2 r) {
+    @Actor
+    public void actor1(S s, IntResult2 r) {
         s.a = 1;
         r.r1 = s.b;
     }
 
-    @Override
-    public void actor2(State s, IntResult2 r) {
+    @Actor
+    public void actor2(S s, IntResult2 r) {
         s.b = 1;
         r.r2 = s.a;
     }
 
-    @Override
-    public IntResult2 newResult() {
-        return new IntResult2();
+    @State
+    public static class S {
+        volatile int a;
+        volatile int b;
     }
 
-    public static class State {
-        public volatile int a;
-        public volatile int b;
-    }
 }

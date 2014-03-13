@@ -37,13 +37,8 @@ import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.grading.ConsoleReportPrinter;
 import org.openjdk.jcstress.infra.grading.ExceptionReportPrinter;
 import org.openjdk.jcstress.infra.grading.HTMLReportPrinter;
-import org.openjdk.jcstress.infra.runners.Actor1_Runner;
-import org.openjdk.jcstress.infra.runners.Actor2_Arbiter1_Runner;
-import org.openjdk.jcstress.infra.runners.Actor2_Runner;
-import org.openjdk.jcstress.infra.runners.Actor3_Runner;
-import org.openjdk.jcstress.infra.runners.Actor4_Runner;
 import org.openjdk.jcstress.infra.runners.Runner;
-import org.openjdk.jcstress.infra.runners.TerminationRunner;
+import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.tests.Actor1_Test;
 import org.openjdk.jcstress.tests.Actor2_Arbiter1_Test;
 import org.openjdk.jcstress.tests.Actor2_Test;
@@ -60,14 +55,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Properties;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
@@ -75,6 +68,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 /**
  * JCStress main entry point.
@@ -103,7 +97,7 @@ public class JCStress {
     }
 
     public void run(Options opts) throws Exception {
-        SortedSet<Class<? extends ConcurrencyTest>> tests = filterTests(opts.getTestFilter(), ConcurrencyTest.class);
+        SortedSet<String> tests = getTests(opts.getTestFilter());
 
         if (!opts.shouldParse()) {
             opts.printSettingsOn(out);
@@ -117,7 +111,7 @@ public class JCStress {
             scheduler = new Scheduler(opts.getUserCPUs());
 
             if (opts.shouldFork()) {
-                for (Class<? extends ConcurrencyTest> test : tests) {
+                for (String test : tests) {
                     for (int f = 0; f < opts.getForks(); f++) {
                         runForked(opts, test, sink);
                     }
@@ -152,18 +146,13 @@ public class JCStress {
         out.println("Done.");
     }
 
-    void runForked(final Options opts, final Class<? extends ConcurrencyTest> test, final TestResultCollector collector) {
+    void runForked(final Options opts, final String test, final TestResultCollector collector) {
         try {
             scheduler.schedule(new Scheduler.ScheduledTask() {
                 @Override
                 public int getTokens() {
-                    if (Actor1_Test.class.isAssignableFrom(test)) return 1;
-                    if (Actor2_Test.class.isAssignableFrom(test)) return 2;
-                    if (Actor3_Test.class.isAssignableFrom(test)) return 3;
-                    if (Actor4_Test.class.isAssignableFrom(test)) return 4;
-                    if (Actor2_Arbiter1_Test.class.isAssignableFrom(test)) return 3;
-                    if (TerminationTest.class.isAssignableFrom(test)) return 2;
-                    return 1;
+                    // FIXME: Expose the number of tokens
+                    return 2;
                 }
 
                 @Override
@@ -176,9 +165,9 @@ public class JCStress {
         }
     }
 
-    void runForked0(Options opts, Class<? extends ConcurrencyTest> test, TestResultCollector collector) {
+    void runForked0(Options opts, String test, TestResultCollector collector) {
         try {
-            Collection<String> commandString = getSeparateExecutionCommand(opts, test.getName());
+            Collection<String> commandString = getSeparateExecutionCommand(opts, test);
             Process p = Runtime.getRuntime().exec(commandString.toArray(new String[commandString.size()]));
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -196,7 +185,7 @@ public class JCStress {
 
             if (ecode != 0) {
                 // Test had failed, record this.
-                TestResult result = new TestResult(test.getName(), Status.VM_ERROR);
+                TestResult result = new TestResult(test, Status.VM_ERROR);
                 String s = new String(baos.toByteArray()).trim();
                 result.addAuxData(s);
                 collector.add(result);
@@ -210,7 +199,7 @@ public class JCStress {
     }
 
     public void run(Options opts, boolean alreadyForked, TestResultCollector collector) throws Exception {
-        run(opts, filterTests(opts.getTestFilter(), ConcurrencyTest.class), alreadyForked, collector);
+        run(opts, TestList.tests(), alreadyForked, collector);
     }
 
     public void async(final Runner runner) throws ExecutionException, InterruptedException {
@@ -232,53 +221,13 @@ public class JCStress {
         });
     }
 
-    @SuppressWarnings("unchecked")
-    public void run(Options opts, Set<Class<? extends ConcurrencyTest>> tests, boolean alreadyForked, TestResultCollector collector) throws Exception {
-
-        for (Class<? extends ConcurrencyTest> test : tests) {
-            if (Actor2_Arbiter1_Test.class.isAssignableFrom(test)) {
-                @SuppressWarnings("unchecked")
-                Actor2_Arbiter1_Test<Object, ? extends Result> obj = (Actor2_Arbiter1_Test<Object, ? extends Result>) test.newInstance();
-                async(new Actor2_Arbiter1_Runner(opts, obj, collector, pool));
-            }
-
-            if (Actor1_Test.class.isAssignableFrom(test)) {
-                @SuppressWarnings("unchecked")
-                Actor1_Test<Object, ? extends Result> obj = (Actor1_Test<Object, ? extends Result>) test.newInstance();
-                async(new Actor1_Runner(opts, obj, collector, pool));
-            }
-
-            if (Actor2_Test.class.isAssignableFrom(test)) {
-                @SuppressWarnings("unchecked")
-                Actor2_Test<Object, ? extends Result> obj = (Actor2_Test<Object, ? extends Result>) test.newInstance();
-                async(new Actor2_Runner(opts, obj, collector, pool));
-            }
-
-            if (Actor3_Test.class.isAssignableFrom(test)) {
-                @SuppressWarnings("unchecked")
-                Actor3_Test<Object, ? extends Result> obj = (Actor3_Test<Object, ? extends Result>) test.newInstance();
-                async(new Actor3_Runner(opts, obj, collector, pool));
-            }
-
-            if (Actor4_Test.class.isAssignableFrom(test)) {
-                @SuppressWarnings("unchecked")
-                Actor4_Test<Object, ? extends Result> obj = (Actor4_Test<Object, ? extends Result>) test.newInstance();
-                async(new Actor4_Runner(opts, obj, collector, pool));
-            }
-
-            if (TerminationTest.class.isAssignableFrom(test)) {
-                if (!alreadyForked && !opts.shouldNeverFork()) {
-                    for (int f = 0; f < opts.getForks(); f++) {
-                        runForked(opts, test, collector);
-                    }
-                } else {
-                    @SuppressWarnings("unchecked")
-                    TerminationTest<Object> obj = (TerminationTest<Object>) test.newInstance();
-                    async(new TerminationRunner<Object>(opts, obj, collector, pool));
-                }
-            }
+    private void run(Options opts, Collection<String> tests, boolean alreadyForked, TestResultCollector collector) throws Exception {
+        for (String test : tests) {
+            Class<?> aClass = Class.forName(TestList.getRunner(test));
+            Constructor<?> cnstr = aClass.getConstructor(Options.class, TestResultCollector.class, ExecutorService.class);
+            Runner<? extends Result> o = (Runner<? extends Result>) cnstr.newInstance(opts, collector, pool);
+            async(o);
         }
-
     }
 
     public Collection<String> getSeparateExecutionCommand(Options opts, String test) {
@@ -335,34 +284,16 @@ public class JCStress {
         return System.getProperty("os.name").contains("indows");
     }
 
-    static <T> SortedSet<Class<? extends T>> filterTests(final String filter, Class<T> klass) {
-        SortedSet<Class<? extends T>> s = new TreeSet<Class<? extends T>>(new Comparator<Class<? extends T>>() {
-            @Override
-            public int compare(Class<? extends T> o1, Class<? extends T> o2) {
-                return o1.getName().compareTo(o2.getName());
+    static SortedSet<String> getTests(final String filter) {
+        SortedSet<String> s = new TreeSet<String>();
+
+        Pattern pattern = Pattern.compile(filter);
+        for (String testName : TestList.tests()) {
+            if (pattern.matcher(testName).matches()) {
+                s.add(testName);
             }
-        });
-
-        // speculatively handle the case when there is a direct hit
-        try {
-            @SuppressWarnings("unchecked")
-            Class<? extends T> k = (Class<? extends T>) Class.forName(filter);
-            if (klass.isAssignableFrom(k)) {
-                s.add(k);
-            }
-
-            return s;
-        } catch (ClassNotFoundException e) {
-            // continue
         }
-
-        for (Class<?> c : Reflections.lookupClassesImplementing(klass, filter)) {
-            @SuppressWarnings("unchecked")
-            Class<? extends T> c1 = (Class<? extends T>) c;
-            s.add(c1);
-        }
-
         return s;
-    }
+   }
 
 }

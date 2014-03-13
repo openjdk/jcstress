@@ -22,49 +22,14 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.infra.results;
+package org.openjdk.jcstress.infra.annotations;
 
-import org.openjdk.jcstress.infra.Result;
-import sun.misc.Contended;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.io.Serializable;
-
-@org.openjdk.jcstress.infra.annotations.Result
-public class IntResult2 implements Serializable, Result {
-
-    @Contended
-    public int r1;
-
-    @Contended
-    public int r2;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        IntResult2 that = (IntResult2) o;
-
-        if (r1 != that.r1) return false;
-        if (r2 != that.r2) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = r1;
-        result = 31 * result + r2;
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "[" + r1 + ", " + r2 + ']';
-    }
-
-    @Override
-    public void reset() {
-        r1 = r2 = 0;
-    }
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ConcurrencyStressTest {
 }

@@ -54,8 +54,8 @@ public class Main {
         }
 
         if (opts.shouldList()) {
-            for (Class<? extends ConcurrencyTest> test : org.openjdk.jcstress.JCStress.filterTests(opts.getTestFilter(), ConcurrencyTest.class)) {
-                System.out.println(test.getName());
+            for (String test : org.openjdk.jcstress.JCStress.getTests(opts.getTestFilter())) {
+                System.out.println(test);
             }
         } else {
             boolean vmSupportInited;

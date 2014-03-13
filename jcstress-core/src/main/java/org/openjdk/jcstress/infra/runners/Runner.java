@@ -57,7 +57,7 @@ public abstract class Runner<R extends Result> {
     protected final PrintWriter testLog;
     protected final String testName;
 
-    public Runner(Options opts, TestResultCollector collector, ExecutorService pool, String testName) throws FileNotFoundException, JAXBException {
+    public Runner(Options opts, TestResultCollector collector, ExecutorService pool, String testName) {
         this.collector = collector;
         this.pool = pool;
         this.testName = testName;

@@ -22,3 +22,4 @@
 #    questions.
 #
 org.openjdk.jcstress.util.InterfaceListProcessor
+org.openjdk.jcstress.infra.processors.ConcurrencyStressTestProcessor
