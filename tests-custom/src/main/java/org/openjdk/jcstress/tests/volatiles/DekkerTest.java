@@ -31,7 +31,7 @@ import org.openjdk.jcstress.infra.results.IntResult2;
 
 @ConcurrencyStressTest
 @State
-public class DekkerTest  {
+public class DekkerTest {
 
     volatile int a;
     volatile int b;

@@ -24,39 +24,32 @@
  */
 package org.openjdk.jcstress.tests.volatiles;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class DoubleVolatileTest implements Actor2_Test<DoubleVolatileTest.State, IntResult3> {
+@ConcurrencyStressTest
+@State
+public class DoubleVolatileTest {
 
-    @Override
-    public State newState() {
-        return new State();
+    volatile int guard1 = 0;
+    int data = 0;
+    volatile int guard2 = 0;
+
+    @Actor
+    public void actor1() {
+        guard2 = 1;
+        data = 1;
+        guard1 = 1;
     }
 
-    @Override
-    public void actor1(State s, IntResult3 r) {
-        s.guard2 = 1;
-        s.data = 1;
-        s.guard1 = 1;
-    }
-
-    @Override
-    public void actor2(State s, IntResult3 r) {
-        r.r1 = s.guard1;
-        r.r2 = s.data;
-        r.r3 = s.guard2;
-    }
-
-    @Override
-    public IntResult3 newResult() {
-        return new IntResult3();
-    }
-
-    public static class State {
-        volatile int guard1 = 0;
-        int data = 0;
-        volatile int guard2 = 0;
+    @Actor
+    public void actor2(IntResult3 r) {
+        r.r1 = guard1;
+        r.r2 = data;
+        r.r3 = guard2;
     }
 
 }
