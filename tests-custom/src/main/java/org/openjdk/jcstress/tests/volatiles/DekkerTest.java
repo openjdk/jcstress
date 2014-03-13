@@ -30,24 +30,22 @@ import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 
 @ConcurrencyStressTest
+@State
 public class DekkerTest  {
 
+    volatile int a;
+    volatile int b;
+
     @Actor
-    public void actor1(S s, IntResult2 r) {
-        s.a = 1;
-        r.r1 = s.b;
+    public void actor1(IntResult2 r) {
+        a = 1;
+        r.r1 = b;
     }
 
     @Actor
-    public void actor2(S s, IntResult2 r) {
-        s.b = 1;
-        r.r2 = s.a;
-    }
-
-    @State
-    public static class S {
-        volatile int a;
-        volatile int b;
+    public void actor2(IntResult2 r) {
+        b = 1;
+        r.r2 = a;
     }
 
 }

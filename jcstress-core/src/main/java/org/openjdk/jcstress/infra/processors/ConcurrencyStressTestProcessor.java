@@ -159,7 +159,7 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
         }
 
         String packageName = getPackageName(info.getTest()) + ".generated";
-        String testName = info.getTest().getSimpleName().toString();
+        String testName = info.getTest().getSimpleName().toString() + "_jcstress";
 
         info.setGeneratedName(packageName + "." + testName);
 
@@ -170,14 +170,13 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
         PrintWriter pw;
         Writer writer;
         try {
-            writer = processingEnv.getFiler().createSourceFile(info.getTest().getQualifiedName().toString()).openWriter();
+            writer = processingEnv.getFiler().createSourceFile(info.getTest().getQualifiedName().toString() + "_jcstress").openWriter();
             pw = new PrintWriter(writer, true);
         } catch (IOException e) {
             throw new GenerationException("IOException", info.getTest());
         }
 
-        String t = info.getTest().getQualifiedName().toString();
-        String tShort = info.getTest().getSimpleName().toString();
+        String t = info.getTest().getSimpleName().toString();
         String s = info.getState().getSimpleName().toString();
         String r = info.getResult().getSimpleName().toString();
 
@@ -185,11 +184,11 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
 
         printImports(pw, info);
 
-        pw.println("public class " + tShort + " extends Runner<" + r + "> {");
+        pw.println("public class " + t + "_jcstress extends Runner<" + r + "> {");
         pw.println();
 
-        pw.println("    public " + tShort + "(Options opts, TestResultCollector collector, ExecutorService pool) {");
-        pw.println("        super(opts, collector, pool, \"" + t + "\");");
+        pw.println("    public " + t + "_jcstress(Options opts, TestResultCollector collector, ExecutorService pool) {");
+        pw.println("        super(opts, collector, pool, \"" + info.getTest().getQualifiedName() + "\");");
         pw.println("    }");
         pw.println();
 
@@ -317,7 +316,11 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
             pw.println("            for (int l = 0; l < loops; l++) {");
             pw.println("                int index = indices[l];");
 
-            emitMethod(pw, a, "                lt." + a.getSimpleName(), "cur[index]", "res[index]");
+            if (info.getState().equals(info.getTest())) {
+                emitMethod(pw, a, "                cur[index]." + a.getSimpleName(), "cur[index]", "res[index]");
+            } else {
+                emitMethod(pw, a, "                lt." + a.getSimpleName(), "cur[index]", "res[index]");
+            }
 
             pw.println("            }");
             pw.println();
@@ -334,7 +337,11 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
                 pw.println();
                 pw.println("                for (int l = 0; l < loops; l++) {");
                 pw.println("                    int index = indices[l];");
-                emitMethod(pw, info.getArbiter(), "                test." + info.getArbiter().getSimpleName(), "cur[index]", "res[index]");
+                if (info.getState().equals(info.getTest())) {
+                    emitMethod(pw, info.getArbiter(), "                cur[index]." + info.getArbiter().getSimpleName(), "cur[index]", "res[index]");
+                } else {
+                    emitMethod(pw, info.getArbiter(), "                lt." + info.getArbiter().getSimpleName(), "cur[index]", "res[index]");
+                }
                 pw.println("                }");
             }
             pw.println();
@@ -391,7 +398,7 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
     }
 
     private void emitMethod(PrintWriter pw, ExecutableElement el, String lvalue, String stateAccessor, String resultAccessor) {
-        pw.print("                " + lvalue + "(");
+        pw.print(lvalue + "(");
 
         boolean isFirst = true;
         for (VariableElement var : el.getParameters()) {
