@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomicity.primitives.perbyte;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.ByteResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
@@ -33,32 +36,22 @@ import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class VolatileShortAtomicityTest implements Actor2_Test<VolatileShortAtomicityTest.State, ByteResult2> {
+@ConcurrencyStressTest
+@State
+public class VolatileShortAtomicityTest {
 
-    public static class State {
-        volatile short x;
+    volatile short x;
+
+    @Actor
+    public void actor1() {
+        x = Constants.SHORT_SAMPLE;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public void actor1(State s, ByteResult2 r) {
-        s.x = Constants.SHORT_SAMPLE;
-    }
-
-    @Override
-    public void actor2(State s, ByteResult2 r) {
-        short t = s.x;
+    @Actor
+    public void actor2(ByteResult2 r) {
+        short t = x;
         r.r1 = (byte) ((t >> 0) & 0xFF);
         r.r2 = (byte) ((t >> 8) & 0xFF);
-    }
-
-    @Override
-    public ByteResult2 newResult() {
-        return new ByteResult2();
     }
 
 }

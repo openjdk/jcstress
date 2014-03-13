@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomicity.primitives.reflect;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
@@ -35,50 +38,40 @@ import java.lang.reflect.Field;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class IntAtomicityTest implements Actor2_Test<IntAtomicityTest.State, IntResult1> {
+@ConcurrencyStressTest
+@State
+public class IntAtomicityTest {
 
-    public static class State {
-        private static Field FIELD;
+    private static Field FIELD;
 
-        static {
-            try {
-                FIELD = State.class.getDeclaredField("x");
-                FIELD.setAccessible(true);
-            } catch (NoSuchFieldException e) {
-                throw new IllegalStateException(e);
-            }
-
+    static {
+        try {
+            FIELD = IntAtomicityTest.class.getDeclaredField("x");
+            FIELD.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException(e);
         }
 
-        int x;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
+    int x;
 
-    @Override
-    public void actor1(State s, IntResult1 r) {
+    @Actor
+    public void actor1() {
         try {
-            State.FIELD.setInt(s, Constants.INT_SAMPLE);
+            FIELD.setInt(this, Constants.INT_SAMPLE);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    @Override
-    public void actor2(State s, IntResult1 r) {
+    @Actor
+    public void actor2(IntResult1 r) {
         try {
-            r.r1 = State.FIELD.getInt(s);
+            r.r1 = FIELD.getInt(this);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    @Override
-    public IntResult1 newResult() {
-        return new IntResult1();
     }
 
 }

@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomicity.primitives.perbyte;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.ByteResult8;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
@@ -33,25 +36,20 @@ import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class VolatileLongAtomicityTest implements Actor2_Test<VolatileLongAtomicityTest.State, ByteResult8> {
+@ConcurrencyStressTest
+@State
+public class VolatileLongAtomicityTest {
 
-    public static class State {
-        volatile long x;
+    volatile long x;
+
+    @Actor
+    public void actor1() {
+        x = Constants.LONG_SAMPLE;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public void actor1(State s, ByteResult8 r) {
-        s.x = Constants.LONG_SAMPLE;
-    }
-
-    @Override
-    public void actor2(State s, ByteResult8 r) {
-        long t = s.x;
+    @Actor
+    public void actor2(ByteResult8 r) {
+        long t = x;
         r.r1 = (byte) ((t >> 0) & 0xFF);
         r.r2 = (byte) ((t >> 8) & 0xFF);
         r.r3 = (byte) ((t >> 16) & 0xFF);
@@ -60,11 +58,6 @@ public class VolatileLongAtomicityTest implements Actor2_Test<VolatileLongAtomic
         r.r6 = (byte) ((t >> 40) & 0xFF);
         r.r7 = (byte) ((t >> 48) & 0xFF);
         r.r8 = (byte) ((t >> 56) & 0xFF);
-    }
-
-    @Override
-    public ByteResult8 newResult() {
-        return new ByteResult8();
     }
 
 }

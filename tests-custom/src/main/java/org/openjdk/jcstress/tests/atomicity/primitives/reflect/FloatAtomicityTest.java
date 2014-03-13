@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomicity.primitives.reflect;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.FloatResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
@@ -33,50 +36,40 @@ import java.lang.reflect.Field;
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class FloatAtomicityTest implements Actor2_Test<FloatAtomicityTest.State, FloatResult1> {
+@ConcurrencyStressTest
+@State
+public class FloatAtomicityTest {
 
-    public static class State {
-        private static Field FIELD;
+    private static Field FIELD;
 
-        static {
-            try {
-                FIELD = State.class.getDeclaredField("x");
-                FIELD.setAccessible(true);
-            } catch (NoSuchFieldException e) {
-                throw new IllegalStateException(e);
-            }
-
+    static {
+        try {
+            FIELD = FloatAtomicityTest.class.getDeclaredField("x");
+            FIELD.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException(e);
         }
 
-        float x;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
+    float x;
 
-    @Override
-    public void actor1(State s, FloatResult1 r) {
+    @Actor
+    public void actor1() {
         try {
-            State.FIELD.setFloat(s, Constants.FLOAT_SAMPLE);
+            FIELD.setFloat(this, Constants.FLOAT_SAMPLE);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    @Override
-    public void actor2(State s, FloatResult1 r) {
+    @Actor
+    public void actor2(FloatResult1 r) {
         try {
-            r.r1 = State.FIELD.getFloat(s);
+            r.r1 = FIELD.getFloat(this);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    @Override
-    public FloatResult1 newResult() {
-        return new FloatResult1();
     }
 
 }

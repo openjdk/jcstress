@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomicity.primitives.plain;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.CharResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
@@ -32,30 +35,20 @@ import org.openjdk.jcstress.tests.Actor2_Test;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class CharAtomicityTest implements Actor2_Test<CharAtomicityTest.State, CharResult1> {
+@ConcurrencyStressTest
+@State
+public class CharAtomicityTest {
 
-    public static class State {
-        char x;
+    char x;
+
+    @Actor
+    public void actor1() {
+        x = 'A';
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public void actor1(State s, CharResult1 r) {
-        s.x = 'A';
-    }
-
-    @Override
-    public void actor2(State s, CharResult1 r) {
-        r.r1 = (s.x == 0) ? 'N' : 'A';
-    }
-
-    @Override
-    public CharResult1 newResult() {
-        return new CharResult1();
+    @Actor
+    public void actor2(CharResult1 r) {
+        r.r1 = (x == 0) ? 'N' : 'A';
     }
 
 }

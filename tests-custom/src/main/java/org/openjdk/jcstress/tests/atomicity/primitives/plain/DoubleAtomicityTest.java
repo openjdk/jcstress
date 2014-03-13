@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomicity.primitives.plain;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.DoubleResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
@@ -33,30 +36,20 @@ import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class DoubleAtomicityTest implements Actor2_Test<DoubleAtomicityTest.State, DoubleResult1> {
+@ConcurrencyStressTest
+@State
+public class DoubleAtomicityTest {
 
-    public static class State {
-        double x;
+    double x;
+
+    @Actor
+    public void actor1() {
+        x = Constants.DOUBLE_SAMPLE;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public void actor1(State s, DoubleResult1 r) {
-        s.x = Constants.DOUBLE_SAMPLE;
-    }
-
-    @Override
-    public void actor2(State s, DoubleResult1 r) {
-        r.r1 = s.x;
-    }
-
-    @Override
-    public DoubleResult1 newResult() {
-        return new DoubleResult1();
+    @Actor
+    public void actor2(DoubleResult1 r) {
+        r.r1 = x;
     }
 
 }

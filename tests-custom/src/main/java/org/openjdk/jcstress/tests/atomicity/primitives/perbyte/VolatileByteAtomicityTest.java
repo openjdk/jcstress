@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomicity.primitives.perbyte;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.ByteResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
@@ -33,32 +36,22 @@ import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class VolatileByteAtomicityTest implements Actor2_Test<VolatileByteAtomicityTest.State, ByteResult2> {
+@ConcurrencyStressTest
+@State
+public class VolatileByteAtomicityTest {
 
-    public static class State {
-        volatile byte x;
+    volatile byte x;
+
+    @Actor
+    public void actor1() {
+        x = Constants.BYTE_SAMPLE;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public void actor1(State s, ByteResult2 r) {
-        s.x = Constants.BYTE_SAMPLE;
-    }
-
-    @Override
-    public void actor2(State s, ByteResult2 r) {
-        byte b = s.x;
+    @Actor
+    public void actor2(ByteResult2 r) {
+        byte b = x;
         r.r1 = (byte)((b >> 0) & 0xF);
         r.r2 = (byte)((b >> 4) & 0xF);
-    }
-
-    @Override
-    public ByteResult2 newResult() {
-        return new ByteResult2();
     }
 
 }

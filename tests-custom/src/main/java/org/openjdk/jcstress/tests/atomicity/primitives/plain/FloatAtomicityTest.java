@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomicity.primitives.plain;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.FloatResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
@@ -33,30 +36,20 @@ import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class FloatAtomicityTest implements Actor2_Test<FloatAtomicityTest.State, FloatResult1> {
+@ConcurrencyStressTest
+@State
+public class FloatAtomicityTest {
 
-    public static class State {
-        float x;
+    float x;
+
+    @Actor
+    public void actor1() {
+        x = Constants.FLOAT_SAMPLE;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public void actor1(State s, FloatResult1 r) {
-        s.x = Constants.FLOAT_SAMPLE;
-    }
-
-    @Override
-    public void actor2(State s, FloatResult1 r) {
-        r.r1 = s.x;
-    }
-
-    @Override
-    public FloatResult1 newResult() {
-        return new FloatResult1();
+    @Actor
+    public void actor2(FloatResult1 r) {
+        r.r1 = x;
     }
 
 }

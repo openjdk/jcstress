@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomicity.primitives.reflect;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.DoubleResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
@@ -35,50 +38,40 @@ import java.lang.reflect.Field;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class DoubleAtomicityTest implements Actor2_Test<DoubleAtomicityTest.State, DoubleResult1> {
+@ConcurrencyStressTest
+@State
+public class DoubleAtomicityTest {
 
-    public static class State {
-        private static Field FIELD;
+    private static Field FIELD;
 
-        static {
-            try {
-                FIELD = State.class.getDeclaredField("x");
-                FIELD.setAccessible(true);
-            } catch (NoSuchFieldException e) {
-                throw new IllegalStateException(e);
-            }
-
+    static {
+        try {
+            FIELD = DoubleAtomicityTest.class.getDeclaredField("x");
+            FIELD.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException(e);
         }
 
-        double x;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
+    double x;
 
-    @Override
-    public void actor1(State s, DoubleResult1 r) {
+    @Actor
+    public void actor1() {
         try {
-            State.FIELD.setDouble(s, Constants.DOUBLE_SAMPLE);
+            FIELD.setDouble(this, Constants.DOUBLE_SAMPLE);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    @Override
-    public void actor2(State s, DoubleResult1 r) {
+    @Actor
+    public void actor2(DoubleResult1 r) {
         try {
-            r.r1 = State.FIELD.getDouble(s);
+            r.r1 = FIELD.getDouble(this);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    @Override
-    public DoubleResult1 newResult() {
-        return new DoubleResult1();
     }
 
 }

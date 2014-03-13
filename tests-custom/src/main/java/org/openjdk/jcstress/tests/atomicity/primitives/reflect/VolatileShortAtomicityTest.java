@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomicity.primitives.reflect;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.ShortResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
@@ -35,50 +38,40 @@ import java.lang.reflect.Field;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class VolatileShortAtomicityTest implements Actor2_Test<VolatileShortAtomicityTest.State, ShortResult1> {
+@ConcurrencyStressTest
+@State
+public class VolatileShortAtomicityTest {
 
-    public static class State {
-        private static Field FIELD;
+    private static Field FIELD;
 
-        static {
-            try {
-                FIELD = State.class.getDeclaredField("x");
-                FIELD.setAccessible(true);
-            } catch (NoSuchFieldException e) {
-                throw new IllegalStateException(e);
-            }
-
+    static {
+        try {
+            FIELD = VolatileShortAtomicityTest.class.getDeclaredField("x");
+            FIELD.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException(e);
         }
 
-        volatile short x;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
+    volatile short x;
 
-    @Override
-    public void actor1(State s, ShortResult1 r) {
+    @Actor
+    public void actor1() {
         try {
-            State.FIELD.setShort(s, Constants.SHORT_SAMPLE);
+            FIELD.setShort(this, Constants.SHORT_SAMPLE);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    @Override
-    public void actor2(State s, ShortResult1 r) {
+    @Actor
+    public void actor2(ShortResult1 r) {
         try {
-            r.r1 = State.FIELD.getShort(s);
+            r.r1 = FIELD.getShort(this);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    @Override
-    public ShortResult1 newResult() {
-        return new ShortResult1();
     }
 
 }

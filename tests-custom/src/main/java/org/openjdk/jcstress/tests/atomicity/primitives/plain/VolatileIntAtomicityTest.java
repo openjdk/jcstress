@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomicity.primitives.plain;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
@@ -33,30 +36,20 @@ import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class VolatileIntAtomicityTest implements Actor2_Test<VolatileIntAtomicityTest.State, IntResult1> {
+@ConcurrencyStressTest
+@State
+public class VolatileIntAtomicityTest {
 
-    public static class State {
-        volatile int x;
+    volatile int x;
+
+    @Actor
+    public void actor1() {
+        x = Constants.INT_SAMPLE;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public void actor1(State s, IntResult1 r) {
-        s.x = Constants.INT_SAMPLE;
-    }
-
-    @Override
-    public void actor2(State s, IntResult1 r) {
-        r.r1 = s.x;
-    }
-
-    @Override
-    public IntResult1 newResult() {
-        return new IntResult1();
+    @Actor
+    public void actor2(IntResult1 r) {
+        r.r1 = x;
     }
 
 }

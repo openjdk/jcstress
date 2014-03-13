@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomicity.primitives.reflect;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.CharResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
@@ -35,50 +38,40 @@ import java.lang.reflect.Field;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class VolatileCharAtomicityTest implements Actor2_Test<VolatileCharAtomicityTest.State, CharResult1> {
+@ConcurrencyStressTest
+@State
+public class VolatileCharAtomicityTest {
 
-    public static class State {
-        private static Field FIELD;
+    private static Field FIELD;
 
-        static {
-            try {
-                FIELD = State.class.getDeclaredField("x");
-                FIELD.setAccessible(true);
-            } catch (NoSuchFieldException e) {
-                throw new IllegalStateException(e);
-            }
-
+    static {
+        try {
+            FIELD = VolatileCharAtomicityTest.class.getDeclaredField("x");
+            FIELD.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException(e);
         }
 
-        volatile char x;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
+    volatile char x;
 
-    @Override
-    public void actor1(State s, CharResult1 r) {
+    @Actor
+    public void actor1() {
         try {
-            State.FIELD.setChar(s, Constants.CHAR_SAMPLE);
+            FIELD.setChar(this, Constants.CHAR_SAMPLE);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    @Override
-    public void actor2(State s, CharResult1 r) {
+    @Actor
+    public void actor2(CharResult1 r) {
         try {
-            r.r1 = State.FIELD.getChar(s) == 0 ? 'N' : 'A';
+            r.r1 = FIELD.getChar(this) == 0 ? 'N' : 'A';
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    @Override
-    public CharResult1 newResult() {
-        return new CharResult1();
     }
 
 }

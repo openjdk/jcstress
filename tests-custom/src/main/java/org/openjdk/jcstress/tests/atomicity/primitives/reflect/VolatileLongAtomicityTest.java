@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.atomicity.primitives.reflect;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
@@ -35,50 +38,40 @@ import java.lang.reflect.Field;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class VolatileLongAtomicityTest implements Actor2_Test<VolatileLongAtomicityTest.State, LongResult1> {
+@ConcurrencyStressTest
+@State
+public class VolatileLongAtomicityTest {
 
-    public static class State {
-        private static Field FIELD;
+    private static Field FIELD;
 
-        static {
-            try {
-                FIELD = State.class.getDeclaredField("x");
-                FIELD.setAccessible(true);
-            } catch (NoSuchFieldException e) {
-                throw new IllegalStateException(e);
-            }
-
+    static {
+        try {
+            FIELD = VolatileLongAtomicityTest.class.getDeclaredField("x");
+            FIELD.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException(e);
         }
 
-        volatile long x;
     }
 
-    @Override
-    public State newState() {
-        return new State();
-    }
+    volatile long x;
 
-    @Override
-    public void actor1(State s, LongResult1 r) {
+    @Actor
+    public void actor1() {
         try {
-            State.FIELD.setLong(s, Constants.LONG_SAMPLE);
+            FIELD.setLong(this, Constants.LONG_SAMPLE);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    @Override
-    public void actor2(State s, LongResult1 r) {
+    @Actor
+    public void actor2(LongResult1 r) {
         try {
-            r.r1 = State.FIELD.getLong(s);
+            r.r1 = FIELD.getLong(this);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    @Override
-    public LongResult1 newResult() {
-        return new LongResult1();
     }
 
 }
