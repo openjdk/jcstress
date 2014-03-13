@@ -29,6 +29,7 @@ import sun.misc.Contended;
 
 import java.io.Serializable;
 
+@org.openjdk.jcstress.infra.annotations.Result
 public class LongResult4 implements Serializable, Result {
 
     @Contended

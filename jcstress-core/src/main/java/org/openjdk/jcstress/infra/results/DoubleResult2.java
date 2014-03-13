@@ -29,6 +29,7 @@ import sun.misc.Contended;
 
 import java.io.Serializable;
 
+@org.openjdk.jcstress.infra.annotations.Result
 public class DoubleResult2 implements Serializable, Result {
 
     @Contended
