@@ -136,7 +136,7 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
                     info.setResult(paramClass);
                 } else {
                     throw new GenerationException("The parameter for @" + Actor.class.getSimpleName() +
-                            " methods requires either @" + State.class.getSimpleName() + " or @" + Result.class +
+                            " methods requires either @" + State.class.getSimpleName() + " or @" + Result.class.getSimpleName() +
                             " annotated class", var);
                 }
             }
