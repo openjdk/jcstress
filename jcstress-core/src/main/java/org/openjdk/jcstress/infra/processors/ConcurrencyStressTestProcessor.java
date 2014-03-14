@@ -241,30 +241,17 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
         pw.println("    public Counter<" + r + "> internalRun() {");
         pw.println("        " + t + " test = new " + t + "();");
         pw.println("        " + s + "[] poison = new " + s + "[0];");
+        pw.println("        control.isStopped = false;");
         pw.println();
         pw.println("        Counter<" + r + "> counter = Counters.newCounter(" + r + ".class);");
         pw.println();
-        pw.println("        " + s + "[] newStride = new " + s + "[control.minStride];");
-        pw.println("        for (int c = 0; c < control.minStride; c++) {");
-        pw.println("            newStride[c] = new " + s + "();");
-        pw.println("        }");
-        pw.println();
-        pw.println("        " + r + "[] newResult = new " + r + "[control.minStride];");
-        pw.println("        for (int c = 0; c < control.minStride; c++) {");
-        pw.println("            newResult[c] = new " + r + "();");
-        pw.println("        }");
-        pw.println();
-        pw.println("        int[] indices = ArrayUtils.generatePermutation(control.minStride);");
-        pw.println("        StateHolder<" + s + ", " + r + "> holder = new StateHolder<" + s + ", " + r + ">(newStride, newResult, indices, " + actorsCount + ");");
-        pw.println();
         pw.println("        final AtomicReference<StateHolder<" + s + "," + r + ">> version = new AtomicReference<StateHolder<" + s + ", " + r + ">>();");
-        pw.println("        version.set(holder);");
+        pw.println("        version.set(new StateHolder<" + s + ", " + r + ">(new " + s + "[0], new " + r + "[0], new int[0], " + actorsCount + "));");
         pw.println();
         pw.println("        final AtomicInteger epoch = new AtomicInteger();");
         pw.println();
-        pw.println("        Collection<Future<?>> tasks = new ArrayList<Future<?>>();");
-        pw.println();
         pw.println("        control.isStopped = false;");
+        pw.println("        Collection<Future<?>> tasks = new ArrayList<Future<?>>();");
 
         for (ExecutableElement a : info.getActors()) {
             pw.println("        tasks.add(pool.submit(new Runner_" + a.getSimpleName() + "(control, counter, test, poison, version, epoch)));");
@@ -318,15 +305,15 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
             pw.println("            }");
         }
         pw.println();
-        pw.println("            for (" + r + " r1 : res) {");
-        pw.println("                counter.record(r1);");
+        pw.println("            for (int c = 0; c < loops; c++) {");
+        pw.println("                counter.record(res[c]);");
         pw.println("            }");
         pw.println();
         pw.println("            StateHolder<" + s + ", " + r + "> newHolder;");
         pw.println("            if (control.isStopped) {");
         pw.println("                newHolder = new StateHolder<" + s + ", " + r + ">(poison, null, null, " + actorsCount + ");");
         pw.println("            } else {");
-        pw.println("                int newLoops = holder.hasLaggedWorkers ? Math.min(loops * 2, control.maxStride) : loops;");
+        pw.println("                int newLoops = holder.hasLaggedWorkers ? Math.max(control.minStride, Math.min(loops * 2, control.maxStride)) : loops;");
         pw.println();
         pw.println("                for (int c = 0; c < loops; c++) {");
 
