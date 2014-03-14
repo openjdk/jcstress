@@ -195,7 +195,7 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
         Writer writer;
         try {
             writer = processingEnv.getFiler().createSourceFile(getPackageName(info.getTest()) + ".generated." + getGeneratedName(info.getTest())).openWriter();
-            pw = new PrintWriter(writer, true);
+            pw = new PrintWriter(writer);
         } catch (IOException e) {
             throw new GenerationException("IOException: " + e.getMessage(), info.getTest());
         }

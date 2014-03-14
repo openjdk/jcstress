@@ -50,7 +50,9 @@ public class TestList {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] ls = line.split(",");
-                    m.put(ls[0], ls[1]);
+                    if (ls.length == 2) {
+                        m.put(ls[0], ls[1]);
+                    }
                 }
             } catch (IOException e) {
                 // FIXME: Print warning
