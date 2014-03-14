@@ -24,43 +24,36 @@
  */
 package org.openjdk.jcstress.tests.scratch;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class FailingCASTest implements Actor2_Test<FailingCASTest.State, IntResult2> {
+@ConcurrencyStressTest
+@State
+public class FailingCASTest {
 
-    @Override
-    public void actor1(State s, IntResult2 r) {
-        s.x = 1;
-        if (!s.y.compareAndSet(42, 43)) {
-            s.z = 1;
+    int x;
+    final AtomicInteger y = new AtomicInteger();
+    int z;
+
+    @Actor
+    public void actor1() {
+        x = 1;
+        if (!y.compareAndSet(42, 43)) {
+            z = 1;
         }
     }
 
-    @Override
-    public void actor2(State s, IntResult2 r) {
-        r.r1 = s.z;
+    @Actor
+    public void actor2(IntResult2 r) {
+        r.r1 = z;
         UnsafeHolder.U.fullFence();
-        r.r2 = s.x;
-    }
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public IntResult2 newResult() {
-        return new IntResult2();
-    }
-
-    public static class State {
-        int x;
-        final AtomicInteger y = new AtomicInteger();
-        int z;
+        r.r2 = x;
     }
 
 }

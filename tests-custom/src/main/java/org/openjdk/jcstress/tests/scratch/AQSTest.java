@@ -24,37 +24,32 @@
  */
 package org.openjdk.jcstress.tests.scratch;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.BooleanResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 
-public class AQSTest implements Actor2_Test<AQSTest.MyLock, BooleanResult2> {
+@ConcurrencyStressTest
+public class AQSTest {
 
-    @Override
+    @Actor
     public void actor1(MyLock l, BooleanResult2 r) {
         l.acquire(1);
         r.r1 = true;
         l.release(1);
     }
 
-    @Override
+    @Actor
     public void actor2(MyLock l, BooleanResult2 r) {
         l.acquire(1);
         r.r2 = true;
         l.release(1);
     }
 
-    @Override
-    public MyLock newState() {
-        return new MyLock();
-    }
-
-    @Override
-    public BooleanResult2 newResult() {
-        return new BooleanResult2();
-    }
-
+    @State
     public static class MyLock extends AbstractQueuedSynchronizer {
         @Override
         protected boolean tryAcquire(int _) {

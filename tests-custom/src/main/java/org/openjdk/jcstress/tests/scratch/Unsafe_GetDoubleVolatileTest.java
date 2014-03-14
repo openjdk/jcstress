@@ -24,44 +24,37 @@
  */
 package org.openjdk.jcstress.tests.scratch;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.DoubleResult1;
 import org.openjdk.jcstress.tests.Actor2_Test;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
-public class Unsafe_GetDoubleVolatileTest implements Actor2_Test<Unsafe_GetDoubleVolatileTest.State, DoubleResult1> {
+@ConcurrencyStressTest
+@State
+public class Unsafe_GetDoubleVolatileTest {
 
-    @Override
-    public void actor1(State s, DoubleResult1 r) {
-        UnsafeHolder.U.putDoubleVolatile(s, State.OFFSET, -1D);
-    }
+    static long OFFSET;
 
-    @Override
-    public void actor2(State s, DoubleResult1 r) {
-        r.r1 = UnsafeHolder.U.getDoubleVolatile(s, State.OFFSET);
-    }
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public DoubleResult1 newResult() {
-        return new DoubleResult1();
-    }
-
-    public static class State {
-        private static long OFFSET;
-
-        static {
-            try {
-                OFFSET = UnsafeHolder.U.objectFieldOffset(State.class.getDeclaredField("x"));
-            } catch (NoSuchFieldException e) {
-                throw new IllegalStateException(e);
-            }
+    static {
+        try {
+            OFFSET = UnsafeHolder.U.objectFieldOffset(Unsafe_GetDoubleVolatileTest.class.getDeclaredField("x"));
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException(e);
         }
+    }
 
-        public volatile double x;
+    volatile double x;
+
+    @Actor
+    public void actor1() {
+        UnsafeHolder.U.putDoubleVolatile(this, OFFSET, -1D);
+    }
+
+    @Actor
+    public void actor2(DoubleResult1 r) {
+        r.r1 = UnsafeHolder.U.getDoubleVolatile(this, OFFSET);
     }
 
 }

@@ -24,6 +24,8 @@
  */
 package org.openjdk.jcstress.tests.scratch;
 
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.tests.TerminationTest;
 
 public class StaleReadTest implements TerminationTest<StaleReadTest.State> {

@@ -24,36 +24,29 @@
  */
 package org.openjdk.jcstress.tests.scratch.basic;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class VolatileTest implements Actor2_Test<VolatileTest.State, IntResult2> {
+@ConcurrencyStressTest
+@State
+public class VolatileTest {
 
-    @Override
-    public void actor1(State s, IntResult2 r) {
-        s.a = 1;
-        s.g = 1; // release
+    int a;
+    volatile int g;
+
+    @Actor
+    public void actor1() {
+        a = 1;
+        g = 1; // release
     }
 
-    @Override
-    public void actor2(State s, IntResult2 r) {
-        r.r1 = s.g; // acquire
-        r.r2 = s.a;
-    }
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public IntResult2 newResult() {
-        return new IntResult2();
-    }
-
-    public static class State {
-        private int a;
-        private volatile int g;
+    @Actor
+    public void actor2(IntResult2 r) {
+        r.r1 = g; // acquire
+        r.r2 = a;
     }
 
 }

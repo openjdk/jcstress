@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.scratch;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
@@ -31,36 +34,26 @@ import org.openjdk.jcstress.tests.Actor2_Test;
  * Dummy test to check if volatile write's StoreLoad is erased by following biased lock
  * Run with -XX:BiasedLockingStartupDelay=0
  */
-public class VW_Sync_1_Test implements Actor2_Test<VW_Sync_1_Test.State, IntResult2> {
+@ConcurrencyStressTest
+@State
+public class VW_Sync_1_Test {
 
-    @Override
-    public void actor1(State s, IntResult2 r) {
-        synchronized (s.o) {} // bias first
-        s.x = 1;
-        s.v = 1;
-        synchronized (s.o) {}
+    int x;
+    volatile int v;
+    final Object o = new Object();
+
+    @Actor
+    public void actor1() {
+        synchronized (o) {} // bias first
+        x = 1;
+        v = 1;
+        synchronized (o) {}
     }
 
-    @Override
-    public void actor2(State s, IntResult2 r) {
-        r.r1 = s.v;
-        r.r2 = s.x;
-    }
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public IntResult2 newResult() {
-        return new IntResult2();
-    }
-
-    public static class State  {
-        public int x;
-        public volatile int v;
-        public final Object o = new Object();
+    @Actor
+    public void actor2(IntResult2 r) {
+        r.r1 = v;
+        r.r2 = x;
     }
 
 }

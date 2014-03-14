@@ -24,41 +24,34 @@
  */
 package org.openjdk.jcstress.tests.scratch.basic;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class SynchronizedTest implements Actor2_Test<SynchronizedTest.State, IntResult2> {
+@ConcurrencyStressTest
+@State
+public class SynchronizedTest {
 
-    @Override
-    public void actor1(State s, IntResult2 r) {
-        synchronized (s.g) {
-            s.g1 = 1;
-            s.a = 1;
+    int a;
+    volatile int g1;
+    final Object g = new Object();
+
+    @Actor
+    public void actor1() {
+        synchronized (g) {
+            g1 = 1;
+            a = 1;
         }
     }
 
-    @Override
-    public void actor2(State s, IntResult2 r) {
-        synchronized (s.g) {
-            r.r2 = s.a;
-            r.r1 = s.g1; // check the sync block had indeed executed
+    @Actor
+    public void actor2(IntResult2 r) {
+        synchronized (g) {
+            r.r2 = a;
+            r.r1 = g1; // check the sync block had indeed executed
         }
-    }
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    @Override
-    public IntResult2 newResult() {
-        return new IntResult2();
-    }
-
-    public static class State {
-        private volatile int g1;
-        private int a;
-        private final Object g = new Object();
     }
 
 }
