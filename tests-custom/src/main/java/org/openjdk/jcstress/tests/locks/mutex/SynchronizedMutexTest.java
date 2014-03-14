@@ -24,40 +24,33 @@
  */
 package org.openjdk.jcstress.tests.locks.mutex;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
-public class SynchronizedMutexTest implements Actor2_Test<SynchronizedMutexTest.State, IntResult2> {
+@ConcurrencyStressTest
+@State
+public class SynchronizedMutexTest {
 
-    @Override
-    public State newState() {
-        return new State();
-    }
+    static final Object LOCK = new Object();
+    int value;
 
-    @Override
-    public void actor1(State s, IntResult2 r) {
-        synchronized (State.LOCK) {
-            r.r1 = (s.value == 0) ? 1 : 0;
-            s.value = 1;
+    @Actor
+    public void actor1(IntResult2 r) {
+        synchronized (LOCK) {
+            r.r1 = (value == 0) ? 1 : 0;
+            value = 1;
         }
     }
 
-    @Override
-    public void actor2(State s, IntResult2 r) {
-        synchronized (State.LOCK) {
-            r.r2 = (s.value == 0) ? 2 : 0;
-            s.value = 1;
+    @Actor
+    public void actor2(IntResult2 r) {
+        synchronized (LOCK) {
+            r.r2 = (value == 0) ? 2 : 0;
+            value = 1;
         }
-    }
-
-    @Override
-    public IntResult2 newResult() {
-        return new IntResult2();
-    }
-
-    public static class State {
-        public static final Object LOCK = new Object();
-        public int value;
     }
 
 }

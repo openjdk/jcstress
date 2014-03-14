@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.locks.mutex;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
@@ -37,75 +40,46 @@ public class ReentrantLockMutexTests {
         public static final Lock N_LOCK = new ReentrantLock(false);
         public static final Lock F_LOCK = new ReentrantLock(true);
         public final Lock lock;
+        public int value;
 
         public BaseState(Lock lock) {
             this.lock = lock;
         }
 
-        public int value;
-    }
-
-    public static class I_N_State extends BaseState {
-        public I_N_State() {
-            super(new ReentrantLock(false));
-        }
-    }
-
-    public static class I_F_State extends BaseState {
-        public I_F_State() {
-            super(new ReentrantLock(true));
-        }
-    }
-
-    public static class S_N_State extends BaseState {
-        public S_N_State() {
-            super(BaseState.N_LOCK);
-        }
-    }
-
-    public static class S_F_State extends BaseState {
-        public S_F_State() {
-            super(BaseState.F_LOCK);
-        }
-    }
-
-    public static abstract class Base implements Actor2_Test<BaseState, IntResult2> {
-        @Override public IntResult2 newResult() { return new IntResult2(); }
-
-        public int L(BaseState s) {
-            Lock lock = s.lock;
+        public int L() {
+            Lock lock = this.lock;
             lock.lock();
             try {
-                int r = (s.value == 0) ? 1 : 0;
-                s.value = 1;
+                int r = (value == 0) ? 1 : 0;
+                value = 1;
                 return r;
             } finally {
                 lock.unlock();
             }
         }
 
-        public int LI(BaseState s) {
-            Lock lock = s.lock;
+        public int LI() {
+            Lock lock = this.lock;
             try {
                 lock.lockInterruptibly();
             } catch (InterruptedException e) {
                 return -1;
             }
             try {
-                int r = (s.value == 0) ? 1 : 0;
-                s.value = 1;
+                int r = (value == 0) ? 1 : 0;
+                value = 1;
                 return r;
             } finally {
                 lock.unlock();
             }
         }
 
-        public int TL(BaseState s) {
-            Lock lock = s.lock;
+        public int TL() {
+            Lock lock = this.lock;
             if (lock.tryLock()) {
                 try {
-                    int r = (s.value == 0) ? 1 : 0;
-                    s.value = 1;
+                    int r = (value == 0) ? 1 : 0;
+                    value = 1;
                     return r;
                 } finally {
                     lock.unlock();
@@ -114,13 +88,13 @@ public class ReentrantLockMutexTests {
             return -1;
         }
 
-        public int TLt(BaseState s) {
-            Lock lock = s.lock;
+        public int TLt() {
+            Lock lock = this.lock;
             try {
                 if (lock.tryLock(1, TimeUnit.MINUTES)) {
                     try {
-                        int r = (s.value == 0) ? 1 : 0;
-                        s.value = 1;
+                        int r = (value == 0) ? 1 : 0;
+                        value = 1;
                         return r;
                     } finally {
                         lock.unlock();
@@ -131,230 +105,285 @@ public class ReentrantLockMutexTests {
             }
             return -1;
         }
-
     }
 
-    public abstract static class I_F extends Base {
-        @Override public BaseState newState() { return new I_F_State(); }
-
-        public abstract static class A extends I_F {}
-
-        public static class LI_LI extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = LI(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = LI(s); }
-        }
-
-        public static class LI_L extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = LI(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = LI(s); }
-        }
-
-        public static class LI_TL extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = LI(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TL(s); }
-        }
-
-        public static class LI_TLt extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = LI(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TLt(s); }
-        }
-
-        public static class L_L extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = L(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = L(s); }
-        }
-
-        public static class L_TL extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = L(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TL(s); }
-        }
-
-        public static class L_TLt extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = L(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TLt(s); }
-        }
-
-        public static class TL_TL extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = TL(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TL(s); }
-        }
-
-        public static class TL_TLt extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = TL(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TLt(s); }
-        }
-
-        public static class TLt_TLt extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = TLt(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TLt(s); }
+    @State
+    public static class I_N_State extends BaseState {
+        public I_N_State() {
+            super(new ReentrantLock(false));
         }
     }
 
-    public abstract static class I_N extends Base {
-        @Override public BaseState newState() { return new I_N_State(); }
-
-        public abstract static class A extends I_N {}
-
-        public static class LI_LI extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = LI(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = LI(s); }
-        }
-
-        public static class LI_L extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = LI(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = LI(s); }
-        }
-
-        public static class LI_TL extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = LI(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TL(s); }
-        }
-
-        public static class LI_TLt extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = LI(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TLt(s); }
-        }
-
-        public static class L_L extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = L(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = L(s); }
-        }
-
-        public static class L_TL extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = L(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TL(s); }
-        }
-
-        public static class L_TLt extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = L(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TLt(s); }
-        }
-
-        public static class TL_TL extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = TL(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TL(s); }
-        }
-
-        public static class TL_TLt extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = TL(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TLt(s); }
-        }
-
-        public static class TLt_TLt extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = TLt(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TLt(s); }
+    @State
+    public static class I_F_State extends BaseState {
+        public I_F_State() {
+            super(new ReentrantLock(true));
         }
     }
 
-    public abstract static class S_N extends Base {
-        @Override public BaseState newState() { return new S_N_State(); }
-
-        public abstract static class A extends S_N {}
-
-        public static class LI_LI extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = LI(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = LI(s); }
-        }
-
-        public static class LI_L extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = LI(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = LI(s); }
-        }
-
-        public static class LI_TL extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = LI(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TL(s); }
-        }
-
-        public static class LI_TLt extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = LI(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TLt(s); }
-        }
-
-        public static class L_L extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = L(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = L(s); }
-        }
-
-        public static class L_TL extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = L(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TL(s); }
-        }
-
-        public static class L_TLt extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = L(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TLt(s); }
-        }
-
-        public static class TL_TL extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = TL(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TL(s); }
-        }
-
-        public static class TL_TLt extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = TL(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TLt(s); }
-        }
-
-        public static class TLt_TLt extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = TLt(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TLt(s); }
+    @State
+    public static class S_N_State extends BaseState {
+        public S_N_State() {
+            super(BaseState.N_LOCK);
         }
     }
 
-    public abstract static class S_F extends Base {
-        @Override public BaseState newState() { return new S_F_State(); }
+    @State
+    public static class S_F_State extends BaseState {
+        public S_F_State() {
+            super(BaseState.F_LOCK);
+        }
+    }
 
-        public abstract static class A extends S_F {}
+    public static class I_F {
 
-        public static class LI_LI extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = LI(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = LI(s); }
+        @ConcurrencyStressTest
+        public static class LI_LI {
+            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.LI(); }
+            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.LI(); }
         }
 
-        public static class LI_L extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = LI(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = LI(s); }
+        @ConcurrencyStressTest
+        public static class LI_L {
+            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.LI(); }
+            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.LI(); }
         }
 
-        public static class LI_TL extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = LI(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TL(s); }
+        @ConcurrencyStressTest
+        public static class LI_TL {
+            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.LI(); }
+            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TL(); }
         }
 
-        public static class LI_TLt extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = LI(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TLt(s); }
+        @ConcurrencyStressTest
+        public static class LI_TLt {
+            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.LI(); }
+            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
         }
 
-        public static class L_L extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = L(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = L(s); }
+        @ConcurrencyStressTest
+        public static class L_L {
+            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.L(); }
+            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.L(); }
         }
 
-        public static class L_TL extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = L(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TL(s); }
+        @ConcurrencyStressTest
+        public static class L_TL {
+            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.L(); }
+            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TL(); }
         }
 
-        public static class L_TLt extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = L(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TLt(s); }
+        @ConcurrencyStressTest
+        public static class L_TLt {
+            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.L(); }
+            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
         }
 
-        public static class TL_TL extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = TL(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TL(s); }
+        @ConcurrencyStressTest
+        public static class TL_TL {
+            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.TL(); }
+            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TL(); }
         }
 
-        public static class TL_TLt extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = TL(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TLt(s); }
+        @ConcurrencyStressTest
+        public static class TL_TLt {
+            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.TL(); }
+            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
         }
 
-        public static class TLt_TLt extends A {
-            @Override public void actor1(BaseState s, IntResult2 r) { r.r1 = TLt(s); }
-            @Override public void actor2(BaseState s, IntResult2 r) { r.r2 = TLt(s); }
+        @ConcurrencyStressTest
+        public static class TLt_TLt {
+            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.TLt(); }
+            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
+        }
+    }
+
+    public static class I_N {
+
+        @ConcurrencyStressTest
+        public static class LI_LI {
+            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.LI(); }
+            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.LI(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class LI_L {
+            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.LI(); }
+            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.LI(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class LI_TL {
+            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.LI(); }
+            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TL(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class LI_TLt {
+            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.LI(); }
+            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class L_L {
+            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.L(); }
+            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.L(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class L_TL {
+            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.L(); }
+            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TL(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class L_TLt {
+            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.L(); }
+            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class TL_TL {
+            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.TL(); }
+            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TL(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class TL_TLt {
+            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.TL(); }
+            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class TLt_TLt {
+            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.TLt(); }
+            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
+        }
+    }
+
+    public static class S_N {
+
+        @ConcurrencyStressTest
+        public static class LI_LI {
+            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.LI(); }
+            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.LI(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class LI_L {
+            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.LI(); }
+            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.LI(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class LI_TL {
+            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.LI(); }
+            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TL(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class LI_TLt {
+            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.LI(); }
+            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class L_L {
+            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.L(); }
+            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.L(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class L_TL {
+            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.L(); }
+            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TL(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class L_TLt {
+            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.L(); }
+            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class TL_TL {
+            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.TL(); }
+            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TL(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class TL_TLt {
+            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.TL(); }
+            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class TLt_TLt {
+            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.TLt(); }
+            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
+        }
+    }
+
+    public static class S_F {
+
+        @ConcurrencyStressTest
+        public static class LI_LI {
+            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.LI(); }
+            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.LI(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class LI_L {
+            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.LI(); }
+            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.LI(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class LI_TL {
+            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.LI(); }
+            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TL(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class LI_TLt {
+            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.LI(); }
+            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class L_L {
+            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.L(); }
+            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.L(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class L_TL {
+            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.L(); }
+            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TL(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class L_TLt {
+            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.L(); }
+            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class TL_TL {
+            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.TL(); }
+            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TL(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class TL_TLt {
+            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.TL(); }
+            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
+        }
+
+        @ConcurrencyStressTest
+        public static class TLt_TLt {
+            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.TLt(); }
+            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
         }
     }
 
