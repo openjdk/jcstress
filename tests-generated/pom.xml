@@ -53,7 +53,7 @@ questions.
                     <source>1.6</source>
                     <target>1.6</target>
                     <debug>false</debug>
-                    <meminitial>2048</meminitial>
+                    <meminitial>4096</meminitial>
                     <fork>true</fork>
                 </configuration>
             </plugin>
