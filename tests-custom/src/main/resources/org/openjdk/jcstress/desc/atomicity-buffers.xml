@@ -119,62 +119,62 @@
     </template>
 
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferAtomicityTests.ByteTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferAtomicityTests$ByteTest"/>
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferAtomicityTests.FloatTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferAtomicityTests$FloatTest"/>
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferAtomicityTests.IntTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferAtomicityTests$IntTest"/>
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferAtomicityTests.LongTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferAtomicityTests$LongTest"/>
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferAtomicityTests.ShortTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferAtomicityTests$ShortTest"/>
 
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferAtomicityTests.ByteTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferAtomicityTests$ByteTest"/>
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferAtomicityTests.FloatTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferAtomicityTests$FloatTest"/>
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferAtomicityTests.IntTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferAtomicityTests$IntTest"/>
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferAtomicityTests.LongTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferAtomicityTests$LongTest"/>
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferAtomicityTests.ShortTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferAtomicityTests$ShortTest"/>
 
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.FloatBufferAtomicityTests.FloatTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.FloatBufferAtomicityTests$FloatTest"/>
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.IntBufferAtomicityTests.IntTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.IntBufferAtomicityTests$IntTest"/>
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.LongBufferAtomicityTests.LongTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.LongBufferAtomicityTests$LongTest"/>
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.ShortBufferAtomicityTests.ShortTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.ShortBufferAtomicityTests$ShortTest"/>
 
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferViewsAtomicityTests.IntViewTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferViewsAtomicityTests$IntViewTest"/>
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferViewsAtomicityTests.LongViewTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferViewsAtomicityTests$LongViewTest"/>
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferViewsAtomicityTests.ShortViewTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferViewsAtomicityTests$ShortViewTest"/>
 
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferViewsAtomicityTests.IntViewTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferViewsAtomicityTests$IntViewTest"/>
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferViewsAtomicityTests.LongViewTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferViewsAtomicityTests$LongViewTest"/>
     <test template="main"
-          name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferViewsAtomicityTests.ShortViewTest"/>
+          name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferViewsAtomicityTests$ShortViewTest"/>
 
-    <test template="main-char" name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferAtomicityTests.CharTest" />
-    <test template="main-char" name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferViewsAtomicityTests.CharViewTest" />
-    <test template="main-char" name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferViewsAtomicityTests.CharViewTest" />
-    <test template="main-char" name="org.openjdk.jcstress.tests.atomicity.buffers.CharBufferAtomicityTests.CharTest" />
-    <test template="main-char" name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferAtomicityTests.CharTest" />
+    <test template="main-char" name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferAtomicityTests$CharTest" />
+    <test template="main-char" name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferViewsAtomicityTests$CharViewTest" />
+    <test template="main-char" name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferViewsAtomicityTests$CharViewTest" />
+    <test template="main-char" name="org.openjdk.jcstress.tests.atomicity.buffers.CharBufferAtomicityTests$CharTest" />
+    <test template="main-char" name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferAtomicityTests$CharTest" />
 
-    <test template="main-double" name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferAtomicityTests.DoubleTest" />
-    <test template="main-double" name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferViewsAtomicityTests.DoubleViewTest" />
-    <test template="main-double" name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferViewsAtomicityTests.DoubleViewTest" />
-    <test template="main-double" name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferAtomicityTests.DoubleTest" />
-    <test template="main-double" name="org.openjdk.jcstress.tests.atomicity.buffers.DoubleBufferAtomicityTests.DoubleTest" />
+    <test template="main-double" name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferAtomicityTests$DoubleTest" />
+    <test template="main-double" name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferViewsAtomicityTests$DoubleViewTest" />
+    <test template="main-double" name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferViewsAtomicityTests$DoubleViewTest" />
+    <test template="main-double" name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferAtomicityTests$DoubleTest" />
+    <test template="main-double" name="org.openjdk.jcstress.tests.atomicity.buffers.DoubleBufferAtomicityTests$DoubleTest" />
 
-    <test template="main-float" name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferViewsAtomicityTests.FloatViewTest" />
-    <test template="main-float" name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferViewsAtomicityTests.FloatViewTest" />
+    <test template="main-float" name="org.openjdk.jcstress.tests.atomicity.buffers.ByteBufferViewsAtomicityTests$FloatViewTest" />
+    <test template="main-float" name="org.openjdk.jcstress.tests.atomicity.buffers.DirectByteBufferViewsAtomicityTests$FloatViewTest" />
 </testsuite>

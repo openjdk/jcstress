@@ -26,7 +26,7 @@
 -->
 <testsuite>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.AddAndGet_AddAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$AddAndGet_AddAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -45,7 +45,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.AddAndGet_DecAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$AddAndGet_DecAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -64,7 +64,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.AddAndGet_CAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$AddAndGet_CAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -83,7 +83,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.AddAndGet_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$AddAndGet_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -102,7 +102,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.AddAndGet_GetAndAdd">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$AddAndGet_GetAndAdd">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -121,7 +121,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.AddAndGet_GetAndDec">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$AddAndGet_GetAndDec">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -140,7 +140,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.AddAndGet_GetAndInc">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$AddAndGet_GetAndInc">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -159,7 +159,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.AddAndGet_GetAndSet">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$AddAndGet_GetAndSet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -178,7 +178,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.AddAndGet_IncAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$AddAndGet_IncAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -197,7 +197,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.AddAndGet_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$AddAndGet_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -216,7 +216,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.DecAndGet_CAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$DecAndGet_CAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -235,7 +235,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.DecAndGet_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$DecAndGet_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -254,7 +254,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.DecAndGet_DecAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$DecAndGet_DecAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -273,7 +273,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.DecAndGet_GetAndAdd">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$DecAndGet_GetAndAdd">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -292,7 +292,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.DecAndGet_GetAndDec">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$DecAndGet_GetAndDec">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -311,7 +311,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.DecAndGet_GetAndInc">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$DecAndGet_GetAndInc">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -330,7 +330,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.DecAndGet_GetAndSet">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$DecAndGet_GetAndSet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -349,7 +349,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.DecAndGet_IncAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$DecAndGet_IncAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -368,7 +368,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.DecAndGet_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$DecAndGet_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -387,7 +387,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndAdd_CAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndAdd_CAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -406,7 +406,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndAdd_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndAdd_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -425,7 +425,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndAdd_GetAndAdd">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndAdd_GetAndAdd">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -444,7 +444,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndAdd_GetAndDec">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndAdd_GetAndDec">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -463,7 +463,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndAdd_GetAndInc">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndAdd_GetAndInc">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -482,7 +482,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndAdd_GetAndSet">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndAdd_GetAndSet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -501,7 +501,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndAdd_IncAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndAdd_IncAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -520,7 +520,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndAdd_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndAdd_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -539,7 +539,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndDec_CAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndDec_CAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -558,7 +558,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndDec_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndDec_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -577,7 +577,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndDec_GetAndDec">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndDec_GetAndDec">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -596,7 +596,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndDec_GetAndInc">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndDec_GetAndInc">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -615,7 +615,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndDec_GetAndSet">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndDec_GetAndSet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -634,7 +634,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndDec_IncAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndDec_IncAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -653,7 +653,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndDec_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndDec_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -672,7 +672,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndInc_CAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndInc_CAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -691,7 +691,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndInc_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndInc_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -710,7 +710,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndInc_GetAndInc">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndInc_GetAndInc">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -729,7 +729,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndInc_GetAndSet">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndInc_GetAndSet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -748,7 +748,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndInc_IncAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndInc_IncAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -767,7 +767,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndInc_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndInc_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -786,7 +786,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndSet_CAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndSet_CAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -805,7 +805,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndSet_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndSet_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -824,7 +824,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndSet_GetAndSet">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndSet_GetAndSet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -843,7 +843,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndSet_IncAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndSet_IncAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -862,7 +862,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.GetAndSet_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$GetAndSet_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -881,7 +881,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.IncAndGet_CAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$IncAndGet_CAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -900,7 +900,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.IncAndGet_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$IncAndGet_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -919,7 +919,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.IncAndGet_IncAndGet">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$IncAndGet_IncAndGet">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -938,7 +938,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.IncAndGet_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$IncAndGet_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -957,7 +957,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.Set_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$Set_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -976,7 +976,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.CAS_CAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$CAS_CAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -995,7 +995,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.CAS_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$CAS_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -1014,7 +1014,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.CAS_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$CAS_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -1033,7 +1033,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.WCAS_WCAS">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$WCAS_WCAS">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>
@@ -1057,7 +1057,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests.WCAS_Set">
+    <test name="org.openjdk.jcstress.tests.atomics.longs.AtomicLongFieldUpdaterPairwiseTests$WCAS_Set">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>Tests the atomicity of AtomicLongFieldUpdater pair-wise operations.</description>
         <case>

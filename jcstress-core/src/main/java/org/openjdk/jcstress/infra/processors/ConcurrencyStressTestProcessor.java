@@ -175,6 +175,21 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
         return name + "_jcstress";
     }
 
+    public static String getQualifiedName(Element ci) {
+        String name = "";
+        while (true) {
+            Element parent = ci.getEnclosingElement();
+            if (parent == null || parent.getKind() == ElementKind.PACKAGE) {
+                name = ((TypeElement)ci).getQualifiedName() + (name.isEmpty() ? "" : "$" + name);
+                break;
+            } else {
+                name = ci.getSimpleName() + (name.isEmpty() ? "" : "$" + name);
+            }
+            ci = parent;
+        }
+        return name;
+    }
+
     private void generate(TestInfo info) {
         PrintWriter pw;
         Writer writer;
@@ -197,7 +212,7 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
         pw.println();
 
         pw.println("    public " + getGeneratedName(info.getTest()) + "(Options opts, TestResultCollector collector, ExecutorService pool) {");
-        pw.println("        super(opts, collector, pool, \"" + info.getTest().getQualifiedName() + "\");");
+        pw.println("        super(opts, collector, pool, \"" + getQualifiedName(info.getTest()) + "\");");
         pw.println("    }");
         pw.println();
 

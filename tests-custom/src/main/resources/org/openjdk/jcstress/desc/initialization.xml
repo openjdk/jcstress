@@ -220,7 +220,7 @@
             <match>[0]</match>
             <expect>ACCEPTABLE</expect>
             <description>
-                Seeing the default value. The update to the field in the constructor is lost.
+                Seeing the default value for long field. The update to the field in the constructor is lost.
                 This is a legal JMM behavior.
             </description>
         </case>
@@ -253,7 +253,7 @@
             <match>[A]</match>
             <expect>ACCEPTABLE</expect>
             <description>
-                Seeing the default value. The update to the field in the constructor is lost.
+                Seeing the default value for long field. The update to the field in the constructor is lost.
                 This is a legal JMM behavior.
             </description>
         </case>
@@ -286,7 +286,7 @@
             <match>[0.0]</match>
             <expect>ACCEPTABLE</expect>
             <description>
-                Seeing the default value. The update to the field in the constructor is lost.
+                Seeing the default value for long field. The update to the field in the constructor is lost.
                 This is a legal JMM behavior.
             </description>
         </case>

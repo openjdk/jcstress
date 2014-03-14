@@ -53,247 +53,247 @@
         </unmatched>
     </template>
 
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRL_U.aRWLw_U"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRL_U.aWL_U"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRL_U.tWL_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRL_U.tWL_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRL_U.tWL_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRL_U.tWLt_tUW" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRL_U.tWLt_Us"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRL_U.tWLt_UWs" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRL_U.WL_tUW"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRL_U.WL_Us"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRL_U.WL_UWs"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRL_U.WLI_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRL_U.WLI_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRL_U.WLI_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRL_U.orWL_V"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRL_U$aRWLw_U"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRL_U$aWL_U"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRL_U$tWL_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRL_U$tWL_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRL_U$tWL_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRL_U$tWLt_tUW" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRL_U$tWLt_Us"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRL_U$tWLt_UWs" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRL_U$WL_tUW"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRL_U$WL_Us"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRL_U$WL_UWs"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRL_U$WLI_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRL_U$WLI_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRL_U$WLI_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRL_U$orWL_V"  />
 
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRWLr_U.aRWLw_U"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRWLr_U.aWL_U"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRWLr_U.tWL_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRWLr_U.tWL_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRWLr_U.tWL_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRWLr_U.tWLt_tUW" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRWLr_U.tWLt_Us"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRWLr_U.tWLt_UWs" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRWLr_U.WL_tUW"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRWLr_U.WL_Us"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRWLr_U.WL_UWs"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRWLr_U.WLI_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRWLr_U.WLI_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRWLr_U.WLI_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.aRWLr_U.orWL_V"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRWLr_U$aRWLw_U"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRWLr_U$aWL_U"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRWLr_U$tWL_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRWLr_U$tWL_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRWLr_U$tWL_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRWLr_U$tWLt_tUW" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRWLr_U$tWLt_Us"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRWLr_U$tWLt_UWs" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRWLr_U$WL_tUW"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRWLr_U$WL_Us"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRWLr_U$WL_UWs"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRWLr_U$WLI_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRWLr_U$WLI_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRWLr_U$WLI_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$aRWLr_U$orWL_V"  />
 
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_URs.aRWLw_U"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_URs.aWL_U"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_URs.tWL_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_URs.tWL_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_URs.tWL_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_URs.tWLt_tUW" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_URs.tWLt_Us"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_URs.tWLt_UWs" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_URs.WL_tUW"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_URs.WL_Us"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_URs.WL_UWs"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_URs.WLI_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_URs.WLI_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_URs.WLI_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_URs.orWL_V"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_URs$aRWLw_U"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_URs$aWL_U"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_URs$tWL_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_URs$tWL_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_URs$tWL_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_URs$tWLt_tUW" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_URs$tWLt_Us"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_URs$tWLt_UWs" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_URs$WL_tUW"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_URs$WL_Us"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_URs$WL_UWs"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_URs$WLI_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_URs$WLI_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_URs$WLI_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_URs$orWL_V"  />
 
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_Us.aRWLw_U"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_Us.aWL_U"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_Us.tWL_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_Us.tWL_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_Us.tWL_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_Us.tWLt_tUW" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_Us.tWLt_Us"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_Us.tWLt_UWs" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_Us.WL_tUW"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_Us.WL_Us"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_Us.WL_UWs"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_Us.WLI_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_Us.WLI_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_Us.WLI_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_Us.orWL_V"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_Us$aRWLw_U"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_Us$aWL_U"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_Us$tWL_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_Us$tWL_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_Us$tWL_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_Us$tWLt_tUW" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_Us$tWLt_Us"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_Us$tWLt_UWs" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_Us$WL_tUW"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_Us$WL_Us"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_Us$WL_UWs"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_Us$WLI_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_Us$WLI_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_Us$WLI_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_Us$orWL_V"  />
 
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_tUR.aRWLw_U"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_tUR.aWL_U"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_tUR.tWL_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_tUR.tWL_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_tUR.tWL_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_tUR.tWLt_tUW" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_tUR.tWLt_Us"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_tUR.tWLt_UWs" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_tUR.WL_tUW"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_tUR.WL_Us"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_tUR.WL_UWs"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_tUR.WLI_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_tUR.WLI_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_tUR.WLI_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RL_tUR.orWL_V"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_tUR$aRWLw_U"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_tUR$aWL_U"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_tUR$tWL_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_tUR$tWL_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_tUR$tWL_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_tUR$tWLt_tUW" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_tUR$tWLt_Us"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_tUR$tWLt_UWs" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_tUR$WL_tUW"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_tUR$WL_Us"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_tUR$WL_UWs"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_tUR$WLI_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_tUR$WLI_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_tUR$WLI_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RL_tUR$orWL_V"  />
 
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_URs.aRWLw_U"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_URs.aWL_U"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_URs.tWL_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_URs.tWL_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_URs.tWL_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_URs.tWLt_tUW" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_URs.tWLt_Us"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_URs.tWLt_UWs" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_URs.WL_tUW"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_URs.WL_Us"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_URs.WL_UWs"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_URs.WLI_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_URs.WLI_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_URs.WLI_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_URs.orWL_V"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_URs$aRWLw_U"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_URs$aWL_U"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_URs$tWL_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_URs$tWL_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_URs$tWL_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_URs$tWLt_tUW" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_URs$tWLt_Us"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_URs$tWLt_UWs" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_URs$WL_tUW"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_URs$WL_Us"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_URs$WL_UWs"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_URs$WLI_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_URs$WLI_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_URs$WLI_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_URs$orWL_V"  />
 
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_Us.aRWLw_U"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_Us.aWL_U"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_Us.tWL_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_Us.tWL_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_Us.tWL_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_Us.tWLt_tUW" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_Us.tWLt_Us"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_Us.tWLt_UWs" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_Us.WL_tUW"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_Us.WL_Us"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_Us.WL_UWs"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_Us.WLI_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_Us.WLI_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_Us.WLI_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_Us.orWL_V"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_Us$aRWLw_U"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_Us$aWL_U"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_Us$tWL_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_Us$tWL_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_Us$tWL_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_Us$tWLt_tUW" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_Us$tWLt_Us"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_Us$tWLt_UWs" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_Us$WL_tUW"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_Us$WL_Us"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_Us$WL_UWs"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_Us$WLI_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_Us$WLI_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_Us$WLI_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_Us$orWL_V"  />
 
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_tUR.aRWLw_U"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_tUR.aWL_U"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_tUR.tWL_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_tUR.tWL_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_tUR.tWL_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_tUR.tWLt_tUW" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_tUR.tWLt_Us"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_tUR.tWLt_UWs" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_tUR.WL_tUW"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_tUR.WL_Us"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_tUR.WL_UWs"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_tUR.WLI_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_tUR.WLI_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_tUR.WLI_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.RLI_tUR.orWL_V"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_tUR$aRWLw_U"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_tUR$aWL_U"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_tUR$tWL_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_tUR$tWL_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_tUR$tWL_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_tUR$tWLt_tUW" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_tUR$tWLt_Us"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_tUR$tWLt_UWs" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_tUR$WL_tUW"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_tUR$WL_Us"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_tUR$WL_UWs"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_tUR$WLI_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_tUR$WLI_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_tUR$WLI_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$RLI_tUR$orWL_V"  />
 
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tOR_V.aRWLw_U"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tOR_V.aWL_U"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tOR_V.tWL_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tOR_V.tWL_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tOR_V.tWL_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tOR_V.tWLt_tUW" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tOR_V.tWLt_Us"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tOR_V.tWLt_UWs" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tOR_V.WL_tUW"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tOR_V.WL_Us"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tOR_V.WL_UWs"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tOR_V.WLI_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tOR_V.WLI_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tOR_V.WLI_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tOR_V.orWL_V"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tOR_V$aRWLw_U"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tOR_V$aWL_U"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tOR_V$tWL_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tOR_V$tWL_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tOR_V$tWL_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tOR_V$tWLt_tUW" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tOR_V$tWLt_Us"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tOR_V$tWLt_UWs" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tOR_V$WL_tUW"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tOR_V$WL_Us"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tOR_V$WL_UWs"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tOR_V$WLI_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tOR_V$WLI_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tOR_V$WLI_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tOR_V$orWL_V"  />
 
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_URs.aRWLw_U"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_URs.aWL_U"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_URs.tWL_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_URs.tWL_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_URs.tWL_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_URs.tWLt_tUW" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_URs.tWLt_Us"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_URs.tWLt_UWs" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_URs.WL_tUW"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_URs.WL_Us"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_URs.WL_UWs"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_URs.WLI_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_URs.WLI_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_URs.WLI_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_URs.orWL_V"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_URs$aRWLw_U"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_URs$aWL_U"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_URs$tWL_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_URs$tWL_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_URs$tWL_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_URs$tWLt_tUW" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_URs$tWLt_Us"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_URs$tWLt_UWs" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_URs$WL_tUW"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_URs$WL_Us"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_URs$WL_UWs"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_URs$WLI_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_URs$WLI_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_URs$WLI_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_URs$orWL_V"  />
 
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_Us.aRWLw_U"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_Us.aWL_U"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_Us.tWL_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_Us.tWL_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_Us.tWL_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_Us.tWLt_tUW" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_Us.tWLt_Us"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_Us.tWLt_UWs" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_Us.WL_tUW"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_Us.WL_Us"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_Us.WL_UWs"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_Us.WLI_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_Us.WLI_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_Us.WLI_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_Us.orWL_V"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_Us$aRWLw_U"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_Us$aWL_U"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_Us$tWL_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_Us$tWL_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_Us$tWL_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_Us$tWLt_tUW" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_Us$tWLt_Us"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_Us$tWLt_UWs" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_Us$WL_tUW"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_Us$WL_Us"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_Us$WL_UWs"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_Us$WLI_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_Us$WLI_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_Us$WLI_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_Us$orWL_V"  />
 
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_tUR.aRWLw_U"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_tUR.aWL_U"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_tUR.tWL_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_tUR.tWL_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_tUR.tWL_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_tUR.tWLt_tUW" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_tUR.tWLt_Us"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_tUR.tWLt_UWs" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_tUR.WL_tUW"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_tUR.WL_Us"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_tUR.WL_UWs"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_tUR.WLI_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_tUR.WLI_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_tUR.WLI_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRL_tUR.orWL_V"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_tUR$aRWLw_U"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_tUR$aWL_U"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_tUR$tWL_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_tUR$tWL_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_tUR$tWL_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_tUR$tWLt_tUW" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_tUR$tWLt_Us"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_tUR$tWLt_UWs" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_tUR$WL_tUW"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_tUR$WL_Us"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_tUR$WL_UWs"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_tUR$WLI_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_tUR$WLI_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_tUR$WLI_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRL_tUR$orWL_V"  />
 
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_URs.aRWLw_U"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_URs.aWL_U"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_URs.tWL_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_URs.tWL_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_URs.tWL_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_URs.tWLt_tUW" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_URs.tWLt_Us"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_URs.tWLt_UWs" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_URs.WL_tUW"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_URs.WL_Us"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_URs.WL_UWs"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_URs.WLI_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_URs.WLI_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_URs.WLI_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_URs.orWL_V"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_URs$aRWLw_U"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_URs$aWL_U"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_URs$tWL_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_URs$tWL_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_URs$tWL_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_URs$tWLt_tUW" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_URs$tWLt_Us"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_URs$tWLt_UWs" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_URs$WL_tUW"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_URs$WL_Us"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_URs$WL_UWs"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_URs$WLI_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_URs$WLI_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_URs$WLI_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_URs$orWL_V"  />
 
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_Us.aRWLw_U"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_Us.aWL_U"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_Us.tWL_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_Us.tWL_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_Us.tWL_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_Us.tWLt_tUW" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_Us.tWLt_Us"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_Us.tWLt_UWs" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_Us.WL_tUW"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_Us.WL_Us"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_Us.WL_UWs"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_Us.WLI_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_Us.WLI_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_Us.WLI_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_Us.orWL_V"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_Us$aRWLw_U"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_Us$aWL_U"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_Us$tWL_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_Us$tWL_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_Us$tWL_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_Us$tWLt_tUW" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_Us$tWLt_Us"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_Us$tWLt_UWs" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_Us$WL_tUW"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_Us$WL_Us"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_Us$WL_UWs"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_Us$WLI_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_Us$WLI_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_Us$WLI_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_Us$orWL_V"  />
 
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_tUR.aRWLw_U"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_tUR.aWL_U"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_tUR.tWL_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_tUR.tWL_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_tUR.tWL_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_tUR.tWLt_tUW" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_tUR.tWLt_Us"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_tUR.tWLt_UWs" />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_tUR.WL_tUW"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_tUR.WL_Us"    />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_tUR.WL_UWs"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_tUR.WLI_tUW"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_tUR.WLI_Us"   />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_tUR.WLI_UWs"  />
-    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests.tRLt_tUR.orWL_V"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_tUR$aRWLw_U"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_tUR$aWL_U"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_tUR$tWL_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_tUR$tWL_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_tUR$tWL_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_tUR$tWLt_tUW" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_tUR$tWLt_Us"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_tUR$tWLt_UWs" />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_tUR$WL_tUW"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_tUR$WL_Us"    />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_tUR$WL_UWs"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_tUR$WLI_tUW"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_tUR$WLI_Us"   />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_tUR$WLI_UWs"  />
+    <test template="atomicUpdate" name="org.openjdk.jcstress.tests.locks.stamped.StampedLockPairwiseTests$tRLt_tUR$orWL_V"  />
 
-    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests.OO_OO">
+    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests$OO_OO">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>
             Tests if StampedLock transits to particular state without the illegal races.
@@ -313,7 +313,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests.OO_OR">
+    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests$OO_OR">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>
             Tests if StampedLock transits to particular state without the illegal races.
@@ -340,7 +340,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests.OO_OW">
+    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests$OO_OW">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>
             Tests if StampedLock transits to particular state without the illegal races.
@@ -368,7 +368,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests.OR_OW">
+    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests$OR_OW">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>
             Tests if StampedLock transits to particular state without the illegal races.
@@ -402,7 +402,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests.RO_RO">
+    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests$RO_RO">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>
             Tests if StampedLock transits to particular state without the illegal races.
@@ -422,7 +422,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests.RO_RR">
+    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests$RO_RR">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>
             Tests if StampedLock transits to particular state without the illegal races.
@@ -442,7 +442,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests.RO_RW">
+    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests$RO_RW">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>
             Tests if StampedLock transits to particular state without the illegal races.
@@ -477,7 +477,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests.RR_RW">
+    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests$RR_RW">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>
             Tests if StampedLock transits to particular state without the illegal races.
@@ -505,7 +505,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests.WO_WO">
+    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests$WO_WO">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>
             Tests if StampedLock transits to particular state without the illegal races.
@@ -534,7 +534,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests.WO_WR">
+    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests$WO_WR">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>
             Tests if StampedLock transits to particular state without the illegal races.
@@ -563,7 +563,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests.WO_WW">
+    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests$WO_WW">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>
             Tests if StampedLock transits to particular state without the illegal races.
@@ -593,7 +593,7 @@
         </unmatched>
     </test>
 
-    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests.WR_WW">
+    <test name="org.openjdk.jcstress.tests.locks.stamped.StampedLockTransitionTests$WR_WW">
         <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>
         <description>
             Tests if StampedLock transits to particular state without the illegal races.
