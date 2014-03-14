@@ -380,7 +380,24 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
             pw.println("                    int newLoops = holder.hasLaggedWorkers ? Math.min(loops * 2, maxStride) : loops;");
             pw.println();
             pw.println("                    for (int c = 0; c < loops; c++) {");
-            pw.println("                        res[c].reset();");
+
+            for (VariableElement var : ElementFilter.fieldsIn(info.getResult().getEnclosedElements())) {
+                pw.print("                        res[c]." + var.getSimpleName().toString() + " = ");
+                String type = var.asType().toString();
+                if (type.equals("int") || type.equals("long") || type.equals("short") || type.equals("byte") || type.equals("char")) {
+                    pw.print("0");
+                } else if (type.equals("double")) {
+                    pw.print("0D");
+                } else if (type.equals("float")) {
+                    pw.print("0F");
+                } else if (type.equals("boolean")) {
+                    pw.print("false");
+                } else {
+                    throw new GenerationException("Unable to handle @" + Result.class.getSimpleName() + " field of type " + type, var);
+                }
+                pw.println(";");
+            }
+
             pw.println("                    }");
             pw.println();
             pw.println("                    " + s + "[] newStride = cur;");
