@@ -33,18 +33,18 @@ public class VolatileReadWrite implements Primitive {
     }
 
     @Override
-    public String printStateField() {
+    public String printStateField(String klassName) {
         return "volatile " + type.getSimpleName() + " f;";
     }
 
     @Override
     public String printAcquire(String region) {
-        return "r.r1 = s.f;\n" + region;
+        return "r.r1 = f;\n" + region;
     }
 
     @Override
     public String printRelease(String region) {
-        return region + "\ns.f = " + TestGenerator.getRValue(type) + ";";
+        return region + "\nf = " + TestGenerator.getRValue(type) + ";";
     }
 
 }

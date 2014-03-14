@@ -202,57 +202,46 @@ public class TraceGen {
 
         int threads = mt.traces.size();
 
-        pw.println("package " + pkg + ";\n" +
-                "\n" +
-                "import java.util.concurrent.*;\n" +
-                "import java.util.concurrent.atomic.*;\n" +
-                "import org.openjdk.jcstress.infra.results." + resultName + ";\n" +
-                "import org.openjdk.jcstress.tests.Actor" + threads + "_Test;\n" +
-                "\n" +
-                "public class " + klass + " implements Actor" + threads + "_Test<" + klass + ".State, " + resultName + "> {\n" +
-                "\n" +
-                "    @Override\n" +
-                "    public State newState() {\n" +
-                "        return new State();\n" +
-                "    }\n" +
-                "\n");
-
-
-        for (int t = 0; t < threads; t++) {
-            pw.println(
-                    "    @Override\n" +
-                            "    public void actor" + (t+1) + "(State s, " + resultName + " r) {");
-
-            for (Op op : mt.traces.get(t).ops) {
-                switch (op.getType()) {
-                    case LOAD:
-                        pw.println("        r.r" + (op.getResId() + 1) + " = s.x" + op.getVarId() + ";");
-                        break;
-                    case STORE:
-                        pw.println("        s.x" + op.getVarId() + " = " + mapConst(op.getResId()) + ";");
-                        break;
-                }
-            }
-
-            pw.println("    }\n");
-        }
-
-        pw.println(
-                        "    @Override\n" +
-                        "    public " + resultName + " newResult() {\n" +
-                        "        return new " + resultName + "();\n" +
-                        "    }\n" +
-                        "\n" +
-                        "    public static class State {");
+        pw.println("package " + pkg + ";");
+        pw.println();
+        pw.println("import java.util.concurrent.*;");
+        pw.println("import java.util.concurrent.atomic.*;");
+        pw.println("import org.openjdk.jcstress.infra.results." + resultName + ";");
+        pw.println("import org.openjdk.jcstress.infra.annotations.*;");
+        pw.println();
+        pw.println("@ConcurrencyStressTest");
+        pw.println("@State");
+        pw.println("public class " + klass + " {");
+        pw.println();
 
         Set<Integer> exist = new HashSet<Integer>();
         for (Trace trace : mt.traces)  {
             for (Op op : trace.ops) {
                 if (exist.add(op.getVarId()))
-                    pw.println("        public volatile int x" + op.getVarId() + ";");
+                    pw.println("   volatile int x" + op.getVarId() + ";");
             }
         }
-        pw.println("    }");
+        pw.println();
+
+        for (int t = 0; t < threads; t++) {
+            pw.println("    @Actor");
+            pw.println("    public void actor" + (t+1) + "(" + resultName + " r) {");
+
+            for (Op op : mt.traces.get(t).ops) {
+                switch (op.getType()) {
+                    case LOAD:
+                        pw.println("        r.r" + (op.getResId() + 1) + " = x" + op.getVarId() + ";");
+                        break;
+                    case STORE:
+                        pw.println("        x" + op.getVarId() + " = " + mapConst(op.getResId()) + ";");
+                        break;
+                }
+            }
+
+            pw.println("    }");
+            pw.println();
+        }
+
         pw.println("}");
 
         pw.close();

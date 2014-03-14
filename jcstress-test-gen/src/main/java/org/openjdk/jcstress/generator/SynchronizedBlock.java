@@ -26,17 +26,17 @@ package org.openjdk.jcstress.generator;
 
 public class SynchronizedBlock implements Primitive {
     @Override
-    public String printStateField() {
+    public String printStateField(String klassName) {
         return "Object lock = new Object();" + "\n" + "private volatile int g1;";
     }
 
     @Override
     public String printAcquire(String region) {
-        return "synchronized(s.lock) {\n" + " r.r1 = s.g1;" + region + "}";
+        return "synchronized(lock) {\n" + " r.r1 = g1;" + region + "}";
     }
 
     @Override
     public String printRelease(String region) {
-        return "synchronized(s.lock) { " + region + " s.g1 = " + TestGenerator.getSetValue(int.class) + ";" + " }";
+        return "synchronized(lock) { " + region + " g1 = " + TestGenerator.getSetValue(int.class) + ";" + " }";
     }
 }

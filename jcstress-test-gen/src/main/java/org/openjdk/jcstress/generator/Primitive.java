@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.generator;
 
 public interface Primitive {
-    String printStateField();
+    String printStateField(String klassName);
 
     String printAcquire(String region);
 

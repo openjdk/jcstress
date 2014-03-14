@@ -136,47 +136,30 @@ public class TestGenerator {
 
         PrintWriter pw = new PrintWriter(pathname + "/" + klass + ".java");
 
-        pw.println("package " + pkg +";\n" +
-                "\n" +
-                "import java.util.concurrent.*;\n" +
-                "import java.util.concurrent.atomic.*;\n" +
-                "import org.openjdk.jcstress.infra.results." + resultName + ";\n" +
-                "import org.openjdk.jcstress.tests.Actor2_Test;\n" +
-                "\n" +
-                "public class " + klass + " implements Actor2_Test<" + klass + ".State, " + resultName + "> {\n" +
-                "\n" +
-                "    @Override\n" +
-                "    public State newState() {\n" +
-                "        return new State();\n" +
-                "    }\n" +
-                "\n" +
-                "    @Override\n" +
-                "    public void actor1(State s, " + resultName +" r) {");
-
-        pw.println("        " + prim.printRelease("        s.a = " + getRValue(types.type(1)) +";"));
-
-        pw.println(
-                "    }\n" +
-                        "\n" +
-                        "    @Override\n" +
-                        "    public void actor2(State s, " + resultName +" r) {");
-
-        pw.println("        " + prim.printAcquire("        r.r2 = s.a;"));
-
-        pw.println(
-                "    }\n" +
-                        "\n" +
-                        "    @Override\n" +
-                        "    public " + resultName + " newResult() {\n" +
-                        "        return new " + resultName + "();\n" +
-                        "    }\n" +
-                        "\n" +
-                        "    public static class State {");
-
-        pw.println("        " + prim.printStateField());
-
-        pw.println("        public " + types.type(1) + " a;");
+        pw.println("package " + pkg +";");
+        pw.println();
+        pw.println("import java.util.concurrent.*;");
+        pw.println("import java.util.concurrent.atomic.*;");
+        pw.println("import org.openjdk.jcstress.infra.results." + resultName + ";");
+        pw.println("import org.openjdk.jcstress.infra.annotations.*;");
+        pw.println();
+        pw.println("@ConcurrencyStressTest");
+        pw.println("@State");
+        pw.println("public class " + klass + " {");
+        pw.println();
+        pw.println("    " + prim.printStateField(klass));
+        pw.println("    public " + types.type(1) + " a;");
+        pw.println();
+        pw.println("    @Actor");
+        pw.println("    public void actor1(" + resultName +" r) {");
+        pw.println("        " + prim.printRelease("        a = " + getRValue(types.type(1)) +";"));
         pw.println("    }");
+        pw.println();
+        pw.println("    @Actor");
+        pw.println("    public void actor2(" + resultName +" r) {");
+        pw.println("        " + prim.printAcquire("        r.r2 = a;"));
+        pw.println("    }");
+        pw.println();
         pw.println("}");
 
         pw.close();

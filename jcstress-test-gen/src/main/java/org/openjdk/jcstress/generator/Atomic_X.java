@@ -59,7 +59,7 @@ public class Atomic_X implements Primitive {
     }
 
     @Override
-    public String printStateField() {
+    public String printStateField(String klassName) {
         return "final " + guardType.getSimpleName() + " g = new " + guardType.getSimpleName() + "();";
     }
 
@@ -67,28 +67,28 @@ public class Atomic_X implements Primitive {
     public String printAcquire(String region) {
         switch (acqType) {
             case CAS:
-                return String.format("r.r1 = s.g.compareAndSet(%s, %s) ? %s : %s; \n" + region,
+                return String.format("r.r1 = g.compareAndSet(%s, %s) ? %s : %s; \n" + region,
                         setValue,
                         defaultValue,
                         setValue,
                         defaultValue
                 );
             case get:
-                return "r.r1 = s.g.get() == " + defaultValue + "? " + defaultValue + " : " + setValue + " ; \n" + region;
+                return "r.r1 = g.get() == " + defaultValue + "? " + defaultValue + " : " + setValue + " ; \n" + region;
             case incrementAndGet:
-                return "r.r1 = s.g.incrementAndGet() == (" + defaultValue + " + " + unitValue + ") ? " + defaultValue + " : " + setValue + "; \n" + region;
+                return "r.r1 = g.incrementAndGet() == (" + defaultValue + " + " + unitValue + ") ? " + defaultValue + " : " + setValue + "; \n" + region;
             case getAndIncrement:
-                return "r.r1 = s.g.getAndIncrement() == " + defaultValue + "? " + defaultValue + " : " + setValue + " ; \n" + region;
+                return "r.r1 = g.getAndIncrement() == " + defaultValue + "? " + defaultValue + " : " + setValue + " ; \n" + region;
             case decrementAndGet:
-                return "r.r1 = s.g.decrementAndGet() == (" + defaultValue + " - " + unitValue + ") ? " + defaultValue + " : " + setValue + "; \n" + region;
+                return "r.r1 = g.decrementAndGet() == (" + defaultValue + " - " + unitValue + ") ? " + defaultValue + " : " + setValue + "; \n" + region;
             case getAndDecrement:
-                return "r.r1 = s.g.getAndDecrement() == " + defaultValue + "? " + defaultValue + " : " + setValue + " ; \n" + region;
+                return "r.r1 = g.getAndDecrement() == " + defaultValue + "? " + defaultValue + " : " + setValue + " ; \n" + region;
             case addAndGet:
-                return "r.r1 = s.g.addAndGet(" + rValue + ") == (" + defaultValue + " + " + rValue + ") ? " + defaultValue + " : " + setValue + "; \n" + region;
+                return "r.r1 = g.addAndGet(" + rValue + ") == (" + defaultValue + " + " + rValue + ") ? " + defaultValue + " : " + setValue + "; \n" + region;
             case getAndAdd:
-                return "r.r1 = s.g.getAndAdd(" + rValue + ") == " + defaultValue + "? " + defaultValue + " : " + setValue + " ; \n" + region;
+                return "r.r1 = g.getAndAdd(" + rValue + ") == " + defaultValue + "? " + defaultValue + " : " + setValue + " ; \n" + region;
             case getAndSet:
-                return "r.r1 = s.g.getAndSet(" + rValue + ") == " + defaultValue + "? " + defaultValue + " : " + setValue + " ; \n" + region;
+                return "r.r1 = g.getAndSet(" + rValue + ") == " + defaultValue + "? " + defaultValue + " : " + setValue + " ; \n" + region;
             default:
                 throw new IllegalStateException("" + acqType);
         }
@@ -98,23 +98,23 @@ public class Atomic_X implements Primitive {
     public String printRelease(String region) {
         switch (relType) {
             case set:
-                return region + "s.g.set(" +setValue + ");";
+                return region + "g.set(" +setValue + ");";
             case CAS:
-                return region + "s.g.compareAndSet(" + defaultValue + ", " +setValue + ");";
+                return region + "g.compareAndSet(" + defaultValue + ", " +setValue + ");";
             case incrementAndGet:
-                return region + "s.g.incrementAndGet();";
+                return region + "g.incrementAndGet();";
             case getAndIncrement:
-                return region + "s.g.getAndIncrement();";
+                return region + "g.getAndIncrement();";
             case decrementAndGet:
-                return region + "s.g.decrementAndGet();";
+                return region + "g.decrementAndGet();";
             case getAndDecrement:
-                return region + "s.g.getAndDecrement();";
+                return region + "g.getAndDecrement();";
             case addAndGet:
-                return region + "s.g.addAndGet(" + rValue + ");";
+                return region + "g.addAndGet(" + rValue + ");";
             case getAndAdd:
-                return region + "s.g.getAndAdd(" + rValue + ");";
+                return region + "g.getAndAdd(" + rValue + ");";
             case getAndSet:
-                return region + "s.g.getAndSet(" + rValue + ");";
+                return region + "g.getAndSet(" + rValue + ");";
             default:
                 throw new IllegalStateException("" + relType);
         }
