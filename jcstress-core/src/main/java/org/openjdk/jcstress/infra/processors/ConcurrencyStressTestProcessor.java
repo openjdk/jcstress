@@ -382,14 +382,13 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
             pw.println("        int curEpoch = 0;");
             pw.println();
             pw.println("        " + t + " lt = test;");
-            pw.println("        " + s + "[] lPoison = poison;");
             pw.println();
             pw.println("        while (true) {");
             pw.println("            StateHolder<" + s + ", " + r + "> holder = version.get();");
             pw.println("            " + s + "[] cur = holder.s;");
             pw.println("            " + r + "[] res = holder.r;");
             pw.println();
-            pw.println("            if (cur == lPoison) {");
+            pw.println("            if (cur == poison) {");
             pw.println("                return null;");
             pw.println("            }");
             pw.println();
@@ -400,12 +399,7 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
             pw.println("                indices = ArrayUtils.generatePermutation(loops);");
             pw.println("            }");
             pw.println();
-            pw.println("            holder.announceReady();");
-            pw.println("            while (holder.notAllReady) {");
-            pw.println("                if (control.shouldYield) Thread.yield();");
-            pw.println("            }");
-            pw.println();
-            pw.println("            holder.announceStarted();");
+            pw.println("            holder.preRun(control.shouldYield);");
             pw.println();
             pw.println("            for (int l = 0; l < loops; l++) {");
             pw.println("                int index = indices[l];");
@@ -418,12 +412,7 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
 
             pw.println("            }");
             pw.println();
-            pw.println("            holder.announceFinished();");
-            pw.println("            holder.hasLaggedWorkers |= holder.notAllStarted;");
-            pw.println();
-            pw.println("            while (holder.notAllFinished) {");
-            pw.println("                if (control.shouldYield) Thread.yield();");
-            pw.println("            }");
+            pw.println("            holder.postRun(control.shouldYield);");
             pw.println();
             pw.println("            if (epoch.compareAndSet(curEpoch, curEpoch + 1)) {");
             pw.println("                newEpoch(holder);");
@@ -434,10 +423,7 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
             pw.println("                if (control.shouldYield) Thread.yield();");
             pw.println("            }");
             pw.println();
-            pw.println("            holder.announceConsumed();");
-            pw.println("            while (holder.notAllConsumed) {");
-            pw.println("                if (control.shouldYield) Thread.yield();");
-            pw.println("            }");
+            pw.println("            holder.postConsume(control.shouldYield);");
             pw.println("        }");
             pw.println("    }");
             pw.println("}");

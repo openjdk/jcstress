@@ -53,27 +53,36 @@ public class StateHolder<S, R> {
         this.notAllConsumed = true;
     }
 
-    public void announceReady() {
+    public void preRun(boolean shouldYield) {
         if (ready.decrementAndGet() == 0) {
             notAllReady = false;
         }
-    }
-
-    public void announceFinished() {
-        if (finished.decrementAndGet() == 0) {
-            notAllFinished = false;
+        while (notAllReady) {
+            if (shouldYield) Thread.yield();
         }
-    }
 
-    public void announceStarted() {
         if (started.decrementAndGet() == 0) {
             notAllStarted = false;
         }
     }
 
-    public void announceConsumed() {
+    public void postRun(boolean shouldYield) {
+        if (finished.decrementAndGet() == 0) {
+            notAllFinished = false;
+        }
+        hasLaggedWorkers |= notAllStarted;
+
+        while (notAllFinished) {
+            if (shouldYield) Thread.yield();
+        }
+    }
+
+    public void postConsume(boolean shouldYield) {
         if (consumed.decrementAndGet() == 0) {
             notAllConsumed = false;
+        }
+        while (notAllConsumed) {
+            if (shouldYield) Thread.yield();
         }
     }
 
