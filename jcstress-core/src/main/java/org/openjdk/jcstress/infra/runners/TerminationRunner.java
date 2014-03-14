@@ -91,11 +91,6 @@ public class TerminationRunner<S> extends Runner<TerminationRunner.OutcomeResult
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public int requiredThreads() {
-        return 2;
-    }
-
     private static class Holder<S> {
         volatile S state;
         volatile boolean terminated;

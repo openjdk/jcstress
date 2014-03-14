@@ -62,8 +62,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -101,7 +99,7 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
                 FileObject file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", TestList.LIST.substring(1));
                 PrintWriter writer = new PrintWriter(file.openWriter());
                 for (TestInfo test : tests) {
-                    writer.println(test.getTest().getQualifiedName() + "," + test.getGeneratedName());
+                    writer.println(test.getTest().getQualifiedName() + "," + test.getGeneratedName() + "," + test.getActors().size());
                 }
                 writer.close();
             } catch (IOException ex) {
@@ -212,12 +210,6 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
 
         pw.println("    public " + getGeneratedName(info.getTest()) + "(Options opts, TestResultCollector collector, ExecutorService pool) {");
         pw.println("        super(opts, collector, pool, \"" + getQualifiedName(info.getTest()) + "\");");
-        pw.println("    }");
-        pw.println();
-
-        pw.println("    @Override");
-        pw.println("    public int requiredThreads() {");
-        pw.println("        return " + actorsCount + ";");
         pw.println("    }");
         pw.println();
 

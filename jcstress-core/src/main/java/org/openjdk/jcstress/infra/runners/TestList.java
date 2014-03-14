@@ -37,11 +37,11 @@ public class TestList {
 
     public static final String LIST = "/META-INF/TestList";
 
-    private static volatile Map<String, String> tests;
+    private static volatile Map<String, Info> tests;
 
-    private static Map<String, String> getTests() {
+    private static Map<String, Info> getTests() {
         if (tests == null) {
-            Map<String, String> m = new HashMap<String, String>();
+            Map<String, Info> m = new HashMap<String, Info>();
             InputStream stream = null;
             try {
                 stream = TestList.class.getResourceAsStream(LIST);
@@ -50,12 +50,12 @@ public class TestList {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] ls = line.split(",");
-                    if (ls.length == 2) {
-                        m.put(ls[0], ls[1]);
+                    if (ls.length == 3) {
+                        m.put(ls[0], new Info(ls[1], Integer.valueOf(ls[2])));
                     }
                 }
             } catch (IOException e) {
-                // FIXME: Print warning
+                throw new IllegalStateException("Fatal error", e);
             } finally {
                 if (stream != null) {
                     try {
@@ -75,6 +75,21 @@ public class TestList {
     }
 
     public static String getRunner(String test) {
-        return tests.get(test);
+        return tests.get(test).runner;
     }
+
+    public static int getThreads(String test) {
+        return tests.get(test).threads;
+    }
+
+    public static class Info {
+        public final String runner;
+        public final int threads;
+
+        public Info(String runner, int threads) {
+            this.runner = runner;
+            this.threads = threads;
+        }
+    }
+
 }

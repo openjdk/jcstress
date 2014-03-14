@@ -68,9 +68,6 @@ public abstract class Runner<R> {
         } else {
             testLog = new PrintWriter(new NullOutputStream(), true);
         }
-
-        int totalThreads = requiredThreads();
-        testLog.printf("Executing with %d threads\n", totalThreads);
     }
 
     /**
@@ -148,8 +145,6 @@ public abstract class Runner<R> {
     public abstract void sanityCheck() throws Throwable;
 
     public abstract Counter<R> internalRun();
-
-    public abstract int requiredThreads();
 
     protected void waitFor(Collection<Future<?>> tasks) {
         long startTime = System.nanoTime();

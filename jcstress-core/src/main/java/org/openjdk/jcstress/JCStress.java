@@ -141,8 +141,7 @@ public class JCStress {
             scheduler.schedule(new Scheduler.ScheduledTask() {
                 @Override
                 public int getTokens() {
-                    // FIXME: Expose the number of tokens
-                    return 2;
+                    return TestList.getThreads(test);
                 }
 
                 @Override
@@ -192,7 +191,7 @@ public class JCStress {
         run(opts, getTests(opts.getTestFilter()), alreadyForked, collector);
     }
 
-    public void async(final Runner runner) throws ExecutionException, InterruptedException {
+    public void async(final Runner runner, final int threads) throws ExecutionException, InterruptedException {
         if (scheduler == null) {
             runner.run();
             return;
@@ -201,7 +200,7 @@ public class JCStress {
         scheduler.schedule(new Scheduler.ScheduledTask() {
             @Override
             public int getTokens() {
-                return runner.requiredThreads();
+                return threads;
             }
 
             @Override
@@ -216,7 +215,7 @@ public class JCStress {
             Class<?> aClass = Class.forName(TestList.getRunner(test));
             Constructor<?> cnstr = aClass.getConstructor(Options.class, TestResultCollector.class, ExecutorService.class);
             Runner<?> o = (Runner<?>) cnstr.newInstance(opts, collector, pool);
-            async(o);
+            async(o, TestList.getThreads(test));
         }
     }
 
