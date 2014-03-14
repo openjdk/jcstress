@@ -204,10 +204,10 @@ public class TraceGen {
 
         pw.println("package " + pkg + ";");
         pw.println();
-        pw.println("import java.util.concurrent.*;");
-        pw.println("import java.util.concurrent.atomic.*;");
         pw.println("import org.openjdk.jcstress.infra.results." + resultName + ";");
-        pw.println("import org.openjdk.jcstress.infra.annotations.*;");
+        pw.println("import org.openjdk.jcstress.infra.annotations.Actor;");
+        pw.println("import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;");
+        pw.println("import org.openjdk.jcstress.infra.annotations.State;");
         pw.println();
         pw.println("@ConcurrencyStressTest");
         pw.println("@State");

@@ -111,4 +111,9 @@ public class Atomic_Updater_X implements Primitive {
         }
     }
 
+    @Override
+    public String getClassName() {
+        return guardType.getName();
+    }
+
 }

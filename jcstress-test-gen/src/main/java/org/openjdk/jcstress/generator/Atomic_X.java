@@ -120,4 +120,9 @@ public class Atomic_X implements Primitive {
         }
     }
 
+    @Override
+    public String getClassName() {
+        return guardType.getName();
+    }
+
 }

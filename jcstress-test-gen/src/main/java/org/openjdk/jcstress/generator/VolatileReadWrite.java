@@ -47,4 +47,9 @@ public class VolatileReadWrite implements Primitive {
         return region + "\nf = " + TestGenerator.getRValue(type) + ";";
     }
 
+    @Override
+    public String getClassName() {
+        return null;
+    }
+
 }

@@ -39,4 +39,9 @@ public class SynchronizedBlock implements Primitive {
     public String printRelease(String region) {
         return "synchronized(lock) { " + region + " g1 = " + TestGenerator.getSetValue(int.class) + ";" + " }";
     }
+
+    @Override
+    public String getClassName() {
+        return null;
+    }
 }

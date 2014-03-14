@@ -31,4 +31,6 @@ public interface Primitive {
 
     String printRelease(String region);
 
+    String getClassName();
+
 }
