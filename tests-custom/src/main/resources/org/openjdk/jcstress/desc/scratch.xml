@@ -101,4 +101,31 @@
         </unmatched>
     </test>
 
+
+    <test name="org.openjdk.jcstress.tests.scratch.BitSetTest">
+        <contributed-by>Aleksey Shipilev</contributed-by>
+        <description>
+            Example from JMM Pragmatics talk.
+        </description>
+        <case>
+            <match>[true, true]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>Seeing all updates intact.</description>
+        </case>
+        <case>
+            <match>[true, false]</match>
+            <expect>ACCEPTABLE_INTERESTING</expect>
+            <description>T2 overwrites T1 result.</description>
+        </case>
+        <case>
+            <match>[false, true]</match>
+            <expect>ACCEPTABLE_INTERESTING</expect>
+            <description>T1 overwrites T2 result.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>All other cases are unexpected and forbidden.</description>
+        </unmatched>
+    </test>
+
 </testsuite>
