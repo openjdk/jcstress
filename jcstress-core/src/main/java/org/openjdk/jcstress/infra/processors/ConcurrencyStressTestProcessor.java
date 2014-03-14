@@ -38,9 +38,7 @@ import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.ArrayUtils;
 import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.Counters;
-import org.openjdk.jcstress.util.Reflections;
 
-import javax.annotation.Generated;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -48,7 +46,6 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Name;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -59,19 +56,19 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -454,19 +451,23 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
 
     private void printImports(PrintWriter pw, TestInfo info) {
         Class<?>[] imports = new Class<?>[] {
-                Options.class, Result.class, TestResultCollector.class,
-                Counter.class, Counters.class, Runner.class, Override.class, StateHolder.class,
-                ArrayList.class, Collection.class, ExecutorService.class,
-                Future.class, TimeUnit.class, AtomicInteger.class, AtomicReference.class, Callable.class,
-                ArrayUtils.class, Arrays.class, Control.class
+                ArrayList.class, Arrays.class, Collection.class,
+                Callable.class, ExecutorService.class, Future.class, TimeUnit.class,
+                AtomicInteger.class, AtomicReference.class,
+                Options.class, TestResultCollector.class,
+                Control.class, Runner.class, StateHolder.class,
+                ArrayUtils.class, Counter.class, Counters.class
         };
 
         for (Class<?> c : imports) {
             pw.println("import " + c.getName() + ';');
         }
         pw.println("import " + info.getTest().getQualifiedName() + ";");
-        pw.println("import " + info.getState().getQualifiedName() + ";");
         pw.println("import " + info.getResult().getQualifiedName() + ";");
+        if (!info.getState().equals(info.getTest())) {
+            pw.println("import " + info.getState().getQualifiedName() + ";");
+        }
+
         pw.println();
     }
 
