@@ -25,7 +25,6 @@
 package org.openjdk.jcstress.infra.runners;
 
 import org.openjdk.jcstress.Options;
-import org.openjdk.jcstress.infra.annotations.Result;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
@@ -33,12 +32,9 @@ import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.NullOutputStream;
 import org.openjdk.jcstress.util.VMSupport;
 
-import javax.xml.bind.JAXBException;
-import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collection;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;

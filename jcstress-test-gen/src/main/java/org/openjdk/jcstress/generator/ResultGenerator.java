@@ -67,7 +67,7 @@ public class ResultGenerator {
         pw.println("package org.openjdk.jcstress.infra.results;");
         pw.println("");
         pw.println("import java.io.Serializable;");
-        pw.println("import org.openjdk.jcstress.infra.annotations.Result;");
+        pw.println("import org.openjdk.jcstress.annotations.Result;");
         pw.println("");
         pw.println("@Result");
         pw.println("public class " + name + " implements Serializable {");

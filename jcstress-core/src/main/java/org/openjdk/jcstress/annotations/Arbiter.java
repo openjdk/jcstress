@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.infra.annotations;
+package org.openjdk.jcstress.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -24,7 +24,7 @@
  */
 package org.openjdk.jcstress.infra.results;
 
-import org.openjdk.jcstress.infra.annotations.Result;
+import org.openjdk.jcstress.annotations.Result;
 import sun.misc.Contended;
 
 import java.io.Serializable;

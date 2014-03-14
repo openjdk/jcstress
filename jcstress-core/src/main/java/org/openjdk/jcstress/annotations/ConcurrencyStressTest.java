@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.infra.annotations;
+package org.openjdk.jcstress.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -30,16 +30,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotates the class that is treated as the result object.
+ * Marks the class that should be treated as the concurrency stress test.
  * <p/>
- * Important invariants:
- *   - Result classes usually mimic value types: they do not have identity, and harness
- *     may reuse the objects, and also auto-magically clear the fields;
- *   - All fields in Result classes should be public;
- *   - All fields in Result classes should be primitive;
- *   - Result classes should be serializable;
+ * {@link Actor} and {@link Arbiter} annotations are used to describe test
+ * behavior. {@link State} and {@link Result} annotations are used to
+ * describe the test state.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Result {
+public @interface ConcurrencyStressTest {
 }

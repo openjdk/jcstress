@@ -25,11 +25,11 @@
 package org.openjdk.jcstress.infra.processors;
 
 import org.openjdk.jcstress.Options;
-import org.openjdk.jcstress.infra.annotations.Actor;
-import org.openjdk.jcstress.infra.annotations.Arbiter;
-import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
-import org.openjdk.jcstress.infra.annotations.Result;
-import org.openjdk.jcstress.infra.annotations.State;
+import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Arbiter;
+import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.Result;
+import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.Control;
 import org.openjdk.jcstress.infra.runners.Runner;

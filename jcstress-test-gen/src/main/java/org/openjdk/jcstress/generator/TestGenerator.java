@@ -142,9 +142,9 @@ public class TestGenerator {
             pw.println("import " + prim.getClassName() + ";");
         }
         pw.println("import org.openjdk.jcstress.infra.results." + resultName + ";");
-        pw.println("import org.openjdk.jcstress.infra.annotations.Actor;");
-        pw.println("import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;");
-        pw.println("import org.openjdk.jcstress.infra.annotations.State;");
+        pw.println("import org.openjdk.jcstress.annotations.Actor;");
+        pw.println("import org.openjdk.jcstress.annotations.ConcurrencyStressTest;");
+        pw.println("import org.openjdk.jcstress.annotations.State;");
         pw.println();
         pw.println("@ConcurrencyStressTest");
         pw.println("@State");

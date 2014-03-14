@@ -25,7 +25,6 @@
 package org.openjdk.jcstress.infra.runners;
 
 import org.openjdk.jcstress.Options;
-import org.openjdk.jcstress.infra.annotations.Result;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.tests.TerminationTest;
 import org.openjdk.jcstress.util.Counter;

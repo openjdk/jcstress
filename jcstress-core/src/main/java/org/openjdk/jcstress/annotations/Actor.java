@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.infra.annotations;
+package org.openjdk.jcstress.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -30,13 +30,19 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotates the class treated as test state.
+ * Actors actively mutate the states and may produce results.
  * <p/>
- * Important invariants:
- *   - State classes should have a default constructor;
- *   - All initializations in constructors and instance intializers are visible to all actors;
+ * Actor-annotated methods can have only the {@link State} or {@link Result}-annotated
+ * classes as the parameters.
+ * <p/>
+ * A few important invariants are maintained:
+ *   - the method is called only by single actor thread, once per {@link State} instance;
+ *   - for any given {@link State}, the order vs another actors is deliberately unspecified;
+ *   - any given {@link State} instance will be eventually visited by all actors;
+ *
+ * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-@Target(ElementType.TYPE)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface State {
+public @interface Actor {
 }

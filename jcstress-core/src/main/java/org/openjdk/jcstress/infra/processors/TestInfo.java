@@ -24,9 +24,9 @@
  */
 package org.openjdk.jcstress.infra.processors;
 
-import org.openjdk.jcstress.infra.annotations.Arbiter;
-import org.openjdk.jcstress.infra.annotations.Result;
-import org.openjdk.jcstress.infra.annotations.State;
+import org.openjdk.jcstress.annotations.Arbiter;
+import org.openjdk.jcstress.annotations.Result;
+import org.openjdk.jcstress.annotations.State;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;

@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.infra.annotations;
+package org.openjdk.jcstress.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -30,19 +30,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Actors actively mutate the states and may produce results.
+ * Annotates the class that is treated as the result object.
  * <p/>
- * Actor-annotated methods can have only the {@link State} or {@link Result}-annotated
- * classes as the parameters.
- * <p/>
- * A few important invariants are maintained:
- *   - the method is called only by single actor thread, once per {@link State} instance;
- *   - for any given {@link State}, the order vs another actors is deliberately unspecified;
- *   - any given {@link State} instance will be eventually visited by all actors;
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
+ * Important invariants:
+ *   - Result classes usually mimic value types: they do not have identity, and harness
+ *     may reuse the objects, and also auto-magically clear the fields;
+ *   - All fields in Result classes should be public;
+ *   - All fields in Result classes should be primitive;
+ *   - Result classes should be serializable;
  */
-@Target(ElementType.METHOD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Actor {
+public @interface Result {
 }
