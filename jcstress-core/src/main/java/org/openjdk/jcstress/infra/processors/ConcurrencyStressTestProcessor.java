@@ -200,7 +200,7 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
             throw new GenerationException("IOException: " + e.getMessage(), info.getTest());
         }
 
-        String t = info.getTest().getQualifiedName().toString();
+        String t = info.getTest().getSimpleName().toString();
         String s = info.getState().getSimpleName().toString();
         String r = info.getResult().getSimpleName().toString();
 
