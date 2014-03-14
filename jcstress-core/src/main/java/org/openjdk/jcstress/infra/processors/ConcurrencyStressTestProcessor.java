@@ -299,6 +299,74 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
         pw.println("        this.version = version;");
         pw.println("        this.epoch = epoch;");
         pw.println("    }");
+        pw.println();
+        pw.println("    public void newEpoch(StateHolder<" + s + "," + r + "> holder) {");
+
+        pw.println("            int loops = holder.loops;");
+        pw.println("            " + s + "[] cur = holder.s;");
+        pw.println("            " + r + "[] res = holder.r;");
+
+        if (info.getArbiter() != null) {
+            pw.println();
+            pw.println("                for (int l = 0; l < loops; l++) {");
+            if (info.getState().equals(info.getTest())) {
+                emitMethod(pw, info.getArbiter(), "                cur[l]." + info.getArbiter().getSimpleName(), "cur[l]", "res[l]");
+            } else {
+                emitMethod(pw, info.getArbiter(), "                test." + info.getArbiter().getSimpleName(), "cur[l]", "res[l]");
+            }
+            pw.println("                }");
+        }
+        pw.println();
+        pw.println("                for (" + r + " r1 : res) {");
+        pw.println("                    counter.record(r1);");
+        pw.println("                }");
+        pw.println();
+        pw.println("                StateHolder<" + s + ", " + r + "> newHolder;");
+        pw.println("                if (control.isStopped) {");
+        pw.println("                    newHolder = new StateHolder<" + s + ", " + r + ">(poison, null, holder.countWorkers);");
+        pw.println("                } else {");
+        pw.println("                    int newLoops = holder.hasLaggedWorkers ? Math.min(loops * 2, control.maxStride) : loops;");
+        pw.println();
+        pw.println("                    for (int c = 0; c < loops; c++) {");
+
+        for (VariableElement var : ElementFilter.fieldsIn(info.getResult().getEnclosedElements())) {
+            pw.print("                        res[c]." + var.getSimpleName().toString() + " = ");
+            String type = var.asType().toString();
+            if (type.equals("int") || type.equals("long") || type.equals("short") || type.equals("byte") || type.equals("char")) {
+                pw.print("0");
+            } else if (type.equals("double")) {
+                pw.print("0D");
+            } else if (type.equals("float")) {
+                pw.print("0F");
+            } else if (type.equals("boolean")) {
+                pw.print("false");
+            } else {
+                throw new GenerationException("Unable to handle @" + Result.class.getSimpleName() + " field of type " + type, var);
+            }
+            pw.println(";");
+        }
+
+        pw.println("                    }");
+        pw.println();
+        pw.println("                    " + s + "[] newStride = cur;");
+        pw.println("                    " + r + "[] newRes = res;");
+        pw.println("                    if (newLoops > loops) {");
+        pw.println("                        newStride = Arrays.copyOf(cur, newLoops);");
+        pw.println("                        newRes = Arrays.copyOf(res, newLoops);");
+        pw.println("                        for (int c = loops; c < newLoops; c++) {");
+        pw.println("                            newRes[c] = new " + r + "();");
+        pw.println("                        }");
+        pw.println("                    }");
+        pw.println();
+        pw.println("                    for (int c = 0; c < newLoops; c++) {");
+        pw.println("                        newStride[c] = new " + s + "();");
+        pw.println("                    }");
+        pw.println();
+        pw.println("                    newHolder = new StateHolder<" + s + ", " + r + ">(newStride, newRes, holder.countWorkers);");
+        pw.println("                }");
+        pw.println();
+        pw.println("                version.set(newHolder);");
+        pw.println("    }");
         pw.println("}");
         pw.println();
 
@@ -358,71 +426,10 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
             pw.println("            }");
             pw.println();
             pw.println("            if (epoch.compareAndSet(curEpoch, curEpoch + 1)) {");
-
-            if (info.getArbiter() != null) {
-                pw.println();
-                pw.println("                for (int l = 0; l < loops; l++) {");
-                pw.println("                    int index = indices[l];");
-                if (info.getState().equals(info.getTest())) {
-                    emitMethod(pw, info.getArbiter(), "                cur[index]." + info.getArbiter().getSimpleName(), "cur[index]", "res[index]");
-                } else {
-                    emitMethod(pw, info.getArbiter(), "                lt." + info.getArbiter().getSimpleName(), "cur[index]", "res[index]");
-                }
-                pw.println("                }");
-            }
-            pw.println();
-            pw.println("                for (" + r + " r1 : res) {");
-            pw.println("                    counter.record(r1);");
-            pw.println("                }");
-            pw.println();
-            pw.println("                StateHolder<" + s + ", " + r + "> newHolder;");
-            pw.println("                if (control.isStopped) {");
-            pw.println("                    newHolder = new StateHolder<" + s + ", " + r + ">(lPoison, null, holder.countWorkers);");
-            pw.println("                } else {");
-            pw.println("                    int newLoops = holder.hasLaggedWorkers ? Math.min(loops * 2, control.maxStride) : loops;");
-            pw.println();
-            pw.println("                    for (int c = 0; c < loops; c++) {");
-
-            for (VariableElement var : ElementFilter.fieldsIn(info.getResult().getEnclosedElements())) {
-                pw.print("                        res[c]." + var.getSimpleName().toString() + " = ");
-                String type = var.asType().toString();
-                if (type.equals("int") || type.equals("long") || type.equals("short") || type.equals("byte") || type.equals("char")) {
-                    pw.print("0");
-                } else if (type.equals("double")) {
-                    pw.print("0D");
-                } else if (type.equals("float")) {
-                    pw.print("0F");
-                } else if (type.equals("boolean")) {
-                    pw.print("false");
-                } else {
-                    throw new GenerationException("Unable to handle @" + Result.class.getSimpleName() + " field of type " + type, var);
-                }
-                pw.println(";");
-            }
-
-            pw.println("                    }");
-            pw.println();
-            pw.println("                    " + s + "[] newStride = cur;");
-            pw.println("                    " + r + "[] newRes = res;");
-            pw.println("                    if (newLoops > loops) {");
-            pw.println("                        newStride = Arrays.copyOf(cur, newLoops);");
-            pw.println("                        newRes = Arrays.copyOf(res, newLoops);");
-            pw.println("                        for (int c = loops; c < newLoops; c++) {");
-            pw.println("                            newRes[c] = new " + r + "();");
-            pw.println("                        }");
-            pw.println("                    }");
-            pw.println();
-            pw.println("                    for (int c = 0; c < newLoops; c++) {");
-            pw.println("                        newStride[c] = new " + s + "();");
-            pw.println("                    }");
-            pw.println();
-            pw.println("                    newHolder = new StateHolder<" + s + ", " + r + ">(newStride, newRes, holder.countWorkers);");
-            pw.println("                }");
-            pw.println();
-            pw.println("                version.set(newHolder);");
+            pw.println("                newEpoch(holder);");
             pw.println("            }");
             pw.println();
-            pw.println("            curEpoch += 1;");
+            pw.println("            curEpoch++;");
             pw.println("            while (curEpoch != epoch.get()) {");
             pw.println("                if (control.shouldYield) Thread.yield();");
             pw.println("            }");
