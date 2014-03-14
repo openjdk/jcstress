@@ -77,8 +77,7 @@ public class Main {
             if (!ContendedSupport.tryContended()) {
                 System.out.println("Non-fatal: VM support for @Contended is not enabled, tests might run slower.\nPossible reasons are:\n" +
                         "  1) unsupported JDK, only JDK 8+ is supported; \n" +
-                        "  2) -XX:-RestrictContended is missing; \n" +
-                        "  3) the jcstress JAR is not added to -Xbootclasspath/a\n");
+                        "  2) -XX:-RestrictContended is missing, or the jcstress JAR is not added to -Xbootclasspath/a");
             } else {
                 System.out.println("@Contended is in use.\n");
             }
