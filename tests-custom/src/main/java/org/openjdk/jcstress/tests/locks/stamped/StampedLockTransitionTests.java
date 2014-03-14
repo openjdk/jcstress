@@ -24,30 +24,20 @@
  */
 package org.openjdk.jcstress.tests.locks.stamped;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
-import org.openjdk.jcstress.tests.Actor2_Test;
 
 import java.util.concurrent.locks.StampedLock;
 
 public class StampedLockTransitionTests {
 
-    public static class State {
+    @State
+    public static class S {
         public final StampedLock lock = new StampedLock();
-    }
 
-    public abstract static class AbstractBase implements Actor2_Test<StampedLockTransitionTests.State, IntResult2> {
-        @Override
-        public State newState() {
-            return new State();
-        }
-
-        @Override
-        public IntResult2 newResult() {
-            return new IntResult2();
-        }
-
-
-        public int optimistic_optimistic(StampedLock lock) {
+        public int optimistic_optimistic() {
             long stamp = lock.tryOptimisticRead();
             if (stamp != 0) {
                 long sw = lock.tryConvertToOptimisticRead(stamp);
@@ -57,7 +47,7 @@ public class StampedLockTransitionTests {
             }
         }
 
-        public int optimistic_read(StampedLock lock) {
+        public int optimistic_read() {
             long stamp = lock.tryOptimisticRead();
             if (stamp != 0) {
                 long sw = lock.tryConvertToReadLock(stamp);
@@ -67,7 +57,7 @@ public class StampedLockTransitionTests {
             }
         }
 
-        public int optimistic_write(StampedLock lock) {
+        public int optimistic_write() {
             long stamp = lock.tryOptimisticRead();
             if (stamp != 0) {
                 long sw = lock.tryConvertToWriteLock(stamp);
@@ -77,7 +67,7 @@ public class StampedLockTransitionTests {
             }
         }
 
-        public int read_optimistic(StampedLock lock) {
+        public int read_optimistic() {
             long stamp = lock.tryReadLock();
             if (stamp != 0) {
                 long sw = lock.tryConvertToOptimisticRead(stamp);
@@ -87,7 +77,7 @@ public class StampedLockTransitionTests {
             }
         }
 
-        public int read_read(StampedLock lock) {
+        public int read_read() {
             long stamp = lock.tryReadLock();
             if (stamp != 0) {
                 long sw = lock.tryConvertToReadLock(stamp);
@@ -97,7 +87,7 @@ public class StampedLockTransitionTests {
             }
         }
 
-        public int read_write(StampedLock lock) {
+        public int read_write() {
             long stamp = lock.tryReadLock();
             if (stamp != 0) {
                 long sw = lock.tryConvertToWriteLock(stamp);
@@ -107,7 +97,7 @@ public class StampedLockTransitionTests {
             }
         }
 
-        public int write_optimistic(StampedLock lock) {
+        public int write_optimistic() {
             long stamp = lock.tryWriteLock();
             if (stamp != 0) {
                 long sw = lock.tryConvertToOptimisticRead(stamp);
@@ -117,7 +107,7 @@ public class StampedLockTransitionTests {
             }
         }
 
-        public int write_read(StampedLock lock) {
+        public int write_read() {
             long stamp = lock.tryWriteLock();
             if (stamp != 0) {
                 long sw = lock.tryConvertToReadLock(stamp);
@@ -127,7 +117,7 @@ public class StampedLockTransitionTests {
             }
         }
 
-        public int write_write(StampedLock lock) {
+        public int write_write() {
             long stamp = lock.tryWriteLock();
             if (stamp != 0) {
                 long sw = lock.tryConvertToWriteLock(stamp);
@@ -138,64 +128,76 @@ public class StampedLockTransitionTests {
         }
     }
 
-    public static class OO_OO extends AbstractBase {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = optimistic_optimistic(s.lock); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = optimistic_optimistic(s.lock); }
+    @ConcurrencyStressTest
+    public static class OO_OO {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.optimistic_optimistic(); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.optimistic_optimistic(); }
     }
 
-    public static class OO_OR extends AbstractBase {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = optimistic_optimistic(s.lock); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = optimistic_read(s.lock); }
+    @ConcurrencyStressTest
+    public static class OO_OR {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.optimistic_optimistic(); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.optimistic_read(); }
     }
 
-    public static class OO_OW extends AbstractBase {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = optimistic_optimistic(s.lock); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = optimistic_write(s.lock); }
+    @ConcurrencyStressTest
+    public static class OO_OW {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.optimistic_optimistic(); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.optimistic_write(); }
     }
 
-    public static class OR_OW extends AbstractBase {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = optimistic_read(s.lock); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = optimistic_write(s.lock); }
+    @ConcurrencyStressTest
+    public static class OR_OW {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.optimistic_read(); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.optimistic_write(); }
     }
 
-    public static class RO_RO extends AbstractBase {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = read_optimistic(s.lock); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = read_optimistic(s.lock); }
+    @ConcurrencyStressTest
+    public static class RO_RO {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.read_optimistic(); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.read_optimistic(); }
     }
 
-    public static class RO_RR extends AbstractBase {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = read_optimistic(s.lock); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = read_read(s.lock); }
+    @ConcurrencyStressTest
+    public static class RO_RR {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.read_optimistic(); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.read_read(); }
     }
 
-    public static class RO_RW extends AbstractBase {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = read_optimistic(s.lock); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = read_write(s.lock); }
+    @ConcurrencyStressTest
+    public static class RO_RW {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.read_optimistic(); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.read_write(); }
     }
 
-    public static class RR_RW extends AbstractBase {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = read_read(s.lock); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = read_write(s.lock); }
+    @ConcurrencyStressTest
+    public static class RR_RW {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.read_read(); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.read_write(); }
     }
 
-    public static class WO_WO extends AbstractBase {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = write_optimistic(s.lock); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = write_optimistic(s.lock); }
+    @ConcurrencyStressTest
+    public static class WO_WO {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.write_optimistic(); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.write_optimistic(); }
     }
 
-    public static class WO_WR extends AbstractBase {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = write_optimistic(s.lock); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = write_read(s.lock); }
+    @ConcurrencyStressTest
+    public static class WO_WR {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.write_optimistic(); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.write_read(); }
     }
 
-    public static class WO_WW extends AbstractBase {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = write_optimistic(s.lock); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = write_write(s.lock); }
+    @ConcurrencyStressTest
+    public static class WO_WW {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.write_optimistic(); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.write_write(); }
     }
 
-    public static class WR_WW extends AbstractBase {
-        @Override public void actor1(State s, IntResult2 r) { r.r1 = write_read(s.lock); }
-        @Override public void actor2(State s, IntResult2 r) { r.r2 = write_write(s.lock); }
+    @ConcurrencyStressTest
+    public static class WR_WW {
+        @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.write_read(); }
+        @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.write_write(); }
     }
 
 }

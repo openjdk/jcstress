@@ -24,6 +24,9 @@
  */
 package org.openjdk.jcstress.tests.locks.stamped;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import org.openjdk.jcstress.tests.Actor2_Test;
 
@@ -33,109 +36,97 @@ import java.util.concurrent.locks.StampedLock;
 
 public class StampedLockPairwiseTests {
 
-    public static class State {
+    @State
+    public static class S {
         public final StampedLock lock = new StampedLock();
         public int x;
         public int y;
-    }
-
-    public static abstract class AbstractStampedLockTest implements Actor2_Test<State, IntResult2> {
-
-        @Override
-        public State newState() {
-            return new State();
-        }
-
-        @Override
-        public IntResult2 newResult() {
-            return new IntResult2();
-        }
 
         /* ----------------- READ PATTERNS ----------------- */
 
-        public void aRL_U(State s, IntResult2 r) {
-            Lock lock = s.lock.asReadLock();
+        public void aRL_U(IntResult2 r) {
+            Lock lock = this.lock.asReadLock();
             lock.lock();
-            r.r1 = s.x;
-            r.r2 = s.y;
+            r.r1 = x;
+            r.r2 = y;
             lock.unlock();
         }
 
-        public void aRWLr_U(State s, IntResult2 r) {
-            Lock lock = s.lock.asReadWriteLock().readLock();
+        public void aRWLr_U(IntResult2 r) {
+            Lock lock = this.lock.asReadWriteLock().readLock();
             lock.lock();
-            r.r1 = s.x;
-            r.r2 = s.y;
+            r.r1 = x;
+            r.r2 = y;
             lock.unlock();
         }
 
-        public void RL_tUR(State s, IntResult2 r) {
-            StampedLock lock = s.lock;
+        public void RL_tUR(IntResult2 r) {
+            StampedLock lock = this.lock;
             lock.readLock();
-            r.r1 = s.x;
-            r.r2 = s.y;
+            r.r1 = x;
+            r.r2 = y;
             lock.tryUnlockRead();
         }
 
-        public void RL_Us(State s, IntResult2 r) {
-            StampedLock lock = s.lock;
+        public void RL_Us(IntResult2 r) {
+            StampedLock lock = this.lock;
             long stamp = lock.readLock();
-            r.r1 = s.x;
-            r.r2 = s.y;
+            r.r1 = x;
+            r.r2 = y;
             lock.unlock(stamp);
         }
 
-        public void RL_URs(State s, IntResult2 r) {
-            StampedLock lock = s.lock;
+        public void RL_URs(IntResult2 r) {
+            StampedLock lock = this.lock;
             long stamp = lock.readLock();
-            r.r1 = s.x;
-            r.r2 = s.y;
+            r.r1 = x;
+            r.r2 = y;
             lock.unlockRead(stamp);
         }
 
-        public void RLI_tUR(State s, IntResult2 r) {
+        public void RLI_tUR(IntResult2 r) {
             try {
-            StampedLock lock = s.lock;
+            StampedLock lock = this.lock;
             lock.readLockInterruptibly();
-            r.r1 = s.x;
-            r.r2 = s.y;
+            r.r1 = x;
+            r.r2 = y;
             lock.tryUnlockRead();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        public void RLI_Us(State s, IntResult2 r) {
+        public void RLI_Us(IntResult2 r) {
             try {
-                StampedLock lock = s.lock;
+                StampedLock lock = this.lock;
                 long stamp = lock.readLockInterruptibly();
-                r.r1 = s.x;
-                r.r2 = s.y;
+                r.r1 = x;
+                r.r2 = y;
                 lock.unlock(stamp);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        public void RLI_URs(State s, IntResult2 r) {
+        public void RLI_URs(IntResult2 r) {
             try {
-                StampedLock lock = s.lock;
+                StampedLock lock = this.lock;
                 long stamp = lock.readLockInterruptibly();
-                r.r1 = s.x;
-                r.r2 = s.y;
+                r.r1 = x;
+                r.r2 = y;
                 lock.unlockRead(stamp);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        public void tOR_V(State s, IntResult2 r) {
-            StampedLock lock = s.lock;
+        public void tOR_V(IntResult2 r) {
+            StampedLock lock = this.lock;
             int x = 0, y = 0;
             long stamp = lock.tryOptimisticRead();
             if (stamp != 0) {
-                x = s.x;
-                y = s.y;
+                x = x;
+                y = y;
                 if (!lock.validate(stamp)) {
                     x = 0;
                     y = 0;
@@ -145,43 +136,43 @@ public class StampedLockPairwiseTests {
             r.r2 = y;
         }
 
-        public void tRL_tUR(State s, IntResult2 r) {
-            StampedLock lock = s.lock;
+        public void tRL_tUR(IntResult2 r) {
+            StampedLock lock = this.lock;
             long stamp = lock.tryReadLock();
             if (stamp != 0) {
-                r.r1 = s.x;
-                r.r2 = s.y;
+                r.r1 = x;
+                r.r2 = y;
                 lock.tryUnlockRead();
             }
         }
 
-        public void tRL_Us(State s, IntResult2 r) {
-            StampedLock lock = s.lock;
+        public void tRL_Us(IntResult2 r) {
+            StampedLock lock = this.lock;
             long stamp = lock.tryReadLock();
             if (stamp != 0) {
-                r.r1 = s.x;
-                r.r2 = s.y;
+                r.r1 = x;
+                r.r2 = y;
                 lock.unlock(stamp);
             }
         }
 
-        public void tRL_URs(State s, IntResult2 r) {
-            StampedLock lock = s.lock;
+        public void tRL_URs(IntResult2 r) {
+            StampedLock lock = this.lock;
             long stamp = lock.tryReadLock();
             if (stamp != 0) {
-                r.r1 = s.x;
-                r.r2 = s.y;
+                r.r1 = x;
+                r.r2 = y;
                 lock.unlockRead(stamp);
             }
         }
 
-        public void tRLt_tUR(State s, IntResult2 r) {
+        public void tRLt_tUR(IntResult2 r) {
             try {
-                StampedLock lock = s.lock;
+                StampedLock lock = this.lock;
                 long stamp = lock.tryReadLock(1, TimeUnit.SECONDS);
                 if (stamp != 0) {
-                    r.r1 = s.x;
-                    r.r2 = s.y;
+                    r.r1 = x;
+                    r.r2 = y;
                     lock.tryUnlockRead();
                 }
             } catch (InterruptedException e) {
@@ -189,13 +180,13 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void tRLt_Us(State s, IntResult2 r) {
+        public void tRLt_Us(IntResult2 r) {
             try {
-                StampedLock lock = s.lock;
+                StampedLock lock = this.lock;
                 long stamp = lock.tryReadLock(1, TimeUnit.SECONDS);
                 if (stamp != 0) {
-                    r.r1 = s.x;
-                    r.r2 = s.y;
+                    r.r1 = x;
+                    r.r2 = y;
                     lock.unlock(stamp);
                 }
             } catch (InterruptedException e) {
@@ -203,13 +194,13 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void tRLt_URs(State s, IntResult2 r) {
+        public void tRLt_URs(IntResult2 r) {
             try {
-                StampedLock lock = s.lock;
+                StampedLock lock = this.lock;
                 long stamp = lock.tryReadLock(1, TimeUnit.SECONDS);
                 if (stamp != 0) {
-                    r.r1 = s.x;
-                    r.r2 = s.y;
+                    r.r1 = x;
+                    r.r2 = y;
                     lock.unlockRead(stamp);
                 }
             } catch (InterruptedException e) {
@@ -219,40 +210,40 @@ public class StampedLockPairwiseTests {
 
         /* ----------------- WRITE PATTERNS ----------------- */
 
-        public void aWL_U(State s, IntResult2 r) {
-            Lock lock = s.lock.asWriteLock();
+        public void aWL_U(IntResult2 r) {
+            Lock lock = this.lock.asWriteLock();
             lock.lock();
-            s.x = 1;
-            s.y = 2;
+            x = 1;
+            y = 2;
             lock.unlock();
         }
 
-        public void aRWLw_U(State s, IntResult2 r) {
-            Lock lock = s.lock.asReadWriteLock().writeLock();
+        public void aRWLw_U(IntResult2 r) {
+            Lock lock = this.lock.asReadWriteLock().writeLock();
             lock.lock();
-            s.x = 1;
-            s.y = 2;
+            x = 1;
+            y = 2;
             lock.unlock();
         }
 
-        public void WL_tUW(State s, IntResult2 r) {
-            StampedLock lock = s.lock;
+        public void WL_tUW(IntResult2 r) {
+            StampedLock lock = this.lock;
             lock.writeLock();
-            s.x = 1;
-            s.y = 2;
+            x = 1;
+            y = 2;
             lock.tryUnlockWrite();
         }
 
-        public void orWL_V(State s, IntResult2 r) {
-            StampedLock lock = s.lock;
+        public void orWL_V(IntResult2 r) {
+            StampedLock lock = this.lock;
             long stamp = lock.readLock();
             try {
-                while (s.x == 0 && s.y == 0) {
+                while (x == 0 && y == 0) {
                     long ws = lock.tryConvertToWriteLock(stamp);
                     if (ws != 0L) {
                         stamp = ws;
-                        s.x = 1;
-                        s.y = 2;
+                        x = 1;
+                        y = 2;
                         break;
                     } else {
                         lock.unlockRead(stamp);
@@ -264,95 +255,95 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void WL_Us(State s, IntResult2 r) {
-            StampedLock lock = s.lock;
+        public void WL_Us(IntResult2 r) {
+            StampedLock lock = this.lock;
             long stamp = lock.writeLock();
-            s.x = 1;
-            s.y = 2;
+            x = 1;
+            y = 2;
             lock.unlock(stamp);
         }
 
-        public void WL_UWs(State s, IntResult2 r) {
-            StampedLock lock = s.lock;
+        public void WL_UWs(IntResult2 r) {
+            StampedLock lock = this.lock;
             long stamp = lock.writeLock();
-            s.x = 1;
-            s.y = 2;
+            x = 1;
+            y = 2;
             lock.unlockWrite(stamp);
         }
 
-        public void WLI_tUW(State s, IntResult2 r) {
+        public void WLI_tUW(IntResult2 r) {
             try {
-                StampedLock lock = s.lock;
+                StampedLock lock = this.lock;
                 lock.writeLockInterruptibly();
-                s.x = 1;
-                s.y = 2;
+                x = 1;
+                y = 2;
                 lock.tryUnlockWrite();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        public void WLI_Us(State s, IntResult2 r) {
+        public void WLI_Us(IntResult2 r) {
             try {
-                StampedLock lock = s.lock;
+                StampedLock lock = this.lock;
                 long stamp = lock.writeLockInterruptibly();
-                s.x = 1;
-                s.y = 2;
+                x = 1;
+                y = 2;
                 lock.unlock(stamp);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        public void WLI_UWs(State s, IntResult2 r) {
+        public void WLI_UWs(IntResult2 r) {
             try {
-                StampedLock lock = s.lock;
+                StampedLock lock = this.lock;
                 long stamp = lock.writeLockInterruptibly();
-                s.x = 1;
-                s.y = 2;
+                x = 1;
+                y = 2;
                 lock.unlockWrite(stamp);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        public void tWL_tUW(State s, IntResult2 r) {
-            StampedLock lock = s.lock;
+        public void tWL_tUW(IntResult2 r) {
+            StampedLock lock = this.lock;
             long stamp = lock.tryWriteLock();
             if (stamp != 0) {
-                s.x = 1;
-                s.y = 2;
+                x = 1;
+                y = 2;
                 lock.tryUnlockWrite();
             }
         }
 
-        public void tWL_Us(State s, IntResult2 r) {
-            StampedLock lock = s.lock;
+        public void tWL_Us(IntResult2 r) {
+            StampedLock lock = this.lock;
             long stamp = lock.tryWriteLock();
             if (stamp != 0) {
-                s.x = 1;
-                s.y = 2;
+                x = 1;
+                y = 2;
                 lock.unlock(stamp);
             }
         }
 
-        public void tWL_UWs(State s, IntResult2 r) {
-            StampedLock lock = s.lock;
+        public void tWL_UWs(IntResult2 r) {
+            StampedLock lock = this.lock;
             long stamp = lock.tryWriteLock();
             if (stamp != 0) {
-                s.x = 1;
-                s.y = 2;
+                x = 1;
+                y = 2;
                 lock.unlockWrite(stamp);
             }
         }
 
-        public void tWLt_tUW(State s, IntResult2 r) {
+        public void tWLt_tUW(IntResult2 r) {
             try {
-                StampedLock lock = s.lock;
+                StampedLock lock = this.lock;
                 long stamp = lock.tryWriteLock(1, TimeUnit.SECONDS);
                 if (stamp != 0) {
-                    s.x = 1;
-                    s.y = 2;
+                    x = 1;
+                    y = 2;
                     lock.tryUnlockWrite();
                 }
             } catch (InterruptedException e) {
@@ -360,13 +351,13 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void tWLt_Us(State s, IntResult2 r) {
+        public void tWLt_Us(IntResult2 r) {
             try {
-                StampedLock lock = s.lock;
+                StampedLock lock = this.lock;
                 long stamp = lock.tryWriteLock(1, TimeUnit.SECONDS);
                 if (stamp != 0) {
-                    s.x = 1;
-                    s.y = 2;
+                    x = 1;
+                    y = 2;
                     lock.unlock(stamp);
                 }
             } catch (InterruptedException e) {
@@ -374,13 +365,13 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void tWLt_UWs(State s, IntResult2 r) {
+        public void tWLt_UWs(IntResult2 r) {
             try {
-                StampedLock lock = s.lock;
+                StampedLock lock = this.lock;
                 long stamp = lock.tryWriteLock(1, TimeUnit.SECONDS);
                 if (stamp != 0) {
-                    s.x = 1;
-                    s.y = 2;
+                    x = 1;
+                    y = 2;
                     lock.unlockWrite(stamp);
                 }
             } catch (InterruptedException e) {
@@ -392,798 +383,1398 @@ public class StampedLockPairwiseTests {
 
     /* --------------- CARTESIAN PRODUCT OF READ/WRITE PATTERNS ------------  */
 
-    public abstract static class aRL_U extends AbstractStampedLockTest {
-        @Override
-        public void actor1(State s, IntResult2 r) { aRL_U(s, r); }
+    public abstract static class aRL_U {
 
-        public abstract static class Base extends aRL_U {}
+        @ConcurrencyStressTest
+        public static class aWL_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+        }
 
-        public static class aWL_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aWL_U(s, r); }
+        @ConcurrencyStressTest
+        public static class aRWLw_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
-        public static class aRWLw_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aRWLw_U(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class WL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class WL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class WL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
-        public static class WLI_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
-        public static class WLI_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
-        public static class WLI_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class tWL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class tWL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class tWL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
-        public static class tWLt_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
-        public static class tWLt_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
-        public static class tWLt_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_UWs(s, r); }
-        }
-        public static class orWL_V extends Base {
-            @Override public void actor2(State s, IntResult2 r) { orWL_V(s, r); }
+
+        @ConcurrencyStressTest
+        public static class orWL_V {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
         }
     }
 
-    public abstract static class aRWLr_U extends AbstractStampedLockTest {
-        @Override
-        public void actor1(State s, IntResult2 r) { aRWLr_U(s, r); }
+    public static class aRWLr_U {
 
-        public abstract static class Base extends aRWLr_U {}
+        @ConcurrencyStressTest
+        public static class aWL_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+        }
 
-        public static class aWL_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aWL_U(s, r); }
+        @ConcurrencyStressTest
+        public static class aRWLw_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
-        public static class aRWLw_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aRWLw_U(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class WL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class WL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class WL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
-        public static class WLI_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
-        public static class WLI_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
-        public static class WLI_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class tWL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class tWL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class tWL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
-        public static class tWLt_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
-        public static class tWLt_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
-        public static class tWLt_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_UWs(s, r); }
-        }
-        public static class orWL_V extends Base {
-            @Override public void actor2(State s, IntResult2 r) { orWL_V(s, r); }
+
+        @ConcurrencyStressTest
+        public static class orWL_V {
+            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
         }
     }
 
-    public abstract static class RL_tUR extends AbstractStampedLockTest {
-        @Override
-        public void actor1(State s, IntResult2 r) { RL_tUR(s, r); }
+    public static class RL_tUR {
 
-        public abstract static class Base extends RL_tUR {}
+        @ConcurrencyStressTest
+        public static class aWL_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+        }
 
-        public static class aWL_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aWL_U(s, r); }
+        @ConcurrencyStressTest
+        public static class aRWLw_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
-        public static class aRWLw_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aRWLw_U(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class WL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class WL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class WL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
-        public static class WLI_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
-        public static class WLI_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
-        public static class WLI_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class tWL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class tWL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class tWL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
-        public static class tWLt_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
-        public static class tWLt_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
-        public static class tWLt_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_UWs(s, r); }
-        }
-        public static class orWL_V extends Base {
-            @Override public void actor2(State s, IntResult2 r) { orWL_V(s, r); }
+
+        @ConcurrencyStressTest
+        public static class orWL_V {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
         }
     }
 
-    public abstract static class RL_Us extends AbstractStampedLockTest {
-        @Override
-        public void actor1(State s, IntResult2 r) { RL_Us(s, r); }
+    public static class RL_Us {
 
-        public abstract static class Base extends RL_Us {}
+        @ConcurrencyStressTest
+        public static class aWL_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+        }
 
-        public static class aWL_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aWL_U(s, r); }
+        @ConcurrencyStressTest
+        public static class aRWLw_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
-        public static class aRWLw_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aRWLw_U(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class WL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class WL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class WL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
-        public static class WLI_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
-        public static class WLI_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
-        public static class WLI_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class tWL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class tWL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class tWL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
-        public static class tWLt_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
-        public static class tWLt_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
-        public static class tWLt_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_UWs(s, r); }
-        }
-        public static class orWL_V extends Base {
-            @Override public void actor2(State s, IntResult2 r) { orWL_V(s, r); }
+
+        @ConcurrencyStressTest
+        public static class orWL_V {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
         }
     }
 
-    public abstract static class RL_URs extends AbstractStampedLockTest {
-        @Override
-        public void actor1(State s, IntResult2 r) { RL_URs(s, r); }
+    public static class RL_URs {
 
-        public abstract static class Base extends RL_URs {}
+        @ConcurrencyStressTest
+        public static class aWL_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+        }
 
-        public static class aWL_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aWL_U(s, r); }
+        @ConcurrencyStressTest
+        public static class aRWLw_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
-        public static class aRWLw_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aRWLw_U(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class WL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class WL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class WL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
-        public static class WLI_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
-        public static class WLI_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
-        public static class WLI_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class tWL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class tWL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class tWL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
-        public static class tWLt_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
-        public static class tWLt_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
-        public static class tWLt_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_UWs(s, r); }
-        }
-        public static class orWL_V extends Base {
-            @Override public void actor2(State s, IntResult2 r) { orWL_V(s, r); }
+
+        @ConcurrencyStressTest
+        public static class orWL_V {
+            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
         }
     }
 
-    public abstract static class RLI_tUR extends AbstractStampedLockTest {
-        @Override
-        public void actor1(State s, IntResult2 r) { RLI_tUR(s, r); }
+    public abstract static class RLI_tUR  {
 
-        public abstract static class Base extends RLI_tUR {}
+        @ConcurrencyStressTest
+        public static class aWL_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+        }
 
-        public static class aWL_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aWL_U(s, r); }
+        @ConcurrencyStressTest
+        public static class aRWLw_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
-        public static class aRWLw_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aRWLw_U(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class WL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class WL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class WL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
-        public static class WLI_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
-        public static class WLI_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
-        public static class WLI_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class tWL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class tWL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class tWL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
-        public static class tWLt_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
-        public static class tWLt_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
-        public static class tWLt_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_UWs(s, r); }
-        }
-        public static class orWL_V extends Base {
-            @Override public void actor2(State s, IntResult2 r) { orWL_V(s, r); }
+
+        @ConcurrencyStressTest
+        public static class orWL_V {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
         }
     }
 
-    public abstract static class RLI_Us extends AbstractStampedLockTest {
-        @Override
-        public void actor1(State s, IntResult2 r) { RLI_Us(s, r); }
+    public static class RLI_Us {
 
-        public abstract static class Base extends RLI_Us {}
+        @ConcurrencyStressTest
+        public static class aWL_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+        }
 
-        public static class aWL_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aWL_U(s, r); }
+        @ConcurrencyStressTest
+        public static class aRWLw_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
-        public static class aRWLw_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aRWLw_U(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class WL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class WL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class WL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
-        public static class WLI_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
-        public static class WLI_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
-        public static class WLI_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class tWL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class tWL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class tWL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
-        public static class tWLt_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
-        public static class tWLt_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
-        public static class tWLt_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_UWs(s, r); }
-        }
-        public static class orWL_V extends Base {
-            @Override public void actor2(State s, IntResult2 r) { orWL_V(s, r); }
+
+        @ConcurrencyStressTest
+        public static class orWL_V {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
         }
     }
 
-    public abstract static class RLI_URs extends AbstractStampedLockTest {
-        @Override
-        public void actor1(State s, IntResult2 r) { RLI_URs(s, r); }
+    public static class RLI_URs {
 
-        public abstract static class Base extends RLI_URs {}
+        @ConcurrencyStressTest
+        public static class aWL_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+        }
 
-        public static class aWL_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aWL_U(s, r); }
+        @ConcurrencyStressTest
+        public static class aRWLw_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
-        public static class aRWLw_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aRWLw_U(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class WL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class WL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class WL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
-        public static class WLI_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
-        public static class WLI_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
-        public static class WLI_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class tWL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class tWL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class tWL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
-        public static class tWLt_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
-        public static class tWLt_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
-        public static class tWLt_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_UWs(s, r); }
-        }
-        public static class orWL_V extends Base {
-            @Override public void actor2(State s, IntResult2 r) { orWL_V(s, r); }
+
+        @ConcurrencyStressTest
+        public static class orWL_V {
+            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
         }
     }
 
-    public abstract static class tOR_V extends AbstractStampedLockTest {
-        @Override
-        public void actor1(State s, IntResult2 r) { tOR_V(s, r); }
+    public static class tOR_V {
 
-        public abstract static class Base extends tOR_V {}
+        @ConcurrencyStressTest
+        public static class aWL_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+        }
 
-        public static class aWL_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aWL_U(s, r); }
+        @ConcurrencyStressTest
+        public static class aRWLw_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
-        public static class aRWLw_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aRWLw_U(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class WL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class WL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class WL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
-        public static class WLI_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
-        public static class WLI_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
-        public static class WLI_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class tWL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class tWL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class tWL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
-        public static class tWLt_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
-        public static class tWLt_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
-        public static class tWLt_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_UWs(s, r); }
-        }
-        public static class orWL_V extends Base {
-            @Override public void actor2(State s, IntResult2 r) { orWL_V(s, r); }
+
+        @ConcurrencyStressTest
+        public static class orWL_V {
+            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
         }
     }
 
-    public abstract static class tRL_tUR extends AbstractStampedLockTest {
-        @Override
-        public void actor1(State s, IntResult2 r) { tRL_tUR(s, r); }
+    public static class tRL_tUR {
 
-        public abstract static class Base extends tRL_tUR {}
+        @ConcurrencyStressTest
+        public static class aWL_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+        }
 
-        public static class aWL_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aWL_U(s, r); }
+        @ConcurrencyStressTest
+        public static class aRWLw_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
-        public static class aRWLw_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aRWLw_U(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class WL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class WL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class WL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
-        public static class WLI_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
-        public static class WLI_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
-        public static class WLI_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class tWL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class tWL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class tWL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
-        public static class tWLt_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
-        public static class tWLt_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
-        public static class tWLt_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_UWs(s, r); }
-        }
-        public static class orWL_V extends Base {
-            @Override public void actor2(State s, IntResult2 r) { orWL_V(s, r); }
+
+        @ConcurrencyStressTest
+        public static class orWL_V {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
         }
     }
 
-    public abstract static class tRL_Us extends AbstractStampedLockTest {
-        @Override
-        public void actor1(State s, IntResult2 r) { tRL_Us(s, r); }
+    public static class tRL_Us {
 
-        public abstract static class Base extends tRL_Us {}
+        @ConcurrencyStressTest
+        public static class aWL_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+        }
 
-        public static class aWL_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aWL_U(s, r); }
+        @ConcurrencyStressTest
+        public static class aRWLw_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
-        public static class aRWLw_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aRWLw_U(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class WL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class WL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class WL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
-        public static class WLI_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
-        public static class WLI_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
-        public static class WLI_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class tWL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class tWL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class tWL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
-        public static class tWLt_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
-        public static class tWLt_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
-        public static class tWLt_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_UWs(s, r); }
-        }
-        public static class orWL_V extends Base {
-            @Override public void actor2(State s, IntResult2 r) { orWL_V(s, r); }
+
+        @ConcurrencyStressTest
+        public static class orWL_V {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
         }
     }
 
-    public abstract static class tRL_URs extends AbstractStampedLockTest {
-        @Override
-        public void actor1(State s, IntResult2 r) { tRL_URs(s, r); }
+    public static class tRL_URs {
 
-        public abstract static class Base extends tRL_URs {}
+        @ConcurrencyStressTest
+        public static class aWL_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+        }
 
-        public static class aWL_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aWL_U(s, r); }
+        @ConcurrencyStressTest
+        public static class aRWLw_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
-        public static class aRWLw_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aRWLw_U(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class WL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class WL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class WL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
-        public static class WLI_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
-        public static class WLI_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
-        public static class WLI_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class tWL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class tWL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class tWL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
-        public static class tWLt_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
-        public static class tWLt_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
-        public static class tWLt_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_UWs(s, r); }
-        }
-        public static class orWL_V extends Base {
-            @Override public void actor2(State s, IntResult2 r) { orWL_V(s, r); }
+
+        @ConcurrencyStressTest
+        public static class orWL_V {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
         }
     }
 
-    public abstract static class tRLt_tUR extends AbstractStampedLockTest {
-        @Override
-        public void actor1(State s, IntResult2 r) { tRLt_tUR(s, r); }
+    public abstract static class tRLt_tUR {
 
-        public abstract static class Base extends tRLt_tUR {}
+        @ConcurrencyStressTest
+        public static class aWL_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+        }
 
-        public static class aWL_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aWL_U(s, r); }
+        @ConcurrencyStressTest
+        public static class aRWLw_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
-        public static class aRWLw_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aRWLw_U(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class WL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class WL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class WL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
-        public static class WLI_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
-        public static class WLI_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
-        public static class WLI_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class tWL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class tWL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class tWL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
-        public static class tWLt_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
-        public static class tWLt_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
-        public static class tWLt_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_UWs(s, r); }
-        }
-        public static class orWL_V extends Base {
-            @Override public void actor2(State s, IntResult2 r) { orWL_V(s, r); }
+
+        @ConcurrencyStressTest
+        public static class orWL_V {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
         }
     }
 
-    public abstract static class tRLt_Us extends AbstractStampedLockTest {
-        @Override
-        public void actor1(State s, IntResult2 r) { tRLt_Us(s, r); }
+    public abstract static class tRLt_Us {
 
-        public abstract static class Base extends tRLt_Us {}
+        @ConcurrencyStressTest
+        public static class aWL_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+        }
 
-        public static class aWL_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aWL_U(s, r); }
+        @ConcurrencyStressTest
+        public static class aRWLw_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
-        public static class aRWLw_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aRWLw_U(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class WL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class WL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class WL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
-        public static class WLI_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
-        public static class WLI_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
-        public static class WLI_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class tWL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class tWL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class tWL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
-        public static class tWLt_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
-        public static class tWLt_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
-        public static class tWLt_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_UWs(s, r); }
-        }
-        public static class orWL_V extends Base {
-            @Override public void actor2(State s, IntResult2 r) { orWL_V(s, r); }
+
+        @ConcurrencyStressTest
+        public static class orWL_V {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
         }
     }
 
-    public abstract static class tRLt_URs extends AbstractStampedLockTest {
-        @Override
-        public void actor1(State s, IntResult2 r) { tRLt_URs(s, r); }
+    public abstract static class tRLt_URs {
 
-        public abstract static class Base extends tRLt_URs {}
+        @ConcurrencyStressTest
+        public static class aWL_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+        }
 
-        public static class aWL_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aWL_U(s, r); }
+        @ConcurrencyStressTest
+        public static class aRWLw_U {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
-        public static class aRWLw_U extends Base {
-            @Override public void actor2(State s, IntResult2 r) { aRWLw_U(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class WL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class WL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class WL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
-        public static class WLI_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
-        public static class WLI_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class WLI_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
-        public static class WLI_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { WLI_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
-        public static class tWL_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
-        public static class tWL_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWL_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
-        public static class tWL_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWL_UWs(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_tUW {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
-        public static class tWLt_tUW extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_tUW(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_Us {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
-        public static class tWLt_Us extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_Us(s, r); }
+
+        @ConcurrencyStressTest
+        public static class tWLt_UWs {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
-        public static class tWLt_UWs extends Base {
-            @Override public void actor2(State s, IntResult2 r) { tWLt_UWs(s, r); }
-        }
-        public static class orWL_V extends Base {
-            @Override public void actor2(State s, IntResult2 r) { orWL_V(s, r); }
+
+        @ConcurrencyStressTest
+        public static class orWL_V {
+            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
         }
     }
 
