@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.infra.runners;
 
 import org.openjdk.jcstress.Options;
-import org.openjdk.jcstress.infra.Result;
+import org.openjdk.jcstress.infra.annotations.Result;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.tests.TerminationTest;
 import org.openjdk.jcstress.util.Counter;
@@ -102,16 +102,11 @@ public class TerminationRunner<S> extends Runner<TerminationRunner.OutcomeResult
         volatile boolean error;
     }
 
-    public static class OutcomeResult implements Result {
+    public static class OutcomeResult {
         private Outcome outcome;
 
         public OutcomeResult(Outcome outcome) {
             this.outcome = outcome;
-        }
-
-        @Override
-        public void reset() {
-            throw new UnsupportedOperationException();
         }
 
         @Override

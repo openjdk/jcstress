@@ -24,13 +24,13 @@
  */
 package org.openjdk.jcstress.infra.results;
 
-import org.openjdk.jcstress.infra.Result;
+import org.openjdk.jcstress.infra.annotations.Result;
 import sun.misc.Contended;
 
 import java.io.Serializable;
 
-@org.openjdk.jcstress.infra.annotations.Result
-public class CharResult2 implements Serializable, Result {
+@Result
+public class CharResult2 implements Serializable {
 
     @Contended
     public char r1;
@@ -63,8 +63,4 @@ public class CharResult2 implements Serializable, Result {
         return "[" + r1 + ", " + r2 + ']';
     }
 
-    @Override
-    public void reset() {
-        r1 = r2 = 0;
-    }
 }

@@ -24,7 +24,6 @@
  */
 package org.openjdk.jcstress;
 
-import org.openjdk.jcstress.infra.Result;
 import org.openjdk.jcstress.infra.Scheduler;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.DiskReadCollector;
@@ -39,7 +38,6 @@ import org.openjdk.jcstress.infra.grading.ExceptionReportPrinter;
 import org.openjdk.jcstress.infra.grading.HTMLReportPrinter;
 import org.openjdk.jcstress.infra.runners.Runner;
 import org.openjdk.jcstress.infra.runners.TestList;
-import org.openjdk.jcstress.tests.TerminationTest;
 import org.openjdk.jcstress.util.InputStreamDrainer;
 
 import java.io.ByteArrayOutputStream;
@@ -52,7 +50,6 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -218,7 +215,7 @@ public class JCStress {
         for (String test : tests) {
             Class<?> aClass = Class.forName(TestList.getRunner(test));
             Constructor<?> cnstr = aClass.getConstructor(Options.class, TestResultCollector.class, ExecutorService.class);
-            Runner<? extends Result> o = (Runner<? extends Result>) cnstr.newInstance(opts, collector, pool);
+            Runner<?> o = (Runner<?>) cnstr.newInstance(opts, collector, pool);
             async(o);
         }
     }

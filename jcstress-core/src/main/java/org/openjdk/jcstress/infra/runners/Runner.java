@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.infra.runners;
 
 import org.openjdk.jcstress.Options;
-import org.openjdk.jcstress.infra.Result;
+import org.openjdk.jcstress.infra.annotations.Result;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
@@ -50,7 +50,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public abstract class Runner<R extends Result> {
+public abstract class Runner<R> {
     protected final Control control;
     protected final TestResultCollector collector;
     protected final ExecutorService pool;

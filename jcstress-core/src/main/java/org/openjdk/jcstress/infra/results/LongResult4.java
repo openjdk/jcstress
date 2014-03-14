@@ -24,13 +24,13 @@
  */
 package org.openjdk.jcstress.infra.results;
 
-import org.openjdk.jcstress.infra.Result;
+import org.openjdk.jcstress.infra.annotations.Result;
 import sun.misc.Contended;
 
 import java.io.Serializable;
 
-@org.openjdk.jcstress.infra.annotations.Result
-public class LongResult4 implements Serializable, Result {
+@Result
+public class LongResult4 implements Serializable {
 
     @Contended
     public long r1;
@@ -73,8 +73,4 @@ public class LongResult4 implements Serializable, Result {
         return result;
     }
 
-    @Override
-    public void reset() {
-        r1 = r2 = r3 = r4 = 0;
-    }
 }

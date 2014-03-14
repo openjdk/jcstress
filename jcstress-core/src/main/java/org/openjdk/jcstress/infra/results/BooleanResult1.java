@@ -24,13 +24,13 @@
  */
 package org.openjdk.jcstress.infra.results;
 
-import org.openjdk.jcstress.infra.Result;
+import org.openjdk.jcstress.infra.annotations.Result;
 import sun.misc.Contended;
 
 import java.io.Serializable;
 
-@org.openjdk.jcstress.infra.annotations.Result
-public class BooleanResult1 implements Serializable, Result {
+@Result
+public class BooleanResult1 implements Serializable {
 
     @Contended
     public boolean r1;
@@ -57,8 +57,4 @@ public class BooleanResult1 implements Serializable, Result {
         return "[" + r1 + ']';
     }
 
-    @Override
-    public void reset() {
-        r1 = false;
-    }
 }

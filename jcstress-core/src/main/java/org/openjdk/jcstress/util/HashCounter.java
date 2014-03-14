@@ -24,8 +24,6 @@
  */
 package org.openjdk.jcstress.util;
 
-import org.openjdk.jcstress.infra.Result;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
