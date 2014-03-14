@@ -24,7 +24,6 @@
  */
 package org.openjdk.jcstress;
 
-import org.openjdk.jcstress.tests.ConcurrencyTest;
 import org.openjdk.jcstress.util.ContendedSupport;
 import org.openjdk.jcstress.util.VMSupport;
 

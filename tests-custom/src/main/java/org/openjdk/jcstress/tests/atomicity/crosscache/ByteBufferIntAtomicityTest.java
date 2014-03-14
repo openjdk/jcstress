@@ -28,7 +28,6 @@ import org.openjdk.jcstress.infra.annotations.Actor;
 import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
 import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.ByteResult4;
-import org.openjdk.jcstress.tests.Actor2_Test;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

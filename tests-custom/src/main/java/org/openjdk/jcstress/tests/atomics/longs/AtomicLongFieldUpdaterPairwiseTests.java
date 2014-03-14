@@ -30,8 +30,6 @@ import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
 import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult1;
 import org.openjdk.jcstress.infra.results.LongResult2;
-import org.openjdk.jcstress.tests.Actor2_Arbiter1_Test;
-import org.openjdk.jcstress.tests.Actor2_Test;
 
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 

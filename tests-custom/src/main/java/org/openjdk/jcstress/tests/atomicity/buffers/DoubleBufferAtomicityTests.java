@@ -28,9 +28,7 @@ import org.openjdk.jcstress.infra.annotations.Actor;
 import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
 import org.openjdk.jcstress.infra.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult1;
-import org.openjdk.jcstress.tests.Actor2_Test;
 
-import java.nio.CharBuffer;
 import java.nio.DoubleBuffer;
 
 public class DoubleBufferAtomicityTests {

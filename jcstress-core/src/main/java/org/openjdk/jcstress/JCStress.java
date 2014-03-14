@@ -39,15 +39,8 @@ import org.openjdk.jcstress.infra.grading.ExceptionReportPrinter;
 import org.openjdk.jcstress.infra.grading.HTMLReportPrinter;
 import org.openjdk.jcstress.infra.runners.Runner;
 import org.openjdk.jcstress.infra.runners.TestList;
-import org.openjdk.jcstress.tests.Actor1_Test;
-import org.openjdk.jcstress.tests.Actor2_Arbiter1_Test;
-import org.openjdk.jcstress.tests.Actor2_Test;
-import org.openjdk.jcstress.tests.Actor3_Test;
-import org.openjdk.jcstress.tests.Actor4_Test;
-import org.openjdk.jcstress.tests.ConcurrencyTest;
 import org.openjdk.jcstress.tests.TerminationTest;
 import org.openjdk.jcstress.util.InputStreamDrainer;
-import org.openjdk.jcstress.util.Reflections;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

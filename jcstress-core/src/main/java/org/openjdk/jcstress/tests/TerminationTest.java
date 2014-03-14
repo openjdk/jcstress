@@ -32,7 +32,7 @@ package org.openjdk.jcstress.tests;
  * @param <S>
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public interface TerminationTest<S> extends ConcurrencyTest {
+public interface TerminationTest<S>  {
 
     /**
      * Body for actor thread.
