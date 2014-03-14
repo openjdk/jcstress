@@ -24,14 +24,42 @@
  */
 package org.openjdk.jcstress.tests.singletons;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
+import org.openjdk.jcstress.infra.results.IntResult1;
+
 /**
  * Tests the singleton factory.
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class HolderSingletonTest extends AbstractSingletonTest {
+@ConcurrencyStressTest
+public class HolderSingletonTest {
 
-    public static class HolderFactory implements SingletonFactory {
+    @Actor
+    public final void actor1(HolderFactory s) {
+        s.getInstance();
+    }
+
+    @Actor
+    public final void actor2(HolderFactory s, IntResult1 r) {
+        Singleton singleton = s.getInstance();
+        if (singleton == null) {
+            r.r1 = 0;
+            return;
+        }
+
+        if (singleton.x == null) {
+            r.r1 = 1;
+            return;
+        }
+
+        r.r1 = singleton.x;
+    }
+
+    @State
+    public static class HolderFactory {
         public Singleton getInstance() {
             return Holder.INSTANCE;
         }
@@ -39,11 +67,6 @@ public class HolderSingletonTest extends AbstractSingletonTest {
         public static class Holder {
             public static final Singleton INSTANCE = new Singleton();
         }
-    }
-
-    @Override
-    public SingletonFactory newState() {
-        return new HolderFactory();
     }
 
 }

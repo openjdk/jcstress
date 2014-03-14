@@ -24,14 +24,42 @@
  */
 package org.openjdk.jcstress.tests.singletons;
 
+import org.openjdk.jcstress.infra.annotations.Actor;
+import org.openjdk.jcstress.infra.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.infra.annotations.State;
+import org.openjdk.jcstress.infra.results.IntResult1;
+
 /**
  * Tests the safe double-checked locking singleton.
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class SafeDCLSingletonTest extends AbstractSingletonTest {
+@ConcurrencyStressTest
+public class SafeDCLSingletonTest {
 
-    public static class SafeSingletonFactory implements SingletonFactory {
+    @Actor
+    public final void actor1(SafeSingletonFactory s) {
+        s.getInstance();
+    }
+
+    @Actor
+    public final void actor2(SafeSingletonFactory s, IntResult1 r) {
+        Singleton singleton = s.getInstance();
+        if (singleton == null) {
+            r.r1 = 0;
+            return;
+        }
+
+        if (singleton.x == null) {
+            r.r1 = 1;
+            return;
+        }
+
+        r.r1 = singleton.x;
+    }
+
+    @State
+    public static class SafeSingletonFactory {
         private volatile Singleton instance;
 
         public Singleton getInstance() {
@@ -44,11 +72,6 @@ public class SafeDCLSingletonTest extends AbstractSingletonTest {
             }
             return instance;
         }
-    }
-
-    @Override
-    public SingletonFactory newState() {
-        return new SafeSingletonFactory();
     }
 
 }

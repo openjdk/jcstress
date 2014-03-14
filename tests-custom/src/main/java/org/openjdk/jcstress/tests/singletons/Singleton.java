@@ -24,52 +24,7 @@
  */
 package org.openjdk.jcstress.tests.singletons;
 
-import org.openjdk.jcstress.infra.results.IntResult1;
-import org.openjdk.jcstress.tests.Actor2_Test;
-
-/**
- * Tests the broken double-checked locking.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
- */
-public abstract class AbstractSingletonTest implements Actor2_Test<AbstractSingletonTest.SingletonFactory, IntResult1> {
-
-    @Override
-    public final void actor1(SingletonFactory s, IntResult1 r) {
-        s.getInstance();
-    }
-
-    @Override
-    public final void actor2(SingletonFactory s, IntResult1 r) {
-        Singleton singleton = s.getInstance();
-        if (singleton == null) {
-            r.r1 = 0;
-            return;
-        }
-
-        if (singleton.x == null) {
-            r.r1 = 1;
-            return;
-        }
-
-        r.r1 = singleton.x;
-    }
-
-    @Override
-    public abstract SingletonFactory newState();
-
-    @Override
-    public IntResult1 newResult() {
-        return new IntResult1();
-    }
-
-    public interface SingletonFactory {
-        Singleton getInstance();
-    }
-
-    public static class Singleton {
-        public Byte x;
-        public Singleton() { x = 42; }
-    }
-
+public class Singleton {
+    public Byte x;
+    public Singleton() { x = 42; }
 }
