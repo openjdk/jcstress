@@ -48,10 +48,6 @@ public class Reflections {
     private static volatile boolean RESOURCE_INITED;
     private static Set<String> RESOURCES;
 
-    static String INTERFACE_LIST = "/META-INF/InterfaceList";
-    private static volatile boolean INTERFACE_INITED;
-    private static Multimap<String, String> INTERFACE_MAP;
-
     public static Collection<String> getResources(String filter, String postfix) {
         try {
             ensureResourceInited();
@@ -66,46 +62,6 @@ public class Reflections {
             return res;
         } catch (IOException e) {
             throw new IllegalStateException(e);
-        }
-    }
-
-    public static Collection<Class<?>> lookupClassesImplementing(Class<?> intf, String filter) {
-        ensureInterfacesInited();
-
-        Collection<Class<?>> s = new ArrayList<Class<?>>();
-        String canonicalName = intf.getCanonicalName();
-
-        Pattern pattern = Pattern.compile(filter);
-
-        for (String k : INTERFACE_MAP.keys()) {
-            if (!k.equals(canonicalName)) continue;
-            for (String klass : INTERFACE_MAP.get(k)) {
-                if (pattern.matcher(klass).matches()) {
-                    try {
-                        s.add(Class.forName(klass));
-                    } catch (ClassNotFoundException e) {
-                        // swallow
-                    }
-                }
-            }
-        }
-
-        return s;
-    }
-
-    public static Collection<Class> findAllClassesImplementing(Class<?> intf, String filter) {
-        try {
-            List<Class> result = new ArrayList<Class>();
-            for (Class klass : getClasses(filter)) {
-                if (klass.isInterface()) continue;
-                if (Modifier.isAbstract(klass.getModifiers())) continue;
-                if (intf.isAssignableFrom(klass) && !klass.isInterface()) {
-                    result.add(klass);
-                }
-            }
-            return result;
-        } catch (IOException e) {
-            throw new IllegalStateException("Exception ", e);
         }
     }
 
@@ -124,43 +80,6 @@ public class Reflections {
             }
             RESOURCES = newResources;
             RESOURCE_INITED = true;
-        }
-    }
-
-    private static void ensureInterfacesInited() {
-        if (!INTERFACE_INITED) {
-            final Multimap<String, String> interfaceMap = new HashMultimap<String, String>();
-
-            InputStream list = null;
-            try {
-                list = Reflections.class.getResourceAsStream(INTERFACE_LIST);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(list));
-
-                String currentClass = null;
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (currentClass == null) {
-                        currentClass = line;
-                    } else if (!line.isEmpty()) {
-                        interfaceMap.put(line, currentClass);
-                    } else {
-                        currentClass = null;
-                    }
-                }
-            } catch (IOException e) {
-                System.err.println("Warning: " + e);
-            } finally {
-                if (list != null) {
-                    try {
-                        list.close();
-                    } catch (IOException e) {
-                        // swallow
-                    }
-                }
-            }
-
-            INTERFACE_MAP = interfaceMap;
-            INTERFACE_INITED = true;
         }
     }
 
