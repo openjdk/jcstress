@@ -29,6 +29,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Annotates the class that is treated as the result object.
+ * <p/>
+ * Important invariants:
+ *   - Result classes usually mimic value types: they do not have identity, and harness
+ *     may reuse the objects, and also auto-magically clear the fields;
+ *   - All fields in Result classes should be public;
+ *   - All fields in Result classes should be primitive;
+ *   - Result classes should be serializable;
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Result {

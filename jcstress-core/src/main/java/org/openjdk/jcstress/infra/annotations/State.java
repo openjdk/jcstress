@@ -29,6 +29,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Annotates the class treated as test state.
+ * <p/>
+ * Important invariants:
+ *   - State classes should have a default constructor;
+ *   - All initializations in constructors and instance intializers are visible to all actors;
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface State {

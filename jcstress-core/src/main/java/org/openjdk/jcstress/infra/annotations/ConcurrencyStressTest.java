@@ -29,6 +29,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Marks the class that should be treated as the concurrency stress test.
+ * <p/>
+ * {@link Actor} and {@link Arbiter} annotations are used to describe test
+ * behavior. {@link State} and {@link Result} annotations are used to
+ * describe the test state.
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ConcurrencyStressTest {
