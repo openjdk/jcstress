@@ -22,49 +22,14 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.interrupt;
+package org.openjdk.jcstress.annotations;
 
-import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.JCStressTest;
-import org.openjdk.jcstress.annotations.Mode;
-import org.openjdk.jcstress.annotations.Signal;
-import org.openjdk.jcstress.annotations.State;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
-import java.util.concurrent.TimeUnit;
-
-@JCStressTest(Mode.Termination)
-@State
-public class WeakReferenceTest {
-
-    public volatile Object referent;
-    public final WeakReference<Object> ref;
-    public final ReferenceQueue<Object> refQueue;
-
-    public WeakReferenceTest() {
-        referent = new Object();
-        refQueue = new ReferenceQueue<Object>();
-        ref = new WeakReference<Object>(referent, refQueue);
-    }
-
-
-    @Actor
-    public void actor1() {
-        while (ref.get() != null) {
-            // burn!
-        }
-    }
-
-    @Signal
-    public void signal() throws InterruptedException {
-        referent = null;
-
-        // should eventually complete, not testing here
-        while (refQueue.poll() != ref) {
-            System.gc();
-            TimeUnit.MILLISECONDS.sleep(10);
-        }
-    }
-
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Signal {
 }

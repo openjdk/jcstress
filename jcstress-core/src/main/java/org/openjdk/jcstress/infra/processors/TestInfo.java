@@ -26,6 +26,7 @@ package org.openjdk.jcstress.infra.processors;
 
 import org.openjdk.jcstress.annotations.Arbiter;
 import org.openjdk.jcstress.annotations.Result;
+import org.openjdk.jcstress.annotations.Signal;
 import org.openjdk.jcstress.annotations.State;
 
 import javax.lang.model.element.ExecutableElement;
@@ -40,6 +41,8 @@ public class TestInfo {
     private TypeElement result;
     private ExecutableElement arbiter;
     private TypeElement test;
+    private ExecutableElement signal;
+
     private String generatedName;
 
     public TestInfo() {
@@ -82,6 +85,14 @@ public class TestInfo {
         }
     }
 
+    public void setSignal(ExecutableElement element) {
+        if (signal == null || signal.equals(element)) {
+            signal = element;
+        } else {
+            throw new GenerationException("We can only have a single @" + Signal.class.getName() + " method.", element);
+        }
+    }
+
     public TypeElement getState() {
         return state;
     }
@@ -102,6 +113,10 @@ public class TestInfo {
         return arbiter;
     }
 
+    public ExecutableElement getSignal() {
+        return signal;
+    }
+
     public void setGeneratedName(String generatedName) {
         this.generatedName = generatedName;
     }
@@ -109,4 +124,5 @@ public class TestInfo {
     public String getGeneratedName() {
         return generatedName;
     }
+
 }

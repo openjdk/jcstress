@@ -24,33 +24,32 @@
  */
 package org.openjdk.jcstress.tests.scratch;
 
-import org.openjdk.jcstress.tests.TerminationTest;
+import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Mode;
+import org.openjdk.jcstress.annotations.Signal;
+import org.openjdk.jcstress.annotations.State;
 
-public class StaleReadTest implements TerminationTest<StaleReadTest.State> {
+@JCStressTest(Mode.Termination)
+@State
+public class StaleReadTest {
 
-    @Override
-    public void actor1(State state) throws Exception {
+    volatile int g;
+    int a;
+
+    @Actor
+    public void actor1() throws Exception {
         int la = 0;
         int lg = 0;
         while (la == 0) {
-            lg = state.g; // "force re-read"
-            la = state.a;
+            lg = g; // "force re-read"
+            la = a;
         }
     }
 
-    @Override
-    public void signal(State state, Thread actor1) throws Exception {
-        state.a = 1;
-    }
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    public static class State {
-        volatile int g;
-        int a;
+    @Signal
+    public void signal() throws Exception {
+        a = 1;
     }
 
 }

@@ -24,29 +24,28 @@
  */
 package org.openjdk.jcstress.tests.interrupt;
 
-import org.openjdk.jcstress.tests.TerminationTest;
+import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Mode;
+import org.openjdk.jcstress.annotations.Signal;
+import org.openjdk.jcstress.annotations.State;
 
-public class VolatileBusyLoopTest implements TerminationTest<VolatileBusyLoopTest.State> {
+@JCStressTest(Mode.Termination)
+@State
+public class VolatileBusyLoopTest {
 
-    @Override
-    public void actor1(State s) {
-        while (!s.isStopped) {
+    public volatile boolean isStopped;
+
+    @Actor
+    public void actor1() {
+        while (!isStopped) {
             // burn!
         }
     }
 
-    @Override
-    public void signal(State s, Thread actor1) {
-        s.isStopped = true;
-    }
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    public static class State {
-        public volatile boolean isStopped;
+    @Signal
+    public void signal() {
+        isStopped = true;
     }
 
 }

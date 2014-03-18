@@ -39,4 +39,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JCStressTest {
+
+    Mode value() default Mode.Continuous;
+
 }

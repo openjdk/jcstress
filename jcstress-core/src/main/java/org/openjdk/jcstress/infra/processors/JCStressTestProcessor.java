@@ -28,7 +28,9 @@ import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Arbiter;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Mode;
 import org.openjdk.jcstress.annotations.Result;
+import org.openjdk.jcstress.annotations.Signal;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.Control;
@@ -38,6 +40,8 @@ import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.ArrayUtils;
 import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.Counters;
+import org.openjdk.jcstress.util.HashCounter;
+import org.openjdk.jcstress.util.VMSupport;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -88,10 +92,22 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 TypeElement e = (TypeElement) el;
                 try {
                     TestInfo info = parseAndValidate(e);
-                    generate(info);
+                    Mode mode = el.getAnnotation(JCStressTest.class).value();
+                    switch (mode) {
+                        case Continuous:
+                            generateContinuous(info);
+                            break;
+                        case Termination:
+                            generateTermination(info);
+                            break;
+                        default:
+                            throw new GenerationException("Unknown mode: " + mode, e);
+                    }
                     tests.add(info);
                 } catch (GenerationException ex) {
                     processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, ex.getMessage(), ex.getElement());
+                } catch (Throwable t) {
+                    t.printStackTrace();
                 }
             }
         } else {
@@ -123,6 +139,10 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 info.setArbiter(method);
             }
 
+            if (method.getAnnotation(Signal.class) != null) {
+                info.setSignal(method);
+            }
+
             for (VariableElement var : method.getParameters()) {
                 TypeElement paramClass = (TypeElement) processingEnv.getTypeUtils().asElement(var.asType());
                 if (paramClass.getAnnotation(State.class) != null) {
@@ -130,9 +150,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 } else if (paramClass.getAnnotation(Result.class) != null) {
                     info.setResult(paramClass);
                 } else {
-                    throw new GenerationException("The parameter for @" + Actor.class.getSimpleName() +
-                            " methods requires either @" + State.class.getSimpleName() + " or @" + Result.class.getSimpleName() +
-                            " annotated class", var);
+                    if (e.getAnnotation(JCStressTest.class).value() != Mode.Termination ||
+                            !paramClass.getQualifiedName().toString().equals("java.lang.Thread")) {
+                        throw new GenerationException("The parameter for @" + Actor.class.getSimpleName() +
+                                " methods requires either @" + State.class.getSimpleName() + " or @" + Result.class.getSimpleName() +
+                                " annotated class", var);
+                    }
                 }
             }
         }
@@ -141,16 +164,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
             info.setState(e);
         } else if (e.getAnnotation(Result.class) != null) {
             info.setResult(e);
-        }
-
-        if (info.getState() == null) {
-            throw new GenerationException("@" + JCStressTest.class.getSimpleName() + " defines no @" +
-                    State.class.getSimpleName() + " to work with", e);
-        }
-
-        if (info.getResult() == null) {
-            throw new GenerationException("@" + JCStressTest.class.getSimpleName() + " defines no @" +
-                    Result.class.getSimpleName() + " to work with", e);
         }
 
         String packageName = getPackageName(info.getTest()) + ".generated";
@@ -185,7 +198,17 @@ public class JCStressTestProcessor extends AbstractProcessor {
         return name;
     }
 
-    private void generate(TestInfo info) {
+    private void generateContinuous(TestInfo info) {
+        if (info.getState() == null) {
+            throw new GenerationException("@" + JCStressTest.class.getSimpleName() + " defines no @" +
+                    State.class.getSimpleName() + " to work with", info.getTest());
+        }
+
+        if (info.getResult() == null) {
+            throw new GenerationException("@" + JCStressTest.class.getSimpleName() + " defines no @" +
+                    Result.class.getSimpleName() + " to work with", info.getTest());
+        }
+
         PrintWriter pw;
         Writer writer;
         try {
@@ -408,6 +431,169 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.close();
     }
 
+    private void generateTermination(TestInfo info) {
+        if (info.getSignal() == null) {
+            throw new GenerationException("@" + JCStressTest.class.getSimpleName() + " with mode=" + Mode.Termination +
+                    " should have a @" + Signal.class.getSimpleName() + " method", info.getTest());
+        }
+
+        if (info.getActors().size() != 1) {
+            throw new GenerationException("@" + JCStressTest.class.getSimpleName() + " with mode=" + Mode.Termination +
+                    " should have only the single @" + Actor.class.getName(), info.getTest());
+        }
+
+        String generatedName = getGeneratedName(info.getTest());
+
+        PrintWriter pw;
+        Writer writer;
+        try {
+            writer = processingEnv.getFiler().createSourceFile(getPackageName(info.getTest()) + ".generated." + generatedName).openWriter();
+            pw = new PrintWriter(writer);
+        } catch (IOException e) {
+            throw new GenerationException("IOException: " + e.getMessage(), info.getTest());
+        }
+
+        String t = info.getTest().getSimpleName().toString();
+
+        ExecutableElement actor = info.getActors().get(0);
+
+        pw.println("package " + getPackageName(info.getTest()) + ".generated;");
+
+        printImports(pw, info);
+
+        pw.println("public class " + generatedName + " extends Runner<" + generatedName + ".Outcome> {");
+        pw.println();
+
+        pw.println("    public " + generatedName + "(Options opts, TestResultCollector collector, ExecutorService pool) {");
+        pw.println("        super(opts, collector, pool, \"" + getQualifiedName(info.getTest()) + "\");");
+        pw.println("    }");
+        pw.println();
+
+        pw.println("    @Override");
+        pw.println("    public void run() {");
+        pw.println("        testLog.println(\"Running \" + testName);");
+        pw.println();
+        pw.println("        Counter<Outcome> results = new HashCounter<Outcome>();");
+        pw.println();
+        pw.println("        testLog.print(\"Iterations \");");
+        pw.println("        for (int c = 0; c < control.iters; c++) {");
+        pw.println("            try {");
+        pw.println("                VMSupport.tryDeoptimizeAllInfra(control.deoptRatio);");
+        pw.println("            } catch (NoClassDefFoundError err) {");
+        pw.println("                // gracefully \"handle\"");
+        pw.println("            }");
+        pw.println();
+        pw.println("            testLog.print(\".\");");
+        pw.println("            testLog.flush();");
+        pw.println("            run(results);");
+        pw.println();
+        pw.println("            dump(testName, results);");
+        pw.println();
+        pw.println("            if (results.count(Outcome.STALE) > 0) {");
+        pw.println("                testLog.println(\"Have stale threads, forcing VM to exit\");");
+        pw.println("                testLog.flush();");
+        pw.println("                testLog.close();");
+        pw.println("                System.exit(0);");
+        pw.println("            }");
+        pw.println("        }");
+        pw.println("        testLog.println();");
+        pw.println("    }");
+        pw.println();
+        pw.println("    @Override");
+        pw.println("    public void sanityCheck() throws Throwable {");
+        pw.println("        throw new UnsupportedOperationException();");
+        pw.println("    }");
+        pw.println();
+        pw.println("    @Override");
+        pw.println("    public Counter<Outcome> internalRun() {");
+        pw.println("        throw new UnsupportedOperationException();");
+        pw.println("    }");
+        pw.println();
+        pw.println("    private void run(Counter<Outcome> results) {");
+        pw.println("        long target = System.currentTimeMillis() + control.time;");
+        pw.println("        while (System.currentTimeMillis() < target) {");
+        pw.println();
+
+        if (info.getTest().equals(info.getState())) {
+            pw.println("            final " + info.getState().getSimpleName() + " state = new " + info.getState().getSimpleName() + "();");
+        } else {
+            if (info.getState() != null) {
+                pw.println("            final " + info.getState().getSimpleName() + " state = new " + info.getState().getSimpleName() + "();");
+            }
+            pw.println("            final " + t + " test = new " + t + "();");
+        }
+
+        pw.println("            final Holder holder = new Holder();");
+        pw.println();
+        pw.println("            Thread t1 = new Thread(new Runnable() {");
+        pw.println("                public void run() {");
+        pw.println("                    try {");
+
+        if (info.getTest().equals(info.getState())) {
+            emitMethodTermination(pw, actor, "                        state." + actor.getSimpleName(), "state");
+        } else {
+            emitMethodTermination(pw, actor, "                        test." + actor.getSimpleName(), "state");
+        }
+
+        pw.println("                    } catch (Exception e) {");
+        pw.println("                        holder.error = true;");
+        pw.println("                    }");
+        pw.println("                    holder.terminated = true;");
+        pw.println("                }");
+        pw.println("            });");
+        pw.println("            t1.start();");
+        pw.println();
+        pw.println("            try {");
+        pw.println("                TimeUnit.MILLISECONDS.sleep(10);");
+        pw.println("            } catch (InterruptedException e) {");
+        pw.println("                // do nothing");
+        pw.println("            }");
+        pw.println();
+        pw.println("            try {");
+
+        if (info.getTest().equals(info.getState())) {
+            emitMethodTermination(pw, info.getSignal(), "                state." + info.getSignal().getSimpleName(), "state");
+        } else {
+            emitMethodTermination(pw, info.getSignal(), "                test." + info.getSignal().getSimpleName(), "state");
+        }
+
+        pw.println("            } catch (Exception e) {");
+        pw.println("                holder.error = true;");
+        pw.println("            }");
+        pw.println();
+        pw.println("            try {");
+        pw.println("                t1.join(1000);");
+        pw.println("            } catch (InterruptedException e) {");
+        pw.println("                // do nothing");
+        pw.println("            }");
+        pw.println();
+        pw.println("            if (holder.terminated) {");
+        pw.println("                if (holder.error) {");
+        pw.println("                    results.record(Outcome.ERROR);");
+        pw.println("                } else {");
+        pw.println("                    results.record(Outcome.TERMINATED);");
+        pw.println("                }");
+        pw.println("            } else {");
+        pw.println("                results.record(Outcome.STALE);");
+        pw.println("                return;");
+        pw.println("            }");
+        pw.println("        }");
+        pw.println("    }");
+        pw.println();
+        pw.println("    private static class Holder {");
+        pw.println("        volatile boolean terminated;");
+        pw.println("        volatile boolean error;");
+        pw.println("    }");
+        pw.println();
+        pw.println("    public enum Outcome {");
+        pw.println("        TERMINATED,");
+        pw.println("        STALE,");
+        pw.println("        ERROR,");
+        pw.println("    }");
+        pw.println("}");
+        pw.close();
+    }
+
     private void emitMethod(PrintWriter pw, ExecutableElement el, String lvalue, String stateAccessor, String resultAccessor) {
         pw.print(lvalue + "(");
 
@@ -428,6 +614,27 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println(");");
     }
 
+    private void emitMethodTermination(PrintWriter pw, ExecutableElement el, String lvalue, String stateAccessor) {
+        pw.print(lvalue + "(");
+
+        boolean isFirst = true;
+        for (VariableElement var : el.getParameters()) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                pw.print(", ");
+            }
+            TypeElement paramClass = (TypeElement) processingEnv.getTypeUtils().asElement(var.asType());
+            if (paramClass.getAnnotation(State.class) != null) {
+                pw.print(stateAccessor);
+            }
+            if (paramClass.getQualifiedName().toString().equals("java.lang.Thread")) {
+                pw.print("t1");
+            }
+        }
+        pw.println(");");
+    }
+
     private void printImports(PrintWriter pw, TestInfo info) {
         Class<?>[] imports = new Class<?>[] {
                 ArrayList.class, Arrays.class, Collection.class,
@@ -435,16 +642,21 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 AtomicInteger.class, AtomicReference.class,
                 Options.class, TestResultCollector.class,
                 Control.class, Runner.class, StateHolder.class,
-                ArrayUtils.class, Counter.class, Counters.class
+                ArrayUtils.class, Counter.class, Counters.class,
+                VMSupport.class, HashCounter.class
         };
 
         for (Class<?> c : imports) {
             pw.println("import " + c.getName() + ';');
         }
         pw.println("import " + info.getTest().getQualifiedName() + ";");
-        pw.println("import " + info.getResult().getQualifiedName() + ";");
-        if (!info.getState().equals(info.getTest())) {
-            pw.println("import " + info.getState().getQualifiedName() + ";");
+        if (info.getResult() != null) {
+            pw.println("import " + info.getResult().getQualifiedName() + ";");
+        }
+        if (!info.getTest().equals(info.getState())) {
+            if (info.getState() != null) {
+                pw.println("import " + info.getState().getQualifiedName() + ";");
+            }
         }
 
         pw.println();

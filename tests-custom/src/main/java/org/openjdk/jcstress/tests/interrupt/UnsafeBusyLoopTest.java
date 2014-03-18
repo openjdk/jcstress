@@ -24,12 +24,19 @@
  */
 package org.openjdk.jcstress.tests.interrupt;
 
-import org.openjdk.jcstress.tests.TerminationTest;
+import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Mode;
+import org.openjdk.jcstress.annotations.Signal;
+import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
-public class UnsafeBusyLoopTest implements TerminationTest<UnsafeBusyLoopTest.State> {
+@JCStressTest(Mode.Termination)
+@State
+public class UnsafeBusyLoopTest {
 
-    public static int offset;
+    public static final long offset;
+    public boolean isStopped;
 
     static {
         try {
@@ -39,25 +46,16 @@ public class UnsafeBusyLoopTest implements TerminationTest<UnsafeBusyLoopTest.St
         }
     }
 
-    @Override
-    public void actor1(State s) {
-        while (!UnsafeHolder.U.getBoolean(s, offset)) {
+    @Actor
+    public void actor1() {
+        while (!UnsafeHolder.U.getBoolean(this, offset)) {
             // burn!
         }
     }
 
-    @Override
-    public void signal(State s, Thread actor1) {
-        s.isStopped = true;
-    }
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    public static class State {
-        public boolean isStopped;
+    @Signal
+    public void signal() {
+        isStopped = true;
     }
 
 }

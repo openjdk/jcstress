@@ -24,12 +24,16 @@
  */
 package org.openjdk.jcstress.tests.interrupt;
 
-import org.openjdk.jcstress.tests.TerminationTest;
+import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Mode;
+import org.openjdk.jcstress.annotations.Signal;
 
-public class ThreadSleepTest implements TerminationTest<Void> {
+@JCStressTest(Mode.Termination)
+public class ThreadSleepTest {
 
-    @Override
-    public void actor1(Void _) {
+    @Actor
+    public void actor1() {
         try {
             Thread.sleep(1000*1000*1000);
         } catch (InterruptedException e) {
@@ -37,14 +41,9 @@ public class ThreadSleepTest implements TerminationTest<Void> {
         }
     }
 
-    @Override
-    public void signal(Void _, Thread actor1) {
+    @Signal
+    public void signal(Thread actor1) {
         actor1.interrupt();
-    }
-
-    @Override
-    public Void newState() {
-        return null;
     }
 
 }

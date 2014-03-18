@@ -24,33 +24,32 @@
  */
 package org.openjdk.jcstress.tests.interrupt;
 
-import org.openjdk.jcstress.tests.TerminationTest;
+import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Mode;
+import org.openjdk.jcstress.annotations.Signal;
+import org.openjdk.jcstress.annotations.State;
 
-public class ObjectWaitInfiniteTest implements TerminationTest<ObjectWaitInfiniteTest.State> {
+@JCStressTest(Mode.Termination)
+@State
+public class ObjectWaitInfiniteTest {
 
-    @Override
-    public void actor1(State s) {
-        synchronized (s.lock) {
+    public final Object lock = new Object();
+
+    @Actor
+    public void actor1() {
+        synchronized (lock) {
             try {
-                s.lock.wait();
+                lock.wait();
             } catch (InterruptedException e) {
                 // do nothing, expected
             }
         }
     }
 
-    @Override
-    public void signal(State _, Thread actor1) {
+    @Signal
+    public void signal(Thread actor1) {
         actor1.interrupt();
-    }
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    public static class State {
-        public final Object lock = new Object();
     }
 
 }

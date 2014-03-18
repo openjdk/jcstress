@@ -24,35 +24,34 @@
  */
 package org.openjdk.jcstress.tests.interrupt;
 
-import org.openjdk.jcstress.tests.TerminationTest;
+import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Mode;
+import org.openjdk.jcstress.annotations.Signal;
+import org.openjdk.jcstress.annotations.State;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class ReentrantLockInterruptiblyTest implements TerminationTest<ReentrantLockInterruptiblyTest.State> {
+@JCStressTest(Mode.Termination)
+@State
+public class ReentrantLockInterruptiblyTest {
 
-    @Override
-    public void actor1(State s) {
+    public final Lock lock = new ReentrantLock();
+    public ReentrantLockInterruptiblyTest() { lock.lock(); }
+
+    @Actor
+    public void actor1() {
         try {
-            s.lock.lockInterruptibly();
+            lock.lockInterruptibly();
         } catch (InterruptedException e) {
             // do nothing, expected
         }
     }
 
-    @Override
-    public void signal(State _, Thread actor1) {
+    @Signal
+    public void signal(Thread actor1) {
         actor1.interrupt();
-    }
-
-    @Override
-    public State newState() {
-        return new State();
-    }
-
-    public static class State {
-        public final Lock lock = new ReentrantLock();
-        public State() { lock.lock(); }
     }
 
 }

@@ -24,12 +24,16 @@
  */
 package org.openjdk.jcstress.tests.interrupt;
 
-import org.openjdk.jcstress.tests.TerminationTest;
+import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Mode;
+import org.openjdk.jcstress.annotations.Signal;
 
-public class CurrentThreadIsInterruptedMethodTest implements TerminationTest<Void> {
+@JCStressTest(Mode.Termination)
+public class CurrentThreadIsInterruptedMethodTest {
 
-    @Override
-    public void actor1(Void _) {
+    @Actor
+    public void actor1() {
         while (true) {
             if (check()) break;
         }
@@ -39,14 +43,9 @@ public class CurrentThreadIsInterruptedMethodTest implements TerminationTest<Voi
         return Thread.currentThread().isInterrupted();
     }
 
-    @Override
-    public void signal(Void _, Thread actor1) {
+    @Signal
+    public void signal(Thread actor1) {
         actor1.interrupt();
-    }
-
-    @Override
-    public Void newState() {
-        return null;
     }
 
 }
