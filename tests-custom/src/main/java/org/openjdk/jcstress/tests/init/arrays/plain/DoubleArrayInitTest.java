@@ -25,11 +25,11 @@
 package org.openjdk.jcstress.tests.init.arrays.plain;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.DoubleResult4;
 
-@ConcurrencyStressTest
+@JCStressTest
 @State
 public class DoubleArrayInitTest {
 

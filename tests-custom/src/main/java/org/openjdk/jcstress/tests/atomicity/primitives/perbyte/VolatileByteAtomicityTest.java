@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.atomicity.primitives.perbyte;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.ByteResult2;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
@@ -35,7 +35,7 @@ import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-@ConcurrencyStressTest
+@JCStressTest
 @State
 public class VolatileByteAtomicityTest {
 

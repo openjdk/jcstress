@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.locks.stamped;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 
@@ -384,91 +384,91 @@ public class StampedLockPairwiseTests {
 
     public abstract static class aRL_U {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aWL_U {
             @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aRWLw_U {
             @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class orWL_V {
             @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
@@ -477,91 +477,91 @@ public class StampedLockPairwiseTests {
 
     public static class aRWLr_U {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aWL_U {
             @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aRWLw_U {
             @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class orWL_V {
             @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
@@ -570,91 +570,91 @@ public class StampedLockPairwiseTests {
 
     public static class RL_tUR {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aWL_U {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aRWLw_U {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class orWL_V {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
@@ -663,91 +663,91 @@ public class StampedLockPairwiseTests {
 
     public static class RL_Us {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aWL_U {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aRWLw_U {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class orWL_V {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
@@ -756,91 +756,91 @@ public class StampedLockPairwiseTests {
 
     public static class RL_URs {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aWL_U {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aRWLw_U {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class orWL_V {
             @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
@@ -849,91 +849,91 @@ public class StampedLockPairwiseTests {
 
     public abstract static class RLI_tUR  {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aWL_U {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aRWLw_U {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class orWL_V {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
@@ -942,91 +942,91 @@ public class StampedLockPairwiseTests {
 
     public static class RLI_Us {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aWL_U {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aRWLw_U {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class orWL_V {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
@@ -1035,91 +1035,91 @@ public class StampedLockPairwiseTests {
 
     public static class RLI_URs {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aWL_U {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aRWLw_U {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class orWL_V {
             @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
@@ -1128,91 +1128,91 @@ public class StampedLockPairwiseTests {
 
     public static class tOR_V {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aWL_U {
             @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aRWLw_U {
             @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class orWL_V {
             @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
@@ -1221,91 +1221,91 @@ public class StampedLockPairwiseTests {
 
     public static class tRL_tUR {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aWL_U {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aRWLw_U {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class orWL_V {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
@@ -1314,91 +1314,91 @@ public class StampedLockPairwiseTests {
 
     public static class tRL_Us {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aWL_U {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aRWLw_U {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class orWL_V {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
@@ -1407,91 +1407,91 @@ public class StampedLockPairwiseTests {
 
     public static class tRL_URs {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aWL_U {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aRWLw_U {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class orWL_V {
             @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
@@ -1500,91 +1500,91 @@ public class StampedLockPairwiseTests {
 
     public abstract static class tRLt_tUR {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aWL_U {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aRWLw_U {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class orWL_V {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
@@ -1593,91 +1593,91 @@ public class StampedLockPairwiseTests {
 
     public abstract static class tRLt_Us {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aWL_U {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aRWLw_U {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class orWL_V {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
@@ -1686,91 +1686,91 @@ public class StampedLockPairwiseTests {
 
     public abstract static class tRLt_URs {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aWL_U {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class aRWLw_U {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class WLI_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWL_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_tUW {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_Us {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class tWLt_UWs {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class orWL_V {
             @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
             @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }

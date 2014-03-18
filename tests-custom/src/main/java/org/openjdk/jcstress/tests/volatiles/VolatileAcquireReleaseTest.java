@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.volatiles;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 
@@ -34,7 +34,7 @@ import org.openjdk.jcstress.infra.results.IntResult2;
  *
  *  @author Doug Lea (dl@cs.oswego.edu)
  */
-@ConcurrencyStressTest
+@JCStressTest
 @State
 public class VolatileAcquireReleaseTest {
 

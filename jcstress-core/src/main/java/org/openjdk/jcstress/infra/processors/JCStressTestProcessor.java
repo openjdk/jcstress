@@ -27,7 +27,7 @@ package org.openjdk.jcstress.infra.processors;
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Arbiter;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Result;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
@@ -71,19 +71,19 @@ import java.util.concurrent.atomic.AtomicReference;
 
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-public class ConcurrencyStressTestProcessor extends AbstractProcessor {
+public class JCStressTestProcessor extends AbstractProcessor {
 
     private final List<TestInfo> tests = new ArrayList<TestInfo>();
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        return Collections.singleton(ConcurrencyStressTest.class.getName());
+        return Collections.singleton(JCStressTest.class.getName());
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         if (!roundEnv.processingOver()) {
-            Set<? extends Element> set = roundEnv.getElementsAnnotatedWith(ConcurrencyStressTest.class);
+            Set<? extends Element> set = roundEnv.getElementsAnnotatedWith(JCStressTest.class);
             for (Element el : set) {
                 TypeElement e = (TypeElement) el;
                 try {
@@ -144,12 +144,12 @@ public class ConcurrencyStressTestProcessor extends AbstractProcessor {
         }
 
         if (info.getState() == null) {
-            throw new GenerationException("@" + ConcurrencyStressTest.class.getSimpleName() + " defines no @" +
+            throw new GenerationException("@" + JCStressTest.class.getSimpleName() + " defines no @" +
                     State.class.getSimpleName() + " to work with", e);
         }
 
         if (info.getResult() == null) {
-            throw new GenerationException("@" + ConcurrencyStressTest.class.getSimpleName() + " defines no @" +
+            throw new GenerationException("@" + JCStressTest.class.getSimpleName() + " defines no @" +
                     Result.class.getSimpleName() + " to work with", e);
         }
 

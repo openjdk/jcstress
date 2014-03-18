@@ -25,11 +25,11 @@
 package org.openjdk.jcstress.tests.init.primitives.plain;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.CharResult1;
 
-@ConcurrencyStressTest
+@JCStressTest
 @State
 public class CharPlainTest {
 

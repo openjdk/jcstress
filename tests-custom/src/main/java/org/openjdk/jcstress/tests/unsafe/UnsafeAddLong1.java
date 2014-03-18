@@ -25,13 +25,13 @@
 package org.openjdk.jcstress.tests.unsafe;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult2;
 import org.openjdk.jcstress.util.UnsafeHolder;
 import sun.misc.Contended;
 
-@ConcurrencyStressTest
+@JCStressTest
 @State
 public class UnsafeAddLong1 {
 

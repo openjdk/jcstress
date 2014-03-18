@@ -26,11 +26,11 @@ package org.openjdk.jcstress.tests.tearing;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Arbiter;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 
-@ConcurrencyStressTest
+@JCStressTest
 @State
 public class ArrayInterleaveTest {
 

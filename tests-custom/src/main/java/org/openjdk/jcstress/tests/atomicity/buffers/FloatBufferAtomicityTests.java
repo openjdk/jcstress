@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.atomicity.buffers;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult1;
 
@@ -42,7 +42,7 @@ public class FloatBufferAtomicityTests {
         }
     }
 
-    @ConcurrencyStressTest
+    @JCStressTest
     public static class FloatTest {
         @Actor public void actor1(MyState s)                { s.b.put(0, -1F);                                    }
         @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = Float.floatToRawIntBits(s.b.get());          }

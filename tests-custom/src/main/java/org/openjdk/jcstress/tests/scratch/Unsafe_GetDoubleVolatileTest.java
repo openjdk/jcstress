@@ -25,12 +25,12 @@
 package org.openjdk.jcstress.tests.scratch;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.DoubleResult1;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
-@ConcurrencyStressTest
+@JCStressTest
 @State
 public class Unsafe_GetDoubleVolatileTest {
 

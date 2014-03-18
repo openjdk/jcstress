@@ -25,13 +25,13 @@
 package org.openjdk.jcstress.tests.atomics.integer;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult4;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-@ConcurrencyStressTest
+@JCStressTest
 @State
 public class AtomicIntegerArrayInitialValueTest {
 

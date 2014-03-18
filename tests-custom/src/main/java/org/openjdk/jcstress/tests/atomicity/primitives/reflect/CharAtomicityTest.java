@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.atomicity.primitives.reflect;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.CharResult1;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
@@ -37,7 +37,7 @@ import java.lang.reflect.Field;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-@ConcurrencyStressTest
+@JCStressTest
 @State
 public class CharAtomicityTest {
 

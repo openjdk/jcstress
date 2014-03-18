@@ -25,14 +25,14 @@
 package org.openjdk.jcstress.tests.scratch;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-@ConcurrencyStressTest
+@JCStressTest
 @State
 public class FailingCASTest {
 

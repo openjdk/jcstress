@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.atomicity.crosscache;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.ByteResult4;
 
@@ -33,7 +33,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Random;
 
-@ConcurrencyStressTest
+@JCStressTest
 @State
 public class ByteBufferIntAtomicityTest {
 

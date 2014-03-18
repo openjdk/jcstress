@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.future;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult1;
 
@@ -35,7 +35,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-@ConcurrencyStressTest
+@JCStressTest
 public class FutureTaskSetTest {
 
     @Actor

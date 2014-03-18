@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.singletons;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult1;
 
@@ -34,7 +34,7 @@ import org.openjdk.jcstress.infra.results.IntResult1;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-@ConcurrencyStressTest
+@JCStressTest
 public class UnsafeDCLSingletonTest {
 
     @Actor

@@ -25,11 +25,11 @@
 package org.openjdk.jcstress.tests.init.primitives.instance;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.ByteResult1;
 
-@ConcurrencyStressTest
+@JCStressTest
 @State
 public class ByteInstanceInitializerTest {
 

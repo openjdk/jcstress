@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.locks.mutex;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 
@@ -136,61 +136,61 @@ public class ReentrantLockMutexTests {
 
     public static class I_F {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class LI_LI {
             @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.LI(); }
             @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.LI(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class LI_L {
             @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.LI(); }
             @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.LI(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class LI_TL {
             @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.LI(); }
             @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TL(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class LI_TLt {
             @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.LI(); }
             @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class L_L {
             @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.L(); }
             @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.L(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class L_TL {
             @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.L(); }
             @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TL(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class L_TLt {
             @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.L(); }
             @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class TL_TL {
             @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.TL(); }
             @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TL(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class TL_TLt {
             @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.TL(); }
             @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class TLt_TLt {
             @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.TLt(); }
             @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
@@ -199,61 +199,61 @@ public class ReentrantLockMutexTests {
 
     public static class I_N {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class LI_LI {
             @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.LI(); }
             @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.LI(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class LI_L {
             @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.LI(); }
             @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.LI(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class LI_TL {
             @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.LI(); }
             @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TL(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class LI_TLt {
             @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.LI(); }
             @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class L_L {
             @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.L(); }
             @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.L(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class L_TL {
             @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.L(); }
             @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TL(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class L_TLt {
             @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.L(); }
             @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class TL_TL {
             @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.TL(); }
             @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TL(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class TL_TLt {
             @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.TL(); }
             @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class TLt_TLt {
             @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.TLt(); }
             @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
@@ -262,61 +262,61 @@ public class ReentrantLockMutexTests {
 
     public static class S_N {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class LI_LI {
             @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.LI(); }
             @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.LI(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class LI_L {
             @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.LI(); }
             @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.LI(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class LI_TL {
             @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.LI(); }
             @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TL(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class LI_TLt {
             @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.LI(); }
             @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class L_L {
             @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.L(); }
             @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.L(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class L_TL {
             @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.L(); }
             @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TL(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class L_TLt {
             @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.L(); }
             @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class TL_TL {
             @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.TL(); }
             @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TL(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class TL_TLt {
             @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.TL(); }
             @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class TLt_TLt {
             @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.TLt(); }
             @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
@@ -325,61 +325,61 @@ public class ReentrantLockMutexTests {
 
     public static class S_F {
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class LI_LI {
             @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.LI(); }
             @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.LI(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class LI_L {
             @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.LI(); }
             @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.LI(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class LI_TL {
             @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.LI(); }
             @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TL(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class LI_TLt {
             @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.LI(); }
             @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class L_L {
             @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.L(); }
             @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.L(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class L_TL {
             @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.L(); }
             @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TL(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class L_TLt {
             @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.L(); }
             @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class TL_TL {
             @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.TL(); }
             @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TL(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class TL_TLt {
             @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.TL(); }
             @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
         }
 
-        @ConcurrencyStressTest
+        @JCStressTest
         public static class TLt_TLt {
             @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.TLt(); }
             @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TLt(); }

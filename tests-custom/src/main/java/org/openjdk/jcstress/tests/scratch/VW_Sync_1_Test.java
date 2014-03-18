@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.scratch;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 
@@ -33,7 +33,7 @@ import org.openjdk.jcstress.infra.results.IntResult2;
  * Dummy test to check if volatile write's StoreLoad is erased by following biased lock
  * Run with -XX:BiasedLockingStartupDelay=0
  */
-@ConcurrencyStressTest
+@JCStressTest
 @State
 public class VW_Sync_1_Test {
 

@@ -26,13 +26,13 @@ package org.openjdk.jcstress.tests.atomics.integer;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Arbiter;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-@ConcurrencyStressTest
+@JCStressTest
 public class AtomicIntegerArrayInterleaveTest {
 
     /** Array size: 256 bytes inevitably crosses the cache line on most implementations */

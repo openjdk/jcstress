@@ -206,10 +206,10 @@ public class TraceGen {
         pw.println();
         pw.println("import org.openjdk.jcstress.infra.results." + resultName + ";");
         pw.println("import org.openjdk.jcstress.annotations.Actor;");
-        pw.println("import org.openjdk.jcstress.annotations.ConcurrencyStressTest;");
+        pw.println("import org.openjdk.jcstress.annotations.JCStressTest;");
         pw.println("import org.openjdk.jcstress.annotations.State;");
         pw.println();
-        pw.println("@ConcurrencyStressTest");
+        pw.println("@JCStressTest");
         pw.println("@State");
         pw.println("public class " + klass + " {");
         pw.println();

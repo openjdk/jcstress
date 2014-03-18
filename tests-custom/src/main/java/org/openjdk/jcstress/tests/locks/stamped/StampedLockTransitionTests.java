@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.locks.stamped;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 
@@ -128,73 +128,73 @@ public class StampedLockTransitionTests {
         }
     }
 
-    @ConcurrencyStressTest
+    @JCStressTest
     public static class OO_OO {
         @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.optimistic_optimistic(); }
         @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.optimistic_optimistic(); }
     }
 
-    @ConcurrencyStressTest
+    @JCStressTest
     public static class OO_OR {
         @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.optimistic_optimistic(); }
         @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.optimistic_read(); }
     }
 
-    @ConcurrencyStressTest
+    @JCStressTest
     public static class OO_OW {
         @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.optimistic_optimistic(); }
         @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.optimistic_write(); }
     }
 
-    @ConcurrencyStressTest
+    @JCStressTest
     public static class OR_OW {
         @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.optimistic_read(); }
         @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.optimistic_write(); }
     }
 
-    @ConcurrencyStressTest
+    @JCStressTest
     public static class RO_RO {
         @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.read_optimistic(); }
         @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.read_optimistic(); }
     }
 
-    @ConcurrencyStressTest
+    @JCStressTest
     public static class RO_RR {
         @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.read_optimistic(); }
         @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.read_read(); }
     }
 
-    @ConcurrencyStressTest
+    @JCStressTest
     public static class RO_RW {
         @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.read_optimistic(); }
         @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.read_write(); }
     }
 
-    @ConcurrencyStressTest
+    @JCStressTest
     public static class RR_RW {
         @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.read_read(); }
         @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.read_write(); }
     }
 
-    @ConcurrencyStressTest
+    @JCStressTest
     public static class WO_WO {
         @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.write_optimistic(); }
         @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.write_optimistic(); }
     }
 
-    @ConcurrencyStressTest
+    @JCStressTest
     public static class WO_WR {
         @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.write_optimistic(); }
         @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.write_read(); }
     }
 
-    @ConcurrencyStressTest
+    @JCStressTest
     public static class WO_WW {
         @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.write_optimistic(); }
         @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.write_write(); }
     }
 
-    @ConcurrencyStressTest
+    @JCStressTest
     public static class WR_WW {
         @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.write_read(); }
         @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.write_write(); }

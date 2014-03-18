@@ -25,13 +25,13 @@
 package org.openjdk.jcstress.tests.volatiles;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.ConcurrencyStressTest;
+import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-@ConcurrencyStressTest
+@JCStressTest
 @State
 public class LazySetTransitivityTest {
 
