@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class TerminationRunner<S> extends Runner<TerminationRunner.OutcomeResult> {
+public class TerminationRunner<S> extends Runner<TerminationRunner.Outcome> {
     final TerminationTest<S> test;
 
     public TerminationRunner(Options opts,  TerminationTest<S> test, TestResultCollector collector, ExecutorService pool) throws FileNotFoundException, JAXBException {
@@ -54,7 +54,7 @@ public class TerminationRunner<S> extends Runner<TerminationRunner.OutcomeResult
     public void run() {
         testLog.println("Running " + testName);
 
-        Counter<OutcomeResult> results = new HashCounter<OutcomeResult>();
+        Counter<Outcome> results = new HashCounter<Outcome>();
 
         testLog.print("Iterations ");
         for (int c = 0; c < control.iters; c++) {
@@ -70,7 +70,7 @@ public class TerminationRunner<S> extends Runner<TerminationRunner.OutcomeResult
 
             dump(testName, results);
 
-            if (results.count(OutcomeResult.of(OutcomeResult.Outcome.STALE)) > 0) {
+            if (results.count(Outcome.STALE) > 0) {
                 testLog.println("Have stale threads, forcing VM to exit");
                 testLog.flush();
                 testLog.close();
@@ -86,7 +86,7 @@ public class TerminationRunner<S> extends Runner<TerminationRunner.OutcomeResult
     }
 
     @Override
-    public Counter<OutcomeResult> internalRun() {
+    public Counter<Outcome> internalRun() {
         throw new UnsupportedOperationException();
     }
 
@@ -96,42 +96,13 @@ public class TerminationRunner<S> extends Runner<TerminationRunner.OutcomeResult
         volatile boolean error;
     }
 
-    public static class OutcomeResult {
-        private Outcome outcome;
-
-        public OutcomeResult(Outcome outcome) {
-            this.outcome = outcome;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            OutcomeResult that = (OutcomeResult) o;
-
-            if (outcome != that.outcome) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            return outcome != null ? outcome.hashCode() : 0;
-        }
-
-        private enum Outcome {
-            TERMINATED,
-            STALE,
-            ERROR,
-        }
-
-        public static OutcomeResult of(Outcome outcome) {
-            return new OutcomeResult(outcome);
-        }
+    public enum Outcome {
+        TERMINATED,
+        STALE,
+        ERROR,
     }
 
-    private void run(Counter<OutcomeResult> results) {
+    private void run(Counter<Outcome> results) {
         long target = System.currentTimeMillis() + control.time;
         while (System.currentTimeMillis() < target) {
 
@@ -171,12 +142,12 @@ public class TerminationRunner<S> extends Runner<TerminationRunner.OutcomeResult
 
             if (holder.terminated) {
                 if (holder.error) {
-                    results.record(OutcomeResult.of(OutcomeResult.Outcome.ERROR));
+                    results.record(Outcome.ERROR);
                 } else {
-                    results.record(OutcomeResult.of(OutcomeResult.Outcome.TERMINATED));
+                    results.record(Outcome.TERMINATED);
                 }
             } else {
-                results.record(OutcomeResult.of(OutcomeResult.Outcome.STALE));
+                results.record(Outcome.STALE);
                 return;
             }
         }
