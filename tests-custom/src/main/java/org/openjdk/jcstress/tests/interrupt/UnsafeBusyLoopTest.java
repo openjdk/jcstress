@@ -40,7 +40,7 @@ public class UnsafeBusyLoopTest {
 
     static {
         try {
-            offset = UnsafeHolder.U.fieldOffset(State.class.getDeclaredField("isStopped"));
+            offset = UnsafeHolder.U.fieldOffset(UnsafeBusyLoopTest.class.getDeclaredField("isStopped"));
         } catch (NoSuchFieldException e) {
             throw new IllegalStateException(e);
         }
