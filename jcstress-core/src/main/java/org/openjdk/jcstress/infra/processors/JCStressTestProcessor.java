@@ -115,7 +115,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 FileObject file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", TestList.LIST.substring(1));
                 PrintWriter writer = new PrintWriter(file.openWriter());
                 for (TestInfo test : tests) {
-                    writer.println(test.getTest().getQualifiedName() + "," + test.getGeneratedName() + "," + test.getActors().size());
+                    writer.println(test.getTest().getQualifiedName() + "," + test.getGeneratedName() + "," + test.getActors().size() + "," + test.isRequiresFork());
                 }
                 writer.close();
             } catch (IOException ex) {
@@ -170,6 +170,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
         String testName = getGeneratedName(info.getTest());
 
         info.setGeneratedName(packageName + "." + testName);
+
+        info.setRequiresFork(e.getAnnotation(JCStressTest.class).value() == Mode.Termination);
 
         return info;
     }

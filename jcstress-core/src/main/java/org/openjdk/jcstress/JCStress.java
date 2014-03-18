@@ -212,10 +212,14 @@ public class JCStress {
 
     private void run(Options opts, Collection<String> tests, boolean alreadyForked, TestResultCollector collector) throws Exception {
         for (String test : tests) {
-            Class<?> aClass = Class.forName(TestList.getRunner(test));
-            Constructor<?> cnstr = aClass.getConstructor(Options.class, TestResultCollector.class, ExecutorService.class);
-            Runner<?> o = (Runner<?>) cnstr.newInstance(opts, collector, pool);
-            async(o, TestList.getThreads(test));
+            if (TestList.requiresFork(test) && !alreadyForked && !opts.shouldNeverFork()) {
+                runForked(opts, test, collector);
+            } else {
+                Class<?> aClass = Class.forName(TestList.getRunner(test));
+                Constructor<?> cnstr = aClass.getConstructor(Options.class, TestResultCollector.class, ExecutorService.class);
+                Runner<?> o = (Runner<?>) cnstr.newInstance(opts, collector, pool);
+                async(o, TestList.getThreads(test));
+            }
         }
     }
 

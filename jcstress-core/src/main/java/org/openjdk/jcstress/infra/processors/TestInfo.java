@@ -44,6 +44,7 @@ public class TestInfo {
     private ExecutableElement signal;
 
     private String generatedName;
+    private boolean requiresFork;
 
     public TestInfo() {
         actors = new ArrayList<ExecutableElement>();
@@ -125,4 +126,11 @@ public class TestInfo {
         return generatedName;
     }
 
+    public void setRequiresFork(boolean requiresFork) {
+        this.requiresFork = requiresFork;
+    }
+
+    public boolean isRequiresFork() {
+        return requiresFork;
+    }
 }

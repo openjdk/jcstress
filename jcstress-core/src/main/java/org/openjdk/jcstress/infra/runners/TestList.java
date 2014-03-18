@@ -50,8 +50,8 @@ public class TestList {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] ls = line.split(",");
-                    if (ls.length == 3) {
-                        m.put(ls[0], new Info(ls[1], Integer.valueOf(ls[2])));
+                    if (ls.length == 4) {
+                        m.put(ls[0], new Info(ls[1], Integer.valueOf(ls[2]), Boolean.valueOf(ls[3])));
                     }
                 }
             } catch (IOException e) {
@@ -82,13 +82,19 @@ public class TestList {
         return tests.get(test).threads;
     }
 
+    public static boolean requiresFork(String test) {
+        return tests.get(test).requiresFork;
+    }
+
     public static class Info {
         public final String runner;
         public final int threads;
+        public final boolean requiresFork;
 
-        public Info(String runner, int threads) {
+        public Info(String runner, int threads, boolean requiresFork) {
             this.runner = runner;
             this.threads = threads;
+            this.requiresFork = requiresFork;
         }
     }
 
