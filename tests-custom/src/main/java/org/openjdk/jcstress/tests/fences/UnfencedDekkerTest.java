@@ -46,14 +46,12 @@ public class UnfencedDekkerTest {
     @Actor
     public void actor1(IntResult2 r) {
         a = 1;
-        UnsafeHolder.U.fullFence();
         r.r1 = b;
     }
 
     @Actor
     public void actor2(IntResult2 r) {
         b = 1;
-        UnsafeHolder.U.fullFence();
         r.r2 = a;
     }
 
