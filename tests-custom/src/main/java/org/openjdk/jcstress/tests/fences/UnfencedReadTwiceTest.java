@@ -28,6 +28,7 @@ import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
+import sun.misc.Contended;
 
 /**
  * Test if intervening write breaks reordering.
@@ -38,7 +39,10 @@ import org.openjdk.jcstress.infra.results.IntResult3;
 @State
 public class UnfencedReadTwiceTest {
 
+    @Contended
     int x;
+
+    @Contended
     int y;
 
     @Actor

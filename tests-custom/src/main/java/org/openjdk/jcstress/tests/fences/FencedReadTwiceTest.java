@@ -29,6 +29,7 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 import org.openjdk.jcstress.util.UnsafeHolder;
+import sun.misc.Contended;
 
 /**
  * Test if acquire/release forces re-read
@@ -39,7 +40,10 @@ import org.openjdk.jcstress.util.UnsafeHolder;
 @State
 public class FencedReadTwiceTest {
 
+    @Contended
     int x;
+
+    @Contended
     int y;
 
     @Actor

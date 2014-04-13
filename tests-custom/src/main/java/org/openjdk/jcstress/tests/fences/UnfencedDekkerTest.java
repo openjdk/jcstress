@@ -30,6 +30,7 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import org.openjdk.jcstress.util.UnsafeHolder;
+import sun.misc.Contended;
 
 /**
  * Baseline for FencedDekkerTest
@@ -40,7 +41,10 @@ import org.openjdk.jcstress.util.UnsafeHolder;
 @State
 public class UnfencedDekkerTest {
 
+    @Contended
     int a;
+
+    @Contended
     int b;
 
     @Actor
