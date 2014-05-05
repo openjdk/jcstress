@@ -34,7 +34,8 @@ import java.lang.annotation.Target;
  * <p/>
  * Important invariants:
  *   - State classes should have a default constructor;
- *   - All initializations in constructors and instance intializers are visible to all actors;
+ *   - All initializations in constructors and instance initializers are
+ *     visible to all actors;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
