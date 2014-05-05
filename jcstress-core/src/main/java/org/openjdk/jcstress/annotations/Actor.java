@@ -35,6 +35,9 @@ import java.lang.annotation.Target;
  * Actor-annotated methods can have only the {@link State} or {@link Result}-annotated
  * classes as the parameters.
  * <p/>
+ * Actor methods may declare to throw the exceptions, but the behavior
+ * after actually throwing an exception is undefined.
+ * <p/>
  * A few important invariants are maintained:
  *   - the method is called only by single actor thread, once per {@link State} instance;
  *   - for any given {@link State}, the order vs another actors is deliberately unspecified;

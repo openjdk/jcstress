@@ -34,6 +34,9 @@ import java.lang.annotation.Target;
  *  - arbiter visits the {@link State} instance after all the actors have already visited that instance;
  *  - all memory effects from actors are visible in arbiter;
  * <p/>
+ * Arbiter methods may declare to throw the exceptions, but the behavior
+ * after actually throwing an exception is undefined.
+ * <p/>
  * Arbiter-annotated methods can have only the {@link State} or {@link Result}-annotated
  * classes as the parameters.
  * <p/>
