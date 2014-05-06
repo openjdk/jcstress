@@ -54,5 +54,40 @@
         </unmatched>
     </test>
 
+    <test name="org.openjdk.jcstress.tests.executors.ThreadPoolExecutorKeepAliveTest">
+        <contributed-by>Pavel Rappo (pavel.rappo@oracle.com)</contributed-by>
+        <description>
+            Tests if ThreadPoolExecutor invariant can be violated:
+            keepAliveTime == 0 &#8658; !allowCoreThreadTimeOut
+        </description>
+        <case>
+            <match>[1, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                allowCoreThreadTimeOut had changed, and keepAliveTime failed to change.
+            </description>
+        </case>
+        <case>
+            <match>[0, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                keepAliveTime had changed, and allowCoreThreadTimeOut failed to change.
+            </description>
+        </case>
+        <case>
+            <match>[1, 0]</match>
+            <expect>ACCEPTABLE_INTERESTING</expect>
+            <description>
+                The update under race can break the
+                (keepAliveTime == 0 &#8658; !allowCoreThreadTimeOut) invariant.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                This case is not expected.
+            </description>
+        </unmatched>
+    </test>
 
 </testsuite>
