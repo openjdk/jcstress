@@ -128,4 +128,52 @@
         </unmatched>
     </test>
 
+    <test name="org.openjdk.jcstress.tests.scratch.LazySetOrderTest$Plain">
+        <contributed-by>Aleksey Shipilev</contributed-by>
+        <case>
+            <match>[0, 1]</match>
+            <match>[0, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>Seeing the unset $g, any value for $x is OK</description>
+        </case>
+        <case>
+            <match>[1, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>Seeing both updates.</description>
+        </case>
+        <case>
+            <match>[1, 0]</match>
+            <expect>ACCEPTABLE_INTERESTING</expect>
+            <description>Seeing the update to $g, but not to $x.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>All other cases are unexpected and forbidden.</description>
+        </unmatched>
+    </test>
+
+    <test name="org.openjdk.jcstress.tests.scratch.LazySetOrderTest$Lazy">
+        <contributed-by>Aleksey Shipilev</contributed-by>
+        <case>
+            <match>[0, 1]</match>
+            <match>[0, 0]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>Seeing the unset $g, any value for $x is OK</description>
+        </case>
+        <case>
+            <match>[1, 1]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>Seeing both updates.</description>
+        </case>
+        <case>
+            <match>[1, 0]</match>
+            <expect>FORBIDDEN</expect>
+            <description>Seeing the update to $g, but not to $x.</description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>All other cases are unexpected and forbidden.</description>
+        </unmatched>
+    </test>
+
 </testsuite>
