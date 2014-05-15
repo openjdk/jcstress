@@ -67,6 +67,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -240,13 +241,27 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         pw.println("    @Override");
         pw.println("    public void sanityCheck() throws Throwable {");
-        pw.println("        " + t + " t = new " + t + "();");
-        pw.println("        " + s + " s = new " + s + "();");
-        pw.println("        " + r + " r = new " + r + "();");
+        pw.println("        final " + t + " t = new " + t + "();");
+        pw.println("        final " + s + " s = new " + s + "();");
+        pw.println("        final " + r + " r = new " + r + "();");
 
+        pw.println("        Collection<Future<?>> res = new ArrayList<Future<?>>();");
         for (ExecutableElement el : info.getActors()) {
-            emitMethod(pw, el, "        t." + el.getSimpleName(), "s", "r");
+            pw.println("        res.add(pool.submit(new Runnable() {");
+            pw.println("            public void run() {");
+            emitMethod(pw, el, "                t." + el.getSimpleName(), "s", "r");
+            pw.println("            }");
+            pw.println("        }));");
         }
+
+        pw.println("        for (Future<?> f : res) {");
+        pw.println("            try {");
+        pw.println("                f.get();");
+        pw.println("            } catch (ExecutionException e) {");
+        pw.println("                throw e.getCause();");
+        pw.println("            }");
+        pw.println("        }");
+
         if (info.getArbiter() != null) {
             emitMethod(pw, info.getArbiter(), "        t." + info.getArbiter().getSimpleName(), "s", "r");
         }
@@ -645,7 +660,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 Options.class, TestResultCollector.class,
                 Control.class, Runner.class, StateHolder.class,
                 ArrayUtils.class, Counter.class, Counters.class,
-                VMSupport.class, HashCounter.class
+                VMSupport.class, HashCounter.class, ExecutionException.class
         };
 
         for (Class<?> c : imports) {
