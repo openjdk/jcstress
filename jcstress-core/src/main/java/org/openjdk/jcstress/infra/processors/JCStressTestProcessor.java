@@ -278,7 +278,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        Counter<" + r + "> counter = Counters.newCounter(" + r + ".class);");
         pw.println();
         pw.println("        final AtomicReference<StateHolder<" + s + "," + r + ">> version = new AtomicReference<StateHolder<" + s + ", " + r + ">>();");
-        pw.println("        version.set(new StateHolder<" + s + ", " + r + ">(new " + s + "[0], new " + r + "[0], new int[0], " + actorsCount + "));");
+        pw.println("        version.set(new StateHolder<" + s + ", " + r + ">(new " + s + "[0], new " + r + "[0], " + actorsCount + "));");
         pw.println();
         pw.println("        final AtomicInteger epoch = new AtomicInteger();");
         pw.println();
@@ -343,7 +343,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
         pw.println("            StateHolder<" + s + ", " + r + "> newHolder;");
         pw.println("            if (control.isStopped) {");
-        pw.println("                newHolder = new StateHolder<" + s + ", " + r + ">(poison, null, null, " + actorsCount + ");");
+        pw.println("                newHolder = new StateHolder<" + s + ", " + r + ">(poison, null, " + actorsCount + ");");
         pw.println("            } else {");
         pw.println("                int newLoops = holder.hasLaggedWorkers ? Math.max(control.minStride, Math.min(loops * 2, control.maxStride)) : loops;");
         pw.println();
@@ -370,21 +370,19 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
         pw.println("                " + s + "[] newStride = cur;");
         pw.println("                " + r + "[] newRes = res;");
-        pw.println("                int[] indices = holder.indices;");
         pw.println("                if (newLoops > loops) {");
         pw.println("                    newStride = Arrays.copyOf(cur, newLoops);");
         pw.println("                    newRes = Arrays.copyOf(res, newLoops);");
         pw.println("                    for (int c = loops; c < newLoops; c++) {");
         pw.println("                        newRes[c] = new " + r + "();");
         pw.println("                    }");
-        pw.println("                    indices = ArrayUtils.generatePermutation(newLoops);");
         pw.println("                }");
         pw.println();
         pw.println("                for (int c = 0; c < newLoops; c++) {");
         pw.println("                    newStride[c] = new " + s + "();");
         pw.println("                }");
         pw.println();
-        pw.println("                newHolder = new StateHolder<" + s + ", " + r + ">(newStride, newRes, indices, " + actorsCount + ");");
+        pw.println("                newHolder = new StateHolder<" + s + ", " + r + ">(newStride, newRes, " + actorsCount + ");");
         pw.println("            }");
         pw.println();
         pw.println("            version.set(newHolder);");
@@ -406,7 +404,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("            while (true) {");
             pw.println("                StateHolder<" + s + ", " + r + "> holder = version.get();");
             pw.println("                int loops = holder.loops;");
-            pw.println("                int[] indices = holder.indices;");
             pw.println("                " + s + "[] cur = holder.s;");
             pw.println("                " + r + "[] res = holder.r;");
             pw.println();
@@ -416,13 +413,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println();
             pw.println("                holder.preRun(control.shouldYield);");
             pw.println();
-            pw.println("                for (int l = 0; l < loops; l++) {");
-            pw.println("                    int index = indices[l];");
+            pw.println("                for (int i = 0; i < loops; i++) {");
 
             if (info.getState().equals(info.getTest())) {
-                emitMethod(pw, a, "                    cur[index]." + a.getSimpleName(), "cur[index]", "res[index]");
+                emitMethod(pw, a, "                    cur[i]." + a.getSimpleName(), "cur[i]", "res[i]");
             } else {
-                emitMethod(pw, a, "                    lt." + a.getSimpleName(), "cur[index]", "res[index]");
+                emitMethod(pw, a, "                    lt." + a.getSimpleName(), "cur[i]", "res[i]");
             }
 
             pw.println("                }");
