@@ -272,13 +272,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    @Override");
         pw.println("    public Counter<" + r + "> internalRun() {");
         pw.println("        " + t + " test = new " + t + "();");
-        pw.println("        " + s + "[] poison = new " + s + "[0];");
         pw.println("        control.isStopped = false;");
         pw.println();
         pw.println("        Counter<" + r + "> counter = Counters.newCounter(" + r + ".class);");
         pw.println();
         pw.println("        final AtomicReference<StateHolder<" + s + "," + r + ">> version = new AtomicReference<StateHolder<" + s + ", " + r + ">>();");
-        pw.println("        version.set(new StateHolder<" + s + ", " + r + ">(new " + s + "[0], new " + r + "[0], " + actorsCount + "));");
+        pw.println("        version.set(new StateHolder<" + s + ", " + r + ">(false, new " + s + "[0], new " + r + "[0], " + actorsCount + "));");
         pw.println();
         pw.println("        final AtomicInteger epoch = new AtomicInteger();");
         pw.println();
@@ -286,7 +285,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        Collection<Future<?>> tasks = new ArrayList<Future<?>>();");
 
         for (ExecutableElement a : info.getActors()) {
-            pw.println("        tasks.add(pool.submit(new Runner_" + a.getSimpleName() + "(control, counter, test, poison, version, epoch)));");
+            pw.println("        tasks.add(pool.submit(new Runner_" + a.getSimpleName() + "(control, counter, test, version, epoch)));");
         }
 
         pw.println();
@@ -307,15 +306,13 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        final Control control;");
         pw.println("        final Counter<" + r + "> counter;");
         pw.println("        final " + t + " test;");
-        pw.println("        final " + s + "[] poison;");
         pw.println("        final AtomicReference<StateHolder<" + s + "," + r + ">> version;");
         pw.println("        final AtomicInteger epoch;");
         pw.println();
-        pw.println("        public RunnerBase(Control control, Counter<" + r + "> counter, " + t + " test, " + s + "[] poison, AtomicReference<StateHolder<" + s + "," + r + ">> version, AtomicInteger epoch) {");
+        pw.println("        public RunnerBase(Control control, Counter<" + r + "> counter, " + t + " test, AtomicReference<StateHolder<" + s + "," + r + ">> version, AtomicInteger epoch) {");
         pw.println("            this.control = control;");
         pw.println("            this.counter = counter;");
         pw.println("            this.test = test;");
-        pw.println("            this.poison = poison;");
         pw.println("            this.version = version;");
         pw.println("            this.epoch = epoch;");
         pw.println("        }");
@@ -341,16 +338,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("                counter.record(res[c]);");
         pw.println("            }");
         pw.println();
-        pw.println("            StateHolder<" + s + ", " + r + "> newHolder;");
-        pw.println("            if (control.isStopped) {");
-        pw.println("                newHolder = new StateHolder<" + s + ", " + r + ">(poison, null, " + actorsCount + ");");
-        pw.println("            } else {");
-        pw.println("                int newLoops = holder.hasLaggedWorkers ? Math.max(control.minStride, Math.min(loops * 2, control.maxStride)) : loops;");
+        pw.println("            int newLoops = holder.hasLaggedWorkers ? Math.max(control.minStride, Math.min(loops * 2, control.maxStride)) : loops;");
         pw.println();
-        pw.println("                for (int c = 0; c < loops; c++) {");
+        pw.println("            for (int c = 0; c < loops; c++) {");
 
         for (VariableElement var : ElementFilter.fieldsIn(info.getResult().getEnclosedElements())) {
-            pw.print("                    res[c]." + var.getSimpleName().toString() + " = ");
+            pw.print("                res[c]." + var.getSimpleName().toString() + " = ");
             String type = var.asType().toString();
             if (type.equals("int") || type.equals("long") || type.equals("short") || type.equals("byte") || type.equals("char")) {
                 pw.print("0");
@@ -366,34 +359,31 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println(";");
         }
 
-        pw.println("                }");
-        pw.println();
-        pw.println("                " + s + "[] newStride = cur;");
-        pw.println("                " + r + "[] newRes = res;");
-        pw.println("                if (newLoops > loops) {");
-        pw.println("                    newStride = Arrays.copyOf(cur, newLoops);");
-        pw.println("                    newRes = Arrays.copyOf(res, newLoops);");
-        pw.println("                    for (int c = loops; c < newLoops; c++) {");
-        pw.println("                        newRes[c] = new " + r + "();");
-        pw.println("                    }");
-        pw.println("                }");
-        pw.println();
-        pw.println("                for (int c = 0; c < newLoops; c++) {");
-        pw.println("                    newStride[c] = new " + s + "();");
-        pw.println("                }");
-        pw.println();
-        pw.println("                newHolder = new StateHolder<" + s + ", " + r + ">(newStride, newRes, " + actorsCount + ");");
         pw.println("            }");
         pw.println();
-        pw.println("            version.set(newHolder);");
+        pw.println("            " + s + "[] newStride = cur;");
+        pw.println("            " + r + "[] newRes = res;");
+        pw.println("            if (newLoops > loops) {");
+        pw.println("                newStride = Arrays.copyOf(cur, newLoops);");
+        pw.println("                newRes = Arrays.copyOf(res, newLoops);");
+        pw.println("                for (int c = loops; c < newLoops; c++) {");
+        pw.println("                    newRes[c] = new " + r + "();");
+        pw.println("                }");
+        pw.println("            }");
+        pw.println();
+        pw.println("            for (int c = 0; c < newLoops; c++) {");
+        pw.println("                newStride[c] = new " + s + "();");
+        pw.println("            }");
+        pw.println();
+        pw.println("            version.set(new StateHolder<" + s + ", " + r + ">(control.isStopped, newStride, newRes, " + actorsCount + "));");
         pw.println("        }");
         pw.println("    }");
 
         for (ExecutableElement a : info.getActors()) {
             pw.println();
             pw.println("    public static class Runner_" + a.getSimpleName() + " extends RunnerBase implements Callable {");
-            pw.println("        public Runner_" + a.getSimpleName() + "(Control control, Counter<" + r + "> counter, " + t + " test, " + s + "[] poison, AtomicReference<StateHolder<" + s + "," + r + ">> version, AtomicInteger epoch) {");
-            pw.println("            super(control, counter, test, poison, version, epoch);");
+            pw.println("        public Runner_" + a.getSimpleName() + "(Control control, Counter<" + r + "> counter, " + t + " test, AtomicReference<StateHolder<" + s + "," + r + ">> version, AtomicInteger epoch) {");
+            pw.println("            super(control, counter, test, version, epoch);");
             pw.println("        }");
             pw.println();
             pw.println("        public Void call() {");
@@ -403,13 +393,13 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println();
             pw.println("            while (true) {");
             pw.println("                StateHolder<" + s + ", " + r + "> holder = version.get();");
+            pw.println("                if (holder.stopped) {");
+            pw.println("                    return null;");
+            pw.println("                }");
+            pw.println();
             pw.println("                int loops = holder.loops;");
             pw.println("                " + s + "[] cur = holder.s;");
             pw.println("                " + r + "[] res = holder.r;");
-            pw.println();
-            pw.println("                if (cur == poison) {");
-            pw.println("                    return null;");
-            pw.println("                }");
             pw.println();
             pw.println("                holder.preRun(control.shouldYield);");
             pw.println();

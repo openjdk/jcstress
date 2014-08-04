@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class StateHolder<S, R> {
+    public final boolean stopped;
     public volatile S[] s;
     public volatile R[] r;
     public final int loops;
@@ -38,7 +39,8 @@ public class StateHolder<S, R> {
     public volatile boolean notAllStarted, notAllReady, notAllFinished, notAllConsumed;
     public volatile boolean hasLaggedWorkers;
 
-    public StateHolder(S[] s, R[] r, int expectedWorkers) {
+    public StateHolder(boolean stopped, S[] s, R[] r, int expectedWorkers) {
+        this.stopped = stopped;
         this.s = s;
         this.r = r;
         this.loops = s.length;
