@@ -319,8 +319,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
         pw.println("        public void newEpoch(StateHolder<Pair> holder) {");
 
-        pw.println("            int loops = holder.loops;");
         pw.println("            Pair[] pairs = holder.pairs;");
+        pw.println("            int len = pairs.length;");
 
         if (info.getArbiter() != null) {
             pw.println();
@@ -337,7 +337,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("                counter.record(p.r);");
         pw.println("            }");
         pw.println();
-        pw.println("            int newLoops = holder.hasLaggedWorkers ? Math.max(control.minStride, Math.min(loops * 2, control.maxStride)) : loops;");
+        pw.println("            int newLen = holder.hasLaggedWorkers ? Math.max(control.minStride, Math.min(len * 2, control.maxStride)) : len;");
         pw.println();
         pw.println("            for (Pair p : pairs) {");
         pw.println("                " + r + " r = p.r;");
@@ -362,9 +362,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("            }");
         pw.println();
         pw.println("            Pair[] newPairs = pairs;");
-        pw.println("            if (newLoops > loops) {");
-        pw.println("                newPairs = Arrays.copyOf(pairs, newLoops);");
-        pw.println("                for (int c = loops; c < newLoops; c++) {");
+        pw.println("            if (newLen > len) {");
+        pw.println("                newPairs = Arrays.copyOf(pairs, newLen);");
+        pw.println("                for (int c = len; c < newLen; c++) {");
         pw.println("                    newPairs[c] = new Pair();");
         pw.println("                    newPairs[c].r = new " + r + "();");
         pw.println("                }");
@@ -396,7 +396,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("                    return null;");
             pw.println("                }");
             pw.println();
-            pw.println("                int loops = holder.loops;");
             pw.println("                Pair[] pairs = holder.pairs;");
             pw.println();
             pw.println("                holder.preRun(control.shouldYield);");
