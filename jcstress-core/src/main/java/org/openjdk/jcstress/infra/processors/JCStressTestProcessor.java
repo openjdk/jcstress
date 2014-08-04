@@ -276,8 +276,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
         pw.println("        Counter<" + r + "> counter = Counters.newCounter(" + r + ".class);");
         pw.println();
-        pw.println("        final AtomicReference<StateHolder<" + s + "," + r + ">> version = new AtomicReference<StateHolder<" + s + ", " + r + ">>();");
-        pw.println("        version.set(new StateHolder<" + s + ", " + r + ">(false, new " + s + "[0], new " + r + "[0], " + actorsCount + "));");
+        pw.println("        final AtomicReference<StateHolder<Pair>> version = new AtomicReference<StateHolder<Pair>>();");
+        pw.println("        version.set(new StateHolder<Pair>(false, new Pair[0], " + actorsCount + "));");
         pw.println();
         pw.println("        final AtomicInteger epoch = new AtomicInteger();");
         pw.println();
@@ -306,10 +306,10 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        final Control control;");
         pw.println("        final Counter<" + r + "> counter;");
         pw.println("        final " + t + " test;");
-        pw.println("        final AtomicReference<StateHolder<" + s + "," + r + ">> version;");
+        pw.println("        final AtomicReference<StateHolder<Pair>> version;");
         pw.println("        final AtomicInteger epoch;");
         pw.println();
-        pw.println("        public RunnerBase(Control control, Counter<" + r + "> counter, " + t + " test, AtomicReference<StateHolder<" + s + "," + r + ">> version, AtomicInteger epoch) {");
+        pw.println("        public RunnerBase(Control control, Counter<" + r + "> counter, " + t + " test, AtomicReference<StateHolder<Pair>> version, AtomicInteger epoch) {");
         pw.println("            this.control = control;");
         pw.println("            this.counter = counter;");
         pw.println("            this.test = test;");
@@ -317,33 +317,33 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("            this.epoch = epoch;");
         pw.println("        }");
         pw.println();
-        pw.println("        public void newEpoch(StateHolder<" + s + "," + r + "> holder) {");
+        pw.println("        public void newEpoch(StateHolder<Pair> holder) {");
 
         pw.println("            int loops = holder.loops;");
-        pw.println("            " + s + "[] cur = holder.s;");
-        pw.println("            " + r + "[] res = holder.r;");
+        pw.println("            Pair[] pairs = holder.pairs;");
 
         if (info.getArbiter() != null) {
             pw.println();
-            pw.println("             for (int l = 0; l < loops; l++) {");
+            pw.println("             for (Pair p : pairs) {");
             if (info.getState().equals(info.getTest())) {
-                emitMethod(pw, info.getArbiter(), "                cur[l]." + info.getArbiter().getSimpleName(), "cur[l]", "res[l]");
+                emitMethod(pw, info.getArbiter(), "                p.s." + info.getArbiter().getSimpleName(), "p.s", "p.r");
             } else {
-                emitMethod(pw, info.getArbiter(), "                test." + info.getArbiter().getSimpleName(), "cur[l]", "res[l]");
+                emitMethod(pw, info.getArbiter(), "                test." + info.getArbiter().getSimpleName(), "p.s", "p.r");
             }
             pw.println("            }");
         }
         pw.println();
-        pw.println("            for (int c = 0; c < loops; c++) {");
-        pw.println("                counter.record(res[c]);");
+        pw.println("            for (Pair p : pairs) {");
+        pw.println("                counter.record(p.r);");
         pw.println("            }");
         pw.println();
         pw.println("            int newLoops = holder.hasLaggedWorkers ? Math.max(control.minStride, Math.min(loops * 2, control.maxStride)) : loops;");
         pw.println();
-        pw.println("            for (int c = 0; c < loops; c++) {");
+        pw.println("            for (Pair p : pairs) {");
+        pw.println("                " + r + " r = p.r;");
 
         for (VariableElement var : ElementFilter.fieldsIn(info.getResult().getEnclosedElements())) {
-            pw.print("                res[c]." + var.getSimpleName().toString() + " = ");
+            pw.print("                r." + var.getSimpleName().toString() + " = ");
             String type = var.asType().toString();
             if (type.equals("int") || type.equals("long") || type.equals("short") || type.equals("byte") || type.equals("char")) {
                 pw.print("0");
@@ -361,28 +361,27 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         pw.println("            }");
         pw.println();
-        pw.println("            " + s + "[] newStride = cur;");
-        pw.println("            " + r + "[] newRes = res;");
+        pw.println("            Pair[] newPairs = pairs;");
         pw.println("            if (newLoops > loops) {");
-        pw.println("                newStride = Arrays.copyOf(cur, newLoops);");
-        pw.println("                newRes = Arrays.copyOf(res, newLoops);");
+        pw.println("                newPairs = Arrays.copyOf(pairs, newLoops);");
         pw.println("                for (int c = loops; c < newLoops; c++) {");
-        pw.println("                    newRes[c] = new " + r + "();");
+        pw.println("                    newPairs[c] = new Pair();");
+        pw.println("                    newPairs[c].r = new " + r + "();");
         pw.println("                }");
         pw.println("            }");
         pw.println();
-        pw.println("            for (int c = 0; c < newLoops; c++) {");
-        pw.println("                newStride[c] = new " + s + "();");
+        pw.println("            for (Pair p : newPairs) {");
+        pw.println("                p.s = new " + s + "();");
         pw.println("            }");
         pw.println();
-        pw.println("            version.set(new StateHolder<" + s + ", " + r + ">(control.isStopped, newStride, newRes, " + actorsCount + "));");
+        pw.println("            version.set(new StateHolder<Pair>(control.isStopped, newPairs, " + actorsCount + "));");
         pw.println("        }");
         pw.println("    }");
 
         for (ExecutableElement a : info.getActors()) {
             pw.println();
             pw.println("    public static class Runner_" + a.getSimpleName() + " extends RunnerBase implements Callable {");
-            pw.println("        public Runner_" + a.getSimpleName() + "(Control control, Counter<" + r + "> counter, " + t + " test, AtomicReference<StateHolder<" + s + "," + r + ">> version, AtomicInteger epoch) {");
+            pw.println("        public Runner_" + a.getSimpleName() + "(Control control, Counter<" + r + "> counter, " + t + " test, AtomicReference<StateHolder<Pair>> version, AtomicInteger epoch) {");
             pw.println("            super(control, counter, test, version, epoch);");
             pw.println("        }");
             pw.println();
@@ -392,23 +391,22 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("            " + t + " lt = test;");
             pw.println();
             pw.println("            while (true) {");
-            pw.println("                StateHolder<" + s + ", " + r + "> holder = version.get();");
+            pw.println("                StateHolder<Pair> holder = version.get();");
             pw.println("                if (holder.stopped) {");
             pw.println("                    return null;");
             pw.println("                }");
             pw.println();
             pw.println("                int loops = holder.loops;");
-            pw.println("                " + s + "[] cur = holder.s;");
-            pw.println("                " + r + "[] res = holder.r;");
+            pw.println("                Pair[] pairs = holder.pairs;");
             pw.println();
             pw.println("                holder.preRun(control.shouldYield);");
             pw.println();
-            pw.println("                for (int i = 0; i < loops; i++) {");
+            pw.println("                for (Pair p : pairs) {");
 
             if (info.getState().equals(info.getTest())) {
-                emitMethod(pw, a, "                    cur[i]." + a.getSimpleName(), "cur[i]", "res[i]");
+                emitMethod(pw, a, "                    p.s." + a.getSimpleName(), "p.s", "p.r");
             } else {
-                emitMethod(pw, a, "                    lt." + a.getSimpleName(), "cur[i]", "res[i]");
+                emitMethod(pw, a, "                    lt." + a.getSimpleName(), "p.s", "p.r");
             }
 
             pw.println("                }");
@@ -429,6 +427,11 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("        }");
             pw.println("    }");
         }
+        pw.println();
+        pw.println("    static class Pair {");
+        pw.println("        public " + s + " s;");
+        pw.println("        public " + r + " r;");
+        pw.println("    }");
         pw.println("}");
 
         pw.close();

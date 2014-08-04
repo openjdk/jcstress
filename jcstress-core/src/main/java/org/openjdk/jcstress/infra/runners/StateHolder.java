@@ -29,21 +29,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class StateHolder<S, R> {
+public class StateHolder<P> {
     public final boolean stopped;
-    public volatile S[] s;
-    public volatile R[] r;
+    public final P[] pairs;
     public final int loops;
     public final int countWorkers;
     public final AtomicInteger started, ready, finished, consumed;
     public volatile boolean notAllStarted, notAllReady, notAllFinished, notAllConsumed;
     public volatile boolean hasLaggedWorkers;
 
-    public StateHolder(boolean stopped, S[] s, R[] r, int expectedWorkers) {
+    public StateHolder(boolean stopped, P[] pairs, int expectedWorkers) {
         this.stopped = stopped;
-        this.s = s;
-        this.r = r;
-        this.loops = s.length;
+        this.pairs = pairs;
+        this.loops = pairs.length;
         this.countWorkers = expectedWorkers;
         this.ready = new AtomicInteger(expectedWorkers);
         this.started = new AtomicInteger(expectedWorkers);
