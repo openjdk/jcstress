@@ -389,16 +389,19 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("            int curEpoch = 0;");
             pw.println();
             pw.println("            " + t + " lt = test;");
+            pw.println("            boolean yield = control.shouldYield;");
+            pw.println("            AtomicReference<StateHolder<Pair>> ver = version;");
+            pw.println("            AtomicInteger ep = epoch;");
             pw.println();
             pw.println("            while (true) {");
-            pw.println("                StateHolder<Pair> holder = version.get();");
+            pw.println("                StateHolder<Pair> holder = ver.get();");
             pw.println("                if (holder.stopped) {");
             pw.println("                    return null;");
             pw.println("                }");
             pw.println();
             pw.println("                Pair[] pairs = holder.pairs;");
             pw.println();
-            pw.println("                holder.preRun(control.shouldYield);");
+            pw.println("                holder.preRun(yield);");
             pw.println();
             pw.println("                for (Pair p : pairs) {");
 
@@ -410,18 +413,18 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
             pw.println("                }");
             pw.println();
-            pw.println("                holder.postRun(control.shouldYield);");
+            pw.println("                holder.postRun(yield);");
             pw.println();
-            pw.println("                if (epoch.compareAndSet(curEpoch, curEpoch + 1)) {");
+            pw.println("                if (ep.compareAndSet(curEpoch, curEpoch + 1)) {");
             pw.println("                    newEpoch(holder);");
             pw.println("                }");
             pw.println();
             pw.println("                curEpoch++;");
-            pw.println("                while (curEpoch != epoch.get()) {");
-            pw.println("                    if (control.shouldYield) Thread.yield();");
+            pw.println("                while (curEpoch != ep.get()) {");
+            pw.println("                    if (yield) Thread.yield();");
             pw.println("                }");
             pw.println();
-            pw.println("                holder.postConsume(control.shouldYield);");
+            pw.println("                holder.postConsume(yield);");
             pw.println("            }");
             pw.println("        }");
             pw.println("    }");
