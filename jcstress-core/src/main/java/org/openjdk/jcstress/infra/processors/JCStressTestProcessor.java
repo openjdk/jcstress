@@ -39,7 +39,7 @@ import org.openjdk.jcstress.infra.runners.StateHolder;
 import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.ArrayUtils;
 import org.openjdk.jcstress.util.Counter;
-import org.openjdk.jcstress.util.HashCounter;
+import org.openjdk.jcstress.util.OpenAddressHashCounter;
 import org.openjdk.jcstress.util.VMSupport;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -273,7 +273,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        " + t + " test = new " + t + "();");
         pw.println("        control.isStopped = false;");
         pw.println();
-        pw.println("        Counter<" + r + "> counter = new HashCounter<" + r + ">();");
+        pw.println("        Counter<" + r + "> counter = new OpenAddressHashCounter<" + r + ">();");
         pw.println();
         pw.println("        final AtomicReference<StateHolder<Pair>> version = new AtomicReference<StateHolder<Pair>>();");
         pw.println("        version.set(new StateHolder<Pair>(false, new Pair[0], " + actorsCount + "));");
@@ -481,7 +481,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    public void run() {");
         pw.println("        testLog.println(\"Running \" + testName);");
         pw.println();
-        pw.println("        Counter<Outcome> results = new HashCounter<Outcome>();");
+        pw.println("        Counter<Outcome> results = new OpenAddressHashCounter<Outcome>();");
         pw.println();
         pw.println("        testLog.print(\"Iterations \");");
         pw.println("        for (int c = 0; c < control.iters; c++) {");
@@ -651,7 +651,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 Options.class, TestResultCollector.class,
                 Control.class, Runner.class, StateHolder.class,
                 ArrayUtils.class, Counter.class,
-                VMSupport.class, HashCounter.class, ExecutionException.class
+                VMSupport.class, OpenAddressHashCounter.class, ExecutionException.class
         };
 
         for (Class<?> c : imports) {
