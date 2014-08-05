@@ -79,10 +79,6 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
 
     @Override
     public void add(TestResult r) {
-        if (firstTest == 0) {
-            firstTest = System.nanoTime();
-        }
-
         TestProgress e = testsProgress.get(r.getName());
         if (e == null) {
             e = new TestProgress(r);
@@ -96,13 +92,17 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
             e.enregisterVM(null);
         }
 
-        observedResults.incrementAndGet();
+        if (firstTest == 0) {
+            firstTest = System.nanoTime();
+        } else {
+            observedResults.incrementAndGet();
 
-        int totalCount = 0;
-        for (State s : r.getStates()) {
-            totalCount += s.getCount();
+            int totalCount = 0;
+            for (State s : r.getStates()) {
+                totalCount += s.getCount();
+            }
+            observedCount.addAndGet(totalCount);
         }
-        observedCount.addAndGet(totalCount);
 
         printResult(r, verbose);
     }
@@ -242,7 +242,7 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
 
     private String computeETA() {
         long timeSpent = System.nanoTime() - firstTest;
-        long resultsGot = observedResults.get() - 1; // first result is not timed
+        long resultsGot = observedResults.get();
         if (resultsGot == 0) {
             return "n/a";
         }
