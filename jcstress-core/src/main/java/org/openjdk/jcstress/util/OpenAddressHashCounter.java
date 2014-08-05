@@ -183,8 +183,4 @@ public class OpenAddressHashCounter<R> implements Counter<R>, Serializable {
         return res;
     }
 
-    @Override
-    public Counter<R> merge(Counter<R> other) {
-        throw new UnsupportedOperationException();
-    }
 }

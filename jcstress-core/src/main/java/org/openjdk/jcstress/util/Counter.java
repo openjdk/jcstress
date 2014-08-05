@@ -64,11 +64,4 @@ public interface Counter<R> {
      */
     Collection<R> elementSet();
 
-    /**
-     * Merge the counter with other counter.
-     * @param other counter to merge with
-     * @return new merged counter
-     */
-    Counter<R> merge(Counter<R> other);
-
 }

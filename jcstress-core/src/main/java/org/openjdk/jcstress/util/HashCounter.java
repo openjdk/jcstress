@@ -84,18 +84,6 @@ public class HashCounter<T> implements Counter<T> {
         return ms.keySet();
     }
 
-    @Override
-    public Counter<T> merge(Counter<T> other) {
-        HashCounter<T> r = new HashCounter<T>();
-        for (T t : other.elementSet()) {
-            r.record(t, other.count(t));
-        }
-        for (T t : this.elementSet()) {
-            r.record(t, this.count(t));
-        }
-        return r;
-    }
-
     private static class Holder {
         public long value;
     }
