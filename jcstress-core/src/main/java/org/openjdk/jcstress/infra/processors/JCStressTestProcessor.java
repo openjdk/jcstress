@@ -365,8 +365,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("            if (newLen > len) {");
         pw.println("                newPairs = Arrays.copyOf(pairs, newLen);");
         pw.println("                for (int c = len; c < newLen; c++) {");
-        pw.println("                    newPairs[c] = new Pair();");
-        pw.println("                    newPairs[c].r = new " + r + "();");
+        pw.println("                    Pair p = new Pair();");
+        pw.println("                    p.r = new " + r + "();");
+        pw.println("                    newPairs[c] = p;");
         pw.println("                }");
         pw.println("            }");
         pw.println();
