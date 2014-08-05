@@ -39,7 +39,6 @@ import org.openjdk.jcstress.infra.runners.StateHolder;
 import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.ArrayUtils;
 import org.openjdk.jcstress.util.Counter;
-import org.openjdk.jcstress.util.Counters;
 import org.openjdk.jcstress.util.HashCounter;
 import org.openjdk.jcstress.util.VMSupport;
 
@@ -274,7 +273,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        " + t + " test = new " + t + "();");
         pw.println("        control.isStopped = false;");
         pw.println();
-        pw.println("        Counter<" + r + "> counter = Counters.newCounter(" + r + ".class);");
+        pw.println("        Counter<" + r + "> counter = new HashCounter<" + r + ">();");
         pw.println();
         pw.println("        final AtomicReference<StateHolder<Pair>> version = new AtomicReference<StateHolder<Pair>>();");
         pw.println("        version.set(new StateHolder<Pair>(false, new Pair[0], " + actorsCount + "));");
@@ -651,7 +650,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 AtomicInteger.class, AtomicReference.class,
                 Options.class, TestResultCollector.class,
                 Control.class, Runner.class, StateHolder.class,
-                ArrayUtils.class, Counter.class, Counters.class,
+                ArrayUtils.class, Counter.class,
                 VMSupport.class, HashCounter.class, ExecutionException.class
         };
 
