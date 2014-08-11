@@ -45,7 +45,7 @@ public @interface Outcome {
     /**
      * @return observed outcome; empty string or no parameter if the case is default
      */
-    String id() default "";
+    String[] id() default { "" };
 
     /**
      * @return expect type for the observed outcome

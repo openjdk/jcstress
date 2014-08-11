@@ -125,11 +125,21 @@ public class JCStressTestProcessor extends AbstractProcessor {
                             + "===,===" + test.getActors().size()
                             + "===,===" + test.isRequiresFork());
 
-                    writer.print("===,===" + test.cases().size());
+                    int size = 0;
                     for (Outcome c : test.cases()) {
-                        writer.print("===,===" + c.id());
-                        writer.print("===,===" + c.expect());
-                        writer.print("===,===" + c.desc());
+                        for (String id : c.id()) {
+                            size++;
+                        }
+                    }
+
+                    writer.print("===,===" + size);
+
+                    for (Outcome c : test.cases()) {
+                        for (String id : c.id()) {
+                            writer.print("===,===" + id);
+                            writer.print("===,===" + c.expect());
+                            writer.print("===,===" + c.desc());
+                        }
                     }
 
                     writer.print("===,===" + test.refs().size());

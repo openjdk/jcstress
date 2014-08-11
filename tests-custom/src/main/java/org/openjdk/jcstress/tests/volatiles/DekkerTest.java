@@ -37,10 +37,8 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 
 @JCStressTest
 @Description("Tests Dekker-lock-style idioms")
-@Outcome(id = "[0, 0]", expect = FORBIDDEN,  desc = "Violates sequential consistency")
-@Outcome(id = "[0, 1]", expect = ACCEPTABLE, desc = "Trivial under sequential consistency")
-@Outcome(id = "[1, 0]", expect = ACCEPTABLE, desc = "Trivial under sequential consistency")
-@Outcome(id = "[1, 1]", expect = ACCEPTABLE, desc = "Trivial under sequential consistency")
+@Outcome(id = {"[0, 1]", "[1, 0]", "[1, 1]"}, expect = ACCEPTABLE, desc = "Trivial under sequential consistency")
+@Outcome(id = "[0, 0]",                       expect = FORBIDDEN,  desc = "Violates sequential consistency")
 @Ref("[TBD Link]")
 @State
 public class DekkerTest {
