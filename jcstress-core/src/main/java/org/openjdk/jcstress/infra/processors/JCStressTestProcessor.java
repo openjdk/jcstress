@@ -244,7 +244,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        final " + s + " s = new " + s + "();");
         pw.println("        final " + r + " r = new " + r + "();");
 
-        pw.println("        Collection<Future<?>> res = new ArrayList<Future<?>>();");
+        pw.println("        Collection<Future<?>> res = new ArrayList<>();");
         for (ExecutableElement el : info.getActors()) {
             pw.println("        res.add(pool.submit(new Runnable() {");
             pw.println("            public void run() {");
@@ -273,15 +273,15 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        " + t + " test = new " + t + "();");
         pw.println("        control.isStopped = false;");
         pw.println();
-        pw.println("        Counter<" + r + "> counter = new OpenAddressHashCounter<" + r + ">();");
+        pw.println("        Counter<" + r + "> counter = new OpenAddressHashCounter<>();");
         pw.println();
-        pw.println("        final AtomicReference<StateHolder<Pair>> version = new AtomicReference<StateHolder<Pair>>();");
-        pw.println("        version.set(new StateHolder<Pair>(false, new Pair[0], " + actorsCount + "));");
+        pw.println("        final AtomicReference<StateHolder<Pair>> version = new AtomicReference<>();");
+        pw.println("        version.set(new StateHolder<>(false, new Pair[0], " + actorsCount + "));");
         pw.println();
         pw.println("        final AtomicInteger epoch = new AtomicInteger();");
         pw.println();
         pw.println("        control.isStopped = false;");
-        pw.println("        Collection<Future<?>> tasks = new ArrayList<Future<?>>();");
+        pw.println("        Collection<Future<?>> tasks = new ArrayList<>();");
 
         for (ExecutableElement a : info.getActors()) {
             pw.println("        tasks.add(pool.submit(new Runner_" + a.getSimpleName() + "(control, counter, test, version, epoch)));");
@@ -383,7 +383,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("                p.s = new " + s + "();");
         pw.println("            }");
         pw.println();
-        pw.println("            version.set(new StateHolder<Pair>(control.isStopped, newPairs, " + actorsCount + "));");
+        pw.println("            version.set(new StateHolder<>(control.isStopped, newPairs, " + actorsCount + "));");
         pw.println("        }");
         pw.println("    }");
 
@@ -490,7 +490,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    public void run() {");
         pw.println("        testLog.println(\"Running \" + testName);");
         pw.println();
-        pw.println("        Counter<Outcome> results = new OpenAddressHashCounter<Outcome>();");
+        pw.println("        Counter<Outcome> results = new OpenAddressHashCounter<>();");
         pw.println();
         pw.println("        testLog.print(\"Iterations \");");
         pw.println("        for (int c = 0; c < control.iters; c++) {");
