@@ -26,13 +26,14 @@ package org.openjdk.jcstress.infra.grading;
 
 
 import org.openjdk.jcstress.Options;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.infra.State;
+import org.openjdk.jcstress.infra.StateCase;
 import org.openjdk.jcstress.infra.Status;
+import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.InProcessCollector;
 import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.schema.descr.Case;
-import org.openjdk.jcstress.schema.descr.ExpectType;
-import org.openjdk.jcstress.schema.descr.Test;
+import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.Environment;
 import org.openjdk.jcstress.util.HashMultimap;
 import org.openjdk.jcstress.util.LongHashMultiset;
@@ -46,8 +47,6 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -58,7 +57,7 @@ import java.util.TreeMap;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class HTMLReportPrinter extends DescriptionReader {
+public class HTMLReportPrinter {
 
     private final String resultDir;
     private final InProcessCollector collector;
@@ -163,7 +162,7 @@ public class HTMLReportPrinter extends DescriptionReader {
             for (String k : packages.keys()) {
                 Collection<String> testNames = packages.get(k);
                 for (String testName : testNames) {
-                    Test test = testDescriptions.get(testName);
+                    TestInfo test = TestList.getInfo(testName);
                     TestResult result = results.get(testName);
                     if (result.status() == Status.NORMAL) {
                         if (new TestGrading(result, test).isPassed) {
@@ -283,7 +282,7 @@ public class HTMLReportPrinter extends DescriptionReader {
 
             boolean packageEmitted = false;
             for (String testName : testNames) {
-                Test test = testDescriptions.get(testName);
+                TestInfo test = TestList.getInfo(testName);
                 TestResult result = results.get(testName);
                 TestGrading grading = new TestGrading(result, test);
                 if (result.status() == Status.NORMAL && !grading.isPassed) {
@@ -318,7 +317,7 @@ public class HTMLReportPrinter extends DescriptionReader {
 
             boolean packageEmitted = false;
             for (String testName : testNames) {
-                Test test = testDescriptions.get(testName);
+                TestInfo test = TestList.getInfo(testName);
                 TestResult result = results.get(testName);
                 if (result.status() != Status.NORMAL && result.status() != Status.API_MISMATCH) {
                     if (!packageEmitted) {
@@ -351,7 +350,7 @@ public class HTMLReportPrinter extends DescriptionReader {
 
             boolean packageEmitted = false;
             for (String testName : testNames) {
-                Test test = testDescriptions.get(testName);
+                TestInfo test = TestList.getInfo(testName);
                 TestResult result = results.get(testName);
                 TestGrading grading = new TestGrading(result, test);
                 if (grading.hasInteresting) {
@@ -384,7 +383,7 @@ public class HTMLReportPrinter extends DescriptionReader {
 
             boolean packageEmitted = false;
             for (String testName : testNames) {
-                Test test = testDescriptions.get(testName);
+                TestInfo test = TestList.getInfo(testName);
                 TestResult result = results.get(testName);
                 TestGrading grading = new TestGrading(result, test);
                 if (grading.hasSpec) {
@@ -421,7 +420,7 @@ public class HTMLReportPrinter extends DescriptionReader {
 
             Collection<String> testNames = packages.get(k);
             for (String testName : testNames) {
-                Test test = testDescriptions.get(testName);
+                TestInfo test = TestList.getInfo(testName);
                 TestResult result = results.get(testName);
                 if (result.status() == Status.NORMAL) {
                     emitTest(output, result, test);
@@ -453,7 +452,7 @@ public class HTMLReportPrinter extends DescriptionReader {
         return fqname.substring(fqname.lastIndexOf(".") + 1);
     }
 
-    public void emitTest(PrintWriter output, TestResult result, Test description) throws FileNotFoundException, JAXBException {
+    public void emitTest(PrintWriter output, TestResult result, TestInfo description) throws FileNotFoundException, JAXBException {
         cellStyle = 3 - cellStyle;
         output.println("<tr class=\"cell" + cellStyle + "\">");
         output.println("<td>&nbsp;&nbsp;&nbsp;<a href=\"" + result.getName() + ".html\">" + cutKlass(result.getName()) + "</a></td>");
@@ -486,7 +485,7 @@ public class HTMLReportPrinter extends DescriptionReader {
         output.println("</tr>");
     }
 
-    public void emitTestFailure(PrintWriter output, TestResult result, Test description) throws FileNotFoundException, JAXBException {
+    public void emitTestFailure(PrintWriter output, TestResult result, TestInfo description) throws FileNotFoundException, JAXBException {
         cellStyle = 3 - cellStyle;
         output.println("<tr class=\"cell" + cellStyle + "\">");
         output.println("<td>&nbsp;&nbsp;&nbsp;<a href=\"" + result.getName() + ".html\">" + cutKlass(result.getName()) + "</a></td>");
@@ -538,7 +537,7 @@ public class HTMLReportPrinter extends DescriptionReader {
     }
 
 
-    public void parseTest(PrintWriter output, TestResult r, Test test) throws FileNotFoundException, JAXBException {
+    public void parseTest(PrintWriter output, TestResult r, TestInfo test) throws FileNotFoundException, JAXBException {
         if (test == null) {
             parseTestWithoutDescription(output, r);
             return;
@@ -546,8 +545,13 @@ public class HTMLReportPrinter extends DescriptionReader {
 
         output.println("<h1>" + r.getName() + "</h1>");
 
-        output.println("<p>" + test.getDescription() + "</p>");
-        output.println("<p><b>Contributed by:</b> " + test.getContributedBy() + "</p>");
+        output.println("<p>" + test.description() + "</p>");
+
+        int rIdx = 1;
+        for (String ref : test.refs()) {
+            output.println("<a href=\"" + ref + "\">[" + rIdx + "]</a>");
+            rIdx++;
+        }
 
         output.println("<table width=100%>");
         output.println("<tr>");
@@ -555,30 +559,22 @@ public class HTMLReportPrinter extends DescriptionReader {
         output.println("<th width=50>Occurrence</th>");
         output.println("<th width=50>Expectation</th>");
         output.println("<th>Interpretation</th>");
-        output.println("<th width=50>Refs</th>");
         output.println("</tr>");
 
         List<State> unmatchedStates = new ArrayList<>();
         unmatchedStates.addAll(r.getStates());
-        for (Case c : test.getCase()) {
+        for (StateCase c : test.cases()) {
 
             boolean matched = false;
 
             for (State s : r.getStates()) {
-                if (c.getMatch().contains(s.getId())) {
+                if (c.state().equals(s.getId())) {
                     // match!
-                    output.println("<tr bgColor=" + selectHTMLColor(c.getExpect(), s.getCount() == 0) + ">");
+                    output.println("<tr bgColor=" + selectHTMLColor(c.expect(), s.getCount() == 0) + ">");
                     output.println("<td>" + s.getId() + "</td>");
                     output.println("<td align=center>" + s.getCount() + "</td>");
-                    output.println("<td align=center>" + c.getExpect() + "</td>");
-                    output.println("<td>" + c.getDescription() + "</td>");
-                    output.println("<td bgColor='white'>");
-                    List<String> list = (c.getRefs() != null) ? c.getRefs().getUrl() : Collections.<String>emptyList();
-                    for (int i = 0; i < list.size(); i++) {
-                        output.println("<a href=\"" + list.get(i) + "\">[" + (i+1) + "]</a>");
-                    }
-                    output.println("</td>");
-
+                    output.println("<td align=center>" + c.expect() + "</td>");
+                    output.println("<td>" + c.description() + "</td>");
                     output.println("</tr>");
                     matched = true;
                     unmatchedStates.remove(s);
@@ -586,35 +582,21 @@ public class HTMLReportPrinter extends DescriptionReader {
             }
 
             if (!matched) {
-                for (String m : c.getMatch()) {
-                    output.println("<tr bgColor=" + selectHTMLColor(c.getExpect(), true) + ">");
-                    output.println("<td>" + m + "</td>");
-                    output.println("<td align=center>" + 0 + "</td>");
-                    output.println("<td align=center>" + c.getExpect() + "</td>");
-                    output.println("<td>" + c.getDescription() + "</td>");
-                    output.println("<td bgColor='white'>");
-                    List<String> list = (c.getRefs() != null) ? c.getRefs().getUrl() : Collections.<String>emptyList();
-                    for (int i = 0; i < list.size(); i++) {
-                        output.println("<a href=\"" + list.get(i) + "\">[" + (i+1) + "]</a>");
-                    }
-                    output.println("</td>");
-                    output.println("</tr>");
-                }
+                output.println("<tr bgColor=" + selectHTMLColor(c.expect(), true) + ">");
+                output.println("<td>" + c.state() + "</td>");
+                output.println("<td align=center>" + 0 + "</td>");
+                output.println("<td align=center>" + c.expect() + "</td>");
+                output.println("<td>" + c.description() + "</td>");
+                output.println("</tr>");
             }
         }
 
         for (State s : unmatchedStates) {
-            output.println("<tr bgColor=" + selectHTMLColor(test.getUnmatched().getExpect(), s.getCount() == 0) + ">");
+            output.println("<tr bgColor=" + selectHTMLColor(test.unmatched().expect(), s.getCount() == 0) + ">");
             output.println("<td>" + s.getId() + "</td>");
             output.println("<td align=center>" + s.getCount() + "</td>");
-            output.println("<td align=center>" + test.getUnmatched().getExpect() + "</td>");
-            output.println("<td>" + test.getUnmatched().getDescription() + "</td>");
-            output.println("<td bgColor='white'>");
-            List<String> list = (test.getUnmatched().getRefs() != null) ? test.getUnmatched().getRefs().getUrl() : Collections.<String>emptyList();
-            for (int i = 0; i < list.size(); i++) {
-                output.println("<a href=\"" + list.get(i) + "\">[" + (i+1) + "]</a>");
-            }
-            output.println("</td>");
+            output.println("<td align=center>" + test.unmatched().expect() + "</td>");
+            output.println("<td>" + test.unmatched().expect() + "</td>");
             output.println("</tr>");
         }
 
@@ -646,22 +628,22 @@ public class HTMLReportPrinter extends DescriptionReader {
         output.println("</tr>");
 
         for (State s : r.getStates()) {
-            output.println("<tr bgColor=" + selectHTMLColor(ExpectType.UNKNOWN, s.getCount() == 0) + ">");
+            output.println("<tr bgColor=" + selectHTMLColor(Expect.UNKNOWN, s.getCount() == 0) + ">");
             output.println("<td>" + s.getId() + "</td>");
             output.println("<td align=center>" + s.getCount() + "</td>");
-            output.println("<td align=center>" + ExpectType.UNKNOWN + "</td>");
+            output.println("<td align=center>" + Expect.UNKNOWN + "</td>");
             output.println("<td>" + "Unknows state" + "</td>");
             output.println("</tr>");
         }
         output.println("</table>");
     }
 
-    public String selectHTMLColor(ExpectType type, boolean isZero) {
+    public String selectHTMLColor(Expect type, boolean isZero) {
         String rgb = Integer.toHexString(selectColor(type, isZero).getRGB());
         return "#" + rgb.substring(2, rgb.length());
     }
 
-    public Color selectColor(ExpectType type, boolean isZero) {
+    public Color selectColor(Expect type, boolean isZero) {
         switch (type) {
             case ACCEPTABLE:
                 return isZero ? Color.LIGHT_GRAY : Color.GREEN;

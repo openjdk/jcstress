@@ -25,11 +25,23 @@
 package org.openjdk.jcstress.tests.volatiles;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Description;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
+import org.openjdk.jcstress.annotations.Ref;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 
+import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
+import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
+
 @JCStressTest
+@Description("Tests Dekker-lock-style idioms")
+@Outcome(id = "[0, 0]", expect = FORBIDDEN,  desc = "Violates sequential consistency")
+@Outcome(id = "[0, 1]", expect = ACCEPTABLE, desc = "Trivial under sequential consistency")
+@Outcome(id = "[1, 0]", expect = ACCEPTABLE, desc = "Trivial under sequential consistency")
+@Outcome(id = "[1, 1]", expect = ACCEPTABLE, desc = "Trivial under sequential consistency")
+@Ref("[TBD Link]")
 @State
 public class DekkerTest {
 

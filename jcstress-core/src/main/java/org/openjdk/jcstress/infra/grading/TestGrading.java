@@ -24,11 +24,11 @@
  */
 package org.openjdk.jcstress.infra.grading;
 
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.infra.State;
+import org.openjdk.jcstress.infra.StateCase;
+import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.schema.descr.Case;
-import org.openjdk.jcstress.schema.descr.ExpectType;
-import org.openjdk.jcstress.schema.descr.Test;
 import org.openjdk.jcstress.util.NonNullArrayList;
 
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ public class TestGrading {
     public boolean hasSpec;
     public final List<String> failureMessages;
 
-    public TestGrading(TestResult r, Test test) {
+    public TestGrading(TestResult r, TestInfo test) {
         failureMessages = new NonNullArrayList<>();
 
         if (test == null) {
@@ -60,37 +60,37 @@ public class TestGrading {
 
         List<State> unmatchedStates = new ArrayList<>();
         unmatchedStates.addAll(r.getStates());
-        for (Case c : test.getCase()) {
+        for (StateCase c : test.cases()) {
             boolean matched = false;
 
             for (State s : r.getStates()) {
-                if (c.getMatch().contains(s.getId())) {
-                    isPassed &= passed(c.getExpect(), s.getCount());
-                    hasInteresting |= hasInteresting(c.getExpect(), s.getCount());
-                    hasSpec |= hasSpec(c.getExpect(), s.getCount());
-                    failureMessages.add(failureMessage(s.getId(), c.getExpect(), s.getCount()));
+                if (c.state().equals(s.getId())) {
+                    isPassed &= passed(c.expect(), s.getCount());
+                    hasInteresting |= hasInteresting(c.expect(), s.getCount());
+                    hasSpec |= hasSpec(c.expect(), s.getCount());
+                    failureMessages.add(failureMessage(s.getId(), c.expect(), s.getCount()));
                     matched = true;
                     unmatchedStates.remove(s);
                 }
             }
 
             if (!matched) {
-                isPassed &= passed(c.getExpect(), 0);
-                hasInteresting |= hasInteresting(c.getExpect(), 0);
-                hasSpec |= hasSpec(c.getExpect(), 0);
-                failureMessages.add(failureMessage("N/A", c.getExpect(), 0));
+                isPassed &= passed(c.expect(), 0);
+                hasInteresting |= hasInteresting(c.expect(), 0);
+                hasSpec |= hasSpec(c.expect(), 0);
+                failureMessages.add(failureMessage("N/A", c.expect(), 0));
             }
         }
 
         for (State s : unmatchedStates) {
-            isPassed &= passed(test.getUnmatched().getExpect(), s.getCount());
-            hasInteresting |= hasInteresting(test.getUnmatched().getExpect(), s.getCount());
-            hasSpec |= hasSpec(test.getUnmatched().getExpect(), s.getCount());
-            failureMessages.add(failureMessage(s.getId(), test.getUnmatched().getExpect(), s.getCount()));
+            isPassed &= passed(test.unmatched().expect(), s.getCount());
+            hasInteresting |= hasInteresting(test.unmatched().expect(), s.getCount());
+            hasSpec |= hasSpec(test.unmatched().expect(), s.getCount());
+            failureMessages.add(failureMessage(s.getId(), test.unmatched().expect(), s.getCount()));
         }
     }
 
-    public static String failureMessage(String id, ExpectType expect, long count) {
+    public static String failureMessage(String id, Expect expect, long count) {
         if (passed(expect, count)) {
             return null;
         } else {
@@ -109,7 +109,7 @@ public class TestGrading {
         }
     }
 
-    public static boolean passed(ExpectType expect, long count) {
+    public static boolean passed(Expect expect, long count) {
         switch (expect) {
             case ACCEPTABLE:
             case ACCEPTABLE_INTERESTING:
@@ -124,7 +124,7 @@ public class TestGrading {
         }
     }
 
-    private static boolean hasInteresting(ExpectType expect, long count) {
+    private static boolean hasInteresting(Expect expect, long count) {
         switch (expect) {
             case ACCEPTABLE:
             case ACCEPTABLE_SPEC:
@@ -139,7 +139,7 @@ public class TestGrading {
         }
     }
 
-    private static boolean hasSpec(ExpectType expect, long count) {
+    private static boolean hasSpec(Expect expect, long count) {
         switch (expect) {
             case ACCEPTABLE:
             case ACCEPTABLE_INTERESTING:

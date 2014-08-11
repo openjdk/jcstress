@@ -24,24 +24,27 @@
  */
 package org.openjdk.jcstress.infra.runners;
 
+import org.openjdk.jcstress.annotations.Expect;
+import org.openjdk.jcstress.infra.StateCase;
+import org.openjdk.jcstress.infra.TestInfo;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class TestList {
 
     public static final String LIST = "/META-INF/TestList";
 
-    private static volatile Map<String, Info> tests;
+    private static volatile Map<String, TestInfo> tests;
 
-    private static Map<String, Info> getTests() {
+    private static Map<String, TestInfo> getTests() {
         if (tests == null) {
-            Map<String, Info> m = new HashMap<>();
+            Map<String, TestInfo> m = new HashMap<String, TestInfo>();
             InputStream stream = null;
             try {
                 stream = TestList.class.getResourceAsStream(LIST);
@@ -49,9 +52,29 @@ public class TestList {
 
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    String[] ls = line.split(",");
-                    if (ls.length == 4) {
-                        m.put(ls[0], new Info(ls[1], Integer.valueOf(ls[2]), Boolean.valueOf(ls[3])));
+                    String[] ls = line.split("===,===");
+                    if (ls.length >= 6) {
+                        String name = ls[0];
+                        String runner = ls[1];
+                        String description = ls[2];
+                        int actorCount = Integer.valueOf(ls[3]);
+                        boolean requiresFork = Boolean.valueOf(ls[4]);
+                        int caseCount = Integer.valueOf(ls[5]);
+
+                        TestInfo testInfo = new TestInfo(name, runner, description, actorCount, requiresFork);
+                        m.put(name, testInfo);
+                        for (int c = 0; c < caseCount; c++) {
+                            String state  = ls[6 + 3*c + 0];
+                            String expect = ls[6 + 3*c + 1];
+                            String desc  = ls[6 + 3*c + 2];
+                            testInfo.addCase(new StateCase(state, Expect.valueOf(expect), desc));
+                        }
+
+                        int s = 6 + caseCount * 3;
+                        int refCount = Integer.valueOf(ls[s]);
+                        for (int c = 0; c < refCount; c++) {
+                            testInfo.addRef(ls[s + c]);
+                        }
                     }
                 }
             } catch (IOException e) {
@@ -74,28 +97,7 @@ public class TestList {
         return getTests().keySet();
     }
 
-    public static String getRunner(String test) {
-        return tests.get(test).runner;
+    public static TestInfo getInfo(String name) {
+        return tests.get(name);
     }
-
-    public static int getThreads(String test) {
-        return tests.get(test).threads;
-    }
-
-    public static boolean requiresFork(String test) {
-        return tests.get(test).requiresFork;
-    }
-
-    public static class Info {
-        public final String runner;
-        public final int threads;
-        public final boolean requiresFork;
-
-        public Info(String runner, int threads, boolean requiresFork) {
-            this.runner = runner;
-            this.threads = threads;
-            this.requiresFork = requiresFork;
-        }
-    }
-
 }

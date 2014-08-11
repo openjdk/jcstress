@@ -79,25 +79,6 @@ questions.
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <id>schema-descr</id>
-                        <goals>
-                            <goal>xjc</goal>
-                        </goals>
-                        <configuration>
-                            <packageName>org.openjdk.jcstress.schema.descr</packageName>
-                            <outputDirectory>${project.build.directory}/generated-sources/descriptions/</outputDirectory>
-                            <schemaDirectory>src/main/resources/xsd/descriptions/</schemaDirectory>
-                            <staleFile>${project.build.directory}/jaxb2/.xjcStaleFlag1</staleFile>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>com.mycila.maven-license-plugin</groupId>
                 <artifactId>maven-license-plugin</artifactId>
                 <version>1.10.b1</version>

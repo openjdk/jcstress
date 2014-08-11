@@ -28,9 +28,10 @@ package org.openjdk.jcstress.infra.grading;
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.infra.State;
 import org.openjdk.jcstress.infra.Status;
+import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.InProcessCollector;
 import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.schema.descr.Test;
+import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.HashMultimap;
 import org.openjdk.jcstress.util.LongHashMultiset;
 import org.openjdk.jcstress.util.Multimap;
@@ -51,13 +52,12 @@ import java.util.TreeMap;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class ExceptionReportPrinter extends DescriptionReader {
+public class ExceptionReportPrinter {
 
     private final List<String> failures;
     private final InProcessCollector collector;
 
     public ExceptionReportPrinter(Options opts, InProcessCollector collector) throws JAXBException, FileNotFoundException {
-        super();
         this.collector = collector;
         failures = new ArrayList<>();
     }
@@ -104,7 +104,7 @@ public class ExceptionReportPrinter extends DescriptionReader {
         for (String k : packages.keys()) {
             Collection<String> testNames = packages.get(k);
             for (String testName : testNames) {
-                Test test = testDescriptions.get(testName);
+                TestInfo test = TestList.getInfo(testName);
                 TestResult result = results.get(testName);
                 emitTest(result, test);
             }
@@ -120,7 +120,7 @@ public class ExceptionReportPrinter extends DescriptionReader {
         }
     }
 
-    public void emitTest(TestResult result, Test description) throws FileNotFoundException, JAXBException {
+    public void emitTest(TestResult result, TestInfo description) throws FileNotFoundException, JAXBException {
         switch (result.status()) {
             case CHECK_TEST_ERROR:
                 failures.add(result.getName() + " had failed with the pre-test error.");

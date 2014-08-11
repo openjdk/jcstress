@@ -25,6 +25,7 @@
 package org.openjdk.jcstress.infra.processors;
 
 import org.openjdk.jcstress.annotations.Arbiter;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.Result;
 import org.openjdk.jcstress.annotations.Signal;
 import org.openjdk.jcstress.annotations.State;
@@ -32,6 +33,7 @@ import org.openjdk.jcstress.annotations.State;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class TestInfo {
@@ -42,11 +44,16 @@ public class TestInfo {
     private ExecutableElement arbiter;
     private TypeElement test;
     private ExecutableElement signal;
-
     private String generatedName;
     private boolean requiresFork;
+    private Collection<Outcome> outcomes;
+    private Collection<String> refs;
+    private String description;
 
     public TestInfo() {
+        actors = new ArrayList<ExecutableElement>();
+        outcomes = new ArrayList<Outcome>();
+        refs = new ArrayList<String>();
         actors = new ArrayList<>();
     }
 
@@ -132,5 +139,29 @@ public class TestInfo {
 
     public boolean isRequiresFork() {
         return requiresFork;
+    }
+
+    public void addCase(Outcome c) {
+        outcomes.add(c);
+    }
+
+    public Collection<Outcome> cases() {
+        return outcomes;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void addRef(String value) {
+        refs.add(value);
+    }
+
+    public Collection<String> refs() {
+        return refs;
     }
 }

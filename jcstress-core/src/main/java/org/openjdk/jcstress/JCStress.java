@@ -26,6 +26,7 @@ package org.openjdk.jcstress;
 
 import org.openjdk.jcstress.infra.Scheduler;
 import org.openjdk.jcstress.infra.Status;
+import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.DiskReadCollector;
 import org.openjdk.jcstress.infra.collectors.DiskWriteCollector;
 import org.openjdk.jcstress.infra.collectors.InProcessCollector;
@@ -141,7 +142,7 @@ public class JCStress {
             scheduler.schedule(new Scheduler.ScheduledTask() {
                 @Override
                 public int getTokens() {
-                    return TestList.getThreads(test);
+                    return TestList.getInfo(test).threads();
                 }
 
                 @Override
@@ -210,13 +211,14 @@ public class JCStress {
 
     private void run(Options opts, Collection<String> tests, boolean alreadyForked, TestResultCollector collector) throws Exception {
         for (String test : tests) {
-            if (TestList.requiresFork(test) && !alreadyForked && !opts.shouldNeverFork()) {
+            TestInfo info = TestList.getInfo(test);
+            if (info.requiresFork() && !alreadyForked && !opts.shouldNeverFork()) {
                 runForked(opts, test, collector);
             } else {
-                Class<?> aClass = Class.forName(TestList.getRunner(test));
+                Class<?> aClass = Class.forName(info.generatedRunner());
                 Constructor<?> cnstr = aClass.getConstructor(Options.class, TestResultCollector.class, ExecutorService.class);
                 Runner<?> o = (Runner<?>) cnstr.newInstance(opts, collector, pool);
-                async(o, TestList.getThreads(test));
+                async(o, info.threads());
             }
         }
     }

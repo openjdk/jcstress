@@ -25,12 +25,13 @@
 package org.openjdk.jcstress.infra.grading;
 
 import org.openjdk.jcstress.Options;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.infra.State;
+import org.openjdk.jcstress.infra.StateCase;
+import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
-import org.openjdk.jcstress.schema.descr.Case;
-import org.openjdk.jcstress.schema.descr.ExpectType;
-import org.openjdk.jcstress.schema.descr.Test;
+import org.openjdk.jcstress.infra.runners.TestList;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
@@ -49,7 +50,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class ConsoleReportPrinter extends DescriptionReader implements TestResultCollector {
+public class ConsoleReportPrinter implements TestResultCollector {
 
     private final boolean verbose;
     private final Options opts;
@@ -67,7 +68,6 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
     private long firstTest;
 
     public ConsoleReportPrinter(Options opts, PrintWriter pw, int expectedTests) throws JAXBException, FileNotFoundException {
-        super();
         this.opts = opts;
         this.output = pw;
         this.expectedTests = expectedTests;
@@ -133,7 +133,7 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
                 printLine(output, "SKIPPED", r);
                 return;
             case NORMAL:
-                Test test = testDescriptions.get(r.getName());
+                TestInfo test = TestList.getInfo(r.getName());
                 if (test == null) {
                     output.println();
                     printLine(output, "UNKNOWN", r);
@@ -156,14 +156,14 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
         if (isVerbose) {
             int len = 35;
 
-            Test test = testDescriptions.get(r.getName());
+            TestInfo test = TestList.getInfo(r.getName());
             if (test == null) {
                 output.printf("%" + len + "s %15s %18s %-20s\n", "Observed state", "Occurrences", "Expectation", "Interpretation");
                 for (State s : r.getStates()) {
                     output.printf("%" + len + "s (%,13d) %18s %-40s\n",
                             cutoff(s.getId(), len),
                             s.getCount(),
-                            ExpectType.UNKNOWN,
+                            Expect.UNKNOWN,
                             "N/A");
                 }
 
@@ -174,31 +174,28 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
 
             List<State> unmatchedStates = new ArrayList<>();
             unmatchedStates.addAll(r.getStates());
-            for (Case c : test.getCase()) {
-
+            for (StateCase c : test.cases()) {
                 boolean matched = false;
 
                 for (State s : r.getStates()) {
-                    if (c.getMatch().contains(s.getId())) {
+                    if (c.state().equals(s.getId())) {
                         // match!
                         output.printf("%" + len + "s (%,13d) %18s %-60s\n",
                                 cutoff(s.getId(), len),
                                 s.getCount(),
-                                c.getExpect(),
-                                cutoff(c.getDescription(), 60));
+                                c.expect(),
+                                cutoff(c.description(), 60));
                         matched = true;
                         unmatchedStates.remove(s);
                     }
                 }
 
                 if (!matched) {
-                    for (String m : c.getMatch()) {
-                        output.printf("%" + len + "s (%,13d) %18s %-60s\n",
-                                cutoff(m, len),
+                    output.printf("%" + len + "s (%,13d) %18s %-60s\n",
+                                cutoff(c.state(), len),
                                 0,
-                                c.getExpect(),
-                                cutoff(c.getDescription(), 60));
-                    }
+                                c.expect(),
+                                cutoff(c.description(), 60));
                 }
             }
 
@@ -206,8 +203,8 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
                 output.printf("%" + len + "s (%,13d) %18s %-60s\n",
                         cutoff(s.getId(), len),
                         s.getCount(),
-                        test.getUnmatched().getExpect(),
-                        cutoff(test.getUnmatched().getDescription(), 60));
+                        test.unmatched().expect(),
+                        cutoff(test.unmatched().description(), 60));
             }
 
             output.println();

@@ -27,8 +27,11 @@ package org.openjdk.jcstress.infra.processors;
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Arbiter;
+import org.openjdk.jcstress.annotations.Description;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Mode;
+import org.openjdk.jcstress.annotations.Outcome;
+import org.openjdk.jcstress.annotations.Ref;
 import org.openjdk.jcstress.annotations.Result;
 import org.openjdk.jcstress.annotations.Signal;
 import org.openjdk.jcstress.annotations.State;
@@ -115,7 +118,26 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 FileObject file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", TestList.LIST.substring(1));
                 PrintWriter writer = new PrintWriter(file.openWriter());
                 for (TestInfo test : tests) {
-                    writer.println(test.getTest().getQualifiedName() + "," + test.getGeneratedName() + "," + test.getActors().size() + "," + test.isRequiresFork());
+                    writer.print(
+                            test.getTest().getQualifiedName()
+                            + "===,===" + test.getGeneratedName()
+                            + "===,===" + test.getDescription()
+                            + "===,===" + test.getActors().size()
+                            + "===,===" + test.isRequiresFork());
+
+                    writer.print("===,===" + test.cases().size());
+                    for (Outcome c : test.cases()) {
+                        writer.print("===,===" + c.id());
+                        writer.print("===,===" + c.expect());
+                        writer.print("===,===" + c.desc());
+                    }
+
+                    writer.print("===,===" + test.refs().size());
+                    for (String ref : test.refs()) {
+                        writer.print("===,===" + ref);
+                    }
+
+                    writer.println();
                 }
                 writer.close();
             } catch (IOException ex) {
@@ -129,6 +151,25 @@ public class JCStressTestProcessor extends AbstractProcessor {
         TestInfo info = new TestInfo();
 
         info.setTest(e);
+
+        Outcome.Outcomes outcomes = e.getAnnotation(Outcome.Outcomes.class);
+        if (outcomes != null) {
+            for (Outcome c : outcomes.value()) {
+                info.addCase(c);
+            }
+        }
+
+        Ref.Refs refs = e.getAnnotation(Ref.Refs.class);
+        if (refs != null) {
+            for (Ref r : refs.value()) {
+                info.addRef(r.value());
+            }
+        }
+
+        Description d = e.getAnnotation(Description.class);
+        if (d != null) {
+            info.setDescription(d.value());
+        }
 
         for (ExecutableElement method : ElementFilter.methodsIn(e.getEnclosedElements())) {
             if (method.getAnnotation(Actor.class) != null) {
