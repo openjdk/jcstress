@@ -238,11 +238,21 @@ public class JCStressTestProcessor extends AbstractProcessor {
             }
         }
 
+        Outcome outcome = e.getAnnotation(Outcome.class);
+        if (outcome != null) {
+            info.addCase(outcome);
+        }
+
         Ref.Refs refs = e.getAnnotation(Ref.Refs.class);
         if (refs != null) {
             for (Ref r : refs.value()) {
                 info.addRef(r.value());
             }
+        }
+
+        Ref ref = e.getAnnotation(Ref.class);
+        if (ref != null) {
+            info.addRef(ref.value());
         }
 
         Description d = e.getAnnotation(Description.class);
