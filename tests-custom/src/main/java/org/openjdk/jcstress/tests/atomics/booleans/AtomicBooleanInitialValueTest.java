@@ -25,13 +25,20 @@
 package org.openjdk.jcstress.tests.atomics.booleans;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult1;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @JCStressTest
+@Description("Tests the visibility of AtomicBoolean initial value.")
+@Outcome(id = "[-1]", expect = Expect.ACCEPTABLE, desc = "Seeing null AtomicX, this is a legal race.")
+@Outcome(id = "[1]",  expect = Expect.ACCEPTABLE, desc = "Acceptable to see the initial value.")
+@Outcome(id = "[0]",  expect = Expect.ACCEPTABLE, desc = "Acceptable to see a default value!")
 @State
 public class AtomicBooleanInitialValueTest {
 
