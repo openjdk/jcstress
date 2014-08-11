@@ -60,7 +60,7 @@ public class HashMultiset<T> implements Multiset<T>, Serializable {
     private int size;
 
     public HashMultiset() {
-        map = new HashMap<T, Integer>();
+        map = new HashMap<>();
     }
 
     @Override

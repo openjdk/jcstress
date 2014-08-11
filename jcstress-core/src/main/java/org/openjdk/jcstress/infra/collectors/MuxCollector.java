@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class MuxCollector implements TestResultCollector {
 
-    private final List<TestResultCollector> collectors = new ArrayList<TestResultCollector>();
+    private final List<TestResultCollector> collectors = new ArrayList<>();
 
     public MuxCollector(TestResultCollector[] args) {
         collectors.addAll(Arrays.asList(args));

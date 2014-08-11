@@ -52,7 +52,7 @@ public class Reflections {
         try {
             ensureResourceInited();
 
-            List<String> res = new ArrayList<String>();
+            List<String> res = new ArrayList<>();
             for (String name : RESOURCES) {
                 if (!name.contains(filter)) continue;
                 if (!name.endsWith(postfix)) continue;
@@ -67,14 +67,9 @@ public class Reflections {
 
     private static void ensureResourceInited() throws IOException {
         if (!RESOURCE_INITED) {
-            final SortedSet<String> newResources = new TreeSet<String>();
+            final SortedSet<String> newResources = new TreeSet<>();
             try {
-                enumerate(new ResultCallback() {
-                    @Override
-                    public void accept(String name) {
-                        newResources.add(name);
-                    }
-                });
+                enumerate(newResources::add);
             } catch (Throwable t) {
                 throw new IOException(t);
             }
@@ -84,7 +79,7 @@ public class Reflections {
     }
 
     public static Collection<Class> getClasses(final String filter) throws IOException {
-        final List<Class> newClasses = new ArrayList<Class>();
+        final List<Class> newClasses = new ArrayList<>();
         for (String name : getClassNames(filter)) {
             try {
                 if (name.contains("VMSupport")) continue;
@@ -99,7 +94,7 @@ public class Reflections {
     public static Collection<String> getClassNames(final String filter) throws IOException {
         ensureResourceInited();
 
-        final List<String> newClasses = new ArrayList<String>();
+        final List<String> newClasses = new ArrayList<>();
         for (String name : RESOURCES) {
             name = name.replaceAll("\\\\", ".");
             name = name.replaceAll("/", ".");
@@ -128,12 +123,12 @@ public class Reflections {
 
     private static void enumeratePath(String dir, final ResultCallback callback) throws IOException {
 
-        List<File> dirs = new ArrayList<File>();
+        List<File> dirs = new ArrayList<>();
         dirs.add(new File(dir));
 
         while (!dirs.isEmpty()) {
 
-            List<File> siblings = new ArrayList<File>();
+            List<File> siblings = new ArrayList<>();
             for (File d : dirs) {
                 for (File f : d.listFiles()) {
                     if (f.isDirectory()) {

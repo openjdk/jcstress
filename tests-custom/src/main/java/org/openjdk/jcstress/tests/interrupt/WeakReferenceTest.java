@@ -44,8 +44,8 @@ public class WeakReferenceTest {
 
     public WeakReferenceTest() {
         referent = new Object();
-        refQueue = new ReferenceQueue<Object>();
-        ref = new WeakReference<Object>(referent, refQueue);
+        refQueue = new ReferenceQueue<>();
+        ref = new WeakReference<>(referent, refQueue);
     }
 
 

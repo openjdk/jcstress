@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 public class ThreadPoolExecutorSizesTest {
 
     public final ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 4, 0L,
-            TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(4));
+            TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(4));
 
     @Actor
     public void actor1() {

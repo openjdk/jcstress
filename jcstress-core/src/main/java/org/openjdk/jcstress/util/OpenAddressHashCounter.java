@@ -163,16 +163,14 @@ public class OpenAddressHashCounter<R> implements Counter<R>, Serializable {
             T t = (T)ois.readObject();
 
             return t;
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             throw new IllegalStateException(e);
         }
     }
 
     @Override
     public Collection<R> elementSet() {
-        List<R> res = new ArrayList<R>();
+        List<R> res = new ArrayList<>();
         for (Object k : keys) {
             if (k != null) {
                 @SuppressWarnings("unchecked")

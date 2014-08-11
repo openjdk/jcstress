@@ -47,7 +47,7 @@ public class TestInfo {
     private boolean requiresFork;
 
     public TestInfo() {
-        actors = new ArrayList<ExecutableElement>();
+        actors = new ArrayList<>();
     }
 
     public void addActor(ExecutableElement element) {

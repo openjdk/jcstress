@@ -75,17 +75,7 @@ public abstract class Runner<R> {
 
         try {
             sanityCheck();
-        } catch (NoClassDefFoundError e) {
-            testLog.println("Test sanity check failed, skipping");
-            testLog.println();
-            dumpFailure(testName, Status.API_MISMATCH, e);
-            return;
-        } catch (NoSuchFieldError e) {
-            testLog.println("Test sanity check failed, skipping");
-            testLog.println();
-            dumpFailure(testName, Status.API_MISMATCH, e);
-            return;
-        } catch (NoSuchMethodError e) {
+        } catch (NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
             testLog.println("Test sanity check failed, skipping");
             testLog.println();
             dumpFailure(testName, Status.API_MISMATCH, e);

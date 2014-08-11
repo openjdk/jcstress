@@ -77,10 +77,10 @@ public class HTMLReportPrinter extends DescriptionReader {
 
     public void parse() throws FileNotFoundException, JAXBException {
 
-        Map<String, TestResult> results = new TreeMap<String, TestResult>();
+        Map<String, TestResult> results = new TreeMap<>();
 
         {
-            Multimap<String, TestResult> multiResults = new HashMultimap<String, TestResult>();
+            Multimap<String, TestResult> multiResults = new HashMultimap<>();
             for (TestResult r : collector.getTestResults()) {
                 multiResults.put(r.getName(), r);
             }
@@ -88,9 +88,9 @@ public class HTMLReportPrinter extends DescriptionReader {
             for (String name : multiResults.keys()) {
                 Collection<TestResult> mergeable = multiResults.get(name);
 
-                LongHashMultiset<State> stateCounts = new LongHashMultiset<State>();
+                LongHashMultiset<State> stateCounts = new LongHashMultiset<>();
 
-                List<String> auxData = new ArrayList<String>();
+                List<String> auxData = new ArrayList<>();
 
                 Status status = Status.NORMAL;
                 Environment env = null;
@@ -120,7 +120,7 @@ public class HTMLReportPrinter extends DescriptionReader {
         }
 
         // build prefixes
-        Multimap<String, String> packages = new TreeMultimap<String, String>();
+        Multimap<String, String> packages = new TreeMultimap<>();
         for (String k : results.keySet()) {
             String pack = k.substring(0, k.lastIndexOf("."));
             packages.put(pack, k);
@@ -212,7 +212,7 @@ public class HTMLReportPrinter extends DescriptionReader {
         output.println("<td width=100>");
 
         {
-            SortedMap<String, String> env = new TreeMap<String, String>();
+            SortedMap<String, String> env = new TreeMap<>();
             for (String k : packages.keys()) {
                 for (String testName : packages.get(k)) {
                     TestResult result = results.get(testName);
@@ -558,7 +558,7 @@ public class HTMLReportPrinter extends DescriptionReader {
         output.println("<th width=50>Refs</th>");
         output.println("</tr>");
 
-        List<State> unmatchedStates = new ArrayList<State>();
+        List<State> unmatchedStates = new ArrayList<>();
         unmatchedStates.addAll(r.getStates());
         for (Case c : test.getCase()) {
 

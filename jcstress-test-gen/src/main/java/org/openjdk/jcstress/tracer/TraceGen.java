@@ -55,14 +55,14 @@ public class TraceGen {
         }
         resourceWriter.println("<testsuite>");
 
-        List<Op> possibleOps = new ArrayList<Op>();
+        List<Op> possibleOps = new ArrayList<>();
         for (int v = 0; v < vars; v++) {
             for (Op.Type t : Op.Type.values()) {
                 possibleOps.add(new Op(t, v));
             }
         }
 
-        List<Trace> allTraces = new ArrayList<Trace>();
+        List<Trace> allTraces = new ArrayList<>();
         List<Trace> traces = Collections.singletonList(new Trace());
         for (int l = 0; l < possibleOps.size(); l++) {
             traces = product(traces, possibleOps);
@@ -70,7 +70,7 @@ public class TraceGen {
         }
         System.out.println(traces.size() + " basic traces");
 
-        List<Trace> newTraces = new ArrayList<Trace>();
+        List<Trace> newTraces = new ArrayList<>();
         for (Trace trace : allTraces) {
             if (!trace.hasLoads()) continue;
             if (!trace.hasStores()) continue;
@@ -98,7 +98,7 @@ public class TraceGen {
         traces = newTraces;
         System.out.println(traces.size() + " interesting traces");
 
-        List<MultiTrace> multiTraces = new ArrayList<MultiTrace>();
+        List<MultiTrace> multiTraces = new ArrayList<>();
         for (Trace trace : traces) {
             for (int l1 = 0; l1 < trace.getLength(); l1++) {
                 for (int l2 = l1; l2 < trace.getLength(); l2++) {
@@ -111,15 +111,15 @@ public class TraceGen {
         }
         System.out.println(multiTraces.size() + " basic multi-traces");
 
-        Set<String> processedMultitraces = new HashSet<String>();
+        Set<String> processedMultitraces = new HashSet<>();
 
         int testCount = 0;
         for (MultiTrace mt : multiTraces) {
             if (!processedMultitraces.add(mt.canonicalId())) continue;
 
             List<Trace> linearTraces = mt.linearize();
-            Set<Map<Integer, Integer>> scResults = new HashSet<Map<Integer, Integer>>();
-            Set<Map<Integer, Integer>> allResults = new HashSet<Map<Integer, Integer>>();
+            Set<Map<Integer, Integer>> scResults = new HashSet<>();
+            Set<Map<Integer, Integer>> allResults = new HashSet<>();
 
             for (Trace linear : linearTraces) {
                 SortedMap<Integer, Integer> results = linear.interpret();
@@ -136,9 +136,9 @@ public class TraceGen {
             assert allResults.containsAll(scResults);
             if (scResults.equals(allResults)) continue;
 
-            List<String> mappedResult = new ArrayList<String>();
+            List<String> mappedResult = new ArrayList<>();
             for (Map<Integer, Integer> m : scResults) {
-                List<String> mappedValues = new ArrayList<String>();
+                List<String> mappedValues = new ArrayList<>();
                 for (int v : m.values()) {
                     mappedValues.add(mapConst(v));
                 }
@@ -214,7 +214,7 @@ public class TraceGen {
         pw.println("public class " + klass + " {");
         pw.println();
 
-        Set<Integer> exist = new HashSet<Integer>();
+        Set<Integer> exist = new HashSet<>();
         for (Trace trace : mt.traces)  {
             for (Op op : trace.ops) {
                 if (exist.add(op.getVarId()))
@@ -260,7 +260,7 @@ public class TraceGen {
     }
 
     private List<Trace> product(List<Trace> traces, List<Op> ops) {
-        List<Trace> newTraces = new ArrayList<Trace>();
+        List<Trace> newTraces = new ArrayList<>();
         for (Trace trace : traces) {
             for (Op op : ops) {
                 newTraces.add(trace.pushTail(op));
@@ -273,11 +273,11 @@ public class TraceGen {
         private final List<Op> ops;
 
         public Trace() {
-            ops = new ArrayList<Op>();
+            ops = new ArrayList<>();
         }
 
         public Trace(List<Op> extOps) {
-            ops = new ArrayList<Op>(extOps);
+            ops = new ArrayList<>(extOps);
         }
 
         public Trace pushHead(Op op) {
@@ -310,12 +310,12 @@ public class TraceGen {
         }
 
         public SortedMap<Integer, Integer> interpret() {
-            Map<Integer, Integer> values = new HashMap<Integer, Integer>();
+            Map<Integer, Integer> values = new HashMap<>();
             for (int v = 0; v < vars; v++) {
                 values.put(v, -1);
             }
 
-            SortedMap<Integer, Integer> resValues = new TreeMap<Integer, Integer>();
+            SortedMap<Integer, Integer> resValues = new TreeMap<>();
 
             for (Op op : ops) {
                 switch (op.getType()) {
@@ -335,7 +335,7 @@ public class TraceGen {
         }
 
         public List<Trace> allPermutations() {
-            List<Trace> traces = new ArrayList<Trace>();
+            List<Trace> traces = new ArrayList<>();
             for (List<Op> perm : Utils.permutate(ops)) {
                 traces.add(new Trace(perm));
             }
@@ -400,7 +400,7 @@ public class TraceGen {
 
         public String canonicalId() {
             int varId = 0;
-            Map<Integer, Integer> varMap = new HashMap<Integer, Integer>();
+            Map<Integer, Integer> varMap = new HashMap<>();
             for (Op op : ops) {
                 Integer id = varMap.get(op.getVarId());
                 if (id == null) {
@@ -428,7 +428,7 @@ public class TraceGen {
         }
 
         public boolean hasNonMatchingLoads() {
-            Set<Integer> stores = new HashSet<Integer>();
+            Set<Integer> stores = new HashSet<>();
             for (Op op : ops) {
                 if (op.getType() == Op.Type.STORE) {
                     stores.add(op.getVarId());
@@ -446,7 +446,7 @@ public class TraceGen {
         }
 
         public boolean hasNonMatchingStores() {
-            Set<Integer> loads = new HashSet<Integer>();
+            Set<Integer> loads = new HashSet<>();
             for (Op op : ops) {
                 if (op.getType() == Op.Type.LOAD) {
                     loads.add(op.getVarId());
@@ -475,18 +475,13 @@ public class TraceGen {
         public MultiTrace(Trace original, List<Trace> copy) {
             this.original = original;
 
-            this.traces = new ArrayList<Trace>();
+            this.traces = new ArrayList<>();
             for (Trace t : copy) {
                 if (!t.ops.isEmpty())
                     traces.add(t);
             }
 
-            Collections.sort(traces, new Comparator<Trace>() {
-                @Override
-                public int compare(Trace o1, Trace o2) {
-                    return o1.id().compareTo(o2.id());
-                }
-            });
+            Collections.sort(traces, (o1, o2) -> o1.id().compareTo(o2.id()));
         }
 
         public List<Trace> linearize() {
@@ -494,10 +489,10 @@ public class TraceGen {
                 return Collections.singletonList(new Trace());
             }
 
-            List<Trace> newTraces = new ArrayList<Trace>();
+            List<Trace> newTraces = new ArrayList<>();
 
             for (int t = 0; t < traces.size(); t++) {
-                List<Trace> copy = new ArrayList<Trace>();
+                List<Trace> copy = new ArrayList<>();
                 copy.addAll(traces);
 
                 Trace cT = copy.get(t);

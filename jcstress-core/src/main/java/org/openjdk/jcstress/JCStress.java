@@ -180,9 +180,7 @@ public class JCStress {
                 collector.add(result);
             }
 
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (InterruptedException ex) {
+        } catch (IOException | InterruptedException ex) {
             ex.printStackTrace();
         }
     }
@@ -224,7 +222,7 @@ public class JCStress {
     }
 
     public Collection<String> getSeparateExecutionCommand(Options opts, String test) {
-        List<String> command = new ArrayList<String>();
+        List<String> command = new ArrayList<>();
 
         // jvm path
         command.add(getDefaultJvm());
@@ -278,7 +276,7 @@ public class JCStress {
     }
 
     static SortedSet<String> getTests(final String filter) {
-        SortedSet<String> s = new TreeSet<String>();
+        SortedSet<String> s = new TreeSet<>();
 
         Pattern pattern = Pattern.compile(filter);
         for (String testName : TestList.tests()) {

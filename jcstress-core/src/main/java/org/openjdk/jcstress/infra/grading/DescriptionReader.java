@@ -57,7 +57,7 @@ public class DescriptionReader {
     private final Unmarshaller testSuiteUnmarshaller;
 
     public DescriptionReader() {
-        testDescriptions = new HashMap<String, Test>();
+        testDescriptions = new HashMap<>();
         try {
             SchemaFactory sf = SchemaFactory.newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI);
 
@@ -67,9 +67,7 @@ public class DescriptionReader {
             testSuiteUnmarshaller.setSchema(sf.newSchema(getClass().getResource("/xsd/descriptions/test-descriptions.xsd")));
 
             readDescriptions();
-        } catch (SAXException e) {
-            throw new IllegalStateException(e);
-        } catch (JAXBException e) {
+        } catch (SAXException | JAXBException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -88,7 +86,7 @@ public class DescriptionReader {
             throw new IllegalStateException(name + ": " + e.getMessage(), e);
         }
 
-        Map<String, Template> templates = new HashMap<String, Template>();
+        Map<String, Template> templates = new HashMap<>();
         for (Template t : suite.getTemplate()) {
             templates.put(t.getName(), t);
         }
@@ -106,7 +104,7 @@ public class DescriptionReader {
     }
 
     private void splitCases(Collection<Case> cases) {
-        List<Case> newCases = new ArrayList<Case>();
+        List<Case> newCases = new ArrayList<>();
         for (Case c : cases) {
             for (String match : c.getMatch()) {
                 Case newCase = new Case();
@@ -131,9 +129,9 @@ public class DescriptionReader {
         splitCases(template.getCase());
 
         // merge the matches
-        Collection<Case> newCases = new ArrayList<Case>();
+        Collection<Case> newCases = new ArrayList<>();
 
-        Set<String> fulfilledMatches = new HashSet<String>();
+        Set<String> fulfilledMatches = new HashSet<>();
         for (Case c : t.getCase()) {
             fulfilledMatches.add(c.getMatch().get(0));
             newCases.add(c);
@@ -154,7 +152,7 @@ public class DescriptionReader {
         }
 
         // merge refs
-        Set<String> urls = new HashSet<String>();
+        Set<String> urls = new HashSet<>();
         if (t.getRefs() == null) {
             t.setRefs(new ObjectFactory().createRef());
         }

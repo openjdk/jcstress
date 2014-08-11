@@ -45,7 +45,7 @@ public class Environment implements Serializable {
     private final Map<String, String> env;
 
     public Environment() {
-        Map<String, String> result = new HashMap<String, String>();
+        Map<String, String> result = new HashMap<>();
 
         String[] keys = new String[]{
                 "java.version",

@@ -77,7 +77,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class JCStressTestProcessor extends AbstractProcessor {
 
-    private final List<TestInfo> tests = new ArrayList<TestInfo>();
+    private final List<TestInfo> tests = new ArrayList<>();
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
@@ -344,16 +344,25 @@ public class JCStressTestProcessor extends AbstractProcessor {
         for (VariableElement var : ElementFilter.fieldsIn(info.getResult().getEnclosedElements())) {
             pw.print("                r." + var.getSimpleName().toString() + " = ");
             String type = var.asType().toString();
-            if (type.equals("int") || type.equals("long") || type.equals("short") || type.equals("byte") || type.equals("char")) {
-                pw.print("0");
-            } else if (type.equals("double")) {
-                pw.print("0D");
-            } else if (type.equals("float")) {
-                pw.print("0F");
-            } else if (type.equals("boolean")) {
-                pw.print("false");
-            } else {
-                throw new GenerationException("Unable to handle @" + Result.class.getSimpleName() + " field of type " + type, var);
+            switch (type) {
+                case "int":
+                case "long":
+                case "short":
+                case "byte":
+                case "char":
+                    pw.print("0");
+                    break;
+                case "double":
+                    pw.print("0D");
+                    break;
+                case "float":
+                    pw.print("0F");
+                    break;
+                case "boolean":
+                    pw.print("false");
+                    break;
+                default:
+                    throw new GenerationException("Unable to handle @" + Result.class.getSimpleName() + " field of type " + type, var);
             }
             pw.println(";");
         }

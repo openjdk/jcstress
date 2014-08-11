@@ -39,14 +39,11 @@ public class Scheduler {
 
     private final Semaphore sentinel;
 
-    private final ExecutorService services = Executors.newCachedThreadPool(new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable r) {
-            Thread t = new Thread(r);
-            t.setPriority(Thread.MAX_PRIORITY);
-            t.setDaemon(true);
-            return t;
-        }
+    private final ExecutorService services = Executors.newCachedThreadPool(r -> {
+        Thread t = new Thread(r);
+        t.setPriority(Thread.MAX_PRIORITY);
+        t.setDaemon(true);
+        return t;
     });
     private final int totalTokens;
 
@@ -59,14 +56,11 @@ public class Scheduler {
         // Make fat tasks bypass in exclusive mode
         final int tokensAcquired = Math.min(task.getTokens(), totalTokens);
         sentinel.acquire(tokensAcquired);
-        services.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    task.run();
-                } finally {
-                    sentinel.release(tokensAcquired);
-                }
+        services.submit(() -> {
+            try {
+                task.run();
+            } finally {
+                sentinel.release(tokensAcquired);
             }
         });
     }

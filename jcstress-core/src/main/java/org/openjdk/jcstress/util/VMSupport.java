@@ -63,8 +63,8 @@ public class VMSupport {
             try {
                 Collection<Method> im = infraMethods;
                 if (im == null) {
-                    im = new ArrayList<Method>();
-                    Collection<String> infraNames = new ArrayList<String>();
+                    im = new ArrayList<>();
+                    Collection<String> infraNames = new ArrayList<>();
                     infraNames.addAll(Reflections.getClassNames("org.openjdk.jcstress.infra"));
                     infraNames.addAll(Reflections.getClassNames("org.openjdk.jcstress.util"));
                     for (String name : infraNames) {

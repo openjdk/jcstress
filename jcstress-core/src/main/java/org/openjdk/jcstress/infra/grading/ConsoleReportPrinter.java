@@ -61,7 +61,7 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
     private AtomicLong observedResults = new AtomicLong();
     private AtomicLong observedCount = new AtomicLong();
 
-    private final ConcurrentMap<String, TestProgress> testsProgress = new ConcurrentHashMap<String, TestProgress>();
+    private final ConcurrentMap<String, TestProgress> testsProgress = new ConcurrentHashMap<>();
     private final int totalExpectedResults;
 
     private long firstTest;
@@ -172,7 +172,7 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
 
             output.printf("%" + len + "s %15s %18s %-20s\n", "Observed state", "Occurrences", "Expectation", "Interpretation");
 
-            List<State> unmatchedStates = new ArrayList<State>();
+            List<State> unmatchedStates = new ArrayList<>();
             unmatchedStates.addAll(r.getStates());
             for (Case c : test.getCase()) {
 
@@ -278,8 +278,8 @@ public class ConsoleReportPrinter extends DescriptionReader implements TestResul
         private final String name;
 
         private int currentVM;
-        private final Map<String, Integer> vmIDs = new HashMap<String, Integer>();
-        private final Map<String, Integer> iterations = new HashMap<String, Integer>();
+        private final Map<String, Integer> vmIDs = new HashMap<>();
+        private final Map<String, Integer> iterations = new HashMap<>();
 
         public TestProgress(TestResult result){
             this.name = result.getName();

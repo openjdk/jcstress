@@ -56,7 +56,7 @@ public class NetworkInputCollector {
     public NetworkInputCollector(TestResultCollector out) throws IOException {
         this.out = out;
 
-        registeredReaders = Collections.synchronizedList(new ArrayList<Reader>());
+        registeredReaders = Collections.synchronizedList(new ArrayList<>());
 
         acceptor = new Acceptor();
         acceptor.start();
@@ -172,13 +172,7 @@ public class NetworkInputCollector {
                 }
             } catch (EOFException e) {
                 // expect
-            } catch (ObjectStreamException e) {
-                throw new IllegalStateException(e);
-            } catch (InterruptedIOException e) {
-                throw new IllegalStateException(e);
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            } catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException | IOException e) {
                 throw new IllegalStateException(e);
             } finally {
                 close();

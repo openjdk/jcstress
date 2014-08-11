@@ -30,7 +30,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ResultGenerator {
-    private final Set<String> generatedResults = new HashSet<String>();
+    private final Set<String> generatedResults = new HashSet<>();
     private final String srcRoot;
 
     public ResultGenerator(String srcRoot) {

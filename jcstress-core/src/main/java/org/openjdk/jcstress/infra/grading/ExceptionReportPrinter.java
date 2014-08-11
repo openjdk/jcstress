@@ -59,14 +59,14 @@ public class ExceptionReportPrinter extends DescriptionReader {
     public ExceptionReportPrinter(Options opts, InProcessCollector collector) throws JAXBException, FileNotFoundException {
         super();
         this.collector = collector;
-        failures = new ArrayList<String>();
+        failures = new ArrayList<>();
     }
 
     public void parse() throws FileNotFoundException, JAXBException {
-        Map<String, TestResult> results = new TreeMap<String, TestResult>();
+        Map<String, TestResult> results = new TreeMap<>();
 
         {
-            Multimap<String, TestResult> multiResults = new HashMultimap<String, TestResult>();
+            Multimap<String, TestResult> multiResults = new HashMultimap<>();
             for (TestResult r : collector.getTestResults()) {
                 multiResults.put(r.getName(), r);
             }
@@ -74,7 +74,7 @@ public class ExceptionReportPrinter extends DescriptionReader {
             for (String name : multiResults.keys()) {
                 Collection<TestResult> mergeable = multiResults.get(name);
 
-                LongHashMultiset<State> stateCounts = new LongHashMultiset<State>();
+                LongHashMultiset<State> stateCounts = new LongHashMultiset<>();
 
                 Status status = Status.NORMAL;
                 for (TestResult r : mergeable) {
@@ -95,7 +95,7 @@ public class ExceptionReportPrinter extends DescriptionReader {
         }
 
         // build prefixes
-        Multimap<String, String> packages = new TreeMultimap<String, String>();
+        Multimap<String, String> packages = new TreeMultimap<>();
         for (String k : results.keySet()) {
             String pack = k.substring(0, k.lastIndexOf("."));
             packages.put(pack, k);

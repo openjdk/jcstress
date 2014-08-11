@@ -61,14 +61,14 @@ public class TreesetMultimap<K, V> implements Multimap<K, V>, Serializable {
     private final Map<K, Collection<V>> map;
 
     public TreesetMultimap() {
-        map = new HashMap<K, Collection<V>>();
+        map = new HashMap<>();
     }
 
     @Override
     public void put(K key, V value) {
         Collection<V> vs = map.get(key);
         if (vs == null) {
-            vs = new TreeSet<V>();
+            vs = new TreeSet<>();
             map.put(key, vs);
         }
         vs.add(value);
@@ -97,7 +97,7 @@ public class TreesetMultimap<K, V> implements Multimap<K, V>, Serializable {
 
     @Override
     public Collection<V> values() {
-        Collection<V> result = new ArrayList<V>();
+        Collection<V> result = new ArrayList<>();
         for (K key : map.keySet()) {
             result.addAll(map.get(key));
         }

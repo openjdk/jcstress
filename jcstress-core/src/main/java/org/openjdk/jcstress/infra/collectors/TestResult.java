@@ -54,8 +54,8 @@ public class TestResult implements Serializable {
         this.vmID = VM_ID;
         this.name = name;
         this.status = status;
-        this.states = new HashMap<State, State>();
-        this.auxData = new ArrayList<String>();
+        this.states = new HashMap<>();
+        this.auxData = new ArrayList<>();
     }
 
     public void addState(Object result, long count) {

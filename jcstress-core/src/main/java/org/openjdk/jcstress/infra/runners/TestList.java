@@ -41,7 +41,7 @@ public class TestList {
 
     private static Map<String, Info> getTests() {
         if (tests == null) {
-            Map<String, Info> m = new HashMap<String, Info>();
+            Map<String, Info> m = new HashMap<>();
             InputStream stream = null;
             try {
                 stream = TestList.class.getResourceAsStream(LIST);

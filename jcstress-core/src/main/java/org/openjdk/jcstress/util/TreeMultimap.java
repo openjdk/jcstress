@@ -60,14 +60,14 @@ public class TreeMultimap<K, V> implements Multimap<K, V>, Serializable {
     private final Map<K, Collection<V>> map;
 
     public TreeMultimap() {
-        map = new TreeMap<K, Collection<V>>();
+        map = new TreeMap<>();
     }
 
     @Override
     public void put(K key, V value) {
         Collection<V> vs = map.get(key);
         if (vs == null) {
-            vs = new ArrayList<V>();
+            vs = new ArrayList<>();
             map.put(key, vs);
         }
         vs.add(value);
@@ -96,7 +96,7 @@ public class TreeMultimap<K, V> implements Multimap<K, V>, Serializable {
 
     @Override
     public Collection<V> values() {
-        Collection<V> result = new ArrayList<V>();
+        Collection<V> result = new ArrayList<>();
         for (K key : map.keySet()) {
             result.addAll(map.get(key));
         }

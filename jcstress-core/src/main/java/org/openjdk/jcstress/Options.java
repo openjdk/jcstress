@@ -247,7 +247,7 @@ public class Options {
         int warmupTime = 1000;
         long lastChange = System.currentTimeMillis();
 
-        List<Future<?>> futures = new ArrayList<Future<?>>();
+        List<Future<?>> futures = new ArrayList<>();
         futures.add(service.submit(new BurningTask()));
 
         System.out.print(".");
@@ -323,7 +323,7 @@ public class Options {
 
     public Collection<String> buildForkedCmdLine() {
         // omit -f, -p, -t
-        Collection<String> cmdLine = new ArrayList<String>();
+        Collection<String> cmdLine = new ArrayList<>();
         cmdLine.add("-r");
         cmdLine.add(resultDir);
         cmdLine.add("-minStride");

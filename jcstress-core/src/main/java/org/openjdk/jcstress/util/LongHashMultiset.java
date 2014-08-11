@@ -30,7 +30,7 @@ import java.util.Set;
 
 public class LongHashMultiset<T> {
 
-    private Map<T, Holder> ms = new HashMap<T, Holder>();
+    private Map<T, Holder> ms = new HashMap<>();
 
     public void add(T t, long count) {
         Holder holder = ms.get(t);

@@ -34,7 +34,7 @@ import java.util.List;
  */
 public class InProcessCollector implements TestResultCollector {
 
-    private final List<TestResult> results = Collections.synchronizedList(new ArrayList<TestResult>());
+    private final List<TestResult> results = Collections.synchronizedList(new ArrayList<>());
 
     @Override
     public void add(TestResult result) {

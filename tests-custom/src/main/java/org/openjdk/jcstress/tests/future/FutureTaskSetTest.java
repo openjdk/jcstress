@@ -48,9 +48,7 @@ public class FutureTaskSetTest {
         try {
             Integer key = s.get(1, TimeUnit.HOURS);
             r.r1 = (key == null) ? -1 : key;
-        } catch (InterruptedException e) {
-            r.r1 = Integer.MIN_VALUE;
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             r.r1 = Integer.MIN_VALUE;
         } catch (TimeoutException e) {
             r.r1 = -2;
@@ -59,11 +57,8 @@ public class FutureTaskSetTest {
 
     @State
     public static class MyFutureTask extends FutureTask<Integer> {
-        private static final Callable<Integer> EMPTY_CALLABLE = new Callable<Integer>() {
-            @Override
-            public Integer call() throws Exception {
-                throw new IllegalStateException("Should not reach here");
-            }
+        private static final Callable<Integer> EMPTY_CALLABLE = () -> {
+            throw new IllegalStateException("Should not reach here");
         };
 
         public MyFutureTask() {

@@ -50,14 +50,12 @@ public class UnsafeHolder {
         } catch (SecurityException se) {
             try {
                 return java.security.AccessController.doPrivileged
-                    (new java.security
-                     .PrivilegedExceptionAction<sun.misc.Unsafe>() {
-                        public sun.misc.Unsafe run() throws Exception {
-                            java.lang.reflect.Field f = sun.misc
-                                .Unsafe.class.getDeclaredField("theUnsafe");
-                            f.setAccessible(true);
-                            return (sun.misc.Unsafe) f.get(null);
-                        }});
+                    ((java.security.PrivilegedExceptionAction<sun.misc.Unsafe>) () -> {
+                        java.lang.reflect.Field f = sun.misc
+                            .Unsafe.class.getDeclaredField("theUnsafe");
+                        f.setAccessible(true);
+                        return (sun.misc.Unsafe) f.get(null);
+                    });
             } catch (java.security.PrivilegedActionException e) {
                 throw new RuntimeException("Could not initialize intrinsics",
                                            e.getCause());

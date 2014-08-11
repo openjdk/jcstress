@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 public class ThreadPoolExecutorKeepAliveTest {
 
     public final ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 2, 1L,
-            TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(2));
+            TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(2));
 
     @Actor
     public void actor1() {

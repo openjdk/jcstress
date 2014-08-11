@@ -35,7 +35,7 @@ import java.util.Set;
 
 public class HashCounter<T> implements Counter<T> {
 
-    private Map<T, Holder> ms = new HashMap<T, Holder>();
+    private Map<T, Holder> ms = new HashMap<>();
 
     @Override
     public void record(T result) {
@@ -66,9 +66,7 @@ public class HashCounter<T> implements Counter<T> {
             T t = (T)ois.readObject();
 
             return t;
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             throw new IllegalStateException(e);
         }
     }

@@ -44,7 +44,7 @@ public class TestGrading {
     public final List<String> failureMessages;
 
     public TestGrading(TestResult r, Test test) {
-        failureMessages = new NonNullArrayList<String>();
+        failureMessages = new NonNullArrayList<>();
 
         if (test == null) {
             isPassed = false;
@@ -58,7 +58,7 @@ public class TestGrading {
         hasInteresting = false;
         hasSpec = false;
 
-        List<State> unmatchedStates = new ArrayList<State>();
+        List<State> unmatchedStates = new ArrayList<>();
         unmatchedStates.addAll(r.getStates());
         for (Case c : test.getCase()) {
             boolean matched = false;
