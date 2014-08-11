@@ -28,6 +28,7 @@ import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Arbiter;
 import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Mode;
 import org.openjdk.jcstress.annotations.Outcome;
@@ -49,6 +50,8 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -67,6 +70,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -162,24 +166,23 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         info.setTest(e);
 
-        Outcome.Outcomes outcomes = e.getAnnotation(Outcome.Outcomes.class);
-        if (outcomes != null) {
-            for (Outcome c : outcomes.value()) {
-                info.addCase(c);
+        // try to parse the external grading first
+        String gradingName = JCStressMeta.class.getName();
+
+        for (AnnotationMirror m : e.getAnnotationMirrors()) {
+            if (gradingName.equals(m.getAnnotationType().toString())) {
+                for(Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : m.getElementValues().entrySet()) {
+                    if("value".equals(entry.getKey().getSimpleName().toString())) {
+                        AnnotationValue value = entry.getValue();
+                        parseMeta(processingEnv.getElementUtils().getTypeElement(value.getValue().toString()), info);
+                        break;
+                    }
+                }
             }
         }
 
-        Ref.Refs refs = e.getAnnotation(Ref.Refs.class);
-        if (refs != null) {
-            for (Ref r : refs.value()) {
-                info.addRef(r.value());
-            }
-        }
-
-        Description d = e.getAnnotation(Description.class);
-        if (d != null) {
-            info.setDescription(d.value());
-        }
+        // parse the metadata on the test itself
+        parseMeta(e, info);
 
         for (ExecutableElement method : ElementFilter.methodsIn(e.getEnclosedElements())) {
             if (method.getAnnotation(Actor.class) != null) {
@@ -227,6 +230,27 @@ public class JCStressTestProcessor extends AbstractProcessor {
         return info;
     }
 
+    private void parseMeta(TypeElement e, TestInfo info) {
+        Outcome.Outcomes outcomes = e.getAnnotation(Outcome.Outcomes.class);
+        if (outcomes != null) {
+            for (Outcome c : outcomes.value()) {
+                info.addCase(c);
+            }
+        }
+
+        Ref.Refs refs = e.getAnnotation(Ref.Refs.class);
+        if (refs != null) {
+            for (Ref r : refs.value()) {
+                info.addRef(r.value());
+            }
+        }
+
+        Description d = e.getAnnotation(Description.class);
+        if (d != null) {
+            info.setDescription(d.value());
+        }
+    }
+
     public static String getGeneratedName(Element ci) {
         String name = "";
         do {
@@ -241,10 +265,10 @@ public class JCStressTestProcessor extends AbstractProcessor {
         while (true) {
             Element parent = ci.getEnclosingElement();
             if (parent == null || parent.getKind() == ElementKind.PACKAGE) {
-                name = ((TypeElement)ci).getQualifiedName() + (name.isEmpty() ? "" : "$" + name);
+                name = ((TypeElement)ci).getQualifiedName() + (name.isEmpty() ? "" : "." + name);
                 break;
             } else {
-                name = ci.getSimpleName() + (name.isEmpty() ? "" : "$" + name);
+                name = ci.getSimpleName() + (name.isEmpty() ? "" : "." + name);
             }
             ci = parent;
         }
