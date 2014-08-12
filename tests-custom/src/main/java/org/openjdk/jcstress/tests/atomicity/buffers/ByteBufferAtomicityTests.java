@@ -25,6 +25,7 @@
 package org.openjdk.jcstress.tests.atomicity.buffers;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult1;
@@ -45,36 +46,49 @@ public class ByteBufferAtomicityTests {
     }
 
     @JCStressTest
+    @JCStressMeta(GradeInt.class)
     public static class IntTest {
         @Actor public void actor1(MyState s)                 { s.b.putInt(0, -1);                                    }
         @Actor public void actor2(MyState s, LongResult1 r)  { r.r1 = s.b.getInt(0);                                 }
     }
 
+    @JCStressTest
+    @JCStressMeta(GradeInt.class)
     public static class ShortTest {
         @Actor public void actor1(MyState s, LongResult1 r)  { s.b.putShort(0, (short) -1);                          }
         @Actor public void actor2(MyState s, LongResult1 r)  { r.r1 = s.b.getShort(0);                               }
     }
 
+    @JCStressTest
+    @JCStressMeta(GradeChar.class)
     public static class CharTest {
         @Actor public void actor1(MyState s, LongResult1 r)  { s.b.putChar(0, 'a');                                  }
         @Actor public void actor2(MyState s, LongResult1 r)  { r.r1 = s.b.getChar(0);                                }
     }
 
+    @JCStressTest
+    @JCStressMeta(GradeInt.class)
     public static class LongTest {
         @Actor public void actor1(MyState s, LongResult1 r)  { s.b.putLong(0, -1L);                                  }
         @Actor public void actor2(MyState s, LongResult1 r)  { r.r1 = s.b.getLong(0);                                }
     }
 
+    @JCStressTest
+    @JCStressMeta(GradeDouble.class)
     public static class DoubleTest {
         @Actor public void actor1(MyState s, LongResult1 r)  { s.b.putDouble(0, -1D);                                }
         @Actor public void actor2(MyState s, LongResult1 r)  { r.r1 = Double.doubleToRawLongBits(s.b.getDouble(0));  }
     }
 
+    @JCStressTest
+    @JCStressMeta(GradeFloat.class)
     public static class FloatTest {
         @Actor public void actor1(MyState s, LongResult1 r)  { s.b.putFloat(0, -1F);                                 }
         @Actor public void actor2(MyState s, LongResult1 r)  { r.r1 = Float.floatToRawIntBits(s.b.getFloat(0));      }
     }
 
+    @JCStressTest
+    @JCStressMeta(GradeInt.class)
     public static class ByteTest {
         @Actor public void actor1(MyState s, LongResult1 r)  { s.b.put(0, (byte) -1);                                }
         @Actor public void actor2(MyState s, LongResult1 r)  { r.r1 = s.b.get();                                     }

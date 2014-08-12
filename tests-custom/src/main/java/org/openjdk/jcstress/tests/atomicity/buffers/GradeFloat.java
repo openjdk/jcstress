@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,30 +24,16 @@
  */
 package org.openjdk.jcstress.tests.atomicity.buffers;
 
-import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.JCStressMeta;
-import org.openjdk.jcstress.annotations.JCStressTest;
-import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.LongResult1;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
+import org.openjdk.jcstress.annotations.Outcome;
+import org.openjdk.jcstress.annotations.Ref;
 
-import java.nio.FloatBuffer;
-
-public class FloatBufferAtomicityTests {
-
-    @State
-    public static class MyState {
-        private final FloatBuffer b;
-
-        public MyState() {
-            b = FloatBuffer.allocate(16);
-        }
-    }
-
-    @JCStressTest
-    @JCStressMeta(GradeFloat.class)
-    public static class FloatTest {
-        @Actor public void actor1(MyState s)                { s.b.put(0, -1F);                                    }
-        @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = Float.floatToRawIntBits(s.b.get());          }
-    }
-
+@Description("Tests if operations on buffers are atomic.")
+@Outcome(id = "[-1082130432]",  expect = Expect.ACCEPTABLE,       desc = "Seeing the complete update.")
+@Outcome(id = "[0]",            expect = Expect.ACCEPTABLE,       desc = "Seeing the default value, this is valid under race.")
+@Outcome(                       expect = Expect.ACCEPTABLE_SPEC,  desc = "All other cases are unexpected, but legal.")
+@Ref("http://cs.oswego.edu/pipermail/concurrency-interest/2012-December/010390.html")
+@Ref("http://mail.openjdk.java.net/pipermail/core-libs-dev/2012-December/013133.html")
+public class GradeFloat {
 }
