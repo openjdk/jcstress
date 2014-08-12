@@ -25,8 +25,10 @@
 package org.openjdk.jcstress.tests.interrupt;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Mode;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.Signal;
 import org.openjdk.jcstress.annotations.State;
 
@@ -34,6 +36,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 @JCStressTest(Mode.Termination)
+@Outcome(id = "TERMINATED", expect = Expect.ACCEPTABLE, desc = "The thread had sucessfully terminated.")
+@Outcome(id = "STALE",      expect = Expect.FORBIDDEN,  desc = "Thread had failed to respond.")
 @State
 public class ReentrantLockInterruptiblyTest {
 

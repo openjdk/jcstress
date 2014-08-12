@@ -25,8 +25,11 @@
 package org.openjdk.jcstress.tests.interrupt;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Mode;
+import org.openjdk.jcstress.annotations.Outcome;
+import org.openjdk.jcstress.annotations.Ref;
 import org.openjdk.jcstress.annotations.Signal;
 import org.openjdk.jcstress.annotations.State;
 
@@ -35,6 +38,12 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.TimeUnit;
 
 @JCStressTest(Mode.Termination)
+@Outcome(id = "TERMINATED", expect = Expect.ACCEPTABLE, desc = "The thread had sucessfully terminated.")
+@Outcome(id = "STALE",      expect = Expect.FORBIDDEN,  desc = "Thread had failed to respond.")
+@Ref("http://altair.cs.oswego.edu/pipermail/concurrency-interest/2012-August/009654.html")
+@Ref("http://cs.oswego.edu/pipermail/concurrency-interest/attachments/20120808/cad656d6/attachment.html")
+@Ref("http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7190310")
+@Ref("http://mail.openjdk.java.net/pipermail/hotspot-compiler-dev/2012-August/008190.html")
 @State
 public class WeakReferenceTest {
 
