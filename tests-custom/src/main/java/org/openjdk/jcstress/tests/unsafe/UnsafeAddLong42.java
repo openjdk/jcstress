@@ -25,13 +25,20 @@
 package org.openjdk.jcstress.tests.unsafe;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult2;
 import org.openjdk.jcstress.util.UnsafeHolder;
 import sun.misc.Contended;
 
 @JCStressTest
+@Description("Tests if Unsafe.getAndAddLong is racy")
+@Outcome(id = "[1, 4398046511104]", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")
+@Outcome(id = "[0, 0]",             expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution")
+@Outcome(id = "[0, 4398046511104]", expect = Expect.ACCEPTABLE, desc = "T2 reads the result early")
 @State
 public class UnsafeAddLong42 {
 
