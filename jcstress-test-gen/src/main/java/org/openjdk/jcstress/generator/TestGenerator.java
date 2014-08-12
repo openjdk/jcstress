@@ -41,7 +41,6 @@ public class TestGenerator {
     private final String resRoot;
 
     private final ResultGenerator resultGenerator;
-    private PrintWriter resourceWriter;
 
     public TestGenerator(String srcRoot, String resRoot) {
         this.srcRoot = srcRoot;
@@ -54,9 +53,6 @@ public class TestGenerator {
     }
 
     public void generateMemoryEffects() throws FileNotFoundException {
-        resourceWriter = new PrintWriter(Utils.ensureDir(resRoot + "/org/openjdk/jcstress/desc/") + "/memeffects.xml");
-        resourceWriter.println("<testsuite>");
-
         for (Class<?> varType : Types.SUPPORTED_PRIMITIVES) {
             for (Class<?> guardType : Types.SUPPORTED_PRIMITIVES) {
                 generate(new Types(guardType, varType), new VolatileReadWrite(guardType), "volatile_" + guardType + "_" + varType, "org.openjdk.jcstress.tests.memeffects.basic.volatiles");
@@ -98,38 +94,9 @@ public class TestGenerator {
             }
 
         }
-
-        resourceWriter.println("</testsuite>");
-        resourceWriter.close();
     }
 
    public void generate(Types types, Primitive prim, String klass, String pkg) throws FileNotFoundException {
-
-        resourceWriter.println("    <test name=\"" + pkg + "." + klass + "\">\n" +
-                "        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>\n" +
-                "        <description>Generated test</description>\n" +
-                "        <case>\n" +
-                "            <match>[" + getDefaultValue(types.type(0)) +", " + getDefaultValue(types.type(1))+ "]</match>\n" +
-                "            <match>[" + getDefaultValue(types.type(0)) +", " + getSetValue(types.type(1))+ "]</match>\n" +
-                "            <expect>ACCEPTABLE</expect>\n" +
-                "            <description>Seeing default guard, can see any value</description>\n" +
-                "        </case>\n" +
-                "        <case>\n" +
-                "            <match>[" + getSetValue(types.type(0)) +", " + getSetValue(types.type(1))+ "]</match>\n" +
-                "            <expect>ACCEPTABLE</expect>\n" +
-                "            <description>Seeing set guard, seeing the updated value</description>\n" +
-                "        </case>\n" +
-                "        <case>\n" +
-                "            <match>[" + getSetValue(types.type(0)) +", " + getDefaultValue(types.type(1))+ "]</match>\n" +
-                "            <expect>FORBIDDEN</expect>\n" +
-                "            <description>Seeing set guard, not seeing the updated value</description>\n" +
-                "        </case>\n" +
-                "        <unmatched>\n" +
-                "            <expect>FORBIDDEN</expect>\n" +
-                "            <description>Other cases are not expected.</description>\n" +
-                "        </unmatched>\n" +
-                "    </test>");
-
         String resultName = resultGenerator.generateResult(types);
 
         String pathname = Utils.ensureDir(srcRoot + "/" + pkg.replaceAll("\\.", "/"));
@@ -145,8 +112,14 @@ public class TestGenerator {
         pw.println("import org.openjdk.jcstress.annotations.Actor;");
         pw.println("import org.openjdk.jcstress.annotations.JCStressTest;");
         pw.println("import org.openjdk.jcstress.annotations.State;");
+        pw.println("import org.openjdk.jcstress.annotations.Outcome;");
+        pw.println("import org.openjdk.jcstress.annotations.Expect;");
         pw.println();
         pw.println("@JCStressTest");
+        pw.println("@Outcome(id = \"[" + getDefaultValue(types.type(0)) +", " + getDefaultValue(types.type(1)) + "]\", expect = Expect.ACCEPTABLE, desc = \"Seeing default guard, can see any value\")");
+        pw.println("@Outcome(id = \"[" + getDefaultValue(types.type(0)) +", " + getSetValue(types.type(1)) + "]\", expect = Expect.ACCEPTABLE, desc = \"Seeing default guard, can see any value\")");
+        pw.println("@Outcome(id = \"[" + getSetValue(types.type(0)) +", " + getSetValue(types.type(1)) + "]\", expect = Expect.ACCEPTABLE, desc = \"Seeing set guard, seeing the updated value\")");
+        pw.println("@Outcome(id = \"[" + getSetValue(types.type(0)) +", " + getDefaultValue(types.type(1)) + "]\", expect = Expect.FORBIDDEN, desc = \"Seeing set guard, not seeing the updated value\")");
         pw.println("@State");
         pw.println("public class " + klass + " {");
         pw.println();

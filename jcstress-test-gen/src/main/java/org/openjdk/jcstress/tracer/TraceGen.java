@@ -30,7 +30,16 @@ import org.openjdk.jcstress.generator.Utils;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class TraceGen {
 
@@ -38,7 +47,6 @@ public class TraceGen {
     private final String srcDir;
     private final String resDir;
     private final ResultGenerator resultGenerator;
-    private PrintWriter resourceWriter;
 
     public TraceGen(int vars, String srcDir, String resDir) {
         this.vars = vars;
@@ -48,13 +56,6 @@ public class TraceGen {
     }
 
     public void generate() {
-        try {
-            resourceWriter = new PrintWriter(Utils.ensureDir(resDir + "/org/openjdk/jcstress/desc/") + "/seqcst-volatiles.xml");
-        } catch (FileNotFoundException e) {
-            throw new IllegalStateException(e);
-        }
-        resourceWriter.println("<testsuite>");
-
         List<Op> possibleOps = new ArrayList<>();
         for (int v = 0; v < vars; v++) {
             for (Op.Type t : Op.Type.values()) {
@@ -151,9 +152,6 @@ public class TraceGen {
         }
         System.out.println();
         System.out.println(testCount + " interesting multi-traces");
-
-        resourceWriter.println("</testsuite>");
-        resourceWriter.close();
     }
 
     private void emit(MultiTrace mt, List<String> results) {
@@ -163,28 +161,6 @@ public class TraceGen {
         String pathname = Utils.ensureDir(srcDir + "/" + pkg.replaceAll("\\.", "/"));
 
         String klass = mt.id() + "Test";
-
-        resourceWriter.println("    <test name=\"" + pkg + "." + klass + "\">\n" +
-                "        <contributed-by>Aleksey Shipilev (aleksey.shipilev@oracle.com)</contributed-by>\n" +
-                "        <description>Generated test</description>\n");
-
-        for (String r : results) {
-                resourceWriter.println(
-                "        <case>\n" +
-                "            <match>" + r + "</match>\n" +
-                "            <expect>ACCEPTABLE</expect>\n" +
-                "            <description>Sequential consistency.</description>\n" +
-                "        </case>\n"
-            );
-        }
-
-        resourceWriter.println(
-                "        <unmatched>\n" +
-                "            <expect>FORBIDDEN</expect>\n" +
-                "            <description>Non sequentially-consistent result</description>\n" +
-                "        </unmatched>\n" +
-                "    </test>");
-
 
         Class[] klasses = new Class[mt.original.getLoadCount()];
         for (int c = 0; c < klasses.length; c++) {
@@ -208,8 +184,14 @@ public class TraceGen {
         pw.println("import org.openjdk.jcstress.annotations.Actor;");
         pw.println("import org.openjdk.jcstress.annotations.JCStressTest;");
         pw.println("import org.openjdk.jcstress.annotations.State;");
+        pw.println("import org.openjdk.jcstress.annotations.Outcome;");
+        pw.println("import org.openjdk.jcstress.annotations.Expect;");
         pw.println();
         pw.println("@JCStressTest");
+        for (String r : results) {
+            pw.println("@Outcome(id = \"" + r + "\", expect = Expect.ACCEPTABLE, desc = \"Sequential consistency.\")");
+        }
+
         pw.println("@State");
         pw.println("public class " + klass + " {");
         pw.println();
