@@ -25,7 +25,10 @@
 package org.openjdk.jcstress.tests.atomicity.primitives.perbyte;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
+import org.openjdk.jcstress.annotations.Ref;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.ByteResult8;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
@@ -36,6 +39,10 @@ import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @JCStressTest
+@Outcome(id = "[0, 0, 0, 0, 0, 0, 0, 0]",         expect = Expect.ACCEPTABLE, desc = "Default value for the field. Observers are allowed to see the default value for the field, because there is the data race between reader and writer.")
+@Outcome(id = "[-1, -1, -1, -1, -1, -1, -1, -1]", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
+@Outcome(                                         expect = Expect.ACCEPTABLE_SPEC, desc = "Seeing the torn value. This is specifically allowed by JLS. This is not a surprising behavior on some 32-bit systems which do not have full-width 64-bit instructions.")
+@Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
 @State
 public class DoubleAtomicityTest {
 
