@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,38 +24,16 @@
  */
 package org.openjdk.jcstress.tests.locks.barriers;
 
-import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.JCStressMeta;
-import org.openjdk.jcstress.annotations.JCStressTest;
-import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
+import org.openjdk.jcstress.annotations.Outcome;
 
-@JCStressTest
-@JCStressMeta(G.class)
-@State
-public class SyncBarrier1Test {
-
-    public static ThreadLocal<Object> locks = new ThreadLocal<Object>() {
-        @Override
-        protected Object initialValue() {
-            return new Object();
-        }
-    };
-
-    int a;
-    int b;
-
-    @Actor
-    public void actor1(IntResult2 r) {
-        a = 2;
-        synchronized (locks.get()) {}
-        b = 1;
-    }
-
-    @Actor
-    public void actor2(IntResult2 r) {
-        r.r1 = b;
-        r.r2 = a;
-    }
-
+@Description("Tests if the synchronized section provides the essential barriers")
+@Outcome(id = {"[0, 0]", "[0, 2]"}, expect = Expect.ACCEPTABLE, desc = "The write to $b is not visible yet; we can observe whatever in $a.")
+@Outcome(id = {"[1, 2]"},           expect = Expect.ACCEPTABLE, desc = "The write to $b is observed, expected to see $a == 1.")
+@Outcome(id = {"[1, 0]"},           expect = Expect.ACCEPTABLE_INTERESTING,
+        desc = "The write to $b is observed, but write to $a is not. This is the counter-intuitive behavior," +
+               "but the coding pattern is incorrect: alone \"sync\" barrier is not enough to get the proper" +
+               "acquire/release semantics.")
+public class G {
 }

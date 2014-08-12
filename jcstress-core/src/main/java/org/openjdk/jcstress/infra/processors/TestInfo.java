@@ -142,6 +142,9 @@ public class TestInfo {
     }
 
     public void addCase(Outcome c) {
+        if (c.desc().contains("\n")) {
+            throw new GenerationException("Outcome descriptions can not contain line breaks.", test);
+        }
         outcomes.add(c);
     }
 
