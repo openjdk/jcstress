@@ -26,7 +26,10 @@ package org.openjdk.jcstress.tests.executors;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Arbiter;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.LongResult2;
 
@@ -35,6 +38,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @JCStressTest
+@Description("Tests if ThreadPoolExecutor invariant can be violated: keepAliveTime == 0 &#8658; !allowCoreThreadTimeOut")
+@Outcome(id = "[1, 1]", expect = Expect.ACCEPTABLE, desc = "allowCoreThreadTimeOut had changed, and keepAliveTime failed to change.")
+@Outcome(id = "[0, 0]", expect = Expect.ACCEPTABLE, desc = "keepAliveTime had changed, and allowCoreThreadTimeOut failed to change.")
+@Outcome(id = "[1, 0]", expect = Expect.ACCEPTABLE_INTERESTING, desc = "The update under race can break the (keepAliveTime == 0 &#8658; !allowCoreThreadTimeOut) invariant.")
 @State
 public class ThreadPoolExecutorKeepAliveTest {
 

@@ -26,7 +26,10 @@ package org.openjdk.jcstress.tests.executors;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Arbiter;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 
@@ -35,6 +38,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @JCStressTest
+@Description(" Tests if ThreadPoolExecutor invariant can be violated: corePoolSize &#8804; maxPoolSize")
+@Outcome(id = "[3, 4]", expect = Expect.ACCEPTABLE, desc = "corePoolSize had changed, and maxPoolSize failed to change.")
+@Outcome(id = "[3, 2]", expect = Expect.ACCEPTABLE_INTERESTING, desc = "The update under race can break the (core &#8804; maxPool) invariant.")
 @State
 public class ThreadPoolExecutorSizesTest {
 
