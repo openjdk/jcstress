@@ -25,7 +25,10 @@
 package org.openjdk.jcstress.tests.singletons;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult1;
 
@@ -35,6 +38,10 @@ import org.openjdk.jcstress.infra.results.IntResult1;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @JCStressTest
+@Description("Tests the unsafe publishing case.")
+@Outcome(id = "[0]",  expect = Expect.ACCEPTABLE_INTERESTING, desc = "Singleton return the null instance. This is counter-intuitive, but there is the race on $instance, and second read in the return can indeed return the null reference.")
+@Outcome(id = "[1]",  expect = Expect.ACCEPTABLE_INTERESTING, desc = "The reference field in singleton is null. This is the violation of singleton contract, but legal JMM behavior.")
+@Outcome(id = "[42]", expect = Expect.ACCEPTABLE, desc = "The singleton is observed in fully-constructed way.")
 public class UnsafeLocalDCLSingletonTest {
 
     @Actor

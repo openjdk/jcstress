@@ -25,7 +25,10 @@
 package org.openjdk.jcstress.tests.singletons;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult1;
 
@@ -35,6 +38,10 @@ import org.openjdk.jcstress.infra.results.IntResult1;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @JCStressTest
+@Description("Tests the final wrapper case.")
+@Outcome(id = "[0]",  expect = Expect.FORBIDDEN,  desc = "Factory returned null singleton. This is the major correctness issue.")
+@Outcome(id = "[1]",  expect = Expect.FORBIDDEN,  desc = "The reference field in singleton is null. This is forbidden by JMM.")
+@Outcome(id = "[42]", expect = Expect.ACCEPTABLE, desc = "The singleton is observed in fully-constructed way.")
 public class FinalWrapperSingletonTest {
 
     @Actor
