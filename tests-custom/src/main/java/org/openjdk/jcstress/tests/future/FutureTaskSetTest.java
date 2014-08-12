@@ -25,7 +25,11 @@
 package org.openjdk.jcstress.tests.future;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
+import org.openjdk.jcstress.annotations.Ref;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult1;
 
@@ -36,6 +40,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 @JCStressTest
+@Description("Tests if FutureTask.set() is racy.")
+@Outcome(id = "[-1]", expect = Expect.FORBIDDEN,  desc = "Future.get() had returned, but the value is null.")
+@Outcome(id = "[42]", expect = Expect.ACCEPTABLE, desc = "Future.get() returns, and the value is intact.")
+@Ref("http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7132378")
 public class FutureTaskSetTest {
 
     @Actor
