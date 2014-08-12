@@ -25,11 +25,14 @@
 package org.openjdk.jcstress.tests.init.objects.plain;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.BooleanResult4;
+import org.openjdk.jcstress.tests.init.Grading_AllZeroesBoolean;
 
 @JCStressTest
+@JCStressMeta(Grading_AllZeroesBoolean.class)
 @State
 public class BooleanFieldsTest {
 

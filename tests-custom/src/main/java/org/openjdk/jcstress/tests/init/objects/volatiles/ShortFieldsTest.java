@@ -25,11 +25,14 @@
 package org.openjdk.jcstress.tests.init.objects.volatiles;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.ShortResult4;
+import org.openjdk.jcstress.tests.init.Grading_AllZeroes;
 
 @JCStressTest
+@JCStressMeta(Grading_AllZeroes.class)
 @State
 public class ShortFieldsTest {
 

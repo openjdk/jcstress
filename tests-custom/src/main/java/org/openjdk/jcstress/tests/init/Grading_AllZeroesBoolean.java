@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,42 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.init.objects.plain;
+package org.openjdk.jcstress.tests.init;
 
-import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.JCStressMeta;
-import org.openjdk.jcstress.annotations.JCStressTest;
-import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.FloatResult4;
-import org.openjdk.jcstress.tests.init.Grading_AllZeroesFloat;
+import org.openjdk.jcstress.annotations.Expect;
+import org.openjdk.jcstress.annotations.Outcome;
 
-@JCStressTest
-@JCStressMeta(Grading_AllZeroesFloat.class)
-@State
-public class FloatFieldsTest {
-
-    Data data;
-
-    public static class Data {
-        float v0, v1, v2, v3;
-    }
-
-    @Actor
-    public void actor1() {
-        data = new Data();
-    }
-
-    @Actor
-    public void actor2(FloatResult4 r) {
-        Data d = this.data;
-        if (d == null) {
-            r.r1 = r.r2 = r.r3 = r.r4 = -1;
-        } else {
-            r.r1 = d.v0;
-            r.r2 = d.v1;
-            r.r3 = d.v2;
-            r.r4 = d.v3;
-        }
-    }
-
+@Outcome(id = "[false, false, false, false]", expect = Expect.ACCEPTABLE, desc = "Seeing the completely initialized objects, and all elements are with default values.")
+public class Grading_AllZeroesBoolean {
 }

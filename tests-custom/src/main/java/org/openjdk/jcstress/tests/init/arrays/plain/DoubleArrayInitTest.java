@@ -25,11 +25,14 @@
 package org.openjdk.jcstress.tests.init.arrays.plain;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.DoubleResult4;
+import org.openjdk.jcstress.tests.init.Grading_AllZeroesFloat;
 
 @JCStressTest
+@JCStressMeta(Grading_AllZeroesFloat.class)
 @State
 public class DoubleArrayInitTest {
 
