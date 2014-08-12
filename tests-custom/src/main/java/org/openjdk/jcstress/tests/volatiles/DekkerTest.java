@@ -39,7 +39,8 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 @Description("Tests Dekker-lock-style idioms")
 @Outcome(id = {"[0, 1]", "[1, 0]", "[1, 1]"}, expect = ACCEPTABLE, desc = "Trivial under sequential consistency")
 @Outcome(id = "[0, 0]",                       expect = FORBIDDEN,  desc = "Violates sequential consistency")
-@Ref("[TBD Link]")
+@Ref("http://mail.openjdk.java.net/pipermail/hotspot-compiler-dev/2013-February/009604.html")
+@Ref("http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=8007898")
 @State
 public class DekkerTest {
 

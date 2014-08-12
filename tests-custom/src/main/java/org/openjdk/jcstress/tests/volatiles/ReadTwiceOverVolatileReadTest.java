@@ -25,7 +25,10 @@
 package org.openjdk.jcstress.tests.volatiles;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
+import org.openjdk.jcstress.annotations.Ref;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 
@@ -35,6 +38,13 @@ import org.openjdk.jcstress.infra.results.IntResult3;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @JCStressTest
+@Outcome(id = "[0, 0, 0]", expect = Expect.ACCEPTABLE, desc = "Default value for the fields. Observers are allowed to see the default value for the field, because there is the data race between reader and writer.")
+@Outcome(id = "[0, 1, 0]", expect = Expect.FORBIDDEN,  desc = "Volatile write to $y had happened, and update to $x had been lost.")
+@Outcome(id = "[1, 1, 0]", expect = Expect.FORBIDDEN,  desc = "Volatile write to $y had happened, and update to $x had been lost.")
+@Outcome(id = "[0, 0, 1]", expect = Expect.ACCEPTABLE, desc = "Write to $y is still in flight, $x is arriving late.")
+@Outcome(id = "[0, 1, 1]", expect = Expect.ACCEPTABLE, desc = "The writes appear the the writers' order.")
+@Outcome(id = "[1, 1, 1]", expect = Expect.ACCEPTABLE, desc = "Both updates are visible.")
+@Ref("http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7170145")
 @State
 public class ReadTwiceOverVolatileReadTest {
 

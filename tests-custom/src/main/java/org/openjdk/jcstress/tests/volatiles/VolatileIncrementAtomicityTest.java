@@ -25,7 +25,9 @@
 package org.openjdk.jcstress.tests.volatiles;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 
@@ -35,6 +37,9 @@ import org.openjdk.jcstress.infra.results.IntResult2;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @JCStressTest
+@Outcome(id = "[1, 1]", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Each thread sees the same value, regardless of the update. One update is lost.")
+@Outcome(id = "[1, 2]", expect = Expect.ACCEPTABLE, desc = "Each thread sees its own increment, as if the increment is atomic.")
+@Outcome(id = "[2, 1]", expect = Expect.ACCEPTABLE, desc = "Each thread sees its own increment, as if the increment is atomic.")
 @State
 public class VolatileIncrementAtomicityTest {
 
