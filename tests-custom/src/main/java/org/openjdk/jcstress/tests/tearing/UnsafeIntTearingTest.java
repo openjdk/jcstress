@@ -26,7 +26,10 @@ package org.openjdk.jcstress.tests.tearing;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Arbiter;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import org.openjdk.jcstress.util.UnsafeHolder;
@@ -34,6 +37,8 @@ import org.openjdk.jcstress.util.UnsafeHolder;
 import java.util.Random;
 
 @JCStressTest
+@Description("Tests the word-tearing guarantees for byte[] via Unsafe.")
+@Outcome(id = "[-1431655766, 1431655765]", expect = Expect.ACCEPTABLE, desc = "Seeing all updates intact.")
 @State
 public class UnsafeIntTearingTest {
 

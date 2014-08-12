@@ -26,7 +26,10 @@ package org.openjdk.jcstress.tests.tearing.buffers;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Arbiter;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 
@@ -34,6 +37,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 @JCStressTest
+@Description("Tests the word-tearing guarantees for ByteBuffer.")
+@Outcome(id = "[0, 128, 128]", expect = Expect.ACCEPTABLE, desc = "Seeing all updates intact.")
 @State
 public class ByteBufferInterleaveTest {
 
