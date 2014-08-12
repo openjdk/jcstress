@@ -26,10 +26,12 @@ package org.openjdk.jcstress.tests.fences;
 
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
-import org.openjdk.jcstress.util.UnsafeHolder;
 import sun.misc.Contended;
 
 /**
@@ -38,6 +40,9 @@ import sun.misc.Contended;
  *  @author Doug Lea (dl@cs.oswego.edu)
  */
 @JCStressTest
+@Description("Tests the sequential consistency on Dekker-like construction using explicit fences, not volatiles")
+@Outcome(id = {"[0, 1]", "[1, 0]", "[1, 1]"}, expect = Expect.ACCEPTABLE, desc = "Acceptable under sequential consistency")
+@Outcome(id = {"[0, 0]"},                     expect = Expect.ACCEPTABLE_INTERESTING, desc = "Acceptable with no sequential consistency enforced")
 @State
 public class UnfencedDekkerTest {
 

@@ -25,7 +25,9 @@
 package org.openjdk.jcstress.tests.fences;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 import sun.misc.Contended;
@@ -36,6 +38,14 @@ import sun.misc.Contended;
  *  @author Doug Lea (dl@cs.oswego.edu)
  */
 @JCStressTest
+@Outcome(id = "[0, 0]", expect = Expect.ACCEPTABLE, desc = "Before observing releasing write to, any value is OK for $x.")
+@Outcome(id = "[0, 1]", expect = Expect.ACCEPTABLE, desc = "Before observing releasing write to, any value is OK for $x.")
+@Outcome(id = "[0, 2]", expect = Expect.ACCEPTABLE, desc = "Before observing releasing write to, any value is OK for $x.")
+@Outcome(id = "[0, 3]", expect = Expect.ACCEPTABLE, desc = "Before observing releasing write to, any value is OK for $x.")
+@Outcome(id = "[1, 0]", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Without fence or volatile can read the default or old value for $x after $y is observed.")
+@Outcome(id = "[1, 1]", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Without fence or volatile can read the default or old value for $x after $y is observed.")
+@Outcome(id = "[1, 2]", expect = Expect.ACCEPTABLE, desc = "Can see a released value of $x if $y is observed.")
+@Outcome(id = "[1, 3]", expect = Expect.ACCEPTABLE, desc = "Can see a released value of $x if $y is observed.")
 @State
 public class UnfencedAcquireReleaseTest {
 

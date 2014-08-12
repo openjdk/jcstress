@@ -25,7 +25,9 @@
 package org.openjdk.jcstress.tests.fences;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 import org.openjdk.jcstress.util.UnsafeHolder;
@@ -37,6 +39,14 @@ import sun.misc.Contended;
  * @author Doug Lea (dl@cs.oswego.edu)
  */
 @JCStressTest
+@Outcome(id = "[0, 0, 0]", expect = Expect.ACCEPTABLE, desc = "Consistent ordered reads.")
+@Outcome(id = "[0, 0, 1]", expect = Expect.ACCEPTABLE, desc = "Consistent ordered reads.")
+@Outcome(id = "[0, 1, 1]", expect = Expect.ACCEPTABLE, desc = "Consistent ordered reads.")
+@Outcome(id = "[1, 0, 1]", expect = Expect.ACCEPTABLE, desc = "Consistent ordered reads.")
+@Outcome(id = "[1, 1, 1]", expect = Expect.ACCEPTABLE, desc = "Consistent ordered reads.")
+@Outcome(id = "[1, 1, 0]", expect = Expect.FORBIDDEN,  desc = "Lost or reordered read of x.")
+@Outcome(id = "[0, 1, 0]", expect = Expect.FORBIDDEN,  desc = "Lost or reordered read of x.")
+@Outcome(id = "[1, 0, 0]", expect = Expect.FORBIDDEN,  desc = "Lost or reordered read of x.")
 @State
 public class FencedReadTwiceTest {
 

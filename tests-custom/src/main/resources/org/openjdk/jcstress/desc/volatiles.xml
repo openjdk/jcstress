@@ -290,4 +290,43 @@
         </unmatched>
     </test>
 
+    <test name="org.openjdk.jcstress.tests.volatiles.VolatileAcquireReleaseTest">
+        <contributed-by>Doug Lea (dl@cs.oswego.edu)</contributed-by>
+        <description>
+            Test if releasing volatile write induces ordering of corresponding acquiring read.
+        </description>
+        <case>
+            <match>[0, 0]</match>
+            <match>[0, 1]</match>
+            <match>[0, 2]</match>
+            <match>[0, 3]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Before obeserving releasing write to, any value is OK for $x.
+            </description>
+        </case>
+        <case>
+            <match>[1, 0]</match>
+            <match>[1, 1]</match>
+            <expect>FORBIDDEN</expect>
+            <description>
+                Can't read the default or old value for $x after $y is observed.
+            </description>
+        </case>
+        <case>
+            <match>[1, 2]</match>
+            <match>[1, 3]</match>
+            <expect>ACCEPTABLE</expect>
+            <description>
+                Can see a released value of $x if $y is observed.
+            </description>
+        </case>
+        <unmatched>
+            <expect>FORBIDDEN</expect>
+            <description>
+                This case is not expected.
+            </description>
+        </unmatched>
+    </test>
+
 </testsuite>
