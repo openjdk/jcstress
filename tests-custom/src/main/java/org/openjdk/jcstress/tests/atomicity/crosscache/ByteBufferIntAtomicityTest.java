@@ -25,7 +25,11 @@
 package org.openjdk.jcstress.tests.atomicity.crosscache;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
+import org.openjdk.jcstress.annotations.Ref;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.ByteResult4;
 
@@ -34,6 +38,12 @@ import java.nio.ByteOrder;
 import java.util.Random;
 
 @JCStressTest
+@Description("Tests if ByteBuffer breaks the atomicity while doing cross cache-line reads/writes.")
+@Outcome(id = "[0, 0, 0, 0]",     expect = Expect.ACCEPTABLE,      desc = "Seeing the default value, this is a legal race.")
+@Outcome(id = "[-1, -1, -1, -1]", expect = Expect.ACCEPTABLE,      desc = "Seeing the full value, this is a legal behavior.")
+@Outcome(                         expect = Expect.ACCEPTABLE_SPEC, desc = "Seeing the full value, this is a legal behavior.")
+@Ref("http://cs.oswego.edu/pipermail/concurrency-interest/2012-December/010390.html")
+@Ref("http://mail.openjdk.java.net/pipermail/core-libs-dev/2012-December/013133.html")
 @State
 public class ByteBufferIntAtomicityTest {
 

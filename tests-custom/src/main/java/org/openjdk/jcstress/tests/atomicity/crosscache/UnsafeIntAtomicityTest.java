@@ -25,7 +25,10 @@
 package org.openjdk.jcstress.tests.atomicity.crosscache;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.ByteResult4;
 import org.openjdk.jcstress.util.UnsafeHolder;
@@ -33,6 +36,9 @@ import org.openjdk.jcstress.util.UnsafeHolder;
 import java.util.Random;
 
 @JCStressTest
+@Description("Tests if Unsafe breaks the atomicity while doing cross cache-line reads/writes.")
+@Outcome(id = "[0, 0, 0, 0]",     expect = Expect.ACCEPTABLE, desc = "Seeing the default value, this is a legal race.")
+@Outcome(id = "[-1, -1, -1, -1]", expect = Expect.ACCEPTABLE, desc = "Seeing the full value, this is a legal behavior.")
 @State
 public class UnsafeIntAtomicityTest {
 
