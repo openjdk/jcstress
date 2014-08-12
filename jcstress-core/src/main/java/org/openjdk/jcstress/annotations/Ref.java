@@ -32,7 +32,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Reference element.
+ * Provides the external reference for the test case (URL, BibTeX, ISBN, etc.)
  */
 @Inherited
 @Target(ElementType.TYPE)

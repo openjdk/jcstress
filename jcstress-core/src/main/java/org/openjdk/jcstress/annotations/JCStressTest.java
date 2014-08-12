@@ -35,6 +35,8 @@ import java.lang.annotation.Target;
  * {@link Actor} and {@link Arbiter} annotations are used to describe test
  * behavior. {@link State} and {@link Result} annotations are used to
  * describe the test state.
+ * <p/>
+ * The grading for test is done with {@link Outcome} annotations.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

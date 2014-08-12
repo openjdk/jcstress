@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
 /**
  * Describes the test outcome.
  *
- * <p>Multiple cases with distinct states can be provided for a given test.</p>
+ * <p>Multiple outcomes with distinct IDs can be provided.</p>
  */
 @Inherited
 @Target(ElementType.TYPE)
