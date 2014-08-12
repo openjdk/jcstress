@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,39 +22,16 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.init.primitives.plain;
+package org.openjdk.jcstress.tests.init;
 
-import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.JCStressMeta;
-import org.openjdk.jcstress.annotations.JCStressTest;
-import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.DoubleResult1;
-import org.openjdk.jcstress.tests.init.Grading_DoubleCanSeeMost;
+import org.openjdk.jcstress.annotations.Expect;
+import org.openjdk.jcstress.annotations.Outcome;
+import org.openjdk.jcstress.annotations.Ref;
 
-@JCStressTest
-@JCStressMeta(Grading_DoubleCanSeeMost.class)
-@State
-public class DoublePlainTest {
 
-    Shell shell;
-
-    public static class Shell {
-        double x;
-
-        public Shell() {
-            this.x = Double.longBitsToDouble(0xFFFFFFFFFFFFFFFFL);
-        }
-    }
-
-    @Actor
-    public void actor1() {
-        shell = new Shell();
-    }
-
-    @Actor
-    public void actor2(DoubleResult1 r) {
-        Shell sh = shell;
-        r.r1 = (sh == null) ? 42 : sh.x;
-    }
-
+@Outcome(id = "[-1]", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
+@Outcome(id = "[42]", expect = Expect.ACCEPTABLE, desc = "The observer sees the empty shell. This is a legal JMM behavior, since there is a race between actor and observer.")
+@Outcome(             expect = Expect.ACCEPTABLE_SPEC, desc = "Seeing the torn value. This is specifically allowed by JLS. This is not a surprising behavior on some 32-bit systems which do not have full-width 64-bit instructions.")
+@Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
+public class Grading_LongShouldSeeFull {
 }

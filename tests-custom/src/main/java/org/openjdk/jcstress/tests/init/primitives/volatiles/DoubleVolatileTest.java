@@ -25,11 +25,14 @@
 package org.openjdk.jcstress.tests.init.primitives.volatiles;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.DoubleResult1;
+import org.openjdk.jcstress.tests.init.Grading_DoubleCanSeeMost;
 
 @JCStressTest
+@JCStressMeta(Grading_DoubleCanSeeMost.class)
 @State
 public class DoubleVolatileTest {
 

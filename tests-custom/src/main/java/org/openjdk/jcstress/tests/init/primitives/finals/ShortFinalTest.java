@@ -25,11 +25,14 @@
 package org.openjdk.jcstress.tests.init.primitives.finals;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.ShortResult1;
+import org.openjdk.jcstress.tests.init.Grading_IntShouldSeeFull;
 
 @JCStressTest
+@JCStressMeta(Grading_IntShouldSeeFull.class)
 @State
 public class ShortFinalTest {
 

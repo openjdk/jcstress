@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,39 +22,14 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.init.primitives.plain;
+package org.openjdk.jcstress.tests.init;
 
-import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.JCStressMeta;
-import org.openjdk.jcstress.annotations.JCStressTest;
-import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.DoubleResult1;
-import org.openjdk.jcstress.tests.init.Grading_DoubleCanSeeMost;
+import org.openjdk.jcstress.annotations.Expect;
+import org.openjdk.jcstress.annotations.Outcome;
 
-@JCStressTest
-@JCStressMeta(Grading_DoubleCanSeeMost.class)
-@State
-public class DoublePlainTest {
 
-    Shell shell;
-
-    public static class Shell {
-        double x;
-
-        public Shell() {
-            this.x = Double.longBitsToDouble(0xFFFFFFFFFFFFFFFFL);
-        }
-    }
-
-    @Actor
-    public void actor1() {
-        shell = new Shell();
-    }
-
-    @Actor
-    public void actor2(DoubleResult1 r) {
-        Shell sh = shell;
-        r.r1 = (sh == null) ? 42 : sh.x;
-    }
-
+@Outcome(id = "[A]", expect = Expect.ACCEPTABLE, desc = "Seeing the default value for field. The update to the field in the constructor is lost. This is a legal JMM behavior")
+@Outcome(id = "[B]", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
+@Outcome(id = "[N]", expect = Expect.ACCEPTABLE, desc = "The observer sees the empty shell. This is a legal JMM behavior, since there is a race between actor and observer.")
+public class Grading_CharCanSeeMost {
 }
