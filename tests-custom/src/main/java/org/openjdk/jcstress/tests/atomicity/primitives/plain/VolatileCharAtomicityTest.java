@@ -25,7 +25,9 @@
 package org.openjdk.jcstress.tests.atomicity.primitives.plain;
 
 import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.CharResult1;
 
@@ -35,6 +37,8 @@ import org.openjdk.jcstress.infra.results.CharResult1;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @JCStressTest
+@Outcome(id = "[N]", expect = Expect.ACCEPTABLE, desc = "Default value for the field. Observers are allowed to see the default value for the field, because there is the data race between reader and writer.")
+@Outcome(id = "[A]", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
 @State
 public class VolatileCharAtomicityTest {
 
