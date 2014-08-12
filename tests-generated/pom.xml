@@ -234,26 +234,6 @@ questions.
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>xml-maven-plugin</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>validate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <validationSets>
-                        <validationSet>
-                            <dir>src/main/resources</dir>
-                            <systemId>${project.basedir}/../jcstress-core/src/main/resources/xsd/descriptions/test-descriptions.xsd</systemId>
-                        </validationSet>
-                    </validationSets>
-                </configuration>
-            </plugin>
         </plugins>
 
     </build>
