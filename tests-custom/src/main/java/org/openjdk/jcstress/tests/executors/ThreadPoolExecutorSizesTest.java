@@ -49,7 +49,9 @@ public class ThreadPoolExecutorSizesTest {
 
     @Actor
     public void actor1() {
-        pool.setCorePoolSize(3);
+        try {
+            pool.setCorePoolSize(3);
+        } catch (IllegalArgumentException ignore) {}
     }
 
     @Actor
