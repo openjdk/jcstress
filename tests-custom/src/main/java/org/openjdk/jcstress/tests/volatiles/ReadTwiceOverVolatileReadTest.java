@@ -42,6 +42,7 @@ import org.openjdk.jcstress.infra.results.IntResult3;
 @Outcome(id = "[0, 1, 0]", expect = Expect.FORBIDDEN,  desc = "Volatile write to $y had happened, and update to $x had been lost.")
 @Outcome(id = "[1, 1, 0]", expect = Expect.FORBIDDEN,  desc = "Volatile write to $y had happened, and update to $x had been lost.")
 @Outcome(id = "[0, 0, 1]", expect = Expect.ACCEPTABLE, desc = "Write to $y is still in flight, $x is arriving late.")
+@Outcome(id = "[1, 0, 1]", expect = Expect.ACCEPTABLE, desc = "Write to $y is still in flight, $x has arrived.")
 @Outcome(id = "[0, 1, 1]", expect = Expect.ACCEPTABLE, desc = "The writes appear the the writers' order.")
 @Outcome(id = "[1, 1, 1]", expect = Expect.ACCEPTABLE, desc = "Both updates are visible.")
 @Ref("http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7170145")
