@@ -71,8 +71,7 @@ questions.
                             generate-sources
                         </phase>
                         <configuration>
-                            <!--<skip>true</skip>-->
-                            <executable>java</executable>
+                            <executable>${java.home}/bin/java</executable>
                             <arguments>
                                 <argument>-jar</argument>
                                 <argument>../jcstress-test-gen/target/test-gen.jar</argument>
@@ -90,8 +89,7 @@ questions.
                             generate-sources
                         </phase>
                         <configuration>
-                            <!--<skip>true</skip>-->
-                            <executable>java</executable>
+                            <executable>${java.home}/bin/java</executable>
                             <arguments>
                                 <argument>-jar</argument>
                                 <argument>../jcstress-test-gen/target/volatile-tracegen.jar</argument>
