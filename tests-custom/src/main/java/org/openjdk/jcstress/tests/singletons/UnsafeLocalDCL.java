@@ -25,59 +25,64 @@
 package org.openjdk.jcstress.tests.singletons;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.Description;
-import org.openjdk.jcstress.annotations.Expect;
+import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
-import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult1;
 
+import java.util.function.Supplier;
+
 /**
- * Tests the safe double-checked locking singleton.
+ * Tests the unsafe double-checked locking singleton.
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-@JCStressTest
-@Description("Tests the safe volatile case.")
-@Outcome(id = "[0]",  expect = Expect.FORBIDDEN,  desc = "Factory returned null singleton. This is the major correctness issue.")
-@Outcome(id = "[1]",  expect = Expect.FORBIDDEN,  desc = "The reference field in singleton is null. This is forbidden by JMM.")
-@Outcome(id = "[42]", expect = Expect.ACCEPTABLE, desc = "The singleton is observed in fully-constructed way.")
-public class SafeDCLSingletonTest {
+public class UnsafeLocalDCL {
 
-    @Actor
-    public final void actor1(SafeSingletonFactory s) {
-        s.getInstance();
+    @JCStressTest
+    @JCStressMeta(GradingUnsafe.class)
+    public static class Unsafe {
+        @Actor
+        public final void actor1(UnsafeSingletonFactory s) {
+            s.getInstance(SingletonUnsafe::new);
+        }
+
+        @Actor
+        public final void actor2(UnsafeSingletonFactory s, IntResult1 r) {
+            r.r1 = Singleton.map(s.getInstance(SingletonUnsafe::new));
+        }
     }
 
-    @Actor
-    public final void actor2(SafeSingletonFactory s, IntResult1 r) {
-        Singleton singleton = s.getInstance();
-        if (singleton == null) {
-            r.r1 = 0;
-            return;
+    @JCStressTest
+    @JCStressMeta(GradingSafe.class)
+    public static class Safe {
+        @Actor
+        public final void actor1(UnsafeSingletonFactory s) {
+            s.getInstance(SingletonSafe::new);
         }
 
-        if (singleton.x == null) {
-            r.r1 = 1;
-            return;
+        @Actor
+        public final void actor2(UnsafeSingletonFactory s, IntResult1 r) {
+            r.r1 = Singleton.map(s.getInstance(SingletonSafe::new));
         }
-
-        r.r1 = singleton.x;
     }
 
     @State
-    public static class SafeSingletonFactory {
-        private volatile Singleton instance;
+    public static class UnsafeSingletonFactory {
+        private Singleton instance; // specifically non-volatile
 
-        public Singleton getInstance() {
-            if (instance == null) {
+        public Singleton getInstance(Supplier<Singleton> s) {
+            Singleton i = instance;
+            if (i == null) {
                 synchronized (this) {
-                    if (instance == null) {
-                        instance = new Singleton();
+                    i = instance;
+                    if (i == null) {
+                        i = s.get();
+                        instance = i;
                     }
                 }
             }
-            return instance;
+            return i;
         }
     }
 

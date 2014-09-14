@@ -24,17 +24,12 @@
  */
 package org.openjdk.jcstress.tests.singletons;
 
-public interface Singleton {
+public class SingletonUnsafe implements Singleton {
+    Byte x;
+    public SingletonUnsafe() { x = 42; }
 
-    Byte x();
-
-    public static int map(Singleton singleton) {
-        if (singleton == null) {
-            return 0;
-        }
-        if (singleton.x() == null) {
-            return 1;
-        }
-        return singleton.x();
+    @Override
+    public Byte x() {
+        return x;
     }
 }

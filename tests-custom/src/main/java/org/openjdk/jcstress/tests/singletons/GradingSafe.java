@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,17 +24,13 @@
  */
 package org.openjdk.jcstress.tests.singletons;
 
-public interface Singleton {
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
+import org.openjdk.jcstress.annotations.Outcome;
 
-    Byte x();
-
-    public static int map(Singleton singleton) {
-        if (singleton == null) {
-            return 0;
-        }
-        if (singleton.x() == null) {
-            return 1;
-        }
-        return singleton.x();
-    }
+@Description("Tests the safe singleton pattern.")
+@Outcome(id = "[0]",  expect = Expect.FORBIDDEN,  desc = "Factory returned null singleton.")
+@Outcome(id = "[1]",  expect = Expect.FORBIDDEN,  desc = "The singleton data is null.")
+@Outcome(id = "[42]", expect = Expect.ACCEPTABLE, desc = "The singleton is observed in full.")
+public class GradingSafe {
 }

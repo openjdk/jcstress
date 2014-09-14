@@ -25,10 +25,8 @@
 package org.openjdk.jcstress.tests.singletons;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.Description;
-import org.openjdk.jcstress.annotations.Expect;
+import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
-import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult1;
 
@@ -37,57 +35,55 @@ import org.openjdk.jcstress.infra.results.IntResult1;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-@JCStressTest
-@Description("Tests the final wrapper case.")
-@Outcome(id = "[0]",  expect = Expect.FORBIDDEN,  desc = "Factory returned null singleton. This is the major correctness issue.")
-@Outcome(id = "[1]",  expect = Expect.FORBIDDEN,  desc = "The reference field in singleton is null. This is forbidden by JMM.")
-@Outcome(id = "[42]", expect = Expect.ACCEPTABLE, desc = "The singleton is observed in fully-constructed way.")
-public class FinalWrapperSingletonTest {
+public class Holder {
 
-    @Actor
-    public final void actor1(FinalWrapperFactory s) {
-        s.getInstance();
+    @JCStressTest
+    @JCStressMeta(GradingSafe.class)
+    public static class Unsafe {
+        @Actor
+        public final void actor1(UnsafeHolderFactory s) {
+            s.getInstance();
+        }
+
+        @Actor
+        public final void actor2(UnsafeHolderFactory s, IntResult1 r) {
+            r.r1 = Singleton.map(s.getInstance());
+        }
     }
 
-    @Actor
-    public final void actor2(FinalWrapperFactory s, IntResult1 r) {
-        Singleton singleton = s.getInstance();
-        if (singleton == null) {
-            r.r1 = 0;
-            return;
+    @JCStressTest
+    @JCStressMeta(GradingSafe.class)
+    public static class Safe {
+        @Actor
+        public final void actor1(SafeHolderFactory s) {
+            s.getInstance();
         }
 
-        if (singleton.x == null) {
-            r.r1 = 1;
-            return;
+        @Actor
+        public final void actor2(SafeHolderFactory s, IntResult1 r) {
+            r.r1 = Singleton.map(s.getInstance());
         }
-
-        r.r1 = singleton.x;
     }
 
     @State
-    public static class FinalWrapperFactory {
-        private FinalWrapper wrapper;
-
+    public static class SafeHolderFactory {
         public Singleton getInstance() {
-            FinalWrapper w = wrapper;
-            if (w == null) {
-                synchronized(this) {
-                    w = wrapper;
-                    if (w == null) {
-                        w = new FinalWrapper(new Singleton());
-                        wrapper = w;
-                    }
-                }
-            }
-            return w.instance;
+            return H.INSTANCE;
         }
 
-        private static class FinalWrapper {
-            public final Singleton instance;
-            public FinalWrapper(Singleton instance) {
-                this.instance = instance;
-            }
+        public static class H {
+            public static final Singleton INSTANCE = new SingletonSafe();
+        }
+    }
+
+    @State
+    public static class UnsafeHolderFactory {
+        public Singleton getInstance() {
+            return H.INSTANCE;
+        }
+
+        public static class H {
+            public static final Singleton INSTANCE = new SingletonUnsafe();
         }
     }
 
