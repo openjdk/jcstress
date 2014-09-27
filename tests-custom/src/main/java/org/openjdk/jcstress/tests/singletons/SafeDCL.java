@@ -43,12 +43,12 @@ public class SafeDCL {
     @JCStressMeta(GradingSafe.class)
     public static class Unsafe {
         @Actor
-        public final void actor1(SafeSingletonFactory s) {
+        public final void actor1(SafeDCLFactory s) {
             s.getInstance(SingletonUnsafe::new);
         }
 
         @Actor
-        public final void actor2(SafeSingletonFactory s, IntResult1 r) {
+        public final void actor2(SafeDCLFactory s, IntResult1 r) {
             r.r1 = Singleton.map(s.getInstance(SingletonUnsafe::new));
         }
     }
@@ -57,18 +57,18 @@ public class SafeDCL {
     @JCStressMeta(GradingSafe.class)
     public static class Safe {
         @Actor
-        public final void actor1(SafeSingletonFactory s) {
+        public final void actor1(SafeDCLFactory s) {
             s.getInstance(SingletonSafe::new);
         }
 
         @Actor
-        public final void actor2(SafeSingletonFactory s, IntResult1 r) {
+        public final void actor2(SafeDCLFactory s, IntResult1 r) {
             r.r1 = Singleton.map(s.getInstance(SingletonSafe::new));
         }
     }
 
     @State
-    public static class SafeSingletonFactory {
+    public static class SafeDCLFactory {
         private volatile Singleton instance;
 
         public Singleton getInstance(Supplier<Singleton> s) {
