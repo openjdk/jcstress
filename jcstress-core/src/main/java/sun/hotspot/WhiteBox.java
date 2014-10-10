@@ -1,12 +1,10 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -21,7 +19,9 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
+ *
  */
+
 package sun.hotspot;
 
 import java.lang.reflect.Executable;
@@ -100,8 +100,8 @@ public class WhiteBox {
     return isMethodCompiled(method, false /*not osr*/);
   }
   public native boolean isMethodCompiled(Executable method, boolean isOsr);
-  public boolean isMethodCompilable(Executable method) {
-      return isMethodCompilable(method, -1 /*any*/);
+  public        boolean isMethodCompilable(Executable method) {
+    return isMethodCompilable(method, -1 /*any*/);
   }
   public        boolean isMethodCompilable(Executable method, int compLevel) {
     return isMethodCompilable(method, compLevel, false /*not osr*/);
@@ -112,8 +112,8 @@ public class WhiteBox {
     return deoptimizeMethod(method, false /*not osr*/);
   }
   public native int     deoptimizeMethod(Executable method, boolean isOsr);
-  public void makeMethodNotCompilable(Executable method) {
-      makeMethodNotCompilable(method, -1 /*any*/);
+  public        void    makeMethodNotCompilable(Executable method) {
+    makeMethodNotCompilable(method, -1 /*any*/);
   }
   public        void    makeMethodNotCompilable(Executable method, int compLevel) {
     makeMethodNotCompilable(method, compLevel, false /*not osr*/);
@@ -135,6 +135,7 @@ public class WhiteBox {
   public native boolean enqueueMethodForCompilation(Executable method, int compLevel, int entry_bci);
   public native void    clearMethodState(Executable method);
   public native int     getMethodEntryBci(Executable method);
+  public native Object[] getNMethod(Executable method, boolean isOsr);
 
   // Intered strings
   public native boolean isInStringTable(String str);
@@ -149,5 +150,8 @@ public class WhiteBox {
   public native int stressVirtualSpaceResize(long reservedSpaceSize, long magnitude, long iterations);
   public native void runMemoryUnitTests();
   public native void readFromNoaccessArea();
+
+  // CPU features
+  public native String getCPUFeatures();
 
 }
