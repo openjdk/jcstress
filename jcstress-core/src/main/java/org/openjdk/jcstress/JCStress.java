@@ -282,7 +282,7 @@ public class JCStress {
 
         Pattern pattern = Pattern.compile(filter);
         for (String testName : TestList.tests()) {
-            if (pattern.matcher(testName).matches()) {
+            if (pattern.matcher(testName).find()) {
                 s.add(testName);
             }
         }
