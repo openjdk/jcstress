@@ -154,57 +154,75 @@ public class ConsoleReportPrinter implements TestResultCollector {
         }
 
         if (isVerbose) {
-            int len = 35;
+            int idLen = "Observed state".length();
+            int occLen = "Occurrences".length();
+            int expectLen = "Expectation".length();
+            int descLen = 60;
+
+            for (State s : r.getStates()) {
+                idLen = Math.max(idLen, s.getId().length());
+                occLen = Math.max(occLen, String.format("%,d", s.getCount()).length());
+                expectLen = Math.max(expectLen, Expect.UNKNOWN.toString().length());
+            }
+
+            idLen += 2;
+            occLen += 2;
 
             TestInfo test = TestList.getInfo(r.getName());
             if (test == null) {
-                output.printf("%" + len + "s %15s %18s %-20s\n", "Observed state", "Occurrences", "Expectation", "Interpretation");
+                output.printf("%" + idLen + "s %" + occLen +"s %" + expectLen + "s  %-" + descLen + "s%n", "Observed state", "Occurrences", "Expectation", "Interpretation");
                 for (State s : r.getStates()) {
-                    output.printf("%" + len + "s (%,13d) %18s %-40s\n",
-                            cutoff(s.getId(), len),
+                    output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
+                            cutoff(s.getId(), idLen),
                             s.getCount(),
                             Expect.UNKNOWN,
                             "N/A");
                 }
-
                 return;
             }
 
-            output.printf("%" + len + "s %15s %18s %-20s\n", "Observed state", "Occurrences", "Expectation", "Interpretation");
+            for (StateCase c : test.cases()) {
+                expectLen = Math.max(expectLen, c.expect().toString().length());
+            }
+            expectLen = Math.max(expectLen, test.unmatched().expect().toString().length());
+            expectLen += 2;
+
+            output.printf("%" + idLen + "s %" + occLen +"s %" + expectLen + "s  %-" + descLen + "s%n", "Observed state", "Occurrences", "Expectation", "Interpretation");
 
             List<State> unmatchedStates = new ArrayList<>();
             unmatchedStates.addAll(r.getStates());
+
             for (StateCase c : test.cases()) {
                 boolean matched = false;
 
                 for (State s : r.getStates()) {
                     if (c.state().equals(s.getId())) {
                         // match!
-                        output.printf("%" + len + "s (%,13d) %18s %-60s\n",
-                                cutoff(s.getId(), len),
+                        output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
+                                cutoff(s.getId(), idLen),
                                 s.getCount(),
                                 c.expect(),
-                                cutoff(c.description(), 60));
+                                cutoff(c.description(), descLen));
                         matched = true;
                         unmatchedStates.remove(s);
                     }
                 }
 
                 if (!matched) {
-                    output.printf("%" + len + "s (%,13d) %18s %-60s\n",
-                                cutoff(c.state(), len),
+                    output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
+                                cutoff(c.state(), idLen),
                                 0,
                                 c.expect(),
-                                cutoff(c.description(), 60));
+                                cutoff(c.description(), descLen));
                 }
             }
 
             for (State s : unmatchedStates) {
-                output.printf("%" + len + "s (%,13d) %18s %-60s\n",
-                        cutoff(s.getId(), len),
+                output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
+                        cutoff(s.getId(), idLen),
                         s.getCount(),
                         test.unmatched().expect(),
-                        cutoff(test.unmatched().description(), 60));
+                        cutoff(test.unmatched().description(), descLen));
             }
 
             output.println();
