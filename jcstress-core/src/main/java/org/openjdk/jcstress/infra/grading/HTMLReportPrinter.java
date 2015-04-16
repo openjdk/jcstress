@@ -456,7 +456,7 @@ public class HTMLReportPrinter {
         cellStyle = 3 - cellStyle;
         output.println("<tr class=\"cell" + cellStyle + "\">");
         output.println("<td>&nbsp;&nbsp;&nbsp;<a href=\"" + result.getName() + ".html\">" + cutKlass(result.getName()) + "</a></td>");
-        output.printf("<td>> 10<sup>%d</sup></td>", getRoughCount(result));
+        output.printf("<td>%s</td>", getRoughCount(result));
         if (description != null) {
             TestGrading grading = new TestGrading(result, description);
             if (grading.isPassed) {
@@ -527,13 +527,17 @@ public class HTMLReportPrinter {
         output.println("</tr>");
     }
 
-    public static int getRoughCount(TestResult r) {
+    public static String getRoughCount(TestResult r) {
         long sum = 0;
         for (State s : r.getStates()) {
             sum += s.getCount();
         }
 
-        return (int) Math.floor(Math.log10(sum));
+        if (sum > 10) {
+            return "10<sup>" + (int) Math.floor(Math.log10(sum)) + "</sup>";
+        } else {
+            return String.valueOf(sum);
+        }
     }
 
 
