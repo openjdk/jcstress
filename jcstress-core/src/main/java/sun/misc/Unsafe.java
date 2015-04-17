@@ -140,8 +140,6 @@ public abstract class Unsafe {
 
     public abstract void freeMemory(long address);
 
-    public abstract int fieldOffset(Field f);
-
     public abstract Object staticFieldBase(Class<?> c);
 
     public abstract long staticFieldOffset(Field f);
