@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,24 +22,33 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.annotations;
+package org.openjdk.jcstress.tests.strings;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.openjdk.jcstress.annotations.*;
+import org.openjdk.jcstress.infra.results.StringResult1;
 
-/**
- * Annotates the class that is treated as the result object.
- * <p/>
- * Important invariants:
- *   - Result classes usually mimic value types: they do not have identity, and harness
- *     may reuse the objects, and also auto-magically clear the fields;
- *   - All fields in Result classes should be public;
- *   - All fields in Result classes should be primitive, or String;
- *   - Result classes should be serializable;
- */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Result {
+@JCStressTest
+@Description("Tests the StringBuffers are working good under concurrent updates.")
+@Outcome(id = "[fb]", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution.")
+@Outcome(id = "[bf]", expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution.")
+@State
+public class StringBufferTest {
+
+    StringBuffer sb = new StringBuffer();
+
+    @Actor
+    public void actor1() {
+        sb.append('f');
+    }
+
+    @Actor
+    public void actor2() {
+        sb.append('b');
+    }
+
+    @Arbiter
+    public void tester(StringResult1 r) {
+        r.r1 = sb.toString();
+    }
+
 }
