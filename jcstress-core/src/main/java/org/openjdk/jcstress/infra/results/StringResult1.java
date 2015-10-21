@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,36 +22,40 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.strings;
+package org.openjdk.jcstress.infra.results;
 
-import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.StringResult1;
+import org.openjdk.jcstress.annotations.Result;
+import sun.misc.Contended;
 
-@JCStressTest
-@Description("Tests the StringBuffers are working good under concurrent updates.")
-@Outcome(id = "[bbbbbbbbbbbbbbbbbbbb]", expect = Expect.ACCEPTABLE, desc = "All appends are visible")
-@State
-public class StringBufferTest {
+import java.io.Serializable;
+import java.util.Objects;
 
-    StringBuffer sb = new StringBuffer(0);
+@Result
+public class StringResult1 implements Serializable {
 
-    @Actor
-    public void actor1() {
-        for (int i = 0; i < 10; ++i) {
-            sb.append('b');
-        }
+    @Contended
+    public String r1;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        StringResult1 that = (StringResult1) o;
+
+        if (r1 != null ? !r1.equals(that.r1) : that.r1 != null) return false;
+
+        return true;
     }
 
-    @Actor
-    public void actor2() {
-        for (int i = 0; i < 10; ++i) {
-            sb.append('b');
-        }
+    @Override
+    public int hashCode() {
+        return r1 != null ? r1.hashCode() : 0;
     }
 
-    @Arbiter
-    public void tester(StringResult1 r) {
-        r.r1 = sb.toString();
+    @Override
+    public String toString() {
+        return "[" + r1 + ']';
     }
 
 }

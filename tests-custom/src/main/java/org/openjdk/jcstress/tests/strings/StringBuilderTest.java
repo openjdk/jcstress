@@ -29,27 +29,42 @@ import org.openjdk.jcstress.infra.results.StringResult1;
 
 @JCStressTest
 @Description("Tests the StringBuilders are working good under concurrent updates.")
-@Outcome(id = "[fb]", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution.")
-@Outcome(id = "[bf]", expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution.")
+@Outcome(id = "[bbbbbbbbbbbbbbbbbbbb]", expect = Expect.ACCEPTABLE, desc = "All appends are visible.")
 @Outcome(expect = Expect.ACCEPTABLE_INTERESTING, desc = "Other values are expected, threads are messing with each other.")
 @State
 public class StringBuilderTest {
 
-    StringBuilder sb = new StringBuilder();
+    StringBuilder sb = new StringBuilder(0);
 
     @Actor
     public void actor1() {
-        sb.append('f');
+        try {
+            for (int i = 0; i < 10; ++i) {
+                sb.append('b');
+            }
+        } catch (Exception e) {
+            // most probably AIOOBE, expected for this test
+        }
     }
 
     @Actor
     public void actor2() {
-        sb.append('b');
+        try {
+            for (int i = 0; i < 10; ++i) {
+                sb.append('b');
+            }
+        } catch (Exception e) {
+            // most probably AIOOBE, expected for this test
+        }
     }
 
     @Arbiter
     public void tester(StringResult1 r) {
-        r.r1 = sb.toString();
+        try {
+            r.r1 = sb.toString();
+        } catch (Exception e) {
+            r.r1 = "<ERROR>";
+        }
     }
 
 }
