@@ -32,10 +32,10 @@ questions.
         <artifactId>jcstress-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>jcstress-tests-chapter-0b</artifactId>
+    <artifactId>jcstress-tests-chapter-1a</artifactId>
     <packaging>jar</packaging>
 
-    <name>Chapter 0.b: Language Foundations: Sequential Consistency, Volatiles</name>
+    <name>Chapter 1.a: Library Foundations: Atomics</name>
     <url>http://maven.apache.org</url>
 
     <scm>
@@ -65,7 +65,7 @@ questions.
                 <version>1.2.1</version>
                 <executions>
                     <execution>
-                        <id>volatiles</id>
+                        <id>gen</id>
                         <goals>
                             <goal>exec</goal>
                         </goals>
@@ -76,8 +76,9 @@ questions.
                             <executable>${java.home}/bin/java</executable>
                             <arguments>
                                 <argument>-jar</argument>
-                                <argument>../jcstress-test-gen/target/chapter0b-generator.jar</argument>
+                                <argument>../jcstress-test-gen/target/test-gen.jar</argument>
                                 <argument>${project.build.directory}/generated-sources/tests/</argument>
+                                <argument>${project.build.directory}/generated-resources/</argument>
                             </arguments>
                         </configuration>
                     </execution>

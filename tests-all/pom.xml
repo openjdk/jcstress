@@ -88,5 +88,15 @@ questions.
             <artifactId>jcstress-tests-chapter-0b</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjdk.jcstress</groupId>
+            <artifactId>jcstress-tests-chapter-0c</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jcstress</groupId>
+            <artifactId>jcstress-tests-chapter-1a</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

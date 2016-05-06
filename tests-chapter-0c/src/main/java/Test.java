@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+/**
+ * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,56 +22,6 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tracer;
-
-public class Op {
-
-    private static int IDS;
-
-    private final Type type;
-    private final int varId;
-    private final int resId;
-
-    public Op(Type type, int varId) {
-        this(type, varId, -1);
-    }
-
-    public Op(Type type, int varId, int resId) {
-        this.type = type;
-        this.varId = varId;
-        this.resId = resId;
-    }
-
-    public int getResId() {
-        return resId;
-    }
-
-    public Op setResId(int resId) {
-        return new Op(type, varId, resId);
-    }
-
-    public enum Type {
-        LOAD,
-        STORE,
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public int getVarId() {
-        return varId;
-    }
-
-    @Override
-    public String toString() {
-        switch (type) {
-            case LOAD:
-                return "r" + resId + " = x" + varId;
-            case STORE:
-                return "x" + varId + " = C" + resId;
-            default:
-                throw new IllegalStateException();
-        }
-    }
+// Stub to break the habit of revision control systems to remove empty dirs
+public class Test {
 }

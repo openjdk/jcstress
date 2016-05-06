@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+/**
+ * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,21 +22,6 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress;
-
-import org.openjdk.jcstress.generator.TestGenerator;
-import org.openjdk.jcstress.tracer.TraceGen;
-
-import java.io.FileNotFoundException;
-
-public class TraceGenMain {
-
-    public static void main(String[] args) throws FileNotFoundException {
-        if (args.length >= 2) {
-            new TraceGen(3, args[0], args[1]).generate();
-        } else {
-            throw new IllegalStateException("Please provide the destination dir");
-        }
-    }
-
+// Stub to break the habit of revision control systems to remove empty dirs
+public class Test {
 }

@@ -166,6 +166,8 @@ questions.
         <module>tests-custom</module>
         <module>tests-chapter-0a</module>
         <module>tests-chapter-0b</module>
+        <module>tests-chapter-0c</module>
+        <module>tests-chapter-1a</module>
         <module>tests-all</module>
     </modules>
 
