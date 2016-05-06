@@ -33,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Chapter0aTestGenerator {
 
@@ -185,7 +186,24 @@ public class Chapter0aTestGenerator {
         Path dir = Paths.get(destination, pkg.replaceAll("\\.", File.separator));
         Path file = Paths.get(destination, pkg.replaceAll("\\.", File.separator), name + ".java");
         Files.createDirectories(dir);
-        Files.write(file, Arrays.asList(contents), Charset.defaultCharset());
+
+        boolean doWrite = true;
+        try {
+            List<String> l = Files.readAllLines(file);
+            String exists = l.stream().collect(Collectors.joining(System.lineSeparator()));
+            if (contents.equals(exists)) {
+                doWrite = false;
+            }
+        } catch (IOException e) {
+            // Moving on...
+        }
+
+        if (doWrite) {
+            System.out.println("Generating: " + file);
+            Files.write(file, Arrays.asList(contents), Charset.defaultCharset());
+        } else {
+            System.out.println("Skip, no modifications: " + file);
+        }
     }
 
     private static String readFromResource(String name) throws IOException {
