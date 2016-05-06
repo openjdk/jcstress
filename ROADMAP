@@ -1,8 +1,8 @@
 TESTS AND HARNESS ROADMAPS
 -----------------------------------------------------------------------
 
-We can separate the tests in the several tiers. Often, it does not make
-sense to move to the next major tier if there are bugs in the lower tiers.
+We can separate the tests in the several chapters. Often, it does not make
+sense to move to the next major chapters if there are bugs in the lower chapters.
 
 Legend:
  "----"    -- status is not applicable (the test group)
@@ -12,63 +12,29 @@ Legend:
  "DONE"    -- all planned tests are done
  "PARTIAL" -- some of the tests are complete
 
-==== TIER 0.a: LANGUAGE FOUNDATION
+==== CHAPTER 0.a: LANGUAGE FOUNDATION: Basic properties
 
---------- primitives:
- ....       default values
----------   read/write atomicity
- DONE         plain ops
- DONE         volatile ops
- DONE         per-byte plain ops
- DONE         per-byte volatile ops
----------   reflective read/write atomicity
- ....         plain ops
- ....         volatile ops
- ....         per-byte plain ops
- ....         per-byte volatile ops
----------
---------- arrays:
- DONE       default values
----------   read/write atomicity
- DONE         plain ops
- DONE         per-byte plain ops
- ....         volatile ops
- ....         per-byte volatile ops
----------   reflective read/write atomicity
- ....         plain ops
- ....         per-byte plain ops
- ....         volatile ops
- ....         per-byte volatile ops
----------   word tearing
- ....         small arrays with plain ops
- ....         large arrays with plain ops
- ....         small arrays with volatile ops
- ....         large arrays with volatile ops
----------
---------- objects:
----------   initialization safety
- DONE         instance constructors
- DONE         instance initializers
- DONE         final fields
- DONE         volatile fields
- DONE         fenced constructions
----------   lazy initialization
- DONE         against plain fields
- DONE         against volatile fields
- DONE         against cached volatile fields
+Tests the very basic properties of Java Language:
+  a) access atomicity;
+  b) default values;
+  c) initialization safety;
+  d) word tearing
 
+This is done only on the basic language constructs: fields and arrays.
 
-==== TIER 0.b: LANGUAGE FOUNDATION: BASIC MEMORY EFFECTS
+Add:
+  - per-byte reads and writes, known to trip optimizers into doing multiple ops
+  - initialization with fences?
 
- (we need to greatly expand this)
+==== CHAPTER 0.b: LANGUAGE FOUNDATION: Basic memory effects
 
- volatiles:
-   acquire/release effects
-   non-volatile IRIW
-   volatile IRIW
- fences
+Tests the memory effects:
+  a) sequential consistency of synchronized actions;
+  b) happens-before effects;
 
-==== TIER 1.a: CORE LIBRARY FOUNDATIONS: ATOMICS
+Both are tested only on the basic language constructs: volatiles.
+
+==== CHAPTER 1.a: CORE LIBRARY FOUNDATIONS: ATOMICS
 
 --------- scalars:
 ---------   atomic/AtomicBoolean
@@ -161,7 +127,9 @@ Legend:
  ....         memory effects across the ops
 
 
-==== TIER 1.b: CORE LIBRARY FOUNDATIONS: SYNCHRONIZERS
+==== CHAPTER 1.b: CORE LIBRARY FOUNDATIONS: VARHANDLES
+
+==== CHAPTER 1.c: CORE LIBRARY FOUNDATIONS: SYNCHRONIZERS
 
 Q: tons of methods, we should probably cover the "protected" only?
 Q: we can skip it and rely on testing the implementations on higher tiers?
@@ -171,7 +139,7 @@ Q: we can skip it and rely on testing the implementations on higher tiers?
 --------- locks/AbstractQueuedLongSynchronizer
  #####      TBD
 
-==== TIER 2.a: CORE LIBRARY: LOCKS
+==== CHAPTER 2.c: CORE LIBRARY: LOCKS
 
 --------- synchronized
  DONE       mutual exclusion
@@ -204,7 +172,7 @@ Q: we can skip it and rely on testing the implementations on higher tiers?
  ....       starvation avoidance
  ....       fairness
 
-==== TIER 2.b: CORE LIBRARY: AUXILIARY ATOMICS
+==== CHAPTER 2.d: CORE LIBRARY: AUXILIARY ATOMICS
 
 --------- atomic/DoubleAccumulator
  ....       racy updates
@@ -219,7 +187,7 @@ Q: we can skip it and rely on testing the implementations on higher tiers?
  ....       racy updates
  ....       racy resets
 
-==== TIER 2.c: CORE LIBRARY: USER SYNCHRONIZERS
+==== CHAPTER 2.e: CORE LIBRARY: USER SYNCHRONIZERS
 
 --------- CountDownLatch
  ....       initial state
@@ -243,7 +211,11 @@ Q: we can skip it and rely on testing the implementations on higher tiers?
 --------- FutureTask
  ####       TBD
 
-==== TIER 3.x: CORE LIBRARY: EXECUTORS
+==== CHAPTER 3.x: CORE LIBRARY: REFLECTION
+
+==== CHAPTER 3.x: CORE LIBRARY: BUFFERS
+
+==== CHAPTER 3.x: CORE LIBRARY: EXECUTORS
 
 --------- ScheduledThreadPoolExecutor
  ####       TBD
@@ -262,7 +234,7 @@ Q: we can skip it and rely on testing the implementations on higher tiers?
 --------- RecursiveTask
  ####       TBD
 
-==== TIER 3.x: CORE LIBRARY: CONCURRENT COLLECTIONS
+==== CHAPTER 3.x: CORE LIBRARY: CONCURRENT COLLECTIONS
 
 --------- ConcurrentHashMap
  ####       TBD
@@ -279,7 +251,7 @@ Q: we can skip it and rely on testing the implementations on higher tiers?
 --------- ReadMostlyVector
  ####       TBD
 
-==== TIER 3.x: CORE LIBRARY: QUEUES
+==== CHAPTER 3.x: CORE LIBRARY: QUEUES
 
 --------- ArrayBlockingQueue
  ####       TBD
@@ -300,12 +272,12 @@ Q: we can skip it and rely on testing the implementations on higher tiers?
 --------- DelayQueue
  ####       TBD
 
-==== TIER 4.x: OTHER
+==== CHAPTER 4.x: OTHER
 
 --------- ThreadLocalRandom
  ####       TBD
 
-==== TIER 5.x: OTHER LIBRARY
+==== CHAPTER 5.x: OTHER LIBRARY
 
 --------- java.nio.buffers
  ####       read/write atomicity tests
