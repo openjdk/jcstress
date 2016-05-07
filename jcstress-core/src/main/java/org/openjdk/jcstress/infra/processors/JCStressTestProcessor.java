@@ -304,11 +304,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         pw.println("        Collection<Future<?>> res = new ArrayList<>();");
         for (ExecutableElement el : info.getActors()) {
-            pw.println("        res.add(pool.submit(new Runnable() {");
-            pw.println("            public void run() {");
-            emitMethod(pw, el, "                t." + el.getSimpleName(), "s", "r");
-            pw.println("            }");
-            pw.println("        }));");
+            pw.print("        res.add(pool.submit(() -> ");
+            emitMethod(pw, el, "t." + el.getSimpleName(), "s", "r", false);
+            pw.println("));");
         }
 
         pw.println("        for (Future<?> f : res) {");
@@ -320,7 +318,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        }");
 
         if (info.getArbiter() != null) {
-            emitMethod(pw, info.getArbiter(), "        t." + info.getArbiter().getSimpleName(), "s", "r");
+            emitMethod(pw, info.getArbiter(), "        t." + info.getArbiter().getSimpleName(), "s", "r", true);
         }
 
         pw.println("    }");
@@ -341,8 +339,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        control.isStopped = false;");
         pw.println("        Collection<Future<?>> tasks = new ArrayList<>();");
 
+        pw.println("        Base base = new Base(control, counter, test, version, epoch);");
         for (ExecutableElement a : info.getActors()) {
-            pw.println("        tasks.add(pool.submit(new Runner_" + a.getSimpleName() + "(control, counter, test, version, epoch)));");
+            pw.println("        tasks.add(pool.submit(base::" + a.getSimpleName() + "));");
         }
 
         pw.println();
@@ -359,14 +358,14 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    }");
         pw.println();
 
-        pw.println("    public abstract static class RunnerBase {");
+        pw.println("    public static final class Base {");
         pw.println("        final Control control;");
         pw.println("        final Counter<" + r + "> counter;");
         pw.println("        final " + t + " test;");
         pw.println("        final AtomicReference<StateHolder<Pair>> version;");
         pw.println("        final AtomicInteger epoch;");
         pw.println();
-        pw.println("        public RunnerBase(Control control, Counter<" + r + "> counter, " + t + " test, AtomicReference<StateHolder<Pair>> version, AtomicInteger epoch) {");
+        pw.println("        public Base(Control control, Counter<" + r + "> counter, " + t + " test, AtomicReference<StateHolder<Pair>> version, AtomicInteger epoch) {");
         pw.println("            this.control = control;");
         pw.println("            this.counter = counter;");
         pw.println("            this.test = test;");
@@ -374,7 +373,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("            this.epoch = epoch;");
         pw.println("        }");
         pw.println();
-        pw.println("        public void newEpoch(StateHolder<Pair> holder) {");
+        pw.println("        public final void newEpoch(StateHolder<Pair> holder) {");
 
         pw.println("            Pair[] pairs = holder.pairs;");
         pw.println("            int len = pairs.length;");
@@ -383,9 +382,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println();
             pw.println("             for (Pair p : pairs) {");
             if (info.getState().equals(info.getTest())) {
-                emitMethod(pw, info.getArbiter(), "                p.s." + info.getArbiter().getSimpleName(), "p.s", "p.r");
+                emitMethod(pw, info.getArbiter(), "                p.s." + info.getArbiter().getSimpleName(), "p.s", "p.r", true);
             } else {
-                emitMethod(pw, info.getArbiter(), "                test." + info.getArbiter().getSimpleName(), "p.s", "p.r");
+                emitMethod(pw, info.getArbiter(), "                test." + info.getArbiter().getSimpleName(), "p.s", "p.r", true);
             }
             pw.println("            }");
         }
@@ -446,16 +445,10 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
         pw.println("            version.set(new StateHolder<>(control.isStopped, newPairs, " + actorsCount + "));");
         pw.println("        }");
-        pw.println("    }");
 
         for (ExecutableElement a : info.getActors()) {
             pw.println();
-            pw.println("    public static class Runner_" + a.getSimpleName() + " extends RunnerBase implements Callable {");
-            pw.println("        public Runner_" + a.getSimpleName() + "(Control control, Counter<" + r + "> counter, " + t + " test, AtomicReference<StateHolder<Pair>> version, AtomicInteger epoch) {");
-            pw.println("            super(control, counter, test, version, epoch);");
-            pw.println("        }");
-            pw.println();
-            pw.println("        public Void call() {");
+            pw.println("        public final Void " + a.getSimpleName() + "() {");
             pw.println("            int curEpoch = 0;");
             pw.println();
             pw.println("            " + t + " lt = test;");
@@ -476,9 +469,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("                for (Pair p : pairs) {");
 
             if (info.getState().equals(info.getTest())) {
-                emitMethod(pw, a, "                    p.s." + a.getSimpleName(), "p.s", "p.r");
+                emitMethod(pw, a, "                    p.s." + a.getSimpleName(), "p.s", "p.r", true);
             } else {
-                emitMethod(pw, a, "                    lt." + a.getSimpleName(), "p.s", "p.r");
+                emitMethod(pw, a, "                    lt." + a.getSimpleName(), "p.s", "p.r", true);
             }
 
             pw.println("                }");
@@ -497,8 +490,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("                holder.postConsume(yield);");
             pw.println("            }");
             pw.println("        }");
-            pw.println("    }");
         }
+        pw.println("    }");
+
         pw.println();
         pw.println("    static class Pair {");
         pw.println("        public " + s + " s;");
@@ -672,7 +666,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.close();
     }
 
-    private void emitMethod(PrintWriter pw, ExecutableElement el, String lvalue, String stateAccessor, String resultAccessor) {
+    private void emitMethod(PrintWriter pw, ExecutableElement el, String lvalue, String stateAccessor, String resultAccessor, boolean terminate) {
         pw.print(lvalue + "(");
 
         boolean isFirst = true;
@@ -689,7 +683,10 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 pw.print(resultAccessor);
             }
         }
-        pw.println(");");
+        pw.print(")");
+        if (terminate) {
+            pw.println(";");
+        }
     }
 
     private void emitMethodTermination(PrintWriter pw, ExecutableElement el, String lvalue, String stateAccessor) {
