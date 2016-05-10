@@ -283,6 +283,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
         String s = info.getState().getSimpleName().toString();
         String r = info.getResult().getSimpleName().toString();
 
+        boolean isStateItself = info.getState().equals(info.getTest());
+
         int actorsCount = info.getActors().size();
 
         pw.println("package " + getPackageName(info.getTest()) + ".generated;");
@@ -298,7 +300,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("    Counter<" + r + "> counter_" + a.getSimpleName() + ";");
         }
 
-        pw.println("    " + t + " test;");
+        if (!isStateItself) {
+            pw.println("    " + t + " test;");
+        }
         pw.println("    volatile StateHolder<Pair> version;");
         pw.println("    volatile int epoch;");
         pw.println();
@@ -338,7 +342,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         pw.println("    @Override");
         pw.println("    public Counter<" + r + "> internalRun() {");
-        pw.println("        test = new " + t + "();");
+        if (!isStateItself) {
+            pw.println("        test = new " + t + "();");
+        }
         pw.println("        version = new StateHolder<>(false, new Pair[0], " + actorsCount + ");");
         pw.println("        epoch = 0;");
 
@@ -373,8 +379,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    }");
         pw.println();
 
-
-
         pw.println("    public final void jcstress_consume(StateHolder<Pair> holder, Counter<" + r + "> cnt, int a, int actors) {");
         pw.println("        Pair[] pairs = holder.pairs;");
         pw.println("        int len = pairs.length;");
@@ -385,7 +389,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("            " + r + " r = p.r;");
         pw.println("            " + s + " s = p.s;");
         if (info.getArbiter() != null) {
-            if (info.getState().equals(info.getTest())) {
+            if (isStateItself) {
                 emitMethod(pw, info.getArbiter(), "            s." + info.getArbiter().getSimpleName(), "s", "r", true);
             } else {
                 emitMethod(pw, info.getArbiter(), "            test." + info.getArbiter().getSimpleName(), "s", "r", true);
@@ -431,7 +435,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("    public final Void " + a.getSimpleName() + "() {");
             pw.println("        int curEpoch = 0;");
             pw.println();
-            pw.println("        " + t + " lt = test;");
+            if (!isStateItself) {
+                pw.println("        " + t + " lt = test;");
+            }
             pw.println("        boolean yield = control.shouldYield;");
             pw.println();
             pw.println("        while (true) {");
@@ -446,7 +452,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println();
             pw.println("            for (Pair p : pairs) {");
 
-            if (info.getState().equals(info.getTest())) {
+            if (isStateItself) {
                 emitMethod(pw, a, "                p.s." + a.getSimpleName(), "p.s", "p.r", true);
             } else {
                 emitMethod(pw, a, "                lt." + a.getSimpleName(), "p.s", "p.r", true);
