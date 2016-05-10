@@ -52,6 +52,13 @@ public class HashCounter<T> implements Counter<T> {
         holder.value += count;
     }
 
+    @Override
+    public void merge(Counter<T> other) {
+        for (T key : other.elementSet()) {
+            record(key, other.count(key));
+        }
+    }
+
     private T decouple(T result) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();

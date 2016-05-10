@@ -52,6 +52,12 @@ public interface Counter<R> {
     void record(R result, long count);
 
     /**
+     * Merge another counter data into this counter
+     * @param other counter
+     */
+    void merge(Counter<R> other);
+
+    /**
      * Return the result count.
      *
      * @param result result to count

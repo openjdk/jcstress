@@ -52,8 +52,12 @@ public class StateHolder<P> {
     }
 
     public void preRun(boolean shouldYield) {
-        if (ready.decrementAndGet() == 0) {
+        int v = ready.decrementAndGet();
+        if (v == 0) {
             notAllReady = false;
+        }
+        if (v < 0) {
+            throw new IllegalStateException("Oops: " + v);
         }
         while (notAllReady) {
             if (shouldYield) Thread.yield();

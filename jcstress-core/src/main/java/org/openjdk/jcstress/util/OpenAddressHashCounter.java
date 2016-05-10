@@ -77,6 +77,13 @@ public class OpenAddressHashCounter<R> implements Counter<R>, Serializable {
         recordWithTries(result, count, MAX_TRIES);
     }
 
+    @Override
+    public void merge(Counter<R> other) {
+        for (R key : other.elementSet()) {
+            record(key, other.count(key));
+        }
+    }
+
     private void recordWithTries(R result, long count, int maxTries) {
         int idx = result.hashCode() & (length - 1);
 
