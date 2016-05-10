@@ -184,7 +184,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             info.setResult(e);
         }
 
-        String packageName = getPackageName(info.getTest()) + ".generated";
+        String packageName = getPackageName(info.getTest());
         String testName = getGeneratedName(info.getTest());
 
         info.setGeneratedName(packageName + "." + testName);
@@ -265,7 +265,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         PrintWriter pw;
         Writer writer;
         try {
-            writer = processingEnv.getFiler().createSourceFile(getPackageName(info.getTest()) + ".generated." + className).openWriter();
+            writer = processingEnv.getFiler().createSourceFile(getPackageName(info.getTest()) + "." + className).openWriter();
             pw = new PrintWriter(writer);
         } catch (IOException e) {
             throw new GenerationException("IOException: " + e.getMessage(), info.getTest());
@@ -279,7 +279,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         int actorsCount = info.getActors().size();
 
-        pw.println("package " + getPackageName(info.getTest()) + ".generated;");
+        pw.println("package " + getPackageName(info.getTest()) + ";");
 
         printImports(pw, info);
 
@@ -525,7 +525,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         PrintWriter pw;
         Writer writer;
         try {
-            writer = processingEnv.getFiler().createSourceFile(getPackageName(info.getTest()) + ".generated." + generatedName).openWriter();
+            writer = processingEnv.getFiler().createSourceFile(getPackageName(info.getTest()) + "." + generatedName).openWriter();
             pw = new PrintWriter(writer);
         } catch (IOException e) {
             throw new GenerationException("IOException: " + e.getMessage(), info.getTest());
@@ -535,7 +535,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         ExecutableElement actor = info.getActors().get(0);
 
-        pw.println("package " + getPackageName(info.getTest()) + ".generated;");
+        pw.println("package " + getPackageName(info.getTest()) + ";");
 
         printImports(pw, info);
 
