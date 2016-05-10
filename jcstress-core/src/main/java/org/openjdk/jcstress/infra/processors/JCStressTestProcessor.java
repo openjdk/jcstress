@@ -50,8 +50,7 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
@@ -327,17 +326,11 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    @Override");
         pw.println("    public Counter<" + r + "> internalRun() {");
         pw.println("        " + t + " test = new " + t + "();");
-        pw.println("        control.isStopped = false;");
-        pw.println();
-        pw.println("        final AtomicReference<StateHolder<Pair>> version = new AtomicReference<>();");
-        pw.println("        version.set(new StateHolder<>(false, new Pair[0], " + actorsCount + "));");
-        pw.println();
-        pw.println("        final AtomicInteger epoch = new AtomicInteger();");
         pw.println();
         pw.println("        control.isStopped = false;");
         pw.println("        Collection<Future<?>> tasks = new ArrayList<>();");
 
-        pw.println("        Base base = new Base(control, test, version, epoch);");
+        pw.println("        Base base = new Base(control, test);");
         for (ExecutableElement a : info.getActors()) {
             pw.println("        tasks.add(pool.submit(base::" + a.getSimpleName() + "));");
         }
@@ -361,6 +354,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
 
         pw.println("    public static final class Base {");
+        pw.println("        static final AtomicIntegerFieldUpdater<Base> EPOCH = AtomicIntegerFieldUpdater.newUpdater(Base.class, \"epoch\");");
         pw.println("        final Control control;");
 
         for (ExecutableElement a : info.getActors()) {
@@ -368,14 +362,13 @@ public class JCStressTestProcessor extends AbstractProcessor {
         }
 
         pw.println("        final " + t + " test;");
-        pw.println("        final AtomicReference<StateHolder<Pair>> version;");
-        pw.println("        final AtomicInteger epoch;");
+        pw.println("        volatile StateHolder<Pair> version;");
+        pw.println("        volatile int epoch;");
         pw.println();
-        pw.println("        public Base(Control control, " + t + " test, AtomicReference<StateHolder<Pair>> version, AtomicInteger epoch) {");
+        pw.println("        public Base(Control control, " + t + " test) {");
         pw.println("            this.control = control;");
         pw.println("            this.test = test;");
-        pw.println("            this.version = version;");
-        pw.println("            this.epoch = epoch;");
+        pw.println("            this.version = new StateHolder<>(false, new Pair[0], " + actorsCount + ");");
         pw.println("        }");
         pw.println();
 
@@ -426,7 +419,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("                }");
         pw.println("            }");
         pw.println();
-        pw.println("            version.set(new StateHolder<>(control.isStopped, newPairs, " + actorsCount + "));");
+        pw.println("            version = new StateHolder<>(control.isStopped, newPairs, " + actorsCount + ");");
         pw.println("        }");
 
         int n = 0;
@@ -437,11 +430,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println();
             pw.println("            " + t + " lt = test;");
             pw.println("            boolean yield = control.shouldYield;");
-            pw.println("            AtomicReference<StateHolder<Pair>> ver = version;");
-            pw.println("            AtomicInteger ep = epoch;");
             pw.println();
             pw.println("            while (true) {");
-            pw.println("                StateHolder<Pair> holder = ver.get();");
+            pw.println("                StateHolder<Pair> holder = version;");
             pw.println("                if (holder.stopped) {");
             pw.println("                    return null;");
             pw.println("                }");
@@ -464,14 +455,14 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println();
             pw.println("                jcstress_consume(holder, counter_" + a.getSimpleName() + ", " + n + ", " + actorsCount + ");");
             pw.println();
-            pw.println("                int ticket = ep.incrementAndGet();");
+            pw.println("                int ticket = EPOCH.incrementAndGet(this);");
             pw.println("                if (ticket == curEpoch + " + actorsCount + ") {");
             pw.println("                    jcstress_updateHolder(holder);");
-            pw.println("                    ep.incrementAndGet();");
+            pw.println("                    EPOCH.incrementAndGet(this);");
             pw.println("                }");
             pw.println();
             pw.println("                curEpoch += " + (actorsCount + 1) + ";");
-            pw.println("                while (curEpoch != ep.get()) {");
+            pw.println("                while (curEpoch != EPOCH.get(this)) {");
             pw.println("                    if (yield) Thread.yield();");
             pw.println("                }");
             pw.println("            }");
@@ -729,7 +720,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         Class<?>[] imports = new Class<?>[] {
                 ArrayList.class, Arrays.class, Collection.class,
                 Callable.class, ExecutorService.class, Future.class, TimeUnit.class,
-                AtomicInteger.class, AtomicReference.class,
+                AtomicIntegerFieldUpdater.class,
                 Options.class, TestResultCollector.class,
                 Control.class, Runner.class, StateHolder.class,
                 ArrayUtils.class, Counter.class,
