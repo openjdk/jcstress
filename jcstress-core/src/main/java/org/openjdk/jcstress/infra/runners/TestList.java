@@ -27,6 +27,7 @@ package org.openjdk.jcstress.infra.runners;
 import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.infra.StateCase;
 import org.openjdk.jcstress.infra.TestInfo;
+import org.openjdk.jcstress.util.TestLineReader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,28 +53,32 @@ public class TestList {
 
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    String[] ls = line.split("===,===");
-                    if (ls.length >= 6) {
-                        String name = ls[0];
-                        String runner = ls[1];
-                        String description = ls[2];
-                        int actorCount = Integer.valueOf(ls[3]);
-                        boolean requiresFork = Boolean.valueOf(ls[4]);
-                        int caseCount = Integer.valueOf(ls[5]);
+                    TestLineReader read = new TestLineReader(line);
+
+                    if (read.isCorrect()) {
+                        String name = read.nextString();
+                        String runner = read.nextString();
+                        String description = read.nextString();
+                        int actorCount = read.nextInt();
+                        boolean requiresFork = read.nextBoolean();
+                        int caseCount = read.nextInt();
 
                         TestInfo testInfo = new TestInfo(name, runner, description, actorCount, requiresFork);
                         m.put(name, testInfo);
+
                         for (int c = 0; c < caseCount; c++) {
-                            String state  = ls[6 + 3*c + 0];
-                            String expect = ls[6 + 3*c + 1];
-                            String desc  = ls[6 + 3*c + 2];
-                            testInfo.addCase(new StateCase(state, Expect.valueOf(expect), desc));
+                            Expect expect  = Expect.valueOf(read.nextString());
+                            String desc    = read.nextString();
+                            int stateCount = read.nextInt();
+                            for (int s = 0; s < stateCount; s++) {
+                                String state = read.nextString();
+                                testInfo.addCase(new StateCase(state, expect, desc));
+                            }
                         }
 
-                        int s = 6 + caseCount * 3;
-                        int refCount = Integer.valueOf(ls[s]);
+                        int refCount = read.nextInt();
                         for (int c = 0; c < refCount; c++) {
-                            testInfo.addRef(ls[s + c]);
+                            testInfo.addRef(read.nextString());
                         }
                     }
                 }
@@ -92,6 +97,7 @@ public class TestList {
         }
         return tests;
     }
+
 
     public static Collection<String> tests() {
         return getTests().keySet();

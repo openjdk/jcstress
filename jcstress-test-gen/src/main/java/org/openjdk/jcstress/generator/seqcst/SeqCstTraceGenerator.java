@@ -242,9 +242,11 @@ public class SeqCstTraceGenerator {
         pw.println("import org.openjdk.jcstress.annotations.*;");
         pw.println();
         pw.println("@JCStressTest");
+        pw.println("@Outcome(id = {");
         for (String r : scResults) {
-            pw.println("@Outcome(id = \"" + r + "\", expect = Expect.ACCEPTABLE, desc = \"Sequential consistency.\")");
+            pw.println("            \"" + r + "\",");
         }
+        pw.println("}, expect = Expect.ACCEPTABLE, desc = \"Sequential consistency.\")");
 
         pw.println("@State");
         pw.println("public class " + klass + " {");

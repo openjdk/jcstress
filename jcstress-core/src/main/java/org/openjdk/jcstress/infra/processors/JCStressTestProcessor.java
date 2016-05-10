@@ -31,10 +31,7 @@ import org.openjdk.jcstress.infra.runners.Control;
 import org.openjdk.jcstress.infra.runners.Runner;
 import org.openjdk.jcstress.infra.runners.StateHolder;
 import org.openjdk.jcstress.infra.runners.TestList;
-import org.openjdk.jcstress.util.ArrayUtils;
-import org.openjdk.jcstress.util.Counter;
-import org.openjdk.jcstress.util.OpenAddressHashCounter;
-import org.openjdk.jcstress.util.VMSupport;
+import org.openjdk.jcstress.util.*;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -94,36 +91,31 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 FileObject file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", TestList.LIST.substring(1));
                 PrintWriter writer = new PrintWriter(file.openWriter());
                 for (TestInfo test : tests) {
-                    writer.print(
-                            test.getTest().getQualifiedName()
-                            + "===,===" + test.getGeneratedName()
-                            + "===,===" + test.getDescription()
-                            + "===,===" + test.getActors().size()
-                            + "===,===" + test.isRequiresFork());
+                    TestLineWriter wl = new TestLineWriter();
 
-                    int size = 0;
+                    wl.put(test.getTest().getQualifiedName());
+                    wl.put(test.getGeneratedName());
+                    wl.put(test.getDescription());
+                    wl.put(test.getActors().size());
+                    wl.put(test.isRequiresFork());
+
+                    wl.put(test.cases().size());
+
                     for (Outcome c : test.cases()) {
+                        wl.put(c.expect());
+                        wl.put(c.desc());
+                        wl.put(c.id().length);
                         for (String id : c.id()) {
-                            size++;
+                            wl.put(id);
                         }
                     }
 
-                    writer.print("===,===" + size);
-
-                    for (Outcome c : test.cases()) {
-                        for (String id : c.id()) {
-                            writer.print("===,===" + id);
-                            writer.print("===,===" + c.expect());
-                            writer.print("===,===" + c.desc());
-                        }
-                    }
-
-                    writer.print("===,===" + test.refs().size());
+                    wl.put(test.refs().size());
                     for (String ref : test.refs()) {
-                        writer.print("===,===" + ref);
+                        wl.put(ref);
                     }
 
-                    writer.println();
+                    writer.println(wl.get());
                 }
                 writer.close();
             } catch (IOException ex) {
