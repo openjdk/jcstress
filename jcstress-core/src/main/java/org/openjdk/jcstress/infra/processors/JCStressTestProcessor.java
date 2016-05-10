@@ -378,56 +378,30 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("            Pair[] pairs = holder.pairs;");
         pw.println("            int len = pairs.length;");
 
-        if (info.getArbiter() != null) {
-            pw.println();
-            pw.println("             for (Pair p : pairs) {");
-            if (info.getState().equals(info.getTest())) {
-                emitMethod(pw, info.getArbiter(), "                p.s." + info.getArbiter().getSimpleName(), "p.s", "p.r", true);
-            } else {
-                emitMethod(pw, info.getArbiter(), "                test." + info.getArbiter().getSimpleName(), "p.s", "p.r", true);
-            }
-            pw.println("            }");
-        }
-        pw.println();
-        pw.println("            for (Pair p : pairs) {");
-        pw.println("                counter.record(p.r);");
-        pw.println("            }");
-        pw.println();
-        pw.println("            int newLen = holder.hasLaggedWorkers ? Math.max(control.minStride, Math.min(len * 2, control.maxStride)) : len;");
         pw.println();
         pw.println("            for (Pair p : pairs) {");
         pw.println("                " + r + " r = p.r;");
+        pw.println("                " + s + " s = p.s;");
+        if (info.getArbiter() != null) {
+            if (info.getState().equals(info.getTest())) {
+                emitMethod(pw, info.getArbiter(), "                s." + info.getArbiter().getSimpleName(), "s", "r", true);
+            } else {
+                emitMethod(pw, info.getArbiter(), "                test." + info.getArbiter().getSimpleName(), "s", "r", true);
+            }
+        }
+        pw.println("                counter.record(r);");
 
         for (VariableElement var : ElementFilter.fieldsIn(info.getResult().getEnclosedElements())) {
             pw.print("                r." + var.getSimpleName().toString() + " = ");
             String type = var.asType().toString();
-            switch (type) {
-                case "int":
-                case "long":
-                case "short":
-                case "byte":
-                case "char":
-                    pw.print("0");
-                    break;
-                case "double":
-                    pw.print("0D");
-                    break;
-                case "float":
-                    pw.print("0F");
-                    break;
-                case "boolean":
-                    pw.print("false");
-                    break;
-                case "java.lang.String":
-                    pw.print("\"\"");
-                    break;
-                default:
-                    throw new GenerationException("Unable to handle @" + Result.class.getSimpleName() + " field of type " + type, var);
-            }
+            pw.print(getDefaultVal(var, type));
             pw.println(";");
         }
 
+        pw.println("                p.s = new " + s + "();");
         pw.println("            }");
+        pw.println();
+        pw.println("            int newLen = holder.hasLaggedWorkers ? Math.max(control.minStride, Math.min(len * 2, control.maxStride)) : len;");
         pw.println();
         pw.println("            Pair[] newPairs = pairs;");
         pw.println("            if (newLen > len) {");
@@ -435,12 +409,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("                for (int c = len; c < newLen; c++) {");
         pw.println("                    Pair p = new Pair();");
         pw.println("                    p.r = new " + r + "();");
+        pw.println("                    p.s = new " + s + "();");
         pw.println("                    newPairs[c] = p;");
         pw.println("                }");
-        pw.println("            }");
-        pw.println();
-        pw.println("            for (Pair p : newPairs) {");
-        pw.println("                p.s = new " + s + "();");
         pw.println("            }");
         pw.println();
         pw.println("            version.set(new StateHolder<>(control.isStopped, newPairs, " + actorsCount + "));");
@@ -501,6 +472,34 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("}");
 
         pw.close();
+    }
+
+    private String getDefaultVal(VariableElement var, String type) {
+        String val;
+        switch (type) {
+            case "int":
+            case "long":
+            case "short":
+            case "byte":
+            case "char":
+                val = "0";
+                break;
+            case "double":
+                val = "0D";
+                break;
+            case "float":
+                val = "0F";
+                break;
+            case "boolean":
+                val = "false";
+                break;
+            case "java.lang.String":
+                val = "\"\"";
+                break;
+            default:
+                throw new GenerationException("Unable to handle @" + Result.class.getSimpleName() + " field of type " + type, var);
+        }
+        return val;
     }
 
     private void generateTermination(TestInfo info) {
