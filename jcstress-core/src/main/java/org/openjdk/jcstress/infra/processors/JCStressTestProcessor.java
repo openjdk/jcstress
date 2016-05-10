@@ -391,8 +391,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         for (VariableElement var : ElementFilter.fieldsIn(info.getResult().getEnclosedElements())) {
             pw.print("            r." + var.getSimpleName().toString() + " = ");
-            String type = var.asType().toString();
-            pw.print(getDefaultVal(var, type));
+            pw.print(getDefaultVal(var));
             pw.println(";");
         }
 
@@ -481,7 +480,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.close();
     }
 
-    private String getDefaultVal(VariableElement var, String type) {
+    private String getDefaultVal(VariableElement var) {
+        String type = var.asType().toString();
         String val;
         switch (type) {
             case "int":

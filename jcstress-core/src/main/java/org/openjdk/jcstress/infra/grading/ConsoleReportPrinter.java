@@ -32,6 +32,7 @@ import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.TestList;
+import org.openjdk.jcstress.util.StringUtils;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
@@ -165,15 +166,12 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 expectLen = Math.max(expectLen, Expect.UNKNOWN.toString().length());
             }
 
-            idLen += 2;
-            occLen += 2;
-
             TestInfo test = TestList.getInfo(r.getName());
             if (test == null) {
                 output.printf("%" + idLen + "s %" + occLen +"s %" + expectLen + "s  %-" + descLen + "s%n", "Observed state", "Occurrences", "Expectation", "Interpretation");
                 for (State s : r.getStates()) {
                     output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
-                            cutoff(s.getId(), idLen),
+                            StringUtils.cutoff(s.getId(), idLen),
                             s.getCount(),
                             Expect.UNKNOWN,
                             "N/A");
@@ -182,9 +180,13 @@ public class ConsoleReportPrinter implements TestResultCollector {
             }
 
             for (StateCase c : test.cases()) {
+                idLen = Math.max(idLen, c.state().length());
                 expectLen = Math.max(expectLen, c.expect().toString().length());
             }
             expectLen = Math.max(expectLen, test.unmatched().expect().toString().length());
+
+            idLen += 2;
+            occLen += 2;
             expectLen += 2;
 
             output.printf("%" + idLen + "s %" + occLen +"s %" + expectLen + "s  %-" + descLen + "s%n", "Observed state", "Occurrences", "Expectation", "Interpretation");
@@ -199,10 +201,10 @@ public class ConsoleReportPrinter implements TestResultCollector {
                     if (c.state().equals(s.getId())) {
                         // match!
                         output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
-                                cutoff(s.getId(), idLen),
+                                StringUtils.cutoff(s.getId(), idLen),
                                 s.getCount(),
                                 c.expect(),
-                                cutoff(c.description(), descLen));
+                                StringUtils.cutoff(c.description(), descLen));
                         matched = true;
                         unmatchedStates.remove(s);
                     }
@@ -210,35 +212,22 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
                 if (!matched) {
                     output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
-                                cutoff(c.state(), idLen),
+                                StringUtils.cutoff(c.state(), idLen),
                                 0,
                                 c.expect(),
-                                cutoff(c.description(), descLen));
+                                StringUtils.cutoff(c.description(), descLen));
                 }
             }
 
             for (State s : unmatchedStates) {
                 output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
-                        cutoff(s.getId(), idLen),
+                        StringUtils.cutoff(s.getId(), idLen),
                         s.getCount(),
                         test.unmatched().expect(),
-                        cutoff(test.unmatched().description(), descLen));
+                        StringUtils.cutoff(test.unmatched().description(), descLen));
             }
 
             output.println();
-        }
-    }
-
-    private static String cutoff(String src, int len) {
-        while (src.contains("  ")) {
-            src = src.replaceAll("  ", " ");
-        }
-        String trim = src.replaceAll("\n", "").trim();
-        String substring = trim.substring(0, Math.min(len - 3, trim.length()));
-        if (!substring.equals(trim)) {
-            return substring + "...";
-        } else {
-            return substring;
         }
     }
 

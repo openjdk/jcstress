@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,36 +22,25 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.sample;
+package org.openjdk.jcstress.util;
 
-import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult4;
+public class StringUtils {
 
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
-
-@JCStressTest
-@Description("Sample test")
-@Outcome(expect = ACCEPTABLE,  desc = "All acceptable")
-@State
-public class SampleTest {
-
-    int a;
-    int b;
-
-    @Actor
-    public void actor1(IntResult4 r) {
-        r.r1 = b;
-    }
-
-    @Actor
-    public void actor2(IntResult4 r) {
-        r.r2 = a;
-    }
-
-    @Arbiter
-    public void arbiter(IntResult4 r) {
-        r.r3 = a;
-        r.r4 = b;
+    public static String cutoff(String src, int len) {
+        while (src.contains("  ")) {
+            src = src.replaceAll("  ", " ");
+        }
+        String trim = src.replaceAll("\n", "").trim();
+        if (trim.length() <= len) {
+            return trim;
+        }
+        int min = Math.min(len - 3, trim.length());
+        String substring = trim.substring(0, min);
+        if (!substring.equals(trim)) {
+            return substring + "...";
+        } else {
+            return substring;
+        }
     }
 
 }
