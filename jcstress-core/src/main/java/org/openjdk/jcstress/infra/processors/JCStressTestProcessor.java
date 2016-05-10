@@ -268,10 +268,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
                     Result.class.getSimpleName() + " to work with", info.getTest());
         }
 
+        String className = getGeneratedName(info.getTest());
+
         PrintWriter pw;
         Writer writer;
         try {
-            writer = processingEnv.getFiler().createSourceFile(getPackageName(info.getTest()) + ".generated." + getGeneratedName(info.getTest())).openWriter();
+            writer = processingEnv.getFiler().createSourceFile(getPackageName(info.getTest()) + ".generated." + className).openWriter();
             pw = new PrintWriter(writer);
         } catch (IOException e) {
             throw new GenerationException("IOException: " + e.getMessage(), info.getTest());
@@ -287,10 +289,21 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         printImports(pw, info);
 
-        pw.println("public class " + getGeneratedName(info.getTest()) + " extends Runner<" + r + "> {");
+        pw.println("public class " + className + " extends Runner<" + r + "> {");
         pw.println();
 
-        pw.println("    public " + getGeneratedName(info.getTest()) + "(Options opts, TestResultCollector collector, ExecutorService pool) {");
+        pw.println("    static final AtomicIntegerFieldUpdater<" + className + "> EPOCH = AtomicIntegerFieldUpdater.newUpdater(" + className + ".class, \"epoch\");");
+
+        for (ExecutableElement a : info.getActors()) {
+            pw.println("    Counter<" + r + "> counter_" + a.getSimpleName() + ";");
+        }
+
+        pw.println("    " + t + " test;");
+        pw.println("    volatile StateHolder<Pair> version;");
+        pw.println("    volatile int epoch;");
+        pw.println();
+
+        pw.println("    public " + className + "(Options opts, TestResultCollector collector, ExecutorService pool) {");
         pw.println("        super(opts, collector, pool, \"" + getQualifiedName(info.getTest()) + "\");");
         pw.println("    }");
         pw.println();
@@ -325,14 +338,21 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         pw.println("    @Override");
         pw.println("    public Counter<" + r + "> internalRun() {");
-        pw.println("        " + t + " test = new " + t + "();");
+        pw.println("        test = new " + t + "();");
+        pw.println("        version = new StateHolder<>(false, new Pair[0], " + actorsCount + ");");
+        pw.println("        epoch = 0;");
+
+        for (ExecutableElement a : info.getActors()) {
+            pw.println("        counter_" + a.getSimpleName() + " = new OpenAddressHashCounter<>();");
+        }
+
+
         pw.println();
         pw.println("        control.isStopped = false;");
         pw.println("        Collection<Future<?>> tasks = new ArrayList<>();");
 
-        pw.println("        Base base = new Base(control, test);");
         for (ExecutableElement a : info.getActors()) {
-            pw.println("        tasks.add(pool.submit(base::" + a.getSimpleName() + "));");
+            pw.println("        tasks.add(pool.submit(this::" + a.getSimpleName() + "));");
         }
 
         pw.println();
@@ -347,129 +367,111 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
         pw.println("        Counter<" + r + "> counter = new OpenAddressHashCounter<>();");
         for (ExecutableElement a : info.getActors()) {
-            pw.println("        counter.merge(base.counter_" + a.getSimpleName() + ");");
+            pw.println("        counter.merge(counter_" + a.getSimpleName() + ");");
         }
         pw.println("        return counter;");
         pw.println("    }");
         pw.println();
 
-        pw.println("    public static final class Base {");
-        pw.println("        static final AtomicIntegerFieldUpdater<Base> EPOCH = AtomicIntegerFieldUpdater.newUpdater(Base.class, \"epoch\");");
-        pw.println("        final Control control;");
 
-        for (ExecutableElement a : info.getActors()) {
-            pw.println("        final Counter<" + r + "> counter_" + a.getSimpleName() + " = new OpenAddressHashCounter<>();");
-        }
 
-        pw.println("        final " + t + " test;");
-        pw.println("        volatile StateHolder<Pair> version;");
-        pw.println("        volatile int epoch;");
-        pw.println();
-        pw.println("        public Base(Control control, " + t + " test) {");
-        pw.println("            this.control = control;");
-        pw.println("            this.test = test;");
-        pw.println("            this.version = new StateHolder<>(false, new Pair[0], " + actorsCount + ");");
-        pw.println("        }");
-        pw.println();
-
-        pw.println("        public final void jcstress_consume(StateHolder<Pair> holder, Counter<" + r + "> cnt, int a, int actors) {");
-        pw.println("            Pair[] pairs = holder.pairs;");
-        pw.println("            int len = pairs.length;");
-        pw.println("            int left = a * len / actors;");
-        pw.println("            int right = (a + 1) * len / actors;");
-        pw.println("            for (int c = left; c < right; c++) {");
-        pw.println("                Pair p = pairs[c];");
-        pw.println("                " + r + " r = p.r;");
-        pw.println("                " + s + " s = p.s;");
+        pw.println("    public final void jcstress_consume(StateHolder<Pair> holder, Counter<" + r + "> cnt, int a, int actors) {");
+        pw.println("        Pair[] pairs = holder.pairs;");
+        pw.println("        int len = pairs.length;");
+        pw.println("        int left = a * len / actors;");
+        pw.println("        int right = (a + 1) * len / actors;");
+        pw.println("        for (int c = left; c < right; c++) {");
+        pw.println("            Pair p = pairs[c];");
+        pw.println("            " + r + " r = p.r;");
+        pw.println("            " + s + " s = p.s;");
         if (info.getArbiter() != null) {
             if (info.getState().equals(info.getTest())) {
-                emitMethod(pw, info.getArbiter(), "                s." + info.getArbiter().getSimpleName(), "s", "r", true);
+                emitMethod(pw, info.getArbiter(), "            s." + info.getArbiter().getSimpleName(), "s", "r", true);
             } else {
-                emitMethod(pw, info.getArbiter(), "                test." + info.getArbiter().getSimpleName(), "s", "r", true);
+                emitMethod(pw, info.getArbiter(), "            test." + info.getArbiter().getSimpleName(), "s", "r", true);
             }
         }
-        pw.println("                cnt.record(r);");
+        pw.println("            cnt.record(r);");
 
         for (VariableElement var : ElementFilter.fieldsIn(info.getResult().getEnclosedElements())) {
-            pw.print("                r." + var.getSimpleName().toString() + " = ");
+            pw.print("            r." + var.getSimpleName().toString() + " = ");
             String type = var.asType().toString();
             pw.print(getDefaultVal(var, type));
             pw.println(";");
         }
 
-        pw.println("                p.s = new " + s + "();");
-        pw.println("            }");
+        pw.println("            p.s = new " + s + "();");
         pw.println("        }");
+        pw.println("    }");
+        pw.println();
 
+        pw.println("    public final void jcstress_updateHolder(StateHolder<Pair> holder) {");
+        pw.println("        Pair[] pairs = holder.pairs;");
+        pw.println("        int len = pairs.length;");
         pw.println();
-        pw.println("        public final void jcstress_updateHolder(StateHolder<Pair> holder) {");
-        pw.println("            Pair[] pairs = holder.pairs;");
-        pw.println("            int len = pairs.length;");
+        pw.println("        int newLen = holder.hasLaggedWorkers ? Math.max(control.minStride, Math.min(len * 2, control.maxStride)) : len;");
         pw.println();
-        pw.println("            int newLen = holder.hasLaggedWorkers ? Math.max(control.minStride, Math.min(len * 2, control.maxStride)) : len;");
-        pw.println();
-        pw.println("            Pair[] newPairs = pairs;");
-        pw.println("            if (newLen > len) {");
-        pw.println("                newPairs = Arrays.copyOf(pairs, newLen);");
-        pw.println("                for (int c = len; c < newLen; c++) {");
-        pw.println("                    Pair p = new Pair();");
-        pw.println("                    p.r = new " + r + "();");
-        pw.println("                    p.s = new " + s + "();");
-        pw.println("                    newPairs[c] = p;");
-        pw.println("                }");
+        pw.println("        Pair[] newPairs = pairs;");
+        pw.println("        if (newLen > len) {");
+        pw.println("            newPairs = Arrays.copyOf(pairs, newLen);");
+        pw.println("            for (int c = len; c < newLen; c++) {");
+        pw.println("                Pair p = new Pair();");
+        pw.println("                p.r = new " + r + "();");
+        pw.println("                p.s = new " + s + "();");
+        pw.println("                newPairs[c] = p;");
         pw.println("            }");
+        pw.println("         }");
         pw.println();
-        pw.println("            version = new StateHolder<>(control.isStopped, newPairs, " + actorsCount + ");");
-        pw.println("        }");
+        pw.println("        version = new StateHolder<>(control.isStopped, newPairs, " + actorsCount + ");");
+        pw.println("   }");
 
         int n = 0;
         for (ExecutableElement a : info.getActors()) {
             pw.println();
-            pw.println("        public final Void " + a.getSimpleName() + "() {");
-            pw.println("            int curEpoch = 0;");
+            pw.println("    public final Void " + a.getSimpleName() + "() {");
+            pw.println("        int curEpoch = 0;");
             pw.println();
-            pw.println("            " + t + " lt = test;");
-            pw.println("            boolean yield = control.shouldYield;");
+            pw.println("        " + t + " lt = test;");
+            pw.println("        boolean yield = control.shouldYield;");
             pw.println();
-            pw.println("            while (true) {");
-            pw.println("                StateHolder<Pair> holder = version;");
-            pw.println("                if (holder.stopped) {");
-            pw.println("                    return null;");
-            pw.println("                }");
+            pw.println("        while (true) {");
+            pw.println("            StateHolder<Pair> holder = version;");
+            pw.println("            if (holder.stopped) {");
+            pw.println("                return null;");
+            pw.println("            }");
             pw.println();
-            pw.println("                Pair[] pairs = holder.pairs;");
+            pw.println("            Pair[] pairs = holder.pairs;");
             pw.println();
-            pw.println("                holder.preRun(yield);");
+            pw.println("            holder.preRun(yield);");
             pw.println();
-            pw.println("                for (Pair p : pairs) {");
+            pw.println("            for (Pair p : pairs) {");
 
             if (info.getState().equals(info.getTest())) {
-                emitMethod(pw, a, "                    p.s." + a.getSimpleName(), "p.s", "p.r", true);
+                emitMethod(pw, a, "                p.s." + a.getSimpleName(), "p.s", "p.r", true);
             } else {
-                emitMethod(pw, a, "                    lt." + a.getSimpleName(), "p.s", "p.r", true);
+                emitMethod(pw, a, "                lt." + a.getSimpleName(), "p.s", "p.r", true);
             }
 
-            pw.println("                }");
+            pw.println("            }");
             pw.println();
-            pw.println("                holder.postRun(yield);");
+            pw.println("            holder.postRun(yield);");
             pw.println();
-            pw.println("                jcstress_consume(holder, counter_" + a.getSimpleName() + ", " + n + ", " + actorsCount + ");");
+            pw.println("            jcstress_consume(holder, counter_" + a.getSimpleName() + ", " + n + ", " + actorsCount + ");");
             pw.println();
-            pw.println("                int ticket = EPOCH.incrementAndGet(this);");
-            pw.println("                if (ticket == curEpoch + " + actorsCount + ") {");
-            pw.println("                    jcstress_updateHolder(holder);");
-            pw.println("                    EPOCH.incrementAndGet(this);");
-            pw.println("                }");
+            pw.println("            int ticket = EPOCH.incrementAndGet(this);");
+            pw.println("            if (ticket == curEpoch + " + actorsCount + ") {");
+            pw.println("                jcstress_updateHolder(holder);");
+            pw.println("                EPOCH.incrementAndGet(this);");
+            pw.println("            }");
             pw.println();
-            pw.println("                curEpoch += " + (actorsCount + 1) + ";");
-            pw.println("                while (curEpoch != EPOCH.get(this)) {");
-            pw.println("                    if (yield) Thread.yield();");
-            pw.println("                }");
+            pw.println("            curEpoch += " + (actorsCount + 1) + ";");
+            pw.println("            while (curEpoch != EPOCH.get(this)) {");
+            pw.println("                if (yield) Thread.yield();");
             pw.println("            }");
             pw.println("        }");
+            pw.println("    }");
             n++;
         }
-        pw.println("    }");
 
         pw.println();
         pw.println("    static class Pair {");
