@@ -33,8 +33,8 @@ public class StateHolder<P> {
     public final boolean stopped;
     public final P[] pairs;
     public final int countWorkers;
-    public final AtomicInteger started, ready, finished, consumed;
-    public volatile boolean notAllStarted, notAllReady, notAllFinished, notAllConsumed;
+    public final AtomicInteger started, ready, finished;
+    public volatile boolean notAllStarted, notAllReady, notAllFinished;
     public volatile boolean hasLaggedWorkers;
 
     public StateHolder(boolean stopped, P[] pairs, int expectedWorkers) {
@@ -44,11 +44,9 @@ public class StateHolder<P> {
         this.ready = new AtomicInteger(expectedWorkers);
         this.started = new AtomicInteger(expectedWorkers);
         this.finished = new AtomicInteger(expectedWorkers);
-        this.consumed = new AtomicInteger(expectedWorkers);
         this.notAllReady = true;
         this.notAllFinished = true;
         this.notAllStarted = true;
-        this.notAllConsumed = true;
     }
 
     public void preRun(boolean shouldYield) {
@@ -75,15 +73,6 @@ public class StateHolder<P> {
         hasLaggedWorkers |= notAllStarted;
 
         while (notAllFinished) {
-            if (shouldYield) Thread.yield();
-        }
-    }
-
-    public void postConsume(boolean shouldYield) {
-        if (consumed.decrementAndGet() == 0) {
-            notAllConsumed = false;
-        }
-        while (notAllConsumed) {
             if (shouldYield) Thread.yield();
         }
     }

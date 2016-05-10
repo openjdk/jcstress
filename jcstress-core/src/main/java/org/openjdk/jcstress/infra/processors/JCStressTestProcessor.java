@@ -474,8 +474,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("                while (curEpoch != ep.get()) {");
             pw.println("                    if (yield) Thread.yield();");
             pw.println("                }");
-            pw.println();
-            pw.println("                holder.postConsume(yield);");
             pw.println("            }");
             pw.println("        }");
             n++;
