@@ -48,84 +48,84 @@ public class Chapter0aTestGenerator {
 
         makeTests(
                 dest,
-                readFromResource("/chapter0a/X-FieldAtomicityTest.java.template"),
+                readFromResource("/accessAtomic/X-FieldAtomicityTest.java.template"),
                 "accessAtomic.fields",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/chapter0a/X-FieldDefaultValuesTest.java.template"),
+                readFromResource("/defaultValues/X-FieldDefaultValuesTest.java.template"),
                 "defaultValues.fields",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/chapter0a/X-FieldInitTest.java.template"),
+                readFromResource("/init/X-FieldInitTest.java.template"),
                 "init.fields",
                 new String[]{ "", "volatile", "final" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/chapter0a/X-FieldTearingTest.java.template"),
+                readFromResource("/tearing/X-FieldTearingTest.java.template"),
                 "tearing.fields",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/chapter0a/X-ArrayDefaultValuesTest.java.template"),
+                readFromResource("/defaultValues/X-ArrayDefaultValuesTest.java.template"),
                 "defaultValues.arrays.small",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/chapter0a/X-ArrayLargeDefaultValuesTest.java.template"),
+                readFromResource("/defaultValues/X-ArrayLargeDefaultValuesTest.java.template"),
                 "defaultValues.arrays.large",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/chapter0a/X-ArrayInitTest.java.template"),
+                readFromResource("/init/X-ArrayInitTest.java.template"),
                 "init.arrays.small",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/chapter0a/X-ArrayLargeInitTest.java.template"),
+                readFromResource("/init/X-ArrayLargeInitTest.java.template"),
                 "init.arrays.large",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/chapter0a/X-ArrayAtomicityTest.java.template"),
+                readFromResource("/accessAtomic/X-ArrayAtomicityTest.java.template"),
                 "accessAtomic.arrays.small",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/chapter0a/X-ArrayLargeAtomicityTest.java.template"),
+                readFromResource("/accessAtomic/X-ArrayLargeAtomicityTest.java.template"),
                 "accessAtomic.arrays.large",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/chapter0a/X-ArrayTearingTest.java.template"),
+                readFromResource("/tearing/X-ArrayTearingTest.java.template"),
                 "tearing.arrays.small",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/chapter0a/X-ArrayLargeTearingTest.java.template"),
+                readFromResource("/tearing/X-ArrayLargeTearingTest.java.template"),
                 "tearing.arrays.large",
                 new String[]{ "", "volatile" }
         );
