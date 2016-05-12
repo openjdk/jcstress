@@ -25,35 +25,42 @@
 package org.openjdk.jcstress.infra.results;
 
 import org.openjdk.jcstress.annotations.Result;
-import sun.misc.Contended;
 
 import java.io.Serializable;
 
 @Result
 public class ByteResult8 implements Serializable {
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public byte r1;
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public byte r2;
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public byte r3;
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public byte r4;
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public byte r5;
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public byte r6;
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public byte r7;
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public byte r8;
 
     @Override

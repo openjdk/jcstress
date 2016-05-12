@@ -76,6 +76,7 @@ public class ResultGenerator {
             int n = 1;
             for (Class k : types.all()) {
                 pw.println("    @sun.misc.Contended");
+                pw.println("    @jdk.internal.vm.annotation.Contended");
                 pw.println("    public " + k.getSimpleName() + " r" + n + ";");
                 pw.println();
                 n++;

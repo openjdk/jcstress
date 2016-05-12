@@ -25,23 +25,26 @@
 package org.openjdk.jcstress.infra.results;
 
 import org.openjdk.jcstress.annotations.Result;
-import sun.misc.Contended;
 
 import java.io.Serializable;
 
 @Result
 public class BooleanResult4 implements Serializable {
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public boolean r1;
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public boolean r2;
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public boolean r3;
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public boolean r4;
 
     @Override

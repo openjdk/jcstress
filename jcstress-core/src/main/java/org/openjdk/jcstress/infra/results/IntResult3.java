@@ -25,20 +25,22 @@
 package org.openjdk.jcstress.infra.results;
 
 import org.openjdk.jcstress.annotations.Result;
-import sun.misc.Contended;
 
 import java.io.Serializable;
 
 @Result
 public class IntResult3 implements Serializable {
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public int r1;
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public int r2;
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public int r3;
 
     @Override

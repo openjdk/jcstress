@@ -53,7 +53,7 @@ public class VMSupport {
                 "-XX:+UnlockDiagnosticVMOptions",
                 SimpleTestMain.class);
 
-        detect("Testing @Contended support for avoiding false sharing",
+        detect("Testing @Contended works on all results",
                 "-XX:-RestrictContended",
                 ContendedTestMain.class);
 

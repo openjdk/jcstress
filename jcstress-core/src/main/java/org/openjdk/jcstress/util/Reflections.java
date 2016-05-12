@@ -48,23 +48,6 @@ public class Reflections {
     private static volatile boolean RESOURCE_INITED;
     private static Set<String> RESOURCES;
 
-    public static Collection<String> getResources(String filter, String postfix) {
-        try {
-            ensureResourceInited();
-
-            List<String> res = new ArrayList<>();
-            for (String name : RESOURCES) {
-                if (!name.contains(filter)) continue;
-                if (!name.endsWith(postfix)) continue;
-                res.add(name);
-            }
-
-            return res;
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
     private static void ensureResourceInited() throws IOException {
         if (!RESOURCE_INITED) {
             final SortedSet<String> newResources = new TreeSet<>();
@@ -82,7 +65,8 @@ public class Reflections {
         final List<Class> newClasses = new ArrayList<>();
         for (String name : getClassNames(filter)) {
             try {
-                if (name.contains("VMSupport")) continue;
+                if (name.contains("sun.misc")) continue;
+                if (name.contains("jdk.internal")) continue;
                 newClasses.add(Class.forName(name));
             } catch (ClassNotFoundException e) {
                 throw new IllegalStateException(e.getMessage(), e);
@@ -94,12 +78,12 @@ public class Reflections {
     public static Collection<String> getClassNames(final String filter) throws IOException {
         ensureResourceInited();
 
+        Pattern p = Pattern.compile("[\\\\|/]");
         final List<String> newClasses = new ArrayList<>();
         for (String name : RESOURCES) {
-            name = name.replaceAll("\\\\", ".");
-            name = name.replaceAll("/", ".");
+            name = p.matcher(name).replaceAll(".");
             if (name.contains(filter) && name.endsWith(".class")) {
-                newClasses.add(name.substring(name.indexOf(filter), name.length() - 6));
+                newClasses.add(name.substring(0, name.length() - 6));
             }
         }
 
@@ -154,35 +138,6 @@ public class Reflections {
         jarFileStream.close();
         jarFile.close();
 
-    }
-
-    public static void copy(InputStream input, OutputStream output) throws IOException {
-        if (input == null) {
-            throw new IOException("inputstream is null");
-        }
-
-        byte[] buffer = new byte[8192];
-        while (true) {
-            int read = input.read(buffer);
-            if (read == -1) {
-                break;
-            }
-            output.write(buffer, 0, read);
-        }
-    }
-
-    public static byte[] readAll(File file) throws IOException {
-        FileInputStream fos = new FileInputStream(file);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        copy(fos, baos);
-        fos.close();
-        return baos.toByteArray();
-    }
-
-    public static byte[] readAll(InputStream input) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        copy(input, baos);
-        return baos.toByteArray();
     }
 
 

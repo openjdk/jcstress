@@ -25,23 +25,26 @@
 package org.openjdk.jcstress.infra.results;
 
 import org.openjdk.jcstress.annotations.Result;
-import sun.misc.Contended;
 
 import java.io.Serializable;
 
 @Result
 public class LongResult4 implements Serializable {
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public long r1;
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public long r2;
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public long r3;
 
-    @Contended
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public long r4;
 
     @Override

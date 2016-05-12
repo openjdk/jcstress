@@ -24,17 +24,75 @@
  */
 package org.openjdk.jcstress.vm;
 
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.annotations.Result;
+import org.openjdk.jcstress.util.Reflections;
 import org.openjdk.jcstress.util.UnsafeHolder;
+
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class ContendedTestMain {
 
-    public static void main(String... args) throws NoSuchFieldException {
-        long o1 = UnsafeHolder.U.objectFieldOffset(IntResult2.class.getField("r1"));
-        long o2 = UnsafeHolder.U.objectFieldOffset(IntResult2.class.getField("r2"));
+    private static final int PADDING_WIDTH = 64;
 
-        if (Math.abs(o2 - o1) < 64) {
-            throw new IllegalStateException("@Contended does not seem to be working.");
+    public static void main(String... args) throws NoSuchFieldException, IOException {
+        List<String> msgs = new ArrayList<>();
+
+        Collection<Class> classes = Reflections.getClasses("class");
+        if (classes.isEmpty()) {
+            throw new IllegalStateException("Classes not found");
+        }
+
+        for (Class<?> cl : classes) {
+            if (cl.getAnnotation(Result.class) == null) continue;
+
+            List<FieldDef> fdefs = new ArrayList<>();
+            for (Field f : cl.getDeclaredFields()) {
+                fdefs.add(new FieldDef(f));
+            }
+
+            Collections.sort(fdefs);
+
+            FieldDef last = null;
+            for (FieldDef fd : fdefs) {
+                if (fd.offset < PADDING_WIDTH) {
+                    msgs.add("Class " + cl + ": field " + fd.field.getName() + " is not padded");
+                }
+
+                if (last != null) {
+                    if (Math.abs(fd.offset - last.offset) < PADDING_WIDTH) {
+                        msgs.add("Class " + cl + ": fields " + fd.field.getName() + " and " + last.field.getName() + " are not padded pairwise");
+                    }
+                }
+
+                last = fd;
+            }
+        }
+
+        if (!msgs.isEmpty()) {
+            for (String msg : msgs) {
+                System.out.println(msg);
+            }
+            throw new IllegalStateException("@Contended does not seem to work properly");
+        }
+    }
+
+    static class FieldDef implements Comparable<FieldDef> {
+        final Field field;
+        final long offset;
+
+        FieldDef(Field f) {
+            field = f;
+            offset = UnsafeHolder.U.objectFieldOffset(f);
+        }
+
+        @Override
+        public int compareTo(FieldDef o) {
+            return Long.compare(offset, o.offset);
         }
     }
 

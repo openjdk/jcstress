@@ -22,39 +22,14 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.infra.results;
+package jdk.internal.vm.annotation;
 
-import org.openjdk.jcstress.annotations.Result;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.io.Serializable;
-
-@Result
-public class StringResult1 implements Serializable {
-
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
-    public String r1;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        StringResult1 that = (StringResult1) o;
-
-        if (r1 != null ? !r1.equals(that.r1) : that.r1 != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return r1 != null ? r1.hashCode() : 0;
-    }
-
-    @Override
-    public String toString() {
-        return "[" + r1 + ']';
-    }
-
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.TYPE})
+public @interface Contended {
 }
