@@ -38,25 +38,59 @@ public class WhiteBoxSupport {
 
     private static WhiteBox whiteBox;
     private static volatile boolean tried;
+    private static volatile Mode mode;
     private static volatile Collection<Method> infraMethods;
+
+    enum Mode {
+        DEOPT_ALL,
+        DEOPT_METHOD,
+    }
 
     public static void init() throws Throwable {
         if (tried) return;
         try {
-            WhiteBox w = WhiteBox.getWhiteBox();
-            w.deoptimizeAll();
-            whiteBox = w;
+            initAndTest();
         } finally {
             tried = true;
         }
     }
 
+    private static void initAndTest() {
+        WhiteBox.registerNatives();
+        WhiteBox w = new WhiteBox();
+
+        Throwable deoptMethod = null;
+        try {
+            w.deoptimizeMethod(WhiteBoxSupport.class.getMethod("initSafely"));
+            w.isClassAlive(WhiteBoxSupport.class.getName());
+        } catch (Throwable ex) {
+            deoptMethod = ex;
+        }
+
+        Throwable deoptAll = null;
+        try {
+            w.deoptimizeAll();
+        } catch (Throwable ex) {
+            deoptAll = ex;
+        }
+
+        if (deoptMethod == null) {
+            mode = Mode.DEOPT_METHOD;
+        } else if (deoptAll == null) {
+            mode = Mode.DEOPT_ALL;
+        } else {
+            IllegalStateException whiteBoxFailed = new IllegalStateException();
+            whiteBoxFailed.addSuppressed(deoptAll);
+            whiteBoxFailed.addSuppressed(deoptMethod);
+            throw whiteBoxFailed;
+        }
+        whiteBox = w;
+    }
+
     public static void initSafely() {
         if (tried) return;
         try {
-            WhiteBox w = WhiteBox.getWhiteBox();
-            w.deoptimizeAll();
-            whiteBox = w;
+            initAndTest();
         } catch (Throwable e) {
             // expected
         } finally {
@@ -64,37 +98,49 @@ public class WhiteBoxSupport {
         }
     }
 
-    public static void tryDeoptimizeAllInfra(int actionProbRatio) {
+    public static void tryDeopt(int actionProbRatio) {
         WhiteBox w = whiteBox;
         if (w != null) {
             if (ThreadLocalRandom.current().nextInt(actionProbRatio) != 0)
                 return;
 
-            try {
-                Collection<Method> im = infraMethods;
-                if (im == null) {
-                    im = new ArrayList<>();
-                    Collection<String> infraNames = new ArrayList<>();
-                    infraNames.addAll(Reflections.getClassNames("org.openjdk.jcstress.infra"));
-                    infraNames.addAll(Reflections.getClassNames("org.openjdk.jcstress.util"));
-                    for (String name : infraNames) {
-                        try {
-                            Class<?> aClass = Class.forName(name);
-                            Collections.addAll(im, aClass.getDeclaredMethods());
-                        } catch (ClassNotFoundException e) {
-                            throw new IllegalStateException();
+            switch (mode) {
+                case DEOPT_ALL:
+                    w.deoptimizeAll();
+                    break;
+                case DEOPT_METHOD:
+                    try {
+                        for (Method m : getJCStressMethods()) {
+                            w.deoptimizeMethod(m);
                         }
+                    } catch (IOException e) {
+                        throw new IllegalStateException();
                     }
-                    infraMethods = im;
-                }
-
-                for (Method m : im) {
-                    w.deoptimizeMethod(m);
-                }
-            } catch (IOException e) {
-                throw new IllegalStateException();
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown deopt mode: " + mode);
             }
         }
+    }
+
+    private static Collection<Method> getJCStressMethods() throws IOException {
+        Collection<Method> im = infraMethods;
+        if (im == null) {
+            im = new ArrayList<>();
+            Collection<String> names = new ArrayList<>();
+            names.addAll(Reflections.getClassNames("org.openjdk.jcstress"));
+            for (String name : names) {
+                // Avoid loading classes
+                if (!whiteBox.isClassAlive(name)) continue;
+                try {
+                    Class<?> aClass = Class.forName(name);
+                    Collections.addAll(im, aClass.getDeclaredMethods());
+                } catch (ClassNotFoundException e) {
+                    throw new IllegalStateException();
+                }
+            }
+            infraMethods = im;
+        } return im;
     }
 
 }

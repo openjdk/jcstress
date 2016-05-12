@@ -557,7 +557,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        testLog.print(\"Iterations \");");
         pw.println("        for (int c = 0; c < control.iters; c++) {");
         pw.println("            try {");
-        pw.println("                WhiteBoxSupport.tryDeoptimizeAllInfra(control.deoptRatio);");
+        pw.println("                WhiteBoxSupport.tryDeopt(control.deoptRatio);");
         pw.println("            } catch (NoClassDefFoundError err) {");
         pw.println("                // gracefully \"handle\"");
         pw.println("            }");

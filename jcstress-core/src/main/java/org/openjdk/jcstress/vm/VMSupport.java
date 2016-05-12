@@ -24,6 +24,7 @@
  */
 package org.openjdk.jcstress.vm;
 
+import org.openjdk.jcstress.Main;
 import org.openjdk.jcstress.util.InputStreamDrainer;
 
 import java.io.ByteArrayOutputStream;
@@ -41,15 +42,22 @@ public class VMSupport {
         System.out.println(" (all failures are non-fatal, but may affect testing accuracy)");
         System.out.println();
 
+        String jarName = new File(Main.class.getProtectionDomain()
+                .getCodeSource().getLocation().getPath()).getPath();
+
+        detect("Adding ourselves to bootclasspath: " + jarName,
+                "-Xbootclasspath/a:" + jarName,
+                PrivilegedTestMain.class);
+
         detect("Unlocking diagnostic VM options",
                 "-XX:+UnlockDiagnosticVMOptions",
                 SimpleTestMain.class);
 
-        detect("@Contended support for avoiding false sharing",
+        detect("Testing @Contended support for avoiding false sharing",
                 "-XX:-RestrictContended",
                 ContendedTestMain.class);
 
-        detect("Whitebox API for online de-optimization",
+        detect("Unlocking Whitebox API for online de-optimization",
                 "-XX:+WhiteBoxAPI",
                 DeoptTestMain.class);
 

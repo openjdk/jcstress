@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,46 +22,15 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package sun.hotspot.parser;
+package org.openjdk.jcstress.vm;
 
-public class DiagnosticCommand {
+public class PrivilegedTestMain {
 
-    public enum DiagnosticArgumentType {
-        JLONG, BOOLEAN, STRING, NANOTIME, STRINGARRAY, MEMORYSIZE
+    public static void main(String... args) {
+        ClassLoader cl = PrivilegedTestMain.class.getClassLoader();
+        if (cl != null) {
+            throw new IllegalStateException("We are not loaded with a privileged classloader: " + cl);
+        }
     }
 
-    private String name;
-    private String desc;
-    private DiagnosticArgumentType type;
-    private boolean mandatory;
-    private String defaultValue;
-
-    public DiagnosticCommand(String name, String desc, DiagnosticArgumentType type,
-            boolean mandatory, String defaultValue) {
-        this.name = name;
-        this.desc = desc;
-        this.type = type;
-        this.mandatory = mandatory;
-        this.defaultValue = defaultValue;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
-
-    public DiagnosticArgumentType getType() {
-        return type;
-    }
-
-    public boolean isMandatory() {
-        return mandatory;
-    }
-
-    public String getDefaultValue() {
-        return defaultValue;
-    }
 }

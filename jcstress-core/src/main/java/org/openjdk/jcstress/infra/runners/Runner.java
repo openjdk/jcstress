@@ -90,7 +90,7 @@ public abstract class Runner<R> {
         testLog.print("Iterations ");
         for (int c = 0; c < control.iters; c++) {
             try {
-                WhiteBoxSupport.tryDeoptimizeAllInfra(control.deoptRatio);
+                WhiteBoxSupport.tryDeopt(control.deoptRatio);
             } catch (NoClassDefFoundError err) {
                 // gracefully "handle"
             }
