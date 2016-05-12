@@ -79,13 +79,9 @@ public class VMSupport {
         List<List<String>> modes = Arrays.asList(
                 Arrays.asList("-Xint"),
                 Arrays.asList("-client"),
+                Arrays.asList("-XX:TieredStopAtLevel=1"),
                 Arrays.asList("-server"),
-                Arrays.asList("-server", "-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM"),
-                Arrays.asList("-XX:-TieredCompilation"),
-                Arrays.asList("-XX:-TieredCompilation", "-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM"),
-                Arrays.asList("-XX:+TieredCompilation", "-XX:TieredStopAtLevel=1"),
-                Arrays.asList("-XX:+TieredCompilation", "-XX:TieredStopAtLevel=2"),
-                Arrays.asList("-XX:+TieredCompilation", "-XX:TieredStopAtLevel=3")
+                Arrays.asList("-server", "-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM")
         );
 
         System.out.println("Probing what VM modes are available:");

@@ -154,12 +154,9 @@ public class Options {
 
         this.minStride = orDefault(set.valueOf(minStride), 10);
         this.maxStride = orDefault(set.valueOf(maxStride), 10000);
-        this.time = orDefault(set.valueOf(time), 1000);
-        this.iters = orDefault(set.valueOf(iters), 5);
         this.testFilter = orDefault(set.valueOf(testFilter), ".*");
         this.deoptRatio = orDefault(set.valueOf(deoptRatio), 5);
 
-        this.forks = orDefault(set.valueOf(forks), 1);
         this.parse = orDefault(set.has(parse), false);
         if (this.parse) {
             this.resultFile = set.valueOf(parse);
@@ -200,20 +197,22 @@ public class Options {
         if (this.mode.equalsIgnoreCase("quick")) {
             this.time = 300;
             this.iters = 5;
-            this.forks = 0;
+            this.forks = 1;
         } else
         if (this.mode.equalsIgnoreCase("default")) {
-            // do nothing
+            this.time = orDefault(set.valueOf(time), 1000);
+            this.iters = orDefault(set.valueOf(iters), 5);
+            this.forks = orDefault(set.valueOf(forks), 1);
         } else
         if (this.mode.equalsIgnoreCase("tough")) {
-            this.time = 5000;
+            this.time = 1000;
             this.iters = 10;
             this.forks = 10;
         } else
         if (this.mode.equalsIgnoreCase("stress")) {
             this.time = 1000;
-            this.iters = 5;
-            this.forks = 100;
+            this.iters = 50;
+            this.forks = 10;
         } else {
             System.err.println("Unknown test mode: " + this.mode);
             System.err.println();
