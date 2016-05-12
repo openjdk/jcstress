@@ -153,16 +153,22 @@ public class JCStress {
     private List<TestConfig> prepareRunProgram(Options opts, Set<String> tests) {
         List<TestConfig> configs = new ArrayList<>();
         if (opts.shouldFork()) {
+            List<String> inputArgs = ManagementFactory.getRuntimeMXBean().getInputArguments();
             for (String test : tests) {
-                for (int f = 0; f < opts.getForks(); f++) {
-                    configs.add(new TestConfig(opts, TestList.getInfo(test), TestConfig.RunMode.FORKED, f));
+                for (List<String> jvmArgs : VMSupport.getAvailableVMModes()) {
+                    List<String> fullArgs = new ArrayList<>();
+                    fullArgs.addAll(inputArgs);
+                    fullArgs.addAll(jvmArgs);
+                    for (int f = 0; f < opts.getForks(); f++) {
+                        configs.add(new TestConfig(opts, TestList.getInfo(test), TestConfig.RunMode.FORKED, f, fullArgs));
+                    }
                 }
             }
         } else {
             for (String test : tests) {
                 TestInfo info = TestList.getInfo(test);
                 TestConfig.RunMode mode = info.requiresFork() ? TestConfig.RunMode.FORKED : TestConfig.RunMode.EMBEDDED;
-                configs.add(new TestConfig(opts, info, mode, -1));
+                configs.add(new TestConfig(opts, info, mode, -1, Collections.emptyList()));
             }
         }
         return configs;
@@ -176,12 +182,7 @@ public class JCStress {
             command.addAll(VMSupport.getJavaInvokeLine());
 
             // jvm args
-            command.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
-
-            String appendJvmArgs = config.appendJvmArgs;
-            if (appendJvmArgs.length() > 0) {
-                command.addAll(Arrays.asList(appendJvmArgs.split("\\s")));
-            }
+            command.addAll(config.jvmArgs);
 
             command.add(ForkedMain.class.getName());
 

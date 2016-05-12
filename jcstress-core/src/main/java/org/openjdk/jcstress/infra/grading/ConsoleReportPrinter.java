@@ -134,9 +134,10 @@ public class ConsoleReportPrinter implements TestResultCollector {
         }
 
         if (isVerbose) {
-            output.format("    (fork: #%d, iteration #%d)%n",
+            output.format("    (fork: #%d, iteration #%d, JVM args: %s)%n",
                     r.getConfig().forkId + 1,
-                    r.getIteration() + 1
+                    r.getIteration() + 1,
+                    r.getConfig().jvmArgs
             );
 
             int idLen = "Observed state".length();

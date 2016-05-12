@@ -170,4 +170,7 @@ public class VMSupport {
     }
 
 
+    public static List<List<String>> getAvailableVMModes() {
+        return AVAIL_JVM_MODES;
+    }
 }

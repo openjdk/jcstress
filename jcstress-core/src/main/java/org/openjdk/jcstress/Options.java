@@ -55,7 +55,6 @@ public class Options {
     private boolean parse;
     private boolean list;
     private boolean verbose;
-    private String appendJvmArgs;
     private int systemCPUs;
     private int userCPUs;
     private int forks;
@@ -117,9 +116,6 @@ public class Options {
                 "with occasional forking.")
                 .withOptionalArg().ofType(Integer.class).describedAs("count");
 
-        OptionSpec<String> appendJvmArgs = parser.accepts("jvmArgs", "Append these JVM arguments for the forked runs.")
-                .withRequiredArg().ofType(String.class).describedAs("opts");
-
         OptionSpec<String> modeStr = parser.accepts("m", "Test mode preset: sanity, quick, default, tough, stress.")
                 .withRequiredArg().ofType(String.class).describedAs("mode");
 
@@ -171,7 +167,6 @@ public class Options {
             this.resultFile = "jcstress." + System.currentTimeMillis();
         }
         this.list = orDefault(set.has(list), false);
-        this.appendJvmArgs = orDefault(set.valueOf(appendJvmArgs), "");
         this.verbose = orDefault(set.has("v"), false);
 
         this.hostName = set.valueOf(hostName);
@@ -359,10 +354,6 @@ public class Options {
 
     public int getIterations() {
         return iters;
-    }
-
-    public String getAppendJvmArgs() {
-        return appendJvmArgs;
     }
 
     public boolean isVerbose() {

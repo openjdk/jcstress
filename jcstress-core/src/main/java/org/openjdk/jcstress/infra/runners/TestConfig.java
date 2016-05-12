@@ -28,6 +28,7 @@ import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.infra.TestInfo;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class TestConfig implements Serializable, Comparable<TestConfig> {
 
@@ -41,7 +42,7 @@ public class TestConfig implements Serializable, Comparable<TestConfig> {
     public final int threads;
     public final String name;
     public final String generatedRunnerName;
-    public final String appendJvmArgs;
+    public final List<String> jvmArgs;
     public final RunMode runMode;
     public final int forkId;
 
@@ -50,9 +51,10 @@ public class TestConfig implements Serializable, Comparable<TestConfig> {
         FORKED,
     }
 
-    public TestConfig(Options opts, TestInfo info, RunMode runMode, int forkId) {
+    public TestConfig(Options opts, TestInfo info, RunMode runMode, int forkId, List<String> jvmArgs) {
         this.runMode = runMode;
         this.forkId = forkId;
+        this.jvmArgs = jvmArgs;
         time = opts.getTime();
         minStride = opts.getMinStride();
         maxStride = opts.getMaxStride();
@@ -62,7 +64,6 @@ public class TestConfig implements Serializable, Comparable<TestConfig> {
         deoptRatio = opts.deoptRatio();
         threads = info.threads();
         name = info.name();
-        appendJvmArgs = opts.getAppendJvmArgs();
         generatedRunnerName = info.generatedRunner();
     }
 
@@ -74,7 +75,6 @@ public class TestConfig implements Serializable, Comparable<TestConfig> {
         TestConfig that = (TestConfig) o;
 
         if (shouldYield != that.shouldYield) return false;
-        if (verbose != that.verbose) return false;
         if (minStride != that.minStride) return false;
         if (maxStride != that.maxStride) return false;
         if (time != that.time) return false;
@@ -82,14 +82,14 @@ public class TestConfig implements Serializable, Comparable<TestConfig> {
         if (deoptRatio != that.deoptRatio) return false;
         if (threads != that.threads) return false;
         if (!name.equals(that.name)) return false;
-        if (!generatedRunnerName.equals(that.generatedRunnerName)) return false;
-        return appendJvmArgs.equals(that.appendJvmArgs);
+        if (!jvmArgs.equals(that.jvmArgs)) return false;
+        return runMode == that.runMode;
+
     }
 
     @Override
     public int hashCode() {
         int result = (shouldYield ? 1 : 0);
-        result = 31 * result + (verbose ? 1 : 0);
         result = 31 * result + minStride;
         result = 31 * result + maxStride;
         result = 31 * result + time;
@@ -97,8 +97,8 @@ public class TestConfig implements Serializable, Comparable<TestConfig> {
         result = 31 * result + deoptRatio;
         result = 31 * result + threads;
         result = 31 * result + name.hashCode();
-        result = 31 * result + generatedRunnerName.hashCode();
-        result = 31 * result + appendJvmArgs.hashCode();
+        result = 31 * result + jvmArgs.hashCode();
+        result = 31 * result + runMode.hashCode();
         return result;
     }
 
