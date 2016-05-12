@@ -24,16 +24,15 @@
  */
 package org.openjdk.jcstress.infra.collectors;
 
-import org.openjdk.jcstress.infra.State;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.util.Environment;
+import org.openjdk.jcstress.util.HashMultiset;
+import org.openjdk.jcstress.util.Multiset;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -45,7 +44,7 @@ public class TestResult implements Serializable {
 
     private final String vmID;
     private final String name;
-    private final Map<State, State> states;
+    private final Multiset<String> states;
     private volatile Environment env;
     private final Status status;
     private final List<String> auxData;
@@ -54,17 +53,12 @@ public class TestResult implements Serializable {
         this.vmID = VM_ID;
         this.name = name;
         this.status = status;
-        this.states = new HashMap<>();
+        this.states = new HashMultiset<>();
         this.auxData = new ArrayList<>();
     }
 
-    public void addState(Object result, long count) {
-        State ns = new State(result, count);
-        State os = states.get(ns);
-        if (os != null) {
-            ns = new State(result, count + os.getCount());
-        }
-        states.put(ns, ns);
+    public void addState(String result, long count) {
+        states.add(result, count);
     }
 
     public void addAuxData(String data) {
@@ -77,10 +71,6 @@ public class TestResult implements Serializable {
 
     public String getName() {
         return name;
-    }
-
-    public Collection<State> getStates() {
-        return states.values();
     }
 
     public Environment getEnv() {
@@ -97,5 +87,17 @@ public class TestResult implements Serializable {
 
     public List<String> getAuxData() {
         return auxData;
+    }
+
+    public long getTotalCount() {
+        return states.size();
+    }
+
+    public long getCount(String s) {
+        return states.count(s);
+    }
+
+    public Collection<String> getStateKeys() {
+        return states.keys();
     }
 }

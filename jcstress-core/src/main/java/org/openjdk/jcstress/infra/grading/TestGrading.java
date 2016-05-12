@@ -25,7 +25,6 @@
 package org.openjdk.jcstress.infra.grading;
 
 import org.openjdk.jcstress.annotations.Expect;
-import org.openjdk.jcstress.infra.State;
 import org.openjdk.jcstress.infra.StateCase;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.TestResult;
@@ -58,35 +57,39 @@ public class TestGrading {
         hasInteresting = false;
         hasSpec = false;
 
-        List<State> unmatchedStates = new ArrayList<>();
-        unmatchedStates.addAll(r.getStates());
+        List<String> unmatchedStates = new ArrayList<>();
+        unmatchedStates.addAll(r.getStateKeys());
         for (StateCase c : test.cases()) {
             boolean matched = false;
 
-            for (State s : r.getStates()) {
-                if (c.state().equals(s.getId())) {
-                    isPassed &= passed(c.expect(), s.getCount());
-                    hasInteresting |= hasInteresting(c.expect(), s.getCount());
-                    hasSpec |= hasSpec(c.expect(), s.getCount());
-                    failureMessages.add(failureMessage(s.getId(), c.expect(), s.getCount()));
+            Expect ex = c.expect();
+            for (String s : r.getStateKeys()) {
+                if (c.state().equals(s)) {
+                    long count = r.getCount(s);
+                    isPassed &= passed(ex, count);
+                    hasInteresting |= hasInteresting(ex, count);
+                    hasSpec |= hasSpec(ex, count);
+                    failureMessages.add(failureMessage(s, ex, count));
                     matched = true;
                     unmatchedStates.remove(s);
                 }
             }
 
             if (!matched) {
-                isPassed &= passed(c.expect(), 0);
-                hasInteresting |= hasInteresting(c.expect(), 0);
-                hasSpec |= hasSpec(c.expect(), 0);
-                failureMessages.add(failureMessage("N/A", c.expect(), 0));
+                isPassed &= passed(ex, 0);
+                hasInteresting |= hasInteresting(ex, 0);
+                hasSpec |= hasSpec(ex, 0);
+                failureMessages.add(failureMessage("N/A", ex, 0));
             }
         }
 
-        for (State s : unmatchedStates) {
-            isPassed &= passed(test.unmatched().expect(), s.getCount());
-            hasInteresting |= hasInteresting(test.unmatched().expect(), s.getCount());
-            hasSpec |= hasSpec(test.unmatched().expect(), s.getCount());
-            failureMessages.add(failureMessage(s.getId(), test.unmatched().expect(), s.getCount()));
+        for (String s : unmatchedStates) {
+            Expect expect = test.unmatched().expect();
+            long count = r.getCount(s);
+            isPassed &= passed(expect, count);
+            hasInteresting |= hasInteresting(expect, count);
+            hasSpec |= hasSpec(expect, count);
+            failureMessages.add(failureMessage(s, expect, count));
         }
     }
 

@@ -122,7 +122,7 @@ public abstract class Runner<R> {
         TestResult result = new TestResult(testName, Status.NORMAL);
 
         for (R e : results.elementSet()) {
-            result.addState(e, results.count(e));
+            result.addState(String.valueOf(e), results.count(e));
         }
 
         collector.add(result);

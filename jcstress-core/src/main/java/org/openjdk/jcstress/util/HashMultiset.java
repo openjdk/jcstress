@@ -56,8 +56,8 @@ import java.util.Map;
 
 public class HashMultiset<T> implements Multiset<T>, Serializable {
 
-    private final Map<T, Integer> map;
-    private int size;
+    private final Map<T, Long> map;
+    private long size;
 
     public HashMultiset() {
         map = new HashMap<>();
@@ -65,18 +65,23 @@ public class HashMultiset<T> implements Multiset<T>, Serializable {
 
     @Override
     public void add(T element) {
-        Integer count = map.get(element);
+        add(element, 1);
+    }
+
+    @Override
+    public void add(T element, long add) {
+        Long count = map.get(element);
         if (count == null) {
-            count = 0;
+            count = 0L;
         }
-        count++;
-        size++;
+        count += add;
+        size += add;
         map.put(element, count);
     }
 
     @Override
-    public int count(T element) {
-        Integer count = map.get(element);
+    public long count(T element) {
+        Long count = map.get(element);
         return (count == null) ? 0 : count;
     }
 
@@ -86,7 +91,7 @@ public class HashMultiset<T> implements Multiset<T>, Serializable {
     }
 
     @Override
-    public int size() {
+    public long size() {
         return size;
     }
 

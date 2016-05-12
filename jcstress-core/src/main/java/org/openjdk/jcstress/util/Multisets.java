@@ -50,7 +50,6 @@ package org.openjdk.jcstress.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -58,7 +57,7 @@ public class Multisets {
 
     public static <T> Collection<T> countHighest(Multiset<T> set, int top) {
         // crude and inefficient
-        PriorityQueue<Pair<T, Integer>> q = new PriorityQueue<>(10, (o1, o2) -> o2.k2.compareTo(o1.k2));
+        PriorityQueue<Pair<T, Long>> q = new PriorityQueue<>(10, (o1, o2) -> o2.k2.compareTo(o1.k2));
 
         for (T key : set.keys()) {
             q.add(new Pair<>(key, set.count(key)));

@@ -26,16 +26,12 @@ package org.openjdk.jcstress.infra.grading;
 
 
 import org.openjdk.jcstress.Options;
-import org.openjdk.jcstress.infra.State;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.InProcessCollector;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.TestList;
-import org.openjdk.jcstress.util.HashMultimap;
-import org.openjdk.jcstress.util.LongHashMultiset;
-import org.openjdk.jcstress.util.Multimap;
-import org.openjdk.jcstress.util.TreeMultimap;
+import org.openjdk.jcstress.util.*;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
@@ -74,20 +70,20 @@ public class ExceptionReportPrinter {
             for (String name : multiResults.keys()) {
                 Collection<TestResult> mergeable = multiResults.get(name);
 
-                LongHashMultiset<State> stateCounts = new LongHashMultiset<>();
+                Multiset<String> stateCounts = new HashMultiset<>();
 
                 Status status = Status.NORMAL;
                 for (TestResult r : mergeable) {
                     status = status.combine(r.status());
-                    for (State s : r.getStates()) {
-                        stateCounts.add(s, s.getCount());
+                    for (String s : r.getStateKeys()) {
+                        stateCounts.add(s, r.getCount(s));
                     }
                 }
 
                 TestResult root = new TestResult(name, status);
 
-                for (State s : stateCounts.keys()) {
-                    root.addState(s.getKey(), stateCounts.count(s));
+                for (String s : stateCounts.keys()) {
+                    root.addState(s, stateCounts.count(s));
                 }
 
                 results.put(name, root);

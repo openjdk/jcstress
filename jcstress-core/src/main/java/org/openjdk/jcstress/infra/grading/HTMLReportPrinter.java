@@ -27,18 +27,13 @@ package org.openjdk.jcstress.infra.grading;
 
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.annotations.Expect;
-import org.openjdk.jcstress.infra.State;
 import org.openjdk.jcstress.infra.StateCase;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.InProcessCollector;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.TestList;
-import org.openjdk.jcstress.util.Environment;
-import org.openjdk.jcstress.util.HashMultimap;
-import org.openjdk.jcstress.util.LongHashMultiset;
-import org.openjdk.jcstress.util.Multimap;
-import org.openjdk.jcstress.util.TreeMultimap;
+import org.openjdk.jcstress.util.*;
 
 import javax.xml.bind.JAXBException;
 import java.awt.*;
@@ -87,7 +82,7 @@ public class HTMLReportPrinter {
             for (String name : multiResults.keys()) {
                 Collection<TestResult> mergeable = multiResults.get(name);
 
-                LongHashMultiset<State> stateCounts = new LongHashMultiset<>();
+                Multiset<String> stateCounts = new HashMultiset<>();
 
                 List<String> auxData = new ArrayList<>();
 
@@ -95,8 +90,8 @@ public class HTMLReportPrinter {
                 Environment env = null;
                 for (TestResult r : mergeable) {
                     status = status.combine(r.status());
-                    for (State s : r.getStates()) {
-                        stateCounts.add(s, s.getCount());
+                    for (String s : r.getStateKeys()) {
+                        stateCounts.add(s, r.getCount(s));
                     }
                     env = r.getEnv();
                     auxData.addAll(r.getAuxData());
@@ -104,8 +99,8 @@ public class HTMLReportPrinter {
 
                 TestResult root = new TestResult(name, status);
 
-                for (State s : stateCounts.keys()) {
-                    root.addState(s.getKey(), stateCounts.count(s));
+                for (String s : stateCounts.keys()) {
+                    root.addState(s, stateCounts.count(s));
                 }
 
                 root.setEnv(env);
@@ -528,11 +523,7 @@ public class HTMLReportPrinter {
     }
 
     public static String getRoughCount(TestResult r) {
-        long sum = 0;
-        for (State s : r.getStates()) {
-            sum += s.getCount();
-        }
-
+        long sum = r.getTotalCount();
         if (sum > 10) {
             return "10<sup>" + (int) Math.floor(Math.log10(sum)) + "</sup>";
         } else {
@@ -565,18 +556,18 @@ public class HTMLReportPrinter {
         output.println("<th>Interpretation</th>");
         output.println("</tr>");
 
-        List<State> unmatchedStates = new ArrayList<>();
-        unmatchedStates.addAll(r.getStates());
+        List<String> unmatchedStates = new ArrayList<>();
+        unmatchedStates.addAll(r.getStateKeys());
         for (StateCase c : test.cases()) {
 
             boolean matched = false;
 
-            for (State s : r.getStates()) {
-                if (c.state().equals(s.getId())) {
+            for (String s : r.getStateKeys()) {
+                if (c.state().equals(s)) {
                     // match!
-                    output.println("<tr bgColor=" + selectHTMLColor(c.expect(), s.getCount() == 0) + ">");
-                    output.println("<td>" + s.getId() + "</td>");
-                    output.println("<td align=center>" + s.getCount() + "</td>");
+                    output.println("<tr bgColor=" + selectHTMLColor(c.expect(), r.getCount(s) == 0) + ">");
+                    output.println("<td>" + s + "</td>");
+                    output.println("<td align=center>" + r.getCount(s) + "</td>");
                     output.println("<td align=center>" + c.expect() + "</td>");
                     output.println("<td>" + c.description() + "</td>");
                     output.println("</tr>");
@@ -595,10 +586,10 @@ public class HTMLReportPrinter {
             }
         }
 
-        for (State s : unmatchedStates) {
-            output.println("<tr bgColor=" + selectHTMLColor(test.unmatched().expect(), s.getCount() == 0) + ">");
-            output.println("<td>" + s.getId() + "</td>");
-            output.println("<td align=center>" + s.getCount() + "</td>");
+        for (String s : unmatchedStates) {
+            output.println("<tr bgColor=" + selectHTMLColor(test.unmatched().expect(), r.getCount(s) == 0) + ">");
+            output.println("<td>" + s + "</td>");
+            output.println("<td align=center>" + r.getCount(s) + "</td>");
             output.println("<td align=center>" + test.unmatched().expect() + "</td>");
             output.println("<td>" + test.unmatched().expect() + "</td>");
             output.println("</tr>");
@@ -631,10 +622,10 @@ public class HTMLReportPrinter {
         output.println("<th width=50>Refs</th>");
         output.println("</tr>");
 
-        for (State s : r.getStates()) {
-            output.println("<tr bgColor=" + selectHTMLColor(Expect.UNKNOWN, s.getCount() == 0) + ">");
-            output.println("<td>" + s.getId() + "</td>");
-            output.println("<td align=center>" + s.getCount() + "</td>");
+        for (String s : r.getStateKeys()) {
+            output.println("<tr bgColor=" + selectHTMLColor(Expect.UNKNOWN, r.getCount(s) == 0) + ">");
+            output.println("<td>" + s + "</td>");
+            output.println("<td align=center>" + r.getCount(s) + "</td>");
             output.println("<td align=center>" + Expect.UNKNOWN + "</td>");
             output.println("<td>" + "Unknows state" + "</td>");
             output.println("</tr>");

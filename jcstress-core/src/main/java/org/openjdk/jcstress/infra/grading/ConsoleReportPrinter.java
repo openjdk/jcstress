@@ -26,7 +26,6 @@ package org.openjdk.jcstress.infra.grading;
 
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.annotations.Expect;
-import org.openjdk.jcstress.infra.State;
 import org.openjdk.jcstress.infra.StateCase;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.TestResult;
@@ -97,12 +96,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
             firstTest = System.nanoTime();
         } else {
             observedResults.incrementAndGet();
-
-            int totalCount = 0;
-            for (State s : r.getStates()) {
-                totalCount += s.getCount();
-            }
-            observedCount.addAndGet(totalCount);
+            observedCount.addAndGet(r.getTotalCount());
         }
 
         printResult(r, verbose);
@@ -160,19 +154,19 @@ public class ConsoleReportPrinter implements TestResultCollector {
             int expectLen = "Expectation".length();
             int descLen = 60;
 
-            for (State s : r.getStates()) {
-                idLen = Math.max(idLen, s.getId().length());
-                occLen = Math.max(occLen, String.format("%,d", s.getCount()).length());
+            for (String s : r.getStateKeys()) {
+                idLen = Math.max(idLen, s.length());
+                occLen = Math.max(occLen, String.format("%,d", r.getCount(s)).length());
                 expectLen = Math.max(expectLen, Expect.UNKNOWN.toString().length());
             }
 
             TestInfo test = TestList.getInfo(r.getName());
             if (test == null) {
                 output.printf("%" + idLen + "s %" + occLen +"s %" + expectLen + "s  %-" + descLen + "s%n", "Observed state", "Occurrences", "Expectation", "Interpretation");
-                for (State s : r.getStates()) {
+                for (String s : r.getStateKeys()) {
                     output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
-                            StringUtils.cutoff(s.getId(), idLen),
-                            s.getCount(),
+                            StringUtils.cutoff(s, idLen),
+                            r.getCount(s),
                             Expect.UNKNOWN,
                             "N/A");
                 }
@@ -191,18 +185,18 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
             output.printf("%" + idLen + "s %" + occLen +"s %" + expectLen + "s  %-" + descLen + "s%n", "Observed state", "Occurrences", "Expectation", "Interpretation");
 
-            List<State> unmatchedStates = new ArrayList<>();
-            unmatchedStates.addAll(r.getStates());
+            List<String> unmatchedStates = new ArrayList<>();
+            unmatchedStates.addAll(r.getStateKeys());
 
             for (StateCase c : test.cases()) {
                 boolean matched = false;
 
-                for (State s : r.getStates()) {
-                    if (c.state().equals(s.getId())) {
+                for (String s : r.getStateKeys()) {
+                    if (c.state().equals(s)) {
                         // match!
                         output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
-                                StringUtils.cutoff(s.getId(), idLen),
-                                s.getCount(),
+                                StringUtils.cutoff(s, idLen),
+                                r.getCount(s),
                                 c.expect(),
                                 StringUtils.cutoff(c.description(), descLen));
                         matched = true;
@@ -219,10 +213,10 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 }
             }
 
-            for (State s : unmatchedStates) {
+            for (String s : unmatchedStates) {
                 output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
-                        StringUtils.cutoff(s.getId(), idLen),
-                        s.getCount(),
+                        StringUtils.cutoff(s, idLen),
+                        r.getCount(s),
                         test.unmatched().expect(),
                         StringUtils.cutoff(test.unmatched().description(), descLen));
             }
