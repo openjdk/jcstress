@@ -30,20 +30,15 @@ import org.openjdk.jcstress.infra.StateCase;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
+import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.StringUtils;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Prints the test results to the console.
@@ -55,62 +50,52 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private final boolean verbose;
     private final Options opts;
     private final PrintWriter output;
-    private final int expectedTests;
-    private final int expectedIterations;
-    private final int expectedForks;
+    private final long expectedTests;
+    private final long expectedIterations;
+    private final long expectedConfigs;
 
-    private AtomicLong observedResults = new AtomicLong();
-    private AtomicLong observedCount = new AtomicLong();
+    private long observedIterations;
+    private long observedCount;
 
-    private final ConcurrentMap<String, TestProgress> testsProgress = new ConcurrentHashMap<>();
-    private final int totalExpectedResults;
+    private final Set<String> observedTests = Collections.newSetFromMap(new HashMap<>());
+    private final Set<TestConfig> observedConfigs = Collections.newSetFromMap(new HashMap<>());
 
     private long firstTest;
+    private int progressLen;
 
-    public ConsoleReportPrinter(Options opts, PrintWriter pw, int expectedTests) throws JAXBException, FileNotFoundException {
+    public ConsoleReportPrinter(Options opts, PrintWriter pw, int expectedTests, int expectedConfigs) throws JAXBException, FileNotFoundException {
         this.opts = opts;
         this.output = pw;
         this.expectedTests = expectedTests;
-        this.expectedForks = opts.getForks();
-        this.expectedIterations = opts.getIterations();
-        this.totalExpectedResults = expectedTests * opts.getIterations() * (opts.getForks() > 0 ? opts.getForks() : 1);
+        this.expectedConfigs = expectedConfigs;
+        this.expectedIterations = expectedConfigs * opts.getIterations() * (opts.getForks() > 0 ? opts.getForks() : 1);
         verbose = opts.isVerbose();
+        progressLen = 1;
     }
 
     @Override
-    public void add(TestResult r) {
-        TestProgress e = testsProgress.get(r.getName());
-        if (e == null) {
-            e = new TestProgress(r);
-            TestProgress exist = testsProgress.putIfAbsent(r.getName(), e);
-            e = (exist != null) ? exist : e;
-        }
-
-        if (opts.getForks() > 0) {
-            e.enregisterVM(r.getVmID());
-        } else {
-            e.enregisterVM(null);
-        }
-
+    public synchronized void add(TestResult r) {
         if (firstTest == 0) {
             firstTest = System.nanoTime();
-        } else {
-            observedResults.incrementAndGet();
-            observedCount.addAndGet(r.getTotalCount());
         }
+
+        observedTests.add(r.getName());
+        observedConfigs.add(r.getConfig());
+        observedIterations++;
+        observedCount += r.getTotalCount();
 
         printResult(r, verbose);
     }
 
-    public void printResult(TestResult r, boolean isVerbose) {
+    private void printResult(TestResult r, boolean isVerbose) {
         switch (r.status()) {
             case TIMEOUT_ERROR:
-                printLine(output, "TIMEOUT", r);
+                printLine("TIMEOUT", r);
                 return;
             case CHECK_TEST_ERROR:
             case TEST_ERROR:
                 output.println();
-                printLine(output, "ERROR", r);
+                printLine("ERROR", r);
                 for (String data : r.getAuxData()) {
                     output.println(data);
                 }
@@ -118,28 +103,28 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 return;
             case VM_ERROR:
                 output.println();
-                printLine(output, "VM ERROR", r);
+                printLine("VM ERROR", r);
                 for (String data : r.getAuxData()) {
                     output.println(data);
                 }
                 output.println();
                 return;
             case API_MISMATCH:
-                printLine(output, "SKIPPED", r);
+                printLine("SKIPPED", r);
                 return;
             case NORMAL:
                 TestInfo test = TestList.getInfo(r.getName());
                 if (test == null) {
                     output.println();
-                    printLine(output, "UNKNOWN", r);
+                    printLine("UNKNOWN", r);
                     isVerbose = true;
                 } else {
                     TestGrading grading = new TestGrading(r, test);
                     if (grading.isPassed) {
-                        printLine(output, "OK", r);
+                        printLine("OK", r);
                     } else {
                         output.println();
-                        printLine(output, "FAILED", r);
+                        printLine("FAILED", r);
                         isVerbose = true;
                     }
                 }
@@ -149,6 +134,11 @@ public class ConsoleReportPrinter implements TestResultCollector {
         }
 
         if (isVerbose) {
+            output.format("    (fork: #%d, iteration #%d)%n",
+                    r.getConfig().forkId + 1,
+                    r.getIteration() + 1
+            );
+
             int idLen = "Observed state".length();
             int occLen = "Occurrences".length();
             int expectLen = "Expectation".length();
@@ -223,29 +213,41 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
             output.println();
         }
+
+        printProgress();
     }
 
-    private PrintWriter printLine(PrintWriter output, String label, TestResult r) {
-        return output.printf(" (ETA: %10s) (R: %s) (T:%4d/%d) (F:%2d/%d) (I:%2d/%d) %10s %s\n",
+    private void printLine(String label, TestResult r) {
+        output.printf("\r%" + progressLen + "s\r", "");
+        output.printf("%10s %s\n", "[" + label + "]", chunkName(r.getName()));
+    }
+
+    private void printProgress() {
+        String line = String.format("(ETA: %10s) (Rate: %s samples/sec) (Tests: %4d of %d) (Forks: %2d of %d) (Iterations: %2d of %d) ",
                 computeETA(),
                 computeSpeed(),
-                testsProgress.size(), expectedTests, testsProgress.get(r.getName()).getVMindex(r.getVmID()), expectedForks, testsProgress.get(r.getName()).getIteration(r.getVmID()), expectedIterations,
-                "[" + label + "]", chunkName(r.getName()));
+                observedTests.size(), expectedTests,
+                observedConfigs.size(), expectedConfigs,
+                observedIterations, expectedIterations
+        );
+        progressLen = line.length();
+        output.print(line);
+        output.flush();
     }
 
     private String computeSpeed() {
         long timeSpent = System.nanoTime() - firstTest;
-        return String.format("%3.2E", 1.0 * TimeUnit.SECONDS.toNanos(1) * observedCount.get() / timeSpent);
+        return String.format("%3.2E", 1.0 * TimeUnit.SECONDS.toNanos(1) * observedCount / timeSpent);
     }
 
     private String computeETA() {
         long timeSpent = System.nanoTime() - firstTest;
-        long resultsGot = observedResults.get();
+        long resultsGot = observedIterations;
         if (resultsGot == 0) {
             return "n/a";
         }
 
-        long nsToGo = (long)(timeSpent * (1.0 * (totalExpectedResults - 1) / resultsGot - 1));
+        long nsToGo = (long)(timeSpent * (1.0 * (expectedIterations - 1) / resultsGot - 1));
         if (nsToGo > 0) {
             String result = "";
             long days = TimeUnit.NANOSECONDS.toDays(nsToGo);
@@ -270,64 +272,6 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
     private String chunkName(String name) {
         return name.replace("org.openjdk.jcstress.tests", "o.o.j.t");
-    }
-
-    private static class TestProgress {
-        private final String name;
-
-        private int currentVM;
-        private final Map<String, Integer> vmIDs = new HashMap<>();
-        private final Map<String, Integer> iterations = new HashMap<>();
-
-        public TestProgress(TestResult result){
-            this.name = result.getName();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            TestProgress that = (TestProgress) o;
-
-            if (!name.equals(that.name)) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            return name.hashCode();
-        }
-
-        public void enregisterVM(String vmID) {
-            if (vmID == null) return;
-            synchronized (this) {
-                Integer id = vmIDs.get(vmID);
-                if (id == null) {
-                    vmIDs.put(vmID, ++currentVM);
-                }
-                Integer iters = iterations.get(vmID);
-                if (iters == null) {
-                    iters = 0;
-                }
-                iterations.put(vmID, ++iters);
-            }
-        }
-
-        public int getVMindex(String vmID) {
-            synchronized (this) {
-                Integer id = vmIDs.get(vmID);
-                return id != null ? id : 0;
-            }
-        }
-
-        public int getIteration(String vmID) {
-            synchronized (this) {
-                Integer iters = iterations.get(vmID);
-                return iters != null ? iters : 0;
-            }
-        }
     }
 
 }

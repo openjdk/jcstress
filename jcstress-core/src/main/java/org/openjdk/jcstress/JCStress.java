@@ -108,9 +108,10 @@ public class JCStress {
         if (!opts.shouldParse()) {
             opts.printSettingsOn(out);
 
-            List<TestConfig> configs = prepareRunProgram(opts);
+            SortedSet<String> tests = getTests(opts.getTestFilter());
+            List<TestConfig> configs = prepareRunProgram(opts, tests);
 
-            ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), configs.size());
+            ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), tests.size(), configs.size());
             DiskWriteCollector diskCollector = new DiskWriteCollector(opts.getResultFile());
             TestResultCollector sink = MuxCollector.of(printer, diskCollector);
 
@@ -128,6 +129,7 @@ public class JCStress {
             diskCollector.close();
         }
 
+        out.println();
         out.println("Reading the results back... ");
 
         InProcessCollector collector = new InProcessCollector();
@@ -148,20 +150,19 @@ public class JCStress {
         out.println("Done.");
     }
 
-    private List<TestConfig> prepareRunProgram(Options opts) {
-        SortedSet<String> tests = getTests(opts.getTestFilter());
+    private List<TestConfig> prepareRunProgram(Options opts, Set<String> tests) {
         List<TestConfig> configs = new ArrayList<>();
         if (opts.shouldFork()) {
             for (String test : tests) {
                 for (int f = 0; f < opts.getForks(); f++) {
-                    configs.add(new TestConfig(opts, TestList.getInfo(test), TestConfig.RunMode.FORKED));
+                    configs.add(new TestConfig(opts, TestList.getInfo(test), TestConfig.RunMode.FORKED, f));
                 }
             }
         } else {
             for (String test : tests) {
                 TestInfo info = TestList.getInfo(test);
                 TestConfig.RunMode mode = info.requiresFork() ? TestConfig.RunMode.FORKED : TestConfig.RunMode.EMBEDDED;
-                configs.add(new TestConfig(opts, info, mode));
+                configs.add(new TestConfig(opts, info, mode, -1));
             }
         }
         return configs;
@@ -205,7 +206,7 @@ public class JCStress {
 
             if (ecode != 0) {
                 // Test had failed, record this.
-                TestResult result = new TestResult(config, Status.VM_ERROR);
+                TestResult result = new TestResult(config, Status.VM_ERROR, -1);
                 result.addAuxData(new String(baos.toByteArray()).trim());
                 collector.add(result);
             }

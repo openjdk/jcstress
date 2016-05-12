@@ -34,28 +34,29 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class TestResult implements Serializable {
 
-    private static final String VM_ID = UUID.randomUUID().toString();
-
-    private final String vmID;
     private final TestConfig config;
+    private final Status status;
+    private final int iterationId;
     private final Multiset<String> states;
     private volatile Environment env;
-    private final Status status;
     private final List<String> auxData;
 
-    public TestResult(TestConfig config, Status status) {
-        this.vmID = VM_ID;
+    public TestResult(TestConfig config, Status status, int iterationId) {
         this.config = config;
         this.status = status;
+        this.iterationId = iterationId;
         this.states = new HashMultiset<>();
         this.auxData = new ArrayList<>();
+    }
+
+    public int getIteration() {
+        return iterationId;
     }
 
     public void addState(String result, long count) {
@@ -80,10 +81,6 @@ public class TestResult implements Serializable {
 
     public Status status() {
         return status;
-    }
-
-    public String getVmID() {
-        return vmID;
     }
 
     public List<String> getAuxData() {

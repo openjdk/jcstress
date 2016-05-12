@@ -64,7 +64,7 @@ public class HTMLReportPrinter {
 
     public HTMLReportPrinter(Options opts, InProcessCollector collector) throws JAXBException, FileNotFoundException {
         this.collector = collector;
-        this.printer = new ConsoleReportPrinter(opts, new PrintWriter(System.out, true), 0);
+        this.printer = new ConsoleReportPrinter(opts, new PrintWriter(System.out, true), 0, 0);
         this.resultDir = opts.getResultDest();
         this.verbose = opts.isVerbose();
         new File(resultDir).mkdirs();
@@ -98,7 +98,7 @@ public class HTMLReportPrinter {
                     auxData.addAll(r.getAuxData());
                 }
 
-                TestResult root = new TestResult(name, status);
+                TestResult root = new TestResult(name, status, 0);
 
                 for (String s : stateCounts.keys()) {
                     root.addState(s, stateCounts.count(s));

@@ -43,14 +43,16 @@ public class TestConfig implements Serializable, Comparable<TestConfig> {
     public final String generatedRunnerName;
     public final String appendJvmArgs;
     public final RunMode runMode;
+    public final int forkId;
 
     public enum RunMode {
         EMBEDDED,
         FORKED,
     }
 
-    public TestConfig(Options opts, TestInfo info, RunMode runMode) {
+    public TestConfig(Options opts, TestInfo info, RunMode runMode, int forkId) {
         this.runMode = runMode;
+        this.forkId = forkId;
         time = opts.getTime();
         minStride = opts.getMinStride();
         maxStride = opts.getMaxStride();
@@ -82,7 +84,6 @@ public class TestConfig implements Serializable, Comparable<TestConfig> {
         if (!name.equals(that.name)) return false;
         if (!generatedRunnerName.equals(that.generatedRunnerName)) return false;
         return appendJvmArgs.equals(that.appendJvmArgs);
-
     }
 
     @Override

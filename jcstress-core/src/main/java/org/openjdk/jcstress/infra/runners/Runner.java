@@ -79,12 +79,12 @@ public abstract class Runner<R> {
         } catch (NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
             testLog.println("Test sanity check failed, skipping");
             testLog.println();
-            dumpFailure(testName, Status.API_MISMATCH, e);
+            dumpFailure(-1, Status.API_MISMATCH, e);
             return;
         } catch (Throwable e) {
             testLog.println("Check test failed");
             testLog.println();
-            dumpFailure(testName, Status.CHECK_TEST_ERROR, e);
+            dumpFailure(-1, Status.CHECK_TEST_ERROR, e);
             return;
         }
 
@@ -98,19 +98,18 @@ public abstract class Runner<R> {
 
             testLog.print(".");
             testLog.flush();
-            dump(testName, internalRun());
+            dump(c, internalRun());
         }
         testLog.println();
     }
 
-
-    protected void dumpFailure(String testName, Status status) {
-        TestResult result = new TestResult(config, status);
+    protected void dumpFailure(int iteration, Status status) {
+        TestResult result = new TestResult(config, status, iteration);
         collector.add(result);
     }
 
-    protected void dumpFailure(String testName, Status status, Throwable aux) {
-        TestResult result = new TestResult(config, status);
+    protected void dumpFailure(int iteration, Status status, Throwable aux) {
+        TestResult result = new TestResult(config, status, iteration);
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         aux.printStackTrace(pw);
@@ -119,8 +118,8 @@ public abstract class Runner<R> {
         collector.add(result);
     }
 
-    protected void dump(String testName, Counter<R> results) {
-        TestResult result = new TestResult(config, Status.NORMAL);
+    protected void dump(int iteration, Counter<R> results) {
+        TestResult result = new TestResult(config, Status.NORMAL, iteration);
 
         for (R e : results.elementSet()) {
             result.addState(String.valueOf(e), results.count(e));
@@ -144,7 +143,7 @@ public abstract class Runner<R> {
                 } catch (TimeoutException e) {
                     allStopped = false;
                 } catch (ExecutionException e) {
-                    dumpFailure(testName, Status.TEST_ERROR, e.getCause());
+                    dumpFailure(-1, Status.TEST_ERROR, e.getCause());
                     return;
                 } catch (InterruptedException e) {
                     return;
@@ -152,7 +151,7 @@ public abstract class Runner<R> {
             }
 
             if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) > Math.max(config.time, 60*1000)) {
-                dumpFailure(testName, Status.TIMEOUT_ERROR);
+                dumpFailure(-1, Status.TIMEOUT_ERROR);
                 return;
             }
         }

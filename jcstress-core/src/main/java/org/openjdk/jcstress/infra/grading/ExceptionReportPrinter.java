@@ -81,7 +81,7 @@ public class ExceptionReportPrinter {
                     }
                 }
 
-                TestResult root = new TestResult(config, status);
+                TestResult root = new TestResult(config, status, 0);
 
                 for (String s : stateCounts.keys()) {
                     root.addState(s, stateCounts.count(s));
