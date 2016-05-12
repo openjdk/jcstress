@@ -114,7 +114,7 @@ public class Options {
                 .withOptionalArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<Integer> forks = parser.accepts("f", "Should fork each test N times. \"0\" to run in the embedded mode " +
-                "with occasional forking, \"-1\" to never ever fork.")
+                "with occasional forking.")
                 .withOptionalArg().ofType(Integer.class).describedAs("count");
 
         OptionSpec<String> appendJvmArgs = parser.accepts("jvmArgs", "Append these JVM arguments for the forked runs.")
@@ -321,32 +321,6 @@ public class Options {
         }
     }
 
-    public Collection<String> buildForkedCmdLine() {
-        // omit -f, -p, -t
-        Collection<String> cmdLine = new ArrayList<>();
-        cmdLine.add("-r");
-        cmdLine.add(resultDir);
-        cmdLine.add("-minStride");
-        cmdLine.add(Integer.toString(minStride));
-        cmdLine.add("-maxStride");
-        cmdLine.add(Integer.toString(maxStride));
-        cmdLine.add("-time");
-        cmdLine.add(Integer.toString(time));
-        cmdLine.add("-iters");
-        cmdLine.add(Integer.toString(iters));
-        cmdLine.add("-yield");
-        cmdLine.add(Boolean.toString(shouldYield));
-        cmdLine.add("-c");
-        cmdLine.add(Integer.toString(userCPUs));
-        cmdLine.add("-sc");
-        cmdLine.add(Integer.toString(systemCPUs));
-        cmdLine.add("-f");
-        cmdLine.add("0");
-        if (verbose) cmdLine.add("-v");
-
-        return  cmdLine;
-    }
-
     public int getMinStride() {
         return minStride;
     }
@@ -381,10 +355,6 @@ public class Options {
 
     public boolean shouldFork() {
         return forks > 0;
-    }
-
-    public boolean shouldNeverFork() {
-        return forks < 0;
     }
 
     public int getIterations() {

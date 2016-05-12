@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,13 +22,22 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.infra.runners;
+package org.openjdk.jcstress.link;
 
-import org.openjdk.jcstress.Options;
+import org.openjdk.jcstress.infra.collectors.TestResult;
 
-/**
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
- */
-public class Control {
-    public volatile boolean isStopped;
+import java.io.Serializable;
+
+class ResultsFrame implements Serializable {
+    private static final long serialVersionUID = -5627086531281515824L;
+
+    private final TestResult res;
+
+    public ResultsFrame(TestResult res) {
+        this.res = res;
+    }
+
+    public TestResult getRes() {
+        return res;
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,13 +22,38 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.infra.runners;
+package org.openjdk.jcstress.util;
 
-import org.openjdk.jcstress.Options;
+import java.io.Closeable;
+import java.io.Flushable;
+import java.io.IOException;
 
-/**
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
- */
-public class Control {
-    public volatile boolean isStopped;
+public class FileUtils {
+
+    public static <T extends Flushable & Closeable> void safelyClose(T obj) {
+        if (obj != null) {
+            try {
+                obj.flush();
+            } catch (IOException e) {
+                // ignore
+            }
+            try {
+                obj.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
+    }
+
+    public static <T extends Closeable> void safelyClose(T obj) {
+        if (obj != null) {
+            try {
+                obj.close();
+            } catch (IOException e) {
+                // do nothing
+            }
+        }
+    }
+
+
 }

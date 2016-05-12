@@ -24,7 +24,6 @@
  */
 package org.openjdk.jcstress.infra.runners;
 
-import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
@@ -52,14 +51,16 @@ public abstract class Runner<R> {
     protected final ExecutorService pool;
     protected final PrintWriter testLog;
     protected final String testName;
+    protected final TestConfig config;
 
-    public Runner(Options opts, TestResultCollector collector, ExecutorService pool, String testName) {
+    public Runner(TestConfig config, TestResultCollector collector, ExecutorService pool, String testName) {
         this.collector = collector;
         this.pool = pool;
         this.testName = testName;
-        this.control = new Control(opts);
+        this.control = new Control();
+        this.config = config;
 
-        if (control.verbose) {
+        if (config.verbose) {
             testLog = new PrintWriter(System.out, true);
         } else {
             testLog = new PrintWriter(new NullOutputStream(), true);
@@ -88,9 +89,9 @@ public abstract class Runner<R> {
         }
 
         testLog.print("Iterations ");
-        for (int c = 0; c < control.iters; c++) {
+        for (int c = 0; c < config.iters; c++) {
             try {
-                WhiteBoxSupport.tryDeopt(control.deoptRatio);
+                WhiteBoxSupport.tryDeopt(config.deoptRatio);
             } catch (NoClassDefFoundError err) {
                 // gracefully "handle"
             }
@@ -104,12 +105,12 @@ public abstract class Runner<R> {
 
 
     protected void dumpFailure(String testName, Status status) {
-        TestResult result = new TestResult(testName, status);
+        TestResult result = new TestResult(config, status);
         collector.add(result);
     }
 
     protected void dumpFailure(String testName, Status status, Throwable aux) {
-        TestResult result = new TestResult(testName, status);
+        TestResult result = new TestResult(config, status);
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         aux.printStackTrace(pw);
@@ -119,7 +120,7 @@ public abstract class Runner<R> {
     }
 
     protected void dump(String testName, Counter<R> results) {
-        TestResult result = new TestResult(testName, Status.NORMAL);
+        TestResult result = new TestResult(config, Status.NORMAL);
 
         for (R e : results.elementSet()) {
             result.addState(String.valueOf(e), results.count(e));
@@ -150,7 +151,7 @@ public abstract class Runner<R> {
                 }
             }
 
-            if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) > Math.max(control.time, 60*1000)) {
+            if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) > Math.max(config.time, 60*1000)) {
                 dumpFailure(testName, Status.TIMEOUT_ERROR);
                 return;
             }

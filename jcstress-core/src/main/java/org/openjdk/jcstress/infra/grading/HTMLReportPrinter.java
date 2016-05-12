@@ -32,6 +32,7 @@ import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.InProcessCollector;
 import org.openjdk.jcstress.infra.collectors.TestResult;
+import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.*;
 
@@ -71,15 +72,15 @@ public class HTMLReportPrinter {
 
     public void parse() throws FileNotFoundException, JAXBException {
 
-        Map<String, TestResult> results = new TreeMap<>();
+        Map<TestConfig, TestResult> results = new TreeMap<>();
 
         {
-            Multimap<String, TestResult> multiResults = new HashMultimap<>();
+            Multimap<TestConfig, TestResult> multiResults = new HashMultimap<>();
             for (TestResult r : collector.getTestResults()) {
-                multiResults.put(r.getName(), r);
+                multiResults.put(r.getConfig(), r);
             }
 
-            for (String name : multiResults.keys()) {
+            for (TestConfig name : multiResults.keys()) {
                 Collection<TestResult> mergeable = multiResults.get(name);
 
                 Multiset<String> stateCounts = new HashMultiset<>();
@@ -114,9 +115,9 @@ public class HTMLReportPrinter {
         }
 
         // build prefixes
-        Multimap<String, String> packages = new TreeMultimap<>();
-        for (String k : results.keySet()) {
-            String pack = k.substring(0, k.lastIndexOf("."));
+        Multimap<String, TestConfig> packages = new TreeMultimap<>();
+        for (TestConfig k : results.keySet()) {
+            String pack = k.name.substring(0, k.name.lastIndexOf("."));
             packages.put(pack, k);
         }
 
@@ -155,10 +156,10 @@ public class HTMLReportPrinter {
             int failedCount = 0;
             int sanityFailedCount = 0;
             for (String k : packages.keys()) {
-                Collection<String> testNames = packages.get(k);
-                for (String testName : testNames) {
-                    TestInfo test = TestList.getInfo(testName);
-                    TestResult result = results.get(testName);
+                Collection<TestConfig> testNames = packages.get(k);
+                for (TestConfig cfg : testNames) {
+                    TestInfo test = TestList.getInfo(cfg.name);
+                    TestResult result = results.get(cfg);
                     if (result.status() == Status.NORMAL) {
                         if (new TestGrading(result, test).isPassed) {
                             passedCount++;
@@ -208,8 +209,8 @@ public class HTMLReportPrinter {
         {
             SortedMap<String, String> env = new TreeMap<>();
             for (String k : packages.keys()) {
-                for (String testName : packages.get(k)) {
-                    TestResult result = results.get(testName);
+                for (TestConfig cfg : packages.get(k)) {
+                    TestResult result = results.get(cfg);
                     if (result != null) {
                         for (Map.Entry<String, String> kv : result.getEnv().entries().entrySet()) {
                             String key = kv.getKey();
@@ -259,26 +260,26 @@ public class HTMLReportPrinter {
         output.close();
 
         if (verbose) {
-            for (String k : results.keySet()) {
+            for (TestConfig k : results.keySet()) {
                 TestResult result = results.get(k);
                 printer.add(result);
             }
         }
     }
 
-    private void printFailedTests(Map<String, TestResult> results, Multimap<String, String> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
+    private void printFailedTests(Map<TestConfig, TestResult> results, Multimap<String, TestConfig> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
         output.println("<h3>FAILED tests:<br>");
         output.println("&nbsp;Some asserts have been violated.<br>&nbsp;Correct implementations should have none.</h3>");
         output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">");
 
         boolean hadAnyTests = false;
         for (String k : packages.keys()) {
-            Collection<String> testNames = packages.get(k);
+            Collection<TestConfig> testNames = packages.get(k);
 
             boolean packageEmitted = false;
-            for (String testName : testNames) {
-                TestInfo test = TestList.getInfo(testName);
-                TestResult result = results.get(testName);
+            for (TestConfig cfg : testNames) {
+                TestInfo test = TestList.getInfo(cfg.name);
+                TestResult result = results.get(cfg);
                 TestGrading grading = new TestGrading(result, test);
                 if (result.status() == Status.NORMAL && !grading.isPassed) {
                     if (!packageEmitted) {
@@ -301,19 +302,18 @@ public class HTMLReportPrinter {
     }
 
 
-    private void printErrorTests(Map<String, TestResult> results, Multimap<String, String> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
+    private void printErrorTests(Map<TestConfig, TestResult> results, Multimap<String, TestConfig> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
         output.println("<h3>ERROR tests:<br>");
         output.println("&nbsp;Tests break for some reason, other than failing the assert.<br>&nbsp;Correct implementations should have none.</h3>");
         output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">");
 
         boolean hadAnyTests = false;
         for (String k : packages.keys()) {
-            Collection<String> testNames = packages.get(k);
 
             boolean packageEmitted = false;
-            for (String testName : testNames) {
-                TestInfo test = TestList.getInfo(testName);
-                TestResult result = results.get(testName);
+            for (TestConfig cfg : packages.get(k)) {
+                TestInfo test = TestList.getInfo(cfg.name);
+                TestResult result = results.get(cfg);
                 if (result.status() != Status.NORMAL && result.status() != Status.API_MISMATCH) {
                     if (!packageEmitted) {
                         emitPackage(output, k);
@@ -334,19 +334,18 @@ public class HTMLReportPrinter {
         output.println("<br>");
     }
 
-    private void printInterestingTests(Map<String, TestResult> results, Multimap<String, String> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
+    private void printInterestingTests(Map<TestConfig, TestResult> results, Multimap<String, TestConfig> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
         output.println("<h3>INTERESTING tests:<br>");
         output.println("&nbsp;Some interesting behaviors observed.<br>&nbsp;This is for the plain curiosity.</h3>");
         output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">");
 
         boolean hadAnyTests = false;
         for (String k : packages.keys()) {
-            Collection<String> testNames = packages.get(k);
 
             boolean packageEmitted = false;
-            for (String testName : testNames) {
-                TestInfo test = TestList.getInfo(testName);
-                TestResult result = results.get(testName);
+            for (TestConfig cfg : packages.get(k)) {
+                TestInfo test = TestList.getInfo(cfg.name);
+                TestResult result = results.get(cfg);
                 TestGrading grading = new TestGrading(result, test);
                 if (grading.hasInteresting) {
                     if (!packageEmitted) {
@@ -367,19 +366,18 @@ public class HTMLReportPrinter {
         output.println("<br>");
     }
 
-    private void printSpecTests(Map<String, TestResult> results, Multimap<String, String> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
+    private void printSpecTests(Map<TestConfig, TestResult> results, Multimap<String, TestConfig> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
         output.println("<h3>SPEC tests:<br>");
         output.println("&nbsp;Formally acceptable, but surprising results are observed.<br>&nbsp;Implementations going beyond the minimal requirements should have none.</h3>");
         output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">");
 
         boolean hadAnyTests = false;
         for (String k : packages.keys()) {
-            Collection<String> testNames = packages.get(k);
 
             boolean packageEmitted = false;
-            for (String testName : testNames) {
-                TestInfo test = TestList.getInfo(testName);
-                TestResult result = results.get(testName);
+            for (TestConfig cfg : packages.get(k)) {
+                TestInfo test = TestList.getInfo(cfg.name);
+                TestResult result = results.get(cfg);
                 TestGrading grading = new TestGrading(result, test);
                 if (grading.hasSpec) {
                     if (!packageEmitted) {
@@ -401,7 +399,7 @@ public class HTMLReportPrinter {
         output.println("<br>");
     }
 
-    private void printAllTests(Map<String, TestResult> results, Multimap<String, String> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
+    private void printAllTests(Map<TestConfig, TestResult> results, Multimap<String, TestConfig> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
         output.println("<h3>ALL tests:</h3>");
         output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">\n" +
                 "<tr>\n" +
@@ -413,17 +411,16 @@ public class HTMLReportPrinter {
         for (String k : packages.keys()) {
             emitPackage(output, k);
 
-            Collection<String> testNames = packages.get(k);
-            for (String testName : testNames) {
-                TestInfo test = TestList.getInfo(testName);
-                TestResult result = results.get(testName);
+            for (TestConfig cfg : packages.get(k)) {
+                TestInfo test = TestList.getInfo(cfg.name);
+                TestResult result = results.get(cfg);
                 if (result.status() == Status.NORMAL) {
                     emitTest(output, result, test);
                 } else {
                     emitTestFailure(output, result, test);
                 }
 
-                PrintWriter local = new PrintWriter(resultDir + "/" + testName + ".html");
+                PrintWriter local = new PrintWriter(resultDir + "/" + cfg + ".html");
                 parseTest(local, result, test);
                 local.close();
             }

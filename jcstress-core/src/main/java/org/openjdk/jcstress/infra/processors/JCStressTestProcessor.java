@@ -24,13 +24,9 @@
  */
 package org.openjdk.jcstress.infra.processors;
 
-import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
-import org.openjdk.jcstress.infra.runners.Control;
-import org.openjdk.jcstress.infra.runners.Runner;
-import org.openjdk.jcstress.infra.runners.StateHolder;
-import org.openjdk.jcstress.infra.runners.TestList;
+import org.openjdk.jcstress.infra.runners.*;
 import org.openjdk.jcstress.util.*;
 import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
@@ -300,8 +296,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    volatile int epoch;");
         pw.println();
 
-        pw.println("    public " + className + "(Options opts, TestResultCollector collector, ExecutorService pool) {");
-        pw.println("        super(opts, collector, pool, \"" + getQualifiedName(info.getTest()) + "\");");
+        pw.println("    public " + className + "(TestConfig config, TestResultCollector collector, ExecutorService pool) {");
+        pw.println("        super(config, collector, pool, \"" + getQualifiedName(info.getTest()) + "\");");
         pw.println("    }");
         pw.println();
 
@@ -356,7 +352,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         pw.println();
         pw.println("        try {");
-        pw.println("            TimeUnit.MILLISECONDS.sleep(control.time);");
+        pw.println("            TimeUnit.MILLISECONDS.sleep(config.time);");
         pw.println("        } catch (InterruptedException e) {");
         pw.println("        }");
         pw.println();
@@ -405,7 +401,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        Pair[] pairs = holder.pairs;");
         pw.println("        int len = pairs.length;");
         pw.println();
-        pw.println("        int newLen = holder.hasLaggedWorkers ? Math.max(control.minStride, Math.min(len * 2, control.maxStride)) : len;");
+        pw.println("        int newLen = holder.hasLaggedWorkers ? Math.max(config.minStride, Math.min(len * 2, config.maxStride)) : len;");
         pw.println();
         pw.println("        Pair[] newPairs = pairs;");
         pw.println("        if (newLen > len) {");
@@ -430,7 +426,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             if (!isStateItself) {
                 pw.println("        " + t + " lt = test;");
             }
-            pw.println("        boolean yield = control.shouldYield;");
+            pw.println("        boolean yield = config.shouldYield;");
             pw.println();
             pw.println("        while (true) {");
             pw.println("            StateHolder<Pair> holder = version;");
@@ -543,8 +539,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("public class " + generatedName + " extends Runner<" + generatedName + ".Outcome> {");
         pw.println();
 
-        pw.println("    public " + generatedName + "(Options opts, TestResultCollector collector, ExecutorService pool) {");
-        pw.println("        super(opts, collector, pool, \"" + getQualifiedName(info.getTest()) + "\");");
+        pw.println("    public " + generatedName + "(TestConfig config, TestResultCollector collector, ExecutorService pool) {");
+        pw.println("        super(config, collector, pool, \"" + getQualifiedName(info.getTest()) + "\");");
         pw.println("    }");
         pw.println();
 
@@ -555,9 +551,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        Counter<Outcome> results = new OpenAddressHashCounter<>();");
         pw.println();
         pw.println("        testLog.print(\"Iterations \");");
-        pw.println("        for (int c = 0; c < control.iters; c++) {");
+        pw.println("        for (int c = 0; c < config.iters; c++) {");
         pw.println("            try {");
-        pw.println("                WhiteBoxSupport.tryDeopt(control.deoptRatio);");
+        pw.println("                WhiteBoxSupport.tryDeopt(config.deoptRatio);");
         pw.println("            } catch (NoClassDefFoundError err) {");
         pw.println("                // gracefully \"handle\"");
         pw.println("            }");
@@ -589,7 +585,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    }");
         pw.println();
         pw.println("    private void run(Counter<Outcome> results) {");
-        pw.println("        long target = System.currentTimeMillis() + control.time;");
+        pw.println("        long target = System.currentTimeMillis() + config.time;");
         pw.println("        while (System.currentTimeMillis() < target) {");
         pw.println();
 
@@ -722,7 +718,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 ArrayList.class, Arrays.class, Collection.class,
                 Callable.class, ExecutorService.class, Future.class, TimeUnit.class,
                 AtomicIntegerFieldUpdater.class,
-                Options.class, TestResultCollector.class,
+                TestConfig.class, TestResultCollector.class,
                 Control.class, Runner.class, StateHolder.class,
                 ArrayUtils.class, Counter.class,
                 WhiteBoxSupport.class, OpenAddressHashCounter.class, ExecutionException.class

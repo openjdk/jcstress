@@ -24,7 +24,8 @@
  */
 package org.openjdk.jcstress;
 
-import org.openjdk.jcstress.infra.collectors.NetworkOutputCollector;
+import org.openjdk.jcstress.infra.runners.TestConfig;
+import org.openjdk.jcstress.link.BinaryLinkClient;
 import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
 /**
@@ -35,20 +36,24 @@ import org.openjdk.jcstress.vm.WhiteBoxSupport;
 public class ForkedMain {
 
     public static void main(String[] args) throws Exception {
-        Options opts = new Options(args);
-        if (!opts.parse()) {
-            System.exit(1);
-        }
-
         try {
             WhiteBoxSupport.initSafely();
         } catch (NoClassDefFoundError e) {
             // expected on JDK 7 and lower, parent should have printed the message for user
         }
 
-        NetworkOutputCollector collector = new NetworkOutputCollector(opts.getHostName(), opts.getHostPort());
-        new JCStress().run(opts, true, collector);
-        collector.close();
+        if (args.length < 2) {
+            throw new IllegalStateException("Expected two arguments");
+        }
+
+        String host = args[0];
+        int port = Integer.valueOf(args[1]);
+
+        BinaryLinkClient link = new BinaryLinkClient(host, port);
+        TestConfig config = link.nextJob();
+
+        new JCStress().runEmbedded(config, link);
+        link.close();
     }
 
 }

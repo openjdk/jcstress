@@ -25,6 +25,7 @@
 package org.openjdk.jcstress.infra.collectors;
 
 import org.openjdk.jcstress.infra.Status;
+import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.util.Environment;
 import org.openjdk.jcstress.util.HashMultiset;
 import org.openjdk.jcstress.util.Multiset;
@@ -43,15 +44,15 @@ public class TestResult implements Serializable {
     private static final String VM_ID = UUID.randomUUID().toString();
 
     private final String vmID;
-    private final String name;
+    private final TestConfig config;
     private final Multiset<String> states;
     private volatile Environment env;
     private final Status status;
     private final List<String> auxData;
 
-    public TestResult(String name, Status status) {
+    public TestResult(TestConfig config, Status status) {
         this.vmID = VM_ID;
-        this.name = name;
+        this.config = config;
         this.status = status;
         this.states = new HashMultiset<>();
         this.auxData = new ArrayList<>();
@@ -70,7 +71,7 @@ public class TestResult implements Serializable {
     }
 
     public String getName() {
-        return name;
+        return config.name;
     }
 
     public Environment getEnv() {
@@ -99,5 +100,9 @@ public class TestResult implements Serializable {
 
     public Collection<String> getStateKeys() {
         return states.keys();
+    }
+
+    public TestConfig getConfig() {
+        return config;
     }
 }

@@ -27,18 +27,14 @@ package org.openjdk.jcstress;
 import org.openjdk.jcstress.infra.Scheduler;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.TestInfo;
-import org.openjdk.jcstress.infra.collectors.DiskReadCollector;
-import org.openjdk.jcstress.infra.collectors.DiskWriteCollector;
-import org.openjdk.jcstress.infra.collectors.InProcessCollector;
-import org.openjdk.jcstress.infra.collectors.MuxCollector;
-import org.openjdk.jcstress.infra.collectors.NetworkInputCollector;
-import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.infra.collectors.TestResultCollector;
+import org.openjdk.jcstress.infra.collectors.*;
 import org.openjdk.jcstress.infra.grading.ConsoleReportPrinter;
 import org.openjdk.jcstress.infra.grading.ExceptionReportPrinter;
 import org.openjdk.jcstress.infra.grading.HTMLReportPrinter;
 import org.openjdk.jcstress.infra.runners.Runner;
+import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.TestList;
+import org.openjdk.jcstress.link.BinaryLinkServer;
 import org.openjdk.jcstress.util.InputStreamDrainer;
 import org.openjdk.jcstress.vm.VMSupport;
 
@@ -48,13 +44,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.ExecutionException;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -69,8 +59,6 @@ import java.util.regex.Pattern;
 public class JCStress {
     final ExecutorService pool;
     final PrintStream out;
-    volatile NetworkInputCollector networkCollector;
-    volatile Scheduler scheduler;
 
     public JCStress() {
         this.pool = Executors.newCachedThreadPool(new ThreadFactory() {
@@ -87,32 +75,55 @@ public class JCStress {
         out = System.out;
     }
 
-    public void run(Options opts) throws Exception {
-        SortedSet<String> tests = getTests(opts.getTestFilter());
+    class TestCfgTask implements Scheduler.ScheduledTask {
+        private final TestConfig cfg;
+        private final BinaryLinkServer server;
+        private final TestResultCollector sink;
 
+        public TestCfgTask(TestConfig cfg, BinaryLinkServer server, TestResultCollector sink) {
+            this.cfg = cfg;
+            this.server = server;
+            this.sink = sink;
+        }
+
+        @Override
+        public int getTokens() {
+            return cfg.threads;
+        }
+
+        @Override
+        public void run() {
+            switch (cfg.runMode) {
+                case EMBEDDED:
+                    runEmbedded(cfg, sink);
+                    break;
+                case FORKED:
+                    runForked(cfg, server, sink);
+                    break;
+            }
+        }
+    }
+
+    public void run(Options opts) throws Exception {
         if (!opts.shouldParse()) {
             opts.printSettingsOn(out);
 
-            ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), tests.size());
+            List<TestConfig> configs = prepareRunProgram(opts);
+
+            ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), configs.size());
             DiskWriteCollector diskCollector = new DiskWriteCollector(opts.getResultFile());
             TestResultCollector sink = MuxCollector.of(printer, diskCollector);
 
-            networkCollector = new NetworkInputCollector(sink);
+            BinaryLinkServer server = new BinaryLinkServer(sink);
 
-            scheduler = new Scheduler(opts.getUserCPUs());
-
-            if (opts.shouldFork()) {
-                for (String test : tests) {
-                    for (int f = 0; f < opts.getForks(); f++) {
-                        runForked(opts, test, sink);
-                    }
-                }
-            } else {
-                run(opts, tests, false, sink);
+            Scheduler scheduler = new Scheduler(opts.getUserCPUs());
+            for (TestConfig cfg : configs) {
+                server.addTask(cfg);
+                scheduler.schedule(new TestCfgTask(cfg, server, sink));
             }
-
             scheduler.waitFinish();
-            networkCollector.terminate();
+
+            server.terminate();
 
             diskCollector.close();
         }
@@ -137,28 +148,46 @@ public class JCStress {
         out.println("Done.");
     }
 
-    void runForked(final Options opts, final String test, final TestResultCollector collector) {
-        try {
-            scheduler.schedule(new Scheduler.ScheduledTask() {
-                @Override
-                public int getTokens() {
-                    return TestList.getInfo(test).threads();
+    private List<TestConfig> prepareRunProgram(Options opts) {
+        SortedSet<String> tests = getTests(opts.getTestFilter());
+        List<TestConfig> configs = new ArrayList<>();
+        if (opts.shouldFork()) {
+            for (String test : tests) {
+                for (int f = 0; f < opts.getForks(); f++) {
+                    configs.add(new TestConfig(opts, TestList.getInfo(test), TestConfig.RunMode.FORKED));
                 }
-
-                @Override
-                public void run() {
-                    runForked0(opts, test, collector);
-                }
-            });
-        } catch (InterruptedException e) {
-            throw new IllegalStateException(e);
+            }
+        } else {
+            for (String test : tests) {
+                TestInfo info = TestList.getInfo(test);
+                TestConfig.RunMode mode = info.requiresFork() ? TestConfig.RunMode.FORKED : TestConfig.RunMode.EMBEDDED;
+                configs.add(new TestConfig(opts, info, mode));
+            }
         }
+        return configs;
     }
 
-    void runForked0(Options opts, String test, TestResultCollector collector) {
+    void runForked(TestConfig config, BinaryLinkServer server, TestResultCollector collector) {
         try {
-            List<String> commandString = getSeparateExecutionCommand(opts, test);
-            ProcessBuilder pb = new ProcessBuilder(commandString);
+            List<String> command = new ArrayList<>();
+
+            // basic Java line
+            command.addAll(VMSupport.getJavaInvokeLine());
+
+            // jvm args
+            command.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
+
+            String appendJvmArgs = config.appendJvmArgs;
+            if (appendJvmArgs.length() > 0) {
+                command.addAll(Arrays.asList(appendJvmArgs.split("\\s")));
+            }
+
+            command.add(ForkedMain.class.getName());
+
+            command.add(server.getHost());
+            command.add(String.valueOf(server.getPort()));
+
+            ProcessBuilder pb = new ProcessBuilder(command);
             Process p = pb.start();
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -176,83 +205,24 @@ public class JCStress {
 
             if (ecode != 0) {
                 // Test had failed, record this.
-                TestResult result = new TestResult(test, Status.VM_ERROR);
-                String s = new String(baos.toByteArray()).trim();
-                result.addAuxData(s);
+                TestResult result = new TestResult(config, Status.VM_ERROR);
+                result.addAuxData(new String(baos.toByteArray()).trim());
                 collector.add(result);
             }
-
         } catch (IOException | InterruptedException ex) {
             ex.printStackTrace();
         }
     }
 
-    public void run(Options opts, boolean alreadyForked, TestResultCollector collector) throws Exception {
-        run(opts, getTests(opts.getTestFilter()), alreadyForked, collector);
-    }
-
-    public void async(final Runner runner, final int threads) throws ExecutionException, InterruptedException {
-        if (scheduler == null) {
-            runner.run();
-            return;
+    public void runEmbedded(TestConfig config, TestResultCollector collector) {
+        try {
+            Class<?> aClass = Class.forName(config.generatedRunnerName);
+            Constructor<?> cnstr = aClass.getConstructor(TestConfig.class, TestResultCollector.class, ExecutorService.class);
+            Runner<?> o = (Runner<?>) cnstr.newInstance(config, collector, pool);
+            o.run();
+        } catch (Exception ex) {
+            throw new IllegalStateException("Should have been handled within the Runner");
         }
-
-        scheduler.schedule(new Scheduler.ScheduledTask() {
-            @Override
-            public int getTokens() {
-                return threads;
-            }
-
-            @Override
-            public void run() {
-                runner.run();
-            }
-        });
-    }
-
-    private void run(Options opts, Collection<String> tests, boolean alreadyForked, TestResultCollector collector) throws Exception {
-        for (String test : tests) {
-            TestInfo info = TestList.getInfo(test);
-            if (info.requiresFork() && !alreadyForked && !opts.shouldNeverFork()) {
-                runForked(opts, test, collector);
-            } else {
-                Class<?> aClass = Class.forName(info.generatedRunner());
-                Constructor<?> cnstr = aClass.getConstructor(Options.class, TestResultCollector.class, ExecutorService.class);
-                Runner<?> o = (Runner<?>) cnstr.newInstance(opts, collector, pool);
-                async(o, info.threads());
-            }
-        }
-    }
-
-    public List<String> getSeparateExecutionCommand(Options opts, String test) {
-        List<String> command = new ArrayList<>();
-
-        List<String> o = VMSupport.getJavaInvokeLine();
-        command.addAll(o);
-
-        // jvm args
-        command.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
-
-        String appendJvmArgs = opts.getAppendJvmArgs();
-        if (appendJvmArgs.length() > 0) {
-            command.addAll(Arrays.asList(appendJvmArgs.split("\\s")));
-        }
-
-        command.add(ForkedMain.class.getName());
-
-        // add jcstress options
-        command.addAll(opts.buildForkedCmdLine());
-
-        command.add("-t");
-        command.add(test);
-
-        command.add("--hostName");
-        command.add(networkCollector.getHost());
-
-        command.add("--hostPort");
-        command.add(String.valueOf(networkCollector.getPort()));
-
-        return command;
     }
 
     static SortedSet<String> getTests(final String filter) {

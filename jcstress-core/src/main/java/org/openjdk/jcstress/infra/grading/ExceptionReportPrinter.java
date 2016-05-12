@@ -30,6 +30,7 @@ import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.InProcessCollector;
 import org.openjdk.jcstress.infra.collectors.TestResult;
+import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.*;
 
@@ -59,16 +60,16 @@ public class ExceptionReportPrinter {
     }
 
     public void parse() throws FileNotFoundException, JAXBException {
-        Map<String, TestResult> results = new TreeMap<>();
+        Map<TestConfig, TestResult> results = new TreeMap<>();
 
         {
-            Multimap<String, TestResult> multiResults = new HashMultimap<>();
+            Multimap<TestConfig, TestResult> multiResults = new HashMultimap<>();
             for (TestResult r : collector.getTestResults()) {
-                multiResults.put(r.getName(), r);
+                multiResults.put(r.getConfig(), r);
             }
 
-            for (String name : multiResults.keys()) {
-                Collection<TestResult> mergeable = multiResults.get(name);
+            for (TestConfig config : multiResults.keys()) {
+                Collection<TestResult> mergeable = multiResults.get(config);
 
                 Multiset<String> stateCounts = new HashMultiset<>();
 
@@ -80,28 +81,29 @@ public class ExceptionReportPrinter {
                     }
                 }
 
-                TestResult root = new TestResult(name, status);
+                TestResult root = new TestResult(config, status);
 
                 for (String s : stateCounts.keys()) {
                     root.addState(s, stateCounts.count(s));
                 }
 
-                results.put(name, root);
+                results.put(config, root);
             }
         }
 
         // build prefixes
-        Multimap<String, String> packages = new TreeMultimap<>();
-        for (String k : results.keySet()) {
-            String pack = k.substring(0, k.lastIndexOf("."));
+        Multimap<String, TestConfig> packages = new TreeMultimap<>();
+        for (TestConfig k : results.keySet()) {
+            String name = k.name;
+            String pack = name.substring(0, name.lastIndexOf("."));
             packages.put(pack, k);
         }
 
         for (String k : packages.keys()) {
-            Collection<String> testNames = packages.get(k);
-            for (String testName : testNames) {
-                TestInfo test = TestList.getInfo(testName);
-                TestResult result = results.get(testName);
+            Collection<TestConfig> rs = packages.get(k);
+            for (TestConfig r : rs) {
+                TestInfo test = TestList.getInfo(r.name);
+                TestResult result = results.get(r);
                 emitTest(result, test);
             }
         }
