@@ -30,7 +30,7 @@ import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.NullOutputStream;
-import org.openjdk.jcstress.util.VMSupport;
+import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -90,7 +90,7 @@ public abstract class Runner<R> {
         testLog.print("Iterations ");
         for (int c = 0; c < control.iters; c++) {
             try {
-                VMSupport.tryDeoptimizeAllInfra(control.deoptRatio);
+                WhiteBoxSupport.tryDeoptimizeAllInfra(control.deoptRatio);
             } catch (NoClassDefFoundError err) {
                 // gracefully "handle"
             }

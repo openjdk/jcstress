@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,20 +22,12 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.util;
+package org.openjdk.jcstress.vm;
 
-import org.openjdk.jcstress.infra.results.IntResult2;
-import org.openjdk.jcstress.util.UnsafeHolder;
+public class SimpleTestMain {
 
-public class ContendedSupport {
-    public static boolean tryContended() {
-        try {
-            long o1 = UnsafeHolder.U.objectFieldOffset(IntResult2.class.getField("r1"));
-            long o2 = UnsafeHolder.U.objectFieldOffset(IntResult2.class.getField("r2"));
-
-            return Math.abs(o2 - o1) >= 64;
-        } catch (NoSuchFieldException e) {
-            throw new IllegalStateException();
-        }
+    public static void main(String... args) {
+        // do nothing
     }
+
 }

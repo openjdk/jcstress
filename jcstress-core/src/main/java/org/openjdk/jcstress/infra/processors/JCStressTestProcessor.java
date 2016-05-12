@@ -32,6 +32,7 @@ import org.openjdk.jcstress.infra.runners.Runner;
 import org.openjdk.jcstress.infra.runners.StateHolder;
 import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.*;
+import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -556,7 +557,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        testLog.print(\"Iterations \");");
         pw.println("        for (int c = 0; c < control.iters; c++) {");
         pw.println("            try {");
-        pw.println("                VMSupport.tryDeoptimizeAllInfra(control.deoptRatio);");
+        pw.println("                WhiteBoxSupport.tryDeoptimizeAllInfra(control.deoptRatio);");
         pw.println("            } catch (NoClassDefFoundError err) {");
         pw.println("                // gracefully \"handle\"");
         pw.println("            }");
@@ -724,7 +725,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 Options.class, TestResultCollector.class,
                 Control.class, Runner.class, StateHolder.class,
                 ArrayUtils.class, Counter.class,
-                VMSupport.class, OpenAddressHashCounter.class, ExecutionException.class
+                WhiteBoxSupport.class, OpenAddressHashCounter.class, ExecutionException.class
         };
 
         for (Class<?> c : imports) {

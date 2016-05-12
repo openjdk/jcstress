@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,33 +22,20 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress;
+package org.openjdk.jcstress.vm;
 
-import org.openjdk.jcstress.infra.collectors.NetworkOutputCollector;
-import org.openjdk.jcstress.vm.WhiteBoxSupport;
+import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.util.UnsafeHolder;
 
-/**
- * Entry point for the forked VM run.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
- */
-public class ForkedMain {
+public class ContendedTestMain {
 
-    public static void main(String[] args) throws Exception {
-        Options opts = new Options(args);
-        if (!opts.parse()) {
-            System.exit(1);
+    public static void main(String... args) throws NoSuchFieldException {
+        long o1 = UnsafeHolder.U.objectFieldOffset(IntResult2.class.getField("r1"));
+        long o2 = UnsafeHolder.U.objectFieldOffset(IntResult2.class.getField("r2"));
+
+        if (Math.abs(o2 - o1) < 64) {
+            throw new IllegalStateException("@Contended does not seem to be working.");
         }
-
-        try {
-            WhiteBoxSupport.initSafely();
-        } catch (NoClassDefFoundError e) {
-            // expected on JDK 7 and lower, parent should have printed the message for user
-        }
-
-        NetworkOutputCollector collector = new NetworkOutputCollector(opts.getHostName(), opts.getHostPort());
-        new JCStress().run(opts, true, collector);
-        collector.close();
     }
 
 }

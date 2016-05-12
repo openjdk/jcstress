@@ -24,8 +24,7 @@
  */
 package org.openjdk.jcstress;
 
-import org.openjdk.jcstress.util.ContendedSupport;
-import org.openjdk.jcstress.util.VMSupport;
+import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,30 +56,8 @@ public class Main {
                 System.out.println(test);
             }
         } else {
-            boolean vmSupportInited;
-            try {
-                vmSupportInited = VMSupport.tryInit();
-            } catch (NoClassDefFoundError c) {
-                // expected on JDK 7 and lower
-                vmSupportInited = false;
-            }
-
-            if (!vmSupportInited) {
-                System.out.println("Non-fatal: VM support for online deoptimization is not enabled, tests might miss some issues.\nPossible reasons are:\n" +
-                        "  1) unsupported JDK, only JDK 8+ is supported; \n" +
-                        "  2) -XX:+UnlockDiagnosticVMOptions -XX:+WhiteBoxAPI are missing; \n" +
-                        "  3) the jcstress JAR is not added to -Xbootclasspath/a\n");
-            } else {
-                System.out.println("VM support is initialized.\n");
-            }
-
-            if (!ContendedSupport.tryContended()) {
-                System.out.println("Non-fatal: VM support for @Contended is not enabled, tests might run slower.\nPossible reasons are:\n" +
-                        "  1) unsupported JDK, only JDK 8+ is supported; \n" +
-                        "  2) -XX:-RestrictContended is missing, or the jcstress JAR is not added to -Xbootclasspath/a\n");
-            } else {
-                System.out.println("@Contended is in use.\n");
-            }
+            VMSupport.initSupport();
+            VMSupport.detectAvailableVMModes();
 
             new JCStress().run(opts);
         }

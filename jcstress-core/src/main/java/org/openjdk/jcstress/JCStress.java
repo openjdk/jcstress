@@ -40,9 +40,9 @@ import org.openjdk.jcstress.infra.grading.HTMLReportPrinter;
 import org.openjdk.jcstress.infra.runners.Runner;
 import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.InputStreamDrainer;
+import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -157,8 +157,9 @@ public class JCStress {
 
     void runForked0(Options opts, String test, TestResultCollector collector) {
         try {
-            Collection<String> commandString = getSeparateExecutionCommand(opts, test);
-            Process p = Runtime.getRuntime().exec(commandString.toArray(new String[commandString.size()]));
+            List<String> commandString = getSeparateExecutionCommand(opts, test);
+            ProcessBuilder pb = new ProcessBuilder(commandString);
+            Process p = pb.start();
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -223,19 +224,11 @@ public class JCStress {
         }
     }
 
-    public Collection<String> getSeparateExecutionCommand(Options opts, String test) {
+    public List<String> getSeparateExecutionCommand(Options opts, String test) {
         List<String> command = new ArrayList<>();
 
-        // jvm path
-        command.add(getDefaultJvm());
-
-        // jvm classpath
-        command.add("-cp");
-        if (isWindows()) {
-            command.add('"' + System.getProperty("java.class.path") + '"');
-        } else {
-            command.add(System.getProperty("java.class.path"));
-        }
+        List<String> o = VMSupport.getJavaInvokeLine();
+        command.addAll(o);
 
         // jvm args
         command.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
@@ -260,21 +253,6 @@ public class JCStress {
         command.add(String.valueOf(networkCollector.getPort()));
 
         return command;
-    }
-
-    private String getDefaultJvm() {
-        StringBuilder javaExecutable = new StringBuilder();
-        javaExecutable.append(System.getProperty("java.home"));
-        javaExecutable.append(File.separator);
-        javaExecutable.append("bin");
-        javaExecutable.append(File.separator);
-        javaExecutable.append("java");
-        javaExecutable.append(isWindows() ? ".exe" : "");
-        return javaExecutable.toString();
-    }
-
-    private boolean isWindows() {
-        return System.getProperty("os.name").contains("indows");
     }
 
     static SortedSet<String> getTests(final String filter) {
