@@ -51,13 +51,13 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private final PrintWriter output;
     private final long expectedTests;
     private final long expectedIterations;
-    private final long expectedConfigs;
+    private final long expectedForks;
 
     private long observedIterations;
     private long observedCount;
 
     private final Set<String> observedTests = Collections.newSetFromMap(new HashMap<>());
-    private final Set<TestConfig> observedConfigs = Collections.newSetFromMap(new HashMap<>());
+    private final Set<ConfigFork> observedForks = Collections.newSetFromMap(new HashMap<>());
 
     private long firstTest;
     private int progressLen;
@@ -67,12 +67,12 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private long softErrors;
     private long hardErrors;
 
-    public ConsoleReportPrinter(Options opts, PrintWriter pw, int expectedTests, int expectedConfigs) throws FileNotFoundException {
+    public ConsoleReportPrinter(Options opts, PrintWriter pw, int expectedTests, int expectedForks) throws FileNotFoundException {
         this.opts = opts;
         this.output = pw;
         this.expectedTests = expectedTests;
-        this.expectedConfigs = expectedConfigs;
-        this.expectedIterations = expectedConfigs * opts.getIterations() * (opts.getForks() > 0 ? opts.getForks() : 1);
+        this.expectedForks = expectedForks;
+        this.expectedIterations = expectedForks * opts.getIterations();
         verbose = opts.isVerbose();
         progressLen = 1;
     }
@@ -84,7 +84,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
         }
 
         observedTests.add(r.getName());
-        observedConfigs.add(r.getConfig());
+        observedForks.add(new ConfigFork(r.getConfig()));
         observedIterations++;
         observedCount += r.getTotalCount();
 
@@ -238,7 +238,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 computeETA(),
                 computeSpeed(),
                 observedTests.size(), expectedTests,
-                observedConfigs.size(), expectedConfigs,
+                observedForks.size(), expectedForks,
                 observedIterations, expectedIterations, passed, failed, softErrors, hardErrors
         );
         progressLen = line.length();
@@ -278,6 +278,32 @@ public class ConsoleReportPrinter implements TestResultCollector {
             return result;
         } else {
             return "now";
+        }
+    }
+
+    static class ConfigFork {
+        private TestConfig config;
+
+        public ConfigFork(TestConfig config) {
+            this.config = config;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ConfigFork that = (ConfigFork) o;
+
+            if (config.forkId != that.config.forkId) return false;
+            return config.equals(that.config);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = config.hashCode();
+            result = 31 * result + config.forkId;
+            return result;
         }
     }
 
