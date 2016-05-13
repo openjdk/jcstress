@@ -36,17 +36,13 @@ import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.*;
 
-import javax.xml.bind.JAXBException;
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.function.Predicate;
 
 /**
  * Prints HTML reports.
@@ -62,7 +58,7 @@ public class HTMLReportPrinter {
     private final ConsoleReportPrinter printer;
     private final boolean verbose;
 
-    public HTMLReportPrinter(Options opts, InProcessCollector collector) throws JAXBException, FileNotFoundException {
+    public HTMLReportPrinter(Options opts, InProcessCollector collector) throws FileNotFoundException {
         this.collector = collector;
         this.printer = new ConsoleReportPrinter(opts, new PrintWriter(System.out, true), 0, 0);
         this.resultDir = opts.getResultDest();
@@ -70,82 +66,12 @@ public class HTMLReportPrinter {
         new File(resultDir).mkdirs();
     }
 
-    public void parse() throws FileNotFoundException, JAXBException {
-
-        Map<TestConfig, TestResult> results = new TreeMap<>();
-
-        {
-            Multimap<TestConfig, TestResult> multiResults = new HashMultimap<>();
-            for (TestResult r : collector.getTestResults()) {
-                multiResults.put(r.getConfig(), r);
-            }
-
-            for (TestConfig name : multiResults.keys()) {
-                Collection<TestResult> mergeable = multiResults.get(name);
-
-                Multiset<String> stateCounts = new HashMultiset<>();
-
-                List<String> auxData = new ArrayList<>();
-
-                Status status = Status.NORMAL;
-                Environment env = null;
-                for (TestResult r : mergeable) {
-                    status = status.combine(r.status());
-                    for (String s : r.getStateKeys()) {
-                        stateCounts.add(s, r.getCount(s));
-                    }
-                    env = r.getEnv();
-                    auxData.addAll(r.getAuxData());
-                }
-
-                TestResult root = new TestResult(name, status, 0);
-
-                for (String s : stateCounts.keys()) {
-                    root.addState(s, stateCounts.count(s));
-                }
-
-                root.setEnv(env);
-
-                for (String data : auxData) {
-                    root.addAuxData(data);
-                }
-
-                results.put(name, root);
-            }
-        }
-
-        // build prefixes
-        Multimap<String, TestConfig> packages = new TreeMultimap<>();
-        for (TestConfig k : results.keySet()) {
-            String pack = k.name.substring(0, k.name.lastIndexOf("."));
-            packages.put(pack, k);
-        }
+    public void parse() throws FileNotFoundException {
+        Map<String, TestResult> byName = ReportUtils.mergedByName(collector.getTestResults());
 
         PrintWriter output = new PrintWriter(resultDir + "/index.html");
 
-        output.println("\n" +
-                "<html>\n" +
-                "<head>\n" +
-                "<title>Java Concurrency Stress test report</title>\n" +
-                " <style type=\"text/css\">\n" +
-                "   table { font-size: 9pt; }\n" +
-                "   a { color: #000000; }\n" +
-                "   .progress { padding: 0px; }\n" +
-                "   .header { text-align: left; }\n" +
-                "   .section1 { font-size: 12pt; background-color: #BDB76B; color: #000000; font-weight: bold;}\n" +
-                "   .section2 { font-size: 12pt; background-color: #F0E68C; color: #000000; font-weight: bold;}\n" +
-                "   .cell1 { background-color: #FAFAD2; }\n" +
-                "   .cell2 { background-color: #EEE8AA; }\n" +
-                "   .passedProgress { background-color: #00AA00; color: #FFFFFF; text-align: center; font-weight: bold; }\n" +
-                "   .failedProgress { background-color: #FF0000; color: #FFFFFF; text-align: center; font-weight: bold; }\n" +
-                "   .passed { color: #00AA00; text-align: center; font-weight: bold; }\n" +
-                "   .failed { color: #FF0000; text-align: center; font-weight: bold; }\n" +
-                "   .interesting { color: #0000FF; text-align: center; font-weight: bold; }\n" +
-                "   .spec { color: #AAAA00; text-align: center; font-weight: bold; }\n" +
-                "   .endResult { font-size: 48pt; text-align: center; font-weight: bold; }\n" +
-                " </style>\n" +
-                "</head>\n" +
-                "<body>");
+        printHeader(output);
 
         output.println("<table width=\"100%\" cellspacing=\"20\">");
         output.println("<tr>");
@@ -155,23 +81,21 @@ public class HTMLReportPrinter {
             int passedCount = 0;
             int failedCount = 0;
             int sanityFailedCount = 0;
-            for (String k : packages.keys()) {
-                Collection<TestConfig> testNames = packages.get(k);
-                for (TestConfig cfg : testNames) {
-                    TestInfo test = TestList.getInfo(cfg.name);
-                    TestResult result = results.get(cfg);
-                    if (result.status() == Status.NORMAL) {
-                        if (new TestGrading(result, test).isPassed) {
-                            passedCount++;
-                        } else {
-                            failedCount++;
-                        }
+            for (String name : byName.keySet()) {
+                TestResult result = byName.get(name);
+                TestInfo test = TestList.getInfo(name);
+
+                if (result.status() == Status.NORMAL) {
+                    if (new TestGrading(result, test).isPassed) {
+                        passedCount++;
                     } else {
-                        if (result.status() == Status.API_MISMATCH) {
-                            sanityFailedCount++;
-                        } else {
-                            failedCount++;
-                        }
+                        failedCount++;
+                    }
+                } else {
+                    if (result.status() == Status.API_MISMATCH) {
+                        sanityFailedCount++;
+                    } else {
+                        failedCount++;
                     }
                 }
             }
@@ -191,15 +115,15 @@ public class HTMLReportPrinter {
             }
             output.println("</p>");
 
-            output.println("<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr>");
-            output.println("<td nowrap><b>Overall pass rate:</b> " + passedCount + "/" + (passedCount + failedCount) + "&nbsp;</td>");
+            output.println("<table width=\"100%\" cellpadding=\"3\" cellspacing=\"0\">");
             if (passedProgress > 0) {
-                output.println("<td width=\"" + passedProgress + "%\" class=\"passedProgress\">&nbsp;</td>");
+                output.println("<tr><td width=\"" + passedProgress + "%\" class=\"passedProgress\">&nbsp;</td></tr>");
             }
             if (failedProgress > 0) {
-                output.println("<td width=\"" + failedProgress + "%\" class=\"failedProgress\">&nbsp;</td>");
+                output.println("<tr><td width=\"" + failedProgress + "%\" class=\"failedProgress\">&nbsp;</td></tr>");
             }
-            output.println("</tr></table>");
+            output.println("<tr><td nowrap><b>Overall pass rate:</b> " + passedCount + "/" + (passedCount + failedCount) + "&nbsp;</td></tr>");
+            output.println("</table>");
 
             output.println("<br>");
         }
@@ -208,26 +132,24 @@ public class HTMLReportPrinter {
 
         {
             SortedMap<String, String> env = new TreeMap<>();
-            for (String k : packages.keys()) {
-                for (TestConfig cfg : packages.get(k)) {
-                    TestResult result = results.get(cfg);
-                    if (result != null) {
-                        for (Map.Entry<String, String> kv : result.getEnv().entries().entrySet()) {
-                            String key = kv.getKey();
-                            String value = kv.getValue();
-                            String lastV = env.get(key);
-                            if (lastV == null) {
-                                env.put(key, value);
-                            } else {
-                                // Some VMs have these keys pre-populated with the command line,
-                                // which can have port definitions, PIDs, etc, and naturally
-                                // clash from launch to launch.
-                                if (key.equals("cmdLine")) continue;
-                                if (key.equals("launcher")) continue;
+            for (String k : byName.keySet()) {
+                TestResult result = byName.get(k);
+                if (result != null) {
+                    for (Map.Entry<String, String> kv : result.getEnv().entries().entrySet()) {
+                        String key = kv.getKey();
+                        String value = kv.getValue();
+                        String lastV = env.get(key);
+                        if (lastV == null) {
+                            env.put(key, value);
+                        } else {
+                            // Some VMs have these keys pre-populated with the command line,
+                            // which can have port definitions, PIDs, etc, and naturally
+                            // clash from launch to launch.
+                            if (key.equals("cmdLine")) continue;
+                            if (key.equals("launcher")) continue;
 
-                                if (!lastV.equalsIgnoreCase(value)) {
-                                    System.err.println("Mismatched environment for key = " + key + ", was = " + lastV + ", now = "  + value);
-                                }
+                            if (!lastV.equalsIgnoreCase(value)) {
+                                System.err.println("Mismatched environment for key = " + key + ", was = " + lastV + ", now = " + value);
                             }
                         }
                     }
@@ -238,7 +160,7 @@ public class HTMLReportPrinter {
             for (Map.Entry<String, String> entry : env.entrySet()) {
                 output.println("<tr>");
                 output.println("<td nowrap>" + entry.getKey() + "</td>");
-                output.println("<td>" + entry.getValue() + "</td>");
+                output.println("<td nowrap>" + entry.getValue() + "</td>");
                 output.println("</tr>");
             }
             output.println("</table>");
@@ -248,206 +170,123 @@ public class HTMLReportPrinter {
         output.println("</tr>");
         output.println("</table>");
 
-        printFailedTests(results, packages, output);
-        printErrorTests(results, packages, output);
-        printSpecTests(results, packages, output);
-        printInterestingTests(results, packages, output);
-        printAllTests(results, packages, output);
+        printXTests(byName, output,
+                "FAILED tests",
+                "Strong asserts were violated. Correct implementations should have no assert failures here.",
+                (s) -> s == Status.NORMAL,
+                (g) -> !g.isPassed);
 
-        output.println("</body>");
-        output.println("</html>");
+        printXTests(byName, output,
+                "ERROR tests",
+                "Tests break for some reason, other than failing the assert. Correct implementations should have none.",
+                (s) -> s != Status.NORMAL && s != Status.API_MISMATCH,
+                (g) -> true);
+
+        printXTests(byName, output,
+                "SPEC tests",
+                "Formally acceptable, but surprising results are observed. Implementations going beyond the minimal requirements should have none.",
+                (s) -> s == Status.NORMAL,
+                (g) -> g.hasSpec);
+
+        printXTests(byName, output,
+                "INTERESTING tests",
+                "Some interesting behaviors observed. This is for the plain curiosity.",
+                (s) -> s == Status.NORMAL,
+                (g) -> g.hasInteresting);
+
+        printXTests(byName, output,
+                "All tests",
+                "",
+                (s) -> true,
+                (g) -> true);
+
+        printFooter(output);
 
         output.close();
 
+        emitTestReports(ReportUtils.byName(collector.getTestResults()));
+
         if (verbose) {
-            for (TestConfig k : results.keySet()) {
-                TestResult result = results.get(k);
+            Map<TestConfig, TestResult> byConfig = ReportUtils.mergedByConfig(collector.getTestResults());
+            for (TestConfig k : byConfig.keySet()) {
+                TestResult result = byConfig.get(k);
                 printer.add(result);
             }
         }
     }
 
-    private void printFailedTests(Map<TestConfig, TestResult> results, Multimap<String, TestConfig> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
-        output.println("<h3>FAILED tests:<br>");
-        output.println("&nbsp;Some asserts have been violated.<br>&nbsp;Correct implementations should have none.</h3>");
-        output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">");
-
-        boolean hadAnyTests = false;
-        for (String k : packages.keys()) {
-            Collection<TestConfig> testNames = packages.get(k);
-
-            boolean packageEmitted = false;
-            for (TestConfig cfg : testNames) {
-                TestInfo test = TestList.getInfo(cfg.name);
-                TestResult result = results.get(cfg);
-                TestGrading grading = new TestGrading(result, test);
-                if (result.status() == Status.NORMAL && !grading.isPassed) {
-                    if (!packageEmitted) {
-                        emitPackage(output, k);
-                        packageEmitted = true;
-                    }
-                    emitTest(output, result, test);
-                    hadAnyTests = true;
-                }
-            }
-        }
-
-        output.println("</table>");
-        if (!hadAnyTests) {
-            output.println("None!");
-            output.println("<br>");
-        }
-
-        output.println("<br>");
+    private void printFooter(PrintWriter output) {
+        output.println("</body>");
+        output.println("</html>");
     }
 
-
-    private void printErrorTests(Map<TestConfig, TestResult> results, Multimap<String, TestConfig> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
-        output.println("<h3>ERROR tests:<br>");
-        output.println("&nbsp;Tests break for some reason, other than failing the assert.<br>&nbsp;Correct implementations should have none.</h3>");
-        output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">");
-
-        boolean hadAnyTests = false;
-        for (String k : packages.keys()) {
-
-            boolean packageEmitted = false;
-            for (TestConfig cfg : packages.get(k)) {
-                TestInfo test = TestList.getInfo(cfg.name);
-                TestResult result = results.get(cfg);
-                if (result.status() != Status.NORMAL && result.status() != Status.API_MISMATCH) {
-                    if (!packageEmitted) {
-                        emitPackage(output, k);
-                        packageEmitted = true;
-                    }
-                    emitTestFailure(output, result, test);
-                    hadAnyTests = true;
-                }
-            }
-        }
-
-        output.println("</table>");
-        if (!hadAnyTests) {
-            output.println("None!");
-            output.println("<br>");
-        }
-
-        output.println("<br>");
+    private void printHeader(PrintWriter output) {
+        output.println("\n" +
+                "<html>\n" +
+                "<head>\n" +
+                "<title>Java Concurrency Stress test report</title>\n" +
+                " <style type=\"text/css\">\n" +
+                "   * { font-family: Arial; }\n" +
+                "   table { font-size: 9pt; }\n" +
+                "   a { color: #000000; }\n" +
+                "   .progress { padding: 0px; }\n" +
+                "   .header { text-align: left; }\n" +
+                "   .section1 { font-size: 12pt; background-color: #BDB76B; color: #000000; font-weight: bold;}\n" +
+                "   .section2 { font-size: 12pt; background-color: #F0E68C; color: #000000; font-weight: bold;}\n" +
+                "   .cell1 { background-color: #FAFAD2; }\n" +
+                "   .cell2 { background-color: #EEE8AA; }\n" +
+                "   .passedProgress { background-color: #00AA00; color: #FFFFFF; text-align: center; font-weight: bold; }\n" +
+                "   .failedProgress { background-color: #FF0000; color: #FFFFFF; text-align: center; font-weight: bold; }\n" +
+                "   .passed { color: #00AA00; text-align: center; font-weight: bold; }\n" +
+                "   .failed { color: #FF0000; text-align: center; font-weight: bold; }\n" +
+                "   .interesting { color: #0000FF; text-align: center; font-weight: bold; }\n" +
+                "   .spec { color: #AAAA00; text-align: center; font-weight: bold; }\n" +
+                "   .endResult { font-size: 48pt; text-align: center; font-weight: bold; }\n" +
+                " </style>\n" +
+                "</head>\n" +
+                "<body>");
     }
 
-    private void printInterestingTests(Map<TestConfig, TestResult> results, Multimap<String, TestConfig> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
-        output.println("<h3>INTERESTING tests:<br>");
-        output.println("&nbsp;Some interesting behaviors observed.<br>&nbsp;This is for the plain curiosity.</h3>");
-        output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">");
+    private void printXTests(Map<String, TestResult> byName,
+                             PrintWriter output,
+                             String header,
+                             String subheader,
+                             Predicate<Status> filterStatus,
+                             Predicate<TestGrading> filterGrading
+                             ) throws FileNotFoundException {
+        output.println("<hr>");
+        output.println("<h3>" + header + "</h3>");
+        output.println("<p>" + subheader + "</p>");
+        output.println("<table cellspacing=0 cellpadding=3 width=\"100%\">");
 
         boolean hadAnyTests = false;
-        for (String k : packages.keys()) {
-
-            boolean packageEmitted = false;
-            for (TestConfig cfg : packages.get(k)) {
-                TestInfo test = TestList.getInfo(cfg.name);
-                TestResult result = results.get(cfg);
-                TestGrading grading = new TestGrading(result, test);
-                if (grading.hasInteresting) {
-                    if (!packageEmitted) {
-                        emitPackage(output, k);
-                        packageEmitted = true;
-                    }
-                    emitTest(output, result, test);
-                    hadAnyTests = true;
-                }
-            }
-        }
-
-        output.println("</table>");
-        if (!hadAnyTests) {
-            output.println("None!");
-            output.println("<br>");
-        }
-        output.println("<br>");
-    }
-
-    private void printSpecTests(Map<TestConfig, TestResult> results, Multimap<String, TestConfig> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
-        output.println("<h3>SPEC tests:<br>");
-        output.println("&nbsp;Formally acceptable, but surprising results are observed.<br>&nbsp;Implementations going beyond the minimal requirements should have none.</h3>");
-        output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">");
-
-        boolean hadAnyTests = false;
-        for (String k : packages.keys()) {
-
-            boolean packageEmitted = false;
-            for (TestConfig cfg : packages.get(k)) {
-                TestInfo test = TestList.getInfo(cfg.name);
-                TestResult result = results.get(cfg);
-                TestGrading grading = new TestGrading(result, test);
-                if (grading.hasSpec) {
-                    if (!packageEmitted) {
-                        emitPackage(output, k);
-                        packageEmitted = true;
-                    }
-                    emitTest(output, result, test);
-                    hadAnyTests = true;
-                }
-            }
-        }
-
-        output.println("</table>");
-        if (!hadAnyTests) {
-            output.println("None!");
-            output.println("<br>");
-        }
-
-        output.println("<br>");
-    }
-
-    private void printAllTests(Map<TestConfig, TestResult> results, Multimap<String, TestConfig> packages, PrintWriter output) throws FileNotFoundException, JAXBException {
-        output.println("<h3>ALL tests:</h3>");
-        output.println("<table cellspacing=0 cellpadding=0 width=\"100%\">\n" +
-                "<tr>\n" +
-                " <th class=\"header\">Test</th>\n" +
-                " <th class=\"header\">Cycles</th>\n" +
-                " <th class=\"header\">Results</th>\n" +
-                "</tr>");
-
-        for (String k : packages.keys()) {
-            emitPackage(output, k);
-
-            for (TestConfig cfg : packages.get(k)) {
-                TestInfo test = TestList.getInfo(cfg.name);
-                TestResult result = results.get(cfg);
+        for (String name : byName.keySet()) {
+            TestInfo test = TestList.getInfo(name);
+            TestResult result = byName.get(name);
+            TestGrading grading = new TestGrading(result, test);
+            if (filterStatus.test(result.status()) && filterGrading.test(grading)) {
                 if (result.status() == Status.NORMAL) {
                     emitTest(output, result, test);
                 } else {
                     emitTestFailure(output, result, test);
                 }
-
-                PrintWriter local = new PrintWriter(resultDir + "/" + cfg.name + ".html");
-                parseTest(local, result, test);
-                local.close();
+                hadAnyTests = true;
             }
         }
 
         output.println("</table>");
+        if (!hadAnyTests) {
+            output.println("None!");
+            output.println("<br>");
+        }
+
+        output.println("<br>");
     }
 
-    private void emitPackage(PrintWriter pw, String pack) {
-        pw.println("<tr class=\"section2\">\n" +
-                "   <td><b>" + pack + "</b></td>\n" +
-                "   <td>&nbsp;</td>\n" +
-                "   <td>&nbsp;</td>\n" +
-                "   <td>&nbsp;</td>\n" +
-                "   <td>&nbsp;</td>\n" +
-                "   <td></td>" +
-                "</tr>");
-    }
-
-    public static String cutKlass(String fqname) {
-        return fqname.substring(fqname.lastIndexOf(".") + 1);
-    }
-
-    public void emitTest(PrintWriter output, TestResult result, TestInfo description) throws FileNotFoundException, JAXBException {
+    public void emitTest(PrintWriter output, TestResult result, TestInfo description) {
         cellStyle = 3 - cellStyle;
         output.println("<tr class=\"cell" + cellStyle + "\">");
-        output.println("<td>&nbsp;&nbsp;&nbsp;<a href=\"" + result.getName() + ".html\">" + cutKlass(result.getName()) + "</a></td>");
+        output.println("<td>&nbsp;&nbsp;&nbsp;<a href=\"" + result.getName() + ".html\">" + StringUtils.chunkName(result.getName()) + "</a></td>");
         output.printf("<td>%s</td>", getRoughCount(result));
         if (description != null) {
             TestGrading grading = new TestGrading(result, description);
@@ -477,10 +316,10 @@ public class HTMLReportPrinter {
         output.println("</tr>");
     }
 
-    public void emitTestFailure(PrintWriter output, TestResult result, TestInfo description) throws FileNotFoundException, JAXBException {
+    public void emitTestFailure(PrintWriter output, TestResult result, TestInfo description) {
         cellStyle = 3 - cellStyle;
         output.println("<tr class=\"cell" + cellStyle + "\">");
-        output.println("<td>&nbsp;&nbsp;&nbsp;<a href=\"" + result.getName() + ".html\">" + cutKlass(result.getName()) + "</a></td>");
+        output.println("<td>&nbsp;&nbsp;&nbsp;<a href=\"" + result.getName() + ".html\">" + StringUtils.chunkName(result.getName()) + "</a></td>");
         output.println("<td></td>");
         if (description != null) {
             switch (result.status()) {
@@ -528,14 +367,19 @@ public class HTMLReportPrinter {
         }
     }
 
-
-    public void parseTest(PrintWriter output, TestResult r, TestInfo test) throws FileNotFoundException, JAXBException {
-        if (test == null) {
-            parseTestWithoutDescription(output, r);
-            return;
+    private void emitTestReports(Multimap<String, TestResult> multiByName) throws FileNotFoundException {
+        for (String name : multiByName.keys()) {
+            TestInfo test = TestList.getInfo(name);
+            PrintWriter local = new PrintWriter(resultDir + "/" + name + ".html");
+            emitTestReport(local, multiByName.get(name), test);
+            local.close();
         }
+    }
 
-        output.println("<h1>" + r.getName() + "</h1>");
+    public void emitTestReport(PrintWriter output, Collection<TestResult> results, TestInfo test) {
+        printHeader(output);
+
+        output.println("<h1>" + test.name() + "</h1>");
 
         output.println("<p>" + test.description() + "</p>");
 
@@ -545,89 +389,70 @@ public class HTMLReportPrinter {
             rIdx++;
         }
 
-        output.println("<table width=100%>");
-        output.println("<tr>");
-        output.println("<th width=250>Observed state</th>");
-        output.println("<th width=50>Occurrence</th>");
-        output.println("<th width=50>Expectation</th>");
-        output.println("<th>Interpretation</th>");
-        output.println("</tr>");
+        for (TestResult r : results) {
+            output.println("<p>" + r.getConfig() + "</p>");
 
-        List<String> unmatchedStates = new ArrayList<>();
-        unmatchedStates.addAll(r.getStateKeys());
-        for (StateCase c : test.cases()) {
+            output.println("<table width=100%>");
+            output.println("<tr>");
+            output.println("<th width=250>Observed state</th>");
+            output.println("<th width=50>Occurrence</th>");
+            output.println("<th width=50>Expectation</th>");
+            output.println("<th>Interpretation</th>");
+            output.println("</tr>");
 
-            boolean matched = false;
+            List<String> unmatchedStates = new ArrayList<>();
+            unmatchedStates.addAll(r.getStateKeys());
+            for (StateCase c : test.cases()) {
 
-            for (String s : r.getStateKeys()) {
-                if (c.state().equals(s)) {
-                    // match!
-                    output.println("<tr bgColor=" + selectHTMLColor(c.expect(), r.getCount(s) == 0) + ">");
-                    output.println("<td>" + s + "</td>");
-                    output.println("<td align=center>" + r.getCount(s) + "</td>");
+                boolean matched = false;
+
+                for (String s : r.getStateKeys()) {
+                    if (c.state().equals(s)) {
+                        // match!
+                        output.println("<tr bgColor=" + selectHTMLColor(c.expect(), r.getCount(s) == 0) + ">");
+                        output.println("<td>" + s + "</td>");
+                        output.println("<td align=center>" + r.getCount(s) + "</td>");
+                        output.println("<td align=center>" + c.expect() + "</td>");
+                        output.println("<td>" + c.description() + "</td>");
+                        output.println("</tr>");
+                        matched = true;
+                        unmatchedStates.remove(s);
+                    }
+                }
+
+                if (!matched) {
+                    output.println("<tr bgColor=" + selectHTMLColor(c.expect(), true) + ">");
+                    output.println("<td>" + c.state() + "</td>");
+                    output.println("<td align=center>" + 0 + "</td>");
                     output.println("<td align=center>" + c.expect() + "</td>");
                     output.println("<td>" + c.description() + "</td>");
                     output.println("</tr>");
-                    matched = true;
-                    unmatchedStates.remove(s);
                 }
             }
 
-            if (!matched) {
-                output.println("<tr bgColor=" + selectHTMLColor(c.expect(), true) + ">");
-                output.println("<td>" + c.state() + "</td>");
-                output.println("<td align=center>" + 0 + "</td>");
-                output.println("<td align=center>" + c.expect() + "</td>");
-                output.println("<td>" + c.description() + "</td>");
+            for (String s : unmatchedStates) {
+                output.println("<tr bgColor=" + selectHTMLColor(test.unmatched().expect(), r.getCount(s) == 0) + ">");
+                output.println("<td>" + s + "</td>");
+                output.println("<td align=center>" + r.getCount(s) + "</td>");
+                output.println("<td align=center>" + test.unmatched().expect() + "</td>");
+                output.println("<td>" + test.unmatched().expect() + "</td>");
                 output.println("</tr>");
             }
-        }
 
-        for (String s : unmatchedStates) {
-            output.println("<tr bgColor=" + selectHTMLColor(test.unmatched().expect(), r.getCount(s) == 0) + ">");
-            output.println("<td>" + s + "</td>");
-            output.println("<td align=center>" + r.getCount(s) + "</td>");
-            output.println("<td align=center>" + test.unmatched().expect() + "</td>");
-            output.println("<td>" + test.unmatched().expect() + "</td>");
-            output.println("</tr>");
-        }
+            output.println("</table>");
 
-        output.println("</table>");
-
-        if (!r.getAuxData().isEmpty()) {
-            output.println("<p><b>Auxiliary data</b></p>");
-            output.println("<pre>");
-            for (String data : r.getAuxData()) {
-                output.println(data);
+            if (!r.getAuxData().isEmpty()) {
+                output.println("<p><b>Auxiliary data</b></p>");
+                output.println("<pre>");
+                for (String data : r.getAuxData()) {
+                    output.println(data);
+                }
+                output.println("</pre>");
+                output.println();
             }
-            output.println("</pre>");
-            output.println();
         }
-    }
 
-    private void parseTestWithoutDescription(PrintWriter output, TestResult r) {
-        output.println("<h1>" + r.getName() + "</h1>");
-
-        output.println("<p>No description available for this test</p>");
-
-        output.println("<table width=100%>");
-        output.println("<tr>");
-        output.println("<th width=250>Observed state</th>");
-        output.println("<th width=50>Occurrence</th>");
-        output.println("<th width=50>Expectation</th>");
-        output.println("<th>Interpretation</th>");
-        output.println("<th width=50>Refs</th>");
-        output.println("</tr>");
-
-        for (String s : r.getStateKeys()) {
-            output.println("<tr bgColor=" + selectHTMLColor(Expect.UNKNOWN, r.getCount(s) == 0) + ">");
-            output.println("<td>" + s + "</td>");
-            output.println("<td align=center>" + r.getCount(s) + "</td>");
-            output.println("<td align=center>" + Expect.UNKNOWN + "</td>");
-            output.println("<td>" + "Unknows state" + "</td>");
-            output.println("</tr>");
-        }
-        output.println("</table>");
+        printFooter(output);
     }
 
     public String selectHTMLColor(Expect type, boolean isZero) {

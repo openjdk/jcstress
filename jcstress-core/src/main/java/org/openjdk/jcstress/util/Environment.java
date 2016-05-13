@@ -25,11 +25,8 @@
 package org.openjdk.jcstress.util;
 
 import java.io.Serializable;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Environment implements Serializable {
@@ -64,10 +61,6 @@ public class Environment implements Serializable {
         for (String key : keys) {
             result.put(key, System.getProperty(key));
         }
-
-        RuntimeMXBean RuntimemxBean = ManagementFactory.getRuntimeMXBean();
-        List<String> args = RuntimemxBean.getInputArguments();
-        result.put("cmdLine", args.toString());
 
         env = result;
     }

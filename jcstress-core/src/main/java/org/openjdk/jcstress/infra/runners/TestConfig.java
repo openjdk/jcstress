@@ -28,9 +28,12 @@ import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.infra.TestInfo;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.List;
 
-public class TestConfig implements Serializable, Comparable<TestConfig> {
+public class TestConfig implements Serializable {
+
+    public static final Comparator<TestConfig> COMPARATOR_NAME = Comparator.comparing((c) -> c.name);
 
     public final boolean shouldYield;
     public final boolean verbose;
@@ -103,7 +106,9 @@ public class TestConfig implements Serializable, Comparable<TestConfig> {
     }
 
     @Override
-    public int compareTo(TestConfig o) {
-        return name.compareTo(o.name);
+    public String toString() {
+        return "JVM options: " + jvmArgs + "\n" +
+                "Iterations: " + iters + "\n" +
+                "Time: " + time;
     }
 }

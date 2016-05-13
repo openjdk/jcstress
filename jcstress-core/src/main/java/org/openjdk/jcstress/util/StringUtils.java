@@ -43,4 +43,8 @@ public class StringUtils {
         }
     }
 
+    public static String chunkName(String name) {
+        return name.replace("org.openjdk.jcstress.tests", "o.o.j.t");
+    }
+
 }

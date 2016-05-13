@@ -104,6 +104,6 @@ public class TestList {
     }
 
     public static TestInfo getInfo(String name) {
-        return tests.get(name);
+        return getTests().get(name);
     }
 }

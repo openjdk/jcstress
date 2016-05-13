@@ -34,7 +34,6 @@ import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.StringUtils;
 
-import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.*;
@@ -63,7 +62,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private long firstTest;
     private int progressLen;
 
-    public ConsoleReportPrinter(Options opts, PrintWriter pw, int expectedTests, int expectedConfigs) throws JAXBException, FileNotFoundException {
+    public ConsoleReportPrinter(Options opts, PrintWriter pw, int expectedTests, int expectedConfigs) throws FileNotFoundException {
         this.opts = opts;
         this.output = pw;
         this.expectedTests = expectedTests;
@@ -220,7 +219,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
     private void printLine(String label, TestResult r) {
         output.printf("\r%" + progressLen + "s\r", "");
-        output.printf("%10s %s\n", "[" + label + "]", chunkName(r.getName()));
+        output.printf("%10s %s\n", "[" + label + "]", StringUtils.chunkName(r.getName()));
     }
 
     private void printProgress() {
@@ -269,10 +268,6 @@ public class ConsoleReportPrinter implements TestResultCollector {
         } else {
             return "now";
         }
-    }
-
-    private String chunkName(String name) {
-        return name.replace("org.openjdk.jcstress.tests", "o.o.j.t");
     }
 
 }

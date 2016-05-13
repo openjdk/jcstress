@@ -36,11 +36,7 @@ import org.openjdk.jcstress.util.*;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Exception report.
@@ -54,42 +50,13 @@ public class ExceptionReportPrinter {
     private final List<String> failures;
     private final InProcessCollector collector;
 
-    public ExceptionReportPrinter(Options opts, InProcessCollector collector) throws JAXBException, FileNotFoundException {
+    public ExceptionReportPrinter(InProcessCollector collector) throws JAXBException, FileNotFoundException {
         this.collector = collector;
         failures = new ArrayList<>();
     }
 
     public void parse() throws FileNotFoundException, JAXBException {
-        Map<TestConfig, TestResult> results = new TreeMap<>();
-
-        {
-            Multimap<TestConfig, TestResult> multiResults = new HashMultimap<>();
-            for (TestResult r : collector.getTestResults()) {
-                multiResults.put(r.getConfig(), r);
-            }
-
-            for (TestConfig config : multiResults.keys()) {
-                Collection<TestResult> mergeable = multiResults.get(config);
-
-                Multiset<String> stateCounts = new HashMultiset<>();
-
-                Status status = Status.NORMAL;
-                for (TestResult r : mergeable) {
-                    status = status.combine(r.status());
-                    for (String s : r.getStateKeys()) {
-                        stateCounts.add(s, r.getCount(s));
-                    }
-                }
-
-                TestResult root = new TestResult(config, status, 0);
-
-                for (String s : stateCounts.keys()) {
-                    root.addState(s, stateCounts.count(s));
-                }
-
-                results.put(config, root);
-            }
-        }
+        Map<TestConfig, TestResult> results = ReportUtils.mergedByConfig(collector.getTestResults());
 
         // build prefixes
         Multimap<String, TestConfig> packages = new TreeMultimap<>();
@@ -99,16 +66,12 @@ public class ExceptionReportPrinter {
             packages.put(pack, k);
         }
 
-        for (String k : packages.keys()) {
-            Collection<TestConfig> rs = packages.get(k);
-            for (TestConfig r : rs) {
-                TestInfo test = TestList.getInfo(r.name);
-                TestResult result = results.get(r);
-                emitTest(result, test);
-            }
+        for (TestConfig k : results.keySet()) {
+            TestInfo test = TestList.getInfo(k.name);
+            TestResult result = results.get(k);
+            emitTest(result, test);
         }
 
-        // TODO: Once JDK6 is in infamy, refactor to use suppressed exceptions
         if (!failures.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             for (String f : failures) {

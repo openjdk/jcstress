@@ -147,11 +147,13 @@ public class JCStress {
         HTMLReportPrinter p = new HTMLReportPrinter(opts, collector);
         p.parse();
 
+        out.println();
+        out.println();
         out.println("Look at " + opts.getResultDest() + "index.html for the complete run results.");
         out.println();
 
         out.println("Will throw any pending exceptions at this point.");
-        ExceptionReportPrinter e = new ExceptionReportPrinter(opts, collector);
+        ExceptionReportPrinter e = new ExceptionReportPrinter(collector);
         e.parse();
 
         out.println("Done.");
