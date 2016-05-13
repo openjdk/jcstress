@@ -252,8 +252,7 @@ public class HTMLReportPrinter {
                              String header,
                              String subheader,
                              Predicate<Status> filterStatus,
-                             Predicate<TestGrading> filterGrading
-                             ) throws FileNotFoundException {
+                             Predicate<TestGrading> filterGrading) {
         output.println("<hr>");
         output.println("<h3>" + header + "</h3>");
         output.println("<p>" + subheader + "</p>");
@@ -367,13 +366,17 @@ public class HTMLReportPrinter {
         }
     }
 
-    private void emitTestReports(Multimap<String, TestResult> multiByName) throws FileNotFoundException {
-        for (String name : multiByName.keys()) {
-            TestInfo test = TestList.getInfo(name);
-            PrintWriter local = new PrintWriter(resultDir + "/" + name + ".html");
-            emitTestReport(local, multiByName.get(name), test);
-            local.close();
-        }
+    private void emitTestReports(Multimap<String, TestResult> multiByName) {
+        multiByName.keys().parallelStream().forEach(name -> {
+            try {
+                TestInfo test = TestList.getInfo(name);
+                PrintWriter local = new PrintWriter(resultDir + "/" + name + ".html");
+                emitTestReport(local, multiByName.get(name), test);
+                local.close();
+            } catch (FileNotFoundException e) {
+                // do nothing
+            }
+        });
     }
 
     public void emitTestReport(PrintWriter output, Collection<TestResult> results, TestInfo test) {
