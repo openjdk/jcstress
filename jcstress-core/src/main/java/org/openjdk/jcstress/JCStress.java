@@ -180,6 +180,10 @@ public class JCStress {
                 configs.add(new TestConfig(opts, info, mode, -1, Collections.emptyList()));
             }
         }
+
+        // Randomize the testing order
+        Collections.shuffle(configs);
+
         return configs;
     }
 
