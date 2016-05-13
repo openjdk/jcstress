@@ -62,6 +62,11 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private long firstTest;
     private int progressLen;
 
+    private long passed;
+    private long failed;
+    private long softErrors;
+    private long hardErrors;
+
     public ConsoleReportPrinter(Options opts, PrintWriter pw, int expectedTests, int expectedConfigs) throws FileNotFoundException {
         this.opts = opts;
         this.output = pw;
@@ -90,6 +95,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
         switch (r.status()) {
             case TIMEOUT_ERROR:
                 printLine("TIMEOUT", r);
+                hardErrors++;
                 return;
             case CHECK_TEST_ERROR:
             case TEST_ERROR:
@@ -99,6 +105,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
                     output.println(data);
                 }
                 output.println();
+                hardErrors++;
                 return;
             case VM_ERROR:
                 output.println();
@@ -107,9 +114,11 @@ public class ConsoleReportPrinter implements TestResultCollector {
                     output.println(data);
                 }
                 output.println();
+                hardErrors++;
                 return;
             case API_MISMATCH:
                 printLine("SKIPPED", r);
+                softErrors++;
                 return;
             case NORMAL:
                 TestInfo test = TestList.getInfo(r.getName());
@@ -121,10 +130,12 @@ public class ConsoleReportPrinter implements TestResultCollector {
                     TestGrading grading = new TestGrading(r, test);
                     if (grading.isPassed) {
                         printLine("OK", r);
+                        passed++;
                     } else {
                         output.println();
                         printLine("FAILED", r);
                         isVerbose = true;
+                        failed++;
                     }
                 }
                 break;
@@ -223,12 +234,12 @@ public class ConsoleReportPrinter implements TestResultCollector {
     }
 
     private void printProgress() {
-        String line = String.format("(ETA: %10s) (Rate: %s samples/sec) (Tests: %4d of %d) (Forks: %2d of %d) (Iterations: %2d of %d) ",
+        String line = String.format("(ETA: %10s) (Rate: %s samples/sec) (Tests: %d of %d) (Forks: %2d of %d) (Iterations: %2d of %d; %d passed, %d failed, %d soft errs, %d hard errs) ",
                 computeETA(),
                 computeSpeed(),
                 observedTests.size(), expectedTests,
                 observedConfigs.size(), expectedConfigs,
-                observedIterations, expectedIterations
+                observedIterations, expectedIterations, passed, failed, softErrors, hardErrors
         );
         progressLen = line.length();
         output.print(line);
