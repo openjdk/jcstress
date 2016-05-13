@@ -286,7 +286,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    static final AtomicIntegerFieldUpdater<" + className + "> EPOCH = AtomicIntegerFieldUpdater.newUpdater(" + className + ".class, \"epoch\");");
 
         for (ExecutableElement a : info.getActors()) {
-            pw.println("    Counter<" + r + "> counter_" + a.getSimpleName() + ";");
+            pw.println("    OpenAddressHashCounter<" + r + "> counter_" + a.getSimpleName() + ";");
         }
 
         if (!isStateItself) {
