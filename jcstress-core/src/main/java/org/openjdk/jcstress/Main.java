@@ -24,8 +24,6 @@
  */
 package org.openjdk.jcstress;
 
-import org.openjdk.jcstress.vm.VMSupport;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -51,15 +49,15 @@ public class Main {
             System.exit(1);
         }
 
+        JCStress jcstress = new JCStress(opts);
         if (opts.shouldList()) {
-            for (String test : org.openjdk.jcstress.JCStress.getTests(opts.getTestFilter())) {
+            for (String test : jcstress.getTests()) {
                 System.out.println(test);
             }
+        } else if (opts.shouldParse()) {
+            jcstress.parseResults();
         } else {
-            VMSupport.initSupport();
-            VMSupport.detectAvailableVMModes();
-
-            new JCStress().run(opts);
+            jcstress.run();
         }
     }
 

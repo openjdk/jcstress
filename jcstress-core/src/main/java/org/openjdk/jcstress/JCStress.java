@@ -59,8 +59,10 @@ import java.util.regex.Pattern;
 public class JCStress {
     final ExecutorService pool;
     final PrintStream out;
+    final Options opts;
 
-    public JCStress() {
+    public JCStress(Options opts) {
+        this.opts = opts;
         this.pool = Executors.newCachedThreadPool(new ThreadFactory() {
             private final AtomicInteger id = new AtomicInteger();
 
@@ -104,31 +106,36 @@ public class JCStress {
         }
     }
 
-    public void run(Options opts) throws Exception {
-        if (!opts.shouldParse()) {
-            opts.printSettingsOn(out);
+    public void run() throws Exception {
+        VMSupport.initSupport();
+        VMSupport.detectAvailableVMModes();
 
-            SortedSet<String> tests = getTests(opts.getTestFilter());
-            List<TestConfig> configs = prepareRunProgram(opts, tests);
+        opts.printSettingsOn(out);
 
-            ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), tests.size(), configs.size());
-            DiskWriteCollector diskCollector = new DiskWriteCollector(opts.getResultFile());
-            TestResultCollector sink = MuxCollector.of(printer, diskCollector);
+        SortedSet<String> tests = getTests();
+        List<TestConfig> configs = prepareRunProgram(tests);
 
-            BinaryLinkServer server = new BinaryLinkServer(sink);
+        ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), tests.size(), configs.size());
+        DiskWriteCollector diskCollector = new DiskWriteCollector(opts.getResultFile());
+        TestResultCollector sink = MuxCollector.of(printer, diskCollector);
 
-            Scheduler scheduler = new Scheduler(opts.getUserCPUs());
-            for (TestConfig cfg : configs) {
-                server.addTask(cfg);
-                scheduler.schedule(new TestCfgTask(cfg, server, sink));
-            }
-            scheduler.waitFinish();
+        BinaryLinkServer server = new BinaryLinkServer(sink);
 
-            server.terminate();
-
-            diskCollector.close();
+        Scheduler scheduler = new Scheduler(opts.getUserCPUs());
+        for (TestConfig cfg : configs) {
+            server.addTask(cfg);
+            scheduler.schedule(new TestCfgTask(cfg, server, sink));
         }
+        scheduler.waitFinish();
 
+        server.terminate();
+
+        diskCollector.close();
+
+        parseResults();
+    }
+
+    public void parseResults() throws Exception {
         out.println();
         out.println("Reading the results back... ");
 
@@ -150,7 +157,7 @@ public class JCStress {
         out.println("Done.");
     }
 
-    private List<TestConfig> prepareRunProgram(Options opts, Set<String> tests) {
+    private List<TestConfig> prepareRunProgram(Set<String> tests) {
         List<TestConfig> configs = new ArrayList<>();
         if (opts.shouldFork()) {
             List<String> inputArgs = ManagementFactory.getRuntimeMXBean().getInputArguments();
@@ -227,7 +234,8 @@ public class JCStress {
         }
     }
 
-    static SortedSet<String> getTests(final String filter) {
+    public SortedSet<String> getTests() {
+        String filter = opts.getTestFilter();
         SortedSet<String> s = new TreeSet<>();
 
         Pattern pattern = Pattern.compile(filter);

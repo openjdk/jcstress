@@ -31,6 +31,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class VMSupport {
 
@@ -169,4 +172,56 @@ public class VMSupport {
     public static List<List<String>> getAvailableVMModes() {
         return AVAIL_JVM_MODES;
     }
+
+    /**
+     * Warm up the CPU schedulers, bring all the CPUs online to get the
+     * reasonable estimate of the system capacity.
+     *
+     * @return online CPU count
+     */
+    public static int figureOutHotCPUs() {
+        ExecutorService service = Executors.newCachedThreadPool();
+
+        System.out.print("Burning up to figure out the exact CPU count...");
+
+        int warmupTime = 1000;
+        long lastChange = System.currentTimeMillis();
+
+        List<Future<?>> futures = new ArrayList<>();
+        futures.add(service.submit(new BurningTask()));
+
+        System.out.print(".");
+
+        int max = 0;
+        while (System.currentTimeMillis() - lastChange < warmupTime) {
+            int cur = Runtime.getRuntime().availableProcessors();
+            if (cur > max) {
+                System.out.print(".");
+                max = cur;
+                lastChange = System.currentTimeMillis();
+                futures.add(service.submit(new BurningTask()));
+            }
+        }
+
+        for (Future<?> f : futures) {
+            System.out.print(".");
+            f.cancel(true);
+        }
+
+        service.shutdown();
+
+        System.out.println(" done!");
+        System.out.println();
+
+        return max;
+    }
+
+    static class BurningTask implements Runnable {
+
+        @Override
+        public void run() {
+            while (!Thread.interrupted()); // burn;
+        }
+    }
+
 }

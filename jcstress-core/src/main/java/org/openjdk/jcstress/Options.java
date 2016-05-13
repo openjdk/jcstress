@@ -29,15 +29,11 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.openjdk.jcstress.util.OptionFormatter;
+import org.openjdk.jcstress.util.Promise;
+import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Options.
@@ -51,17 +47,13 @@ public class Options {
     private int time;
     private int iters;
     private final String[] args;
-    private boolean shouldYield;
     private boolean parse;
     private boolean list;
     private boolean verbose;
-    private int systemCPUs;
-    private int userCPUs;
+    private Promise<Integer> systemCPUs;
+    private Promise<Integer> userCPUs;
     private int forks;
     private String mode;
-    private String hostName;
-    private Integer hostPort;
-    private boolean forceYield;
     private boolean userYield;
     private String resultFile;
     private int deoptRatio;
@@ -119,12 +111,6 @@ public class Options {
         OptionSpec<String> modeStr = parser.accepts("m", "Test mode preset: sanity, quick, default, tough, stress.")
                 .withRequiredArg().ofType(String.class).describedAs("mode");
 
-        OptionSpec<String> hostName = parser.accepts("hostName", "(internal) Host VM address")
-                .withRequiredArg().ofType(String.class);
-
-        OptionSpec<Integer> hostPort = parser.accepts("hostPort", "(internal) Host VM port")
-                .withRequiredArg().ofType(Integer.class);
-
         OptionSpec<Integer> deoptRatio = parser.accepts("deoptRatio", "De-optimize (roughly) every N-th iteration. Larger " +
                 "value improves test performance, but decreases the chance we hit unlucky compilation.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
@@ -166,27 +152,19 @@ public class Options {
         this.list = orDefault(set.has(list), false);
         this.verbose = orDefault(set.has("v"), false);
 
-        this.hostName = set.valueOf(hostName);
-        this.hostPort = set.valueOf(hostPort);
-
         if (!set.hasArgument(sysCpus)) {
-            this.systemCPUs = figureOutHotCPUs();
+            this.systemCPUs = Promise.of(VMSupport::figureOutHotCPUs);
         } else {
-            this.systemCPUs = set.valueOf(sysCpus);
+            this.systemCPUs = Promise.of(set.valueOf(sysCpus));
         }
 
         if (!set.hasArgument(cpus)) {
             this.userCPUs = this.systemCPUs;
         } else {
-            this.userCPUs = set.valueOf(cpus);
-        }
-
-        if (userCPUs > systemCPUs) {
-            forceYield = true;
+            this.userCPUs = Promise.of(set.valueOf(cpus));
         }
 
         this.userYield = set.has(shouldYield);
-        this.shouldYield = orDefault(set.valueOf(shouldYield), forceYield);
 
         mode = orDefault(modeStr.value(set), "default");
         if (this.mode.equalsIgnoreCase("sanity")) {
@@ -227,92 +205,28 @@ public class Options {
         return (t != null) ? t : def;
     }
 
-    /**
-     * Warm up the CPU schedulers, bring all the CPUs online to get the
-     * reasonable estimate of the system capacity.
-     *
-     * @return online CPU count
-     */
-    private int figureOutHotCPUs() {
-        ExecutorService service = Executors.newCachedThreadPool();
-
-        System.out.print("Burning up to figure out the exact CPU count...");
-
-        int warmupTime = 1000;
-        long lastChange = System.currentTimeMillis();
-
-        List<Future<?>> futures = new ArrayList<>();
-        futures.add(service.submit(new BurningTask()));
-
-        System.out.print(".");
-
-        int max = 0;
-        while (System.currentTimeMillis() - lastChange < warmupTime) {
-            int cur = Runtime.getRuntime().availableProcessors();
-            if (cur > max) {
-                System.out.print(".");
-                max = cur;
-                lastChange = System.currentTimeMillis();
-                futures.add(service.submit(new BurningTask()));
-            }
-        }
-
-        for (Future<?> f : futures) {
-            System.out.print(".");
-            f.cancel(true);
-        }
-
-        service.shutdown();
-
-        System.out.println(" done!");
-        System.out.println();
-
-        return max;
-    }
-
     public int getForks() {
         return forks;
     }
 
     public void printSettingsOn(PrintStream out) {
-        if (forks > 0) {
-            out.println("FORKED MODE");
+        out.printf("  Hardware threads in use/available: %d/%d, ", getUserCPUs(), getSystemCPUs());
+        if (userYield) {
+            out.printf("user requested yielding in busy loops.\n");
         } else {
-            out.println("EMBEDDED MODE");
+            out.printf("no yielding in use.\n");
         }
         out.printf("  Test preset mode: \"%s\"\n", mode);
         out.printf("  Writing the test results to \"%s\"\n", resultFile);
         out.printf("  Parsing results to \"%s\"\n", resultDir);
         out.printf("  Running each test matching \"%s\" for %d forks, %d iterations, %d ms each\n", getTestFilter(), getForks(), getIterations(), getTime());
         out.printf("  Solo stride size will be autobalanced within [%d, %d] elements\n", getMinStride(), getMaxStride());
-        out.printf("  Hardware threads in use/available: %d/%d, ", getUserCPUs(), getSystemCPUs());
-        if (userYield) {
-            if (shouldYield) {
-                out.printf("user requested yielding in busy loops.\n");
-            } else {
-                out.printf("user disabled yielding in busy loops.\n");
-            }
-        } else {
-            if (shouldYield) {
-                out.printf("yielding was forced, more threads are requested than available.\n");
-            } else {
-                out.printf("no yielding in use.\n");
-            }
-        }
 
         out.println();
     }
 
     public int deoptRatio() {
         return deoptRatio;
-    }
-
-    public static class BurningTask implements Runnable {
-
-        @Override
-        public void run() {
-            while (!Thread.interrupted()); // burn;
-        }
     }
 
     public int getMinStride() {
@@ -332,7 +246,7 @@ public class Options {
     }
 
     public boolean shouldYield() {
-        return shouldYield;
+        return userYield;
     }
 
     public boolean shouldParse() {
@@ -360,19 +274,11 @@ public class Options {
     }
 
     public int getUserCPUs() {
-        return userCPUs;
+        return userCPUs.get();
     }
 
     public int getSystemCPUs() {
-        return systemCPUs;
-    }
-
-    public String getHostName() {
-        return hostName;
-    }
-
-    public int getHostPort() {
-        return hostPort;
+        return systemCPUs.get();
     }
 
     public String getResultFile() {

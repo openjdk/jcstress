@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,38 +22,35 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress;
+package org.openjdk.jcstress.util;
 
-import org.openjdk.jcstress.infra.runners.TestConfig;
-import org.openjdk.jcstress.link.BinaryLinkClient;
-import org.openjdk.jcstress.vm.WhiteBoxSupport;
+import java.util.function.Supplier;
 
-/**
- * Entry point for the forked VM run.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
- */
-public class ForkedMain {
+public class Promise<T> {
 
-    public static void main(String[] args) throws Exception {
-        try {
-            WhiteBoxSupport.initSafely();
-        } catch (NoClassDefFoundError e) {
-            // expected on JDK 7 and lower, parent should have printed the message for user
+    private final Supplier<T> sup;
+    private boolean created;
+    private T value;
+
+    public static <R> Promise<R> of(Supplier<R> sup) {
+        return new Promise<>(sup);
+    }
+
+    public static <R> Promise<R> of(R value) {
+        return new Promise<>(() -> value);
+    }
+
+    private Promise(Supplier<T> sup) {
+        this.sup = sup;
+
+    }
+
+    public T get() {
+        if (!created) {
+            value = sup.get();
+            created = true;
         }
-
-        if (args.length < 2) {
-            throw new IllegalStateException("Expected two arguments");
-        }
-
-        String host = args[0];
-        int port = Integer.valueOf(args[1]);
-
-        BinaryLinkClient link = new BinaryLinkClient(host, port);
-        TestConfig config = link.nextJob();
-
-        new JCStress(null).runEmbedded(config, link);
-        link.close();
+        return value;
     }
 
 }

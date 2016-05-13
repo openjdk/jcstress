@@ -420,7 +420,7 @@ public class HTMLReportPrinter {
                     emitTestFailure(output, result, test);
                 }
 
-                PrintWriter local = new PrintWriter(resultDir + "/" + cfg + ".html");
+                PrintWriter local = new PrintWriter(resultDir + "/" + cfg.name + ".html");
                 parseTest(local, result, test);
                 local.close();
             }
