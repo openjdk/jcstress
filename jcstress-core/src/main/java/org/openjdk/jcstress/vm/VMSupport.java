@@ -80,11 +80,23 @@ public class VMSupport {
 
     public static void detectAvailableVMModes() {
         List<List<String>> modes = Arrays.asList(
+                // Intepreted
                 Arrays.asList("-Xint"),
-                Arrays.asList("-client"),
+
+                // Tiered C1
                 Arrays.asList("-XX:TieredStopAtLevel=1"),
+
+                // Non-tiered C1
+                Arrays.asList("-client"),
+                Arrays.asList("-client", "-XX:-TieredCompilation"),
+
+                // Tiered C2
                 Arrays.asList("-server"),
-                Arrays.asList("-server", "-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM")
+                Arrays.asList("-server", "-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM"),
+
+                // Non-tiered C2
+                Arrays.asList("-server", "-XX:-TieredCompilation"),
+                Arrays.asList("-server", "-XX:-TieredCompilation", "-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM")
         );
 
         System.out.println("Probing what VM modes are available:");
