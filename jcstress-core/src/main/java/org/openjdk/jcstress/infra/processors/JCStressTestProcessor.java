@@ -268,11 +268,18 @@ public class JCStressTestProcessor extends AbstractProcessor {
             throw new GenerationException("IOException: " + e.getMessage(), info.getTest());
         }
 
-        String t = info.getTest().getSimpleName().toString();
-        String s = info.getState().getSimpleName().toString();
-        String r = info.getResult().getSimpleName().toString();
-
         boolean isStateItself = info.getState().equals(info.getTest());
+
+        String t = info.getTest().getSimpleName().toString();
+        String s = isStateItself ?
+                        info.getState().getSimpleName().toString() :
+                        getGeneratedName(info.getState());
+        String r = getGeneratedName(info.getResult());
+
+        generateTrapSubclass(info.getResult());
+        if (!isStateItself) {
+            generateTrapSubclass(info.getState());
+        }
 
         int actorsCount = info.getActors().size();
 
@@ -440,10 +447,25 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println();
             pw.println("            for (Pair p : pairs) {");
 
+            // Try to access both state and result fields early. This will help
+            // compiler to avoid null-pointer checks in the workload, which will
+            // free it to choose alternative load/store orders.
+            //
+            // For results, we can touch the synthetic "trap" field.
+            // For states that are passed as arguments we can do the same.
+            // For states that are receivers themselves, we already have the NP-check.
+
+            if (hasResultArgs(a)) {
+                pw.println("                " + r + " r = p.r;");
+                pw.println("                r.trap = 0;");
+            }
+
             if (isStateItself) {
-                emitMethod(pw, a, "                p.s." + a.getSimpleName(), "p.s", "p.r", true);
+                emitMethod(pw, a, "                p.s." + a.getSimpleName(), "p.s", "r", true);
             } else {
-                emitMethod(pw, a, "                lt." + a.getSimpleName(), "p.s", "p.r", true);
+                pw.println("                " + s + " s = p.s;");
+                pw.println("                s.trap = 0;");
+                emitMethod(pw, a, "                lt." + a.getSimpleName(), "s", "r", true);
             }
 
             pw.println("            }");
@@ -472,6 +494,28 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        public " + s + " s;");
         pw.println("        public " + r + " r;");
         pw.println("    }");
+        pw.println("}");
+
+        pw.close();
+    }
+
+    private void generateTrapSubclass(TypeElement el) {
+        String name = getGeneratedName(el);
+
+        PrintWriter pw;
+        try {
+            Writer writer = processingEnv.getFiler().createSourceFile(getPackageName(el) + "." + name).openWriter();
+            pw = new PrintWriter(writer);
+        } catch (IOException e) {
+            // may happen when file is already generated
+            return;
+        }
+
+        pw.println("package " + getPackageName(el) + ";");
+        pw.println("public class " + name + " extends " + el.getQualifiedName() + "{ ");
+        pw.println("    @sun.misc.Contended");
+        pw.println("    @jdk.internal.vm.annotation.Contended");
+        pw.println("    public int trap;");
         pw.println("}");
 
         pw.close();
@@ -669,6 +713,16 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.close();
     }
 
+    private boolean hasResultArgs(ExecutableElement el) {
+        for (VariableElement var : el.getParameters()) {
+            TypeElement paramClass = (TypeElement) processingEnv.getTypeUtils().asElement(var.asType());
+            if (paramClass.getAnnotation(Result.class) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void emitMethod(PrintWriter pw, ExecutableElement el, String lvalue, String stateAccessor, String resultAccessor, boolean terminate) {
         pw.print(lvalue + "(");
 
@@ -729,11 +783,11 @@ public class JCStressTestProcessor extends AbstractProcessor {
         }
         pw.println("import " + info.getTest().getQualifiedName() + ";");
         if (info.getResult() != null) {
-            pw.println("import " + info.getResult().getQualifiedName() + ";");
+            pw.println("import " + info.getResult().getQualifiedName() + "_jcstress;");
         }
         if (!info.getTest().equals(info.getState())) {
             if (info.getState() != null) {
-                pw.println("import " + info.getState().getQualifiedName() + ";");
+                pw.println("import " + getPackageName(info.getState()) + "." + getGeneratedName(info.getState()) + ";");
             }
         }
 
