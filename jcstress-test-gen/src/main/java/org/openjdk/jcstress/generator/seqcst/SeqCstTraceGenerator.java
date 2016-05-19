@@ -582,7 +582,9 @@ public class SeqCstTraceGenerator {
 
             List<Trace> lsTrace = new ArrayList<>();
             lsTrace.addAll(threads);
-            Collections.sort(lsTrace, (o1, o2) -> o1.loadStoreSeq().compareTo(o2.loadStoreSeq()));
+            Collections.sort(lsTrace,
+                    Comparator.comparing(Trace::loadStoreSeq)
+                              .thenComparing(Trace::id));
 
             int varId = 0;
             Map<Integer, Integer> varMap = new HashMap<>();
