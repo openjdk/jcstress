@@ -70,6 +70,8 @@ public class Reflections {
                 newClasses.add(Class.forName(name));
             } catch (ClassNotFoundException e) {
                 throw new IllegalStateException(e.getMessage(), e);
+            } catch (NoClassDefFoundError e) {
+                // may happen in JDK 9+ while trying to load a privileged class
             }
         }
         return newClasses;
