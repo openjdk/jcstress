@@ -35,6 +35,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -255,6 +256,31 @@ public class JCStressTestProcessor extends AbstractProcessor {
         if (info.getResult() == null) {
             throw new GenerationException("@" + JCStressTest.class.getSimpleName() + " defines no @" +
                     Result.class.getSimpleName() + " to work with", info.getTest());
+        }
+
+        if (info.getState().getModifiers().contains(Modifier.FINAL)) {
+            throw new GenerationException("@" + State.class.getSimpleName() + " should not be final.",
+                    info.getState());
+        }
+
+        if (info.getResult().getModifiers().contains(Modifier.FINAL)) {
+            throw new GenerationException("@" + Result.class.getSimpleName() + " should not be final.",
+                    info.getResult());
+        }
+
+        if (!info.getState().getModifiers().contains(Modifier.PUBLIC)) {
+            throw new GenerationException("@" + State.class.getSimpleName() + " should be public.",
+                    info.getState());
+        }
+
+        if (!info.getResult().getModifiers().contains(Modifier.PUBLIC)) {
+            throw new GenerationException("@" + Result.class.getSimpleName() + " should be public.",
+                    info.getResult());
+        }
+
+        if (info.getResult().getSuperclass().toString().equals("java/lang/Object")) {
+            throw new GenerationException("@" + Result.class.getSimpleName() + " should not inherit other classes.",
+                    info.getResult());
         }
 
         String className = getGeneratedName(info.getTest());
