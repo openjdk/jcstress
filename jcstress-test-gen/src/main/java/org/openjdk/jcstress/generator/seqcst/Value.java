@@ -54,4 +54,19 @@ public class Value {
     public String toString() {
         return "" + v;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Value value = (Value) o;
+
+        return v == value.v;
+    }
+
+    @Override
+    public int hashCode() {
+        return v;
+    }
 }

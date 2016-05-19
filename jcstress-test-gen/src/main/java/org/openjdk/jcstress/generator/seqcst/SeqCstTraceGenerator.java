@@ -184,22 +184,21 @@ public class SeqCstTraceGenerator {
                 scResults.add(results);
             }
 
-            // TODO: Figure out the set of all possible results
-            Set<Map<Result, Value>> allResults = null;
+            Set<Map<Result, Value>> allResults = mt.racyResults();
 
-            if (allResults != null) {
-                // regardless of the reorderings, all results appear SC.
-                //    => the violations are undetectable
-                if (!allResults.containsAll(scResults)) {
-                    System.out.println(scResults);
-                    System.out.println(allResults);
-                    throw new IllegalStateException("SC results should be subset of all results");
-                }
+            if (!allResults.containsAll(scResults)) {
+                System.out.println(mt.canonicalId());
+                System.out.println(scResults);
+                System.out.println(allResults);
+                throw new IllegalStateException("SC results should be subset of all results");
+            }
 
-                if (scResults.equals(allResults)) {
-                    // nothing to do here,
-                    continue;
-                }
+            // regardless of the reorderings, all results appear SC.
+            //    => the violations are undetectable
+
+            if (scResults.equals(allResults)) {
+                // nothing to do here,
+                continue;
             }
 
             List<String> mappedResult = new ArrayList<>();
@@ -656,6 +655,51 @@ public class SeqCstTraceGenerator {
             return threads.size() > 1;
         }
 
+        public Set<Result> allResults() {
+            return threads.stream()
+                    .flatMap(t -> t.ops.stream())
+                    .filter(op -> op.getType() == Op.Type.LOAD)
+                    .map(Op::getResult)
+                    .collect(Collectors.toSet());
+        }
+
+        public Set<Value> allValues() {
+            return threads.stream()
+                    .flatMap(t -> t.ops.stream())
+                    .filter(op -> op.getType() == Op.Type.STORE)
+                    .map(Op::getValue)
+                    .collect(Collectors.toSet());
+        }
+
+        /**
+         * @return The set of outcomes where every load can see every store.
+         */
+        public Set<Map<Result, Value>> racyResults() {
+            Set<Map<Result, Value>> allResults = new HashSet<>();
+            allResults.add(new HashMap<>());
+
+            for (Result r : allResults()) {
+                Set<Map<Result, Value>> temp = new HashSet<>();
+
+                for (Map<Result, Value> sub : allResults) {
+                    for (Value v : allValues()) {
+                        Map<Result, Value> newMap = new HashMap<>(sub);
+                        newMap.put(r, v);
+                        temp.add(newMap);
+                    }
+
+                    {
+                        Map<Result, Value> newMap = new HashMap<>(sub);
+                        newMap.put(r, Value.defaultOne());
+                        temp.add(newMap);
+                    }
+                }
+
+                allResults = temp;
+            }
+
+            return allResults;
+        }
     }
 
 }
