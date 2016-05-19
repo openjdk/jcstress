@@ -394,14 +394,14 @@ public class SeqCstTraceGenerator {
 
         public boolean hasLoads() {
             for (Op op : ops) {
-                if (op.getType() == Op.Type.LOAD) return true;
+                if (op.isLoad()) return true;
             }
             return false;
         }
 
         public boolean hasStores() {
             for (Op op : ops) {
-                if (op.getType() == Op.Type.STORE) return true;
+                if (op.isStore()) return true;
             }
             return false;
         }
@@ -409,7 +409,7 @@ public class SeqCstTraceGenerator {
         public int loadCount() {
             int count = 0;
             for (Op op : ops) {
-                if (op.getType() == Op.Type.LOAD) count++;
+                if (op.isLoad()) count++;
             }
             return count;
         }
@@ -417,7 +417,7 @@ public class SeqCstTraceGenerator {
         public int storeCount() {
             int count = 0;
             for (Op op : ops) {
-                if (op.getType() == Op.Type.STORE) count++;
+                if (op.isStore()) count++;
             }
             return count;
         }
@@ -491,11 +491,13 @@ public class SeqCstTraceGenerator {
             Set<Integer> loads = new HashSet<>();
             Set<Integer> stores = new HashSet<>();
             for (Op op : ops) {
-                if (op.getType() == Op.Type.STORE) {
-                    stores.add(op.getVarId());
-                }
-                if (op.getType() == Op.Type.LOAD) {
-                    loads.add(op.getVarId());
+                switch (op.getType()) {
+                    case STORE:
+                        stores.add(op.getVarId());
+                        break;
+                    case LOAD:
+                        loads.add(op.getVarId());
+                        break;
                 }
             }
 
@@ -660,7 +662,7 @@ public class SeqCstTraceGenerator {
         public Set<Result> allResults() {
             return threads.stream()
                     .flatMap(t -> t.ops.stream())
-                    .filter(op -> op.getType() == Op.Type.LOAD)
+                    .filter(Op::isLoad)
                     .map(Op::getResult)
                     .collect(Collectors.toSet());
         }
@@ -668,7 +670,7 @@ public class SeqCstTraceGenerator {
         public Set<Value> allValues() {
             return threads.stream()
                     .flatMap(t -> t.ops.stream())
-                    .filter(op -> op.getType() == Op.Type.STORE)
+                    .filter(Op::isStore)
                     .map(Op::getValue)
                     .collect(Collectors.toSet());
         }

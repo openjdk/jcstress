@@ -60,6 +60,14 @@ public abstract class Op {
         return type;
     }
 
+    public boolean isLoad() {
+        return type == Type.LOAD;
+    }
+
+    public boolean isStore() {
+        return type == Type.STORE;
+    }
+
     public int getVarId() {
         return varId;
     }
