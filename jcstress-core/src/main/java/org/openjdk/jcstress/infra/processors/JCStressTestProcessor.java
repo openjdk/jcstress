@@ -24,6 +24,8 @@
  */
 package org.openjdk.jcstress.infra.processors;
 
+import com.sun.source.tree.*;
+import com.sun.source.util.Trees;
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.*;
@@ -35,7 +37,6 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -278,7 +279,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
                     info.getResult());
         }
 
-        if (info.getResult().getSuperclass().toString().equals("java/lang/Object")) {
+        if (!info.getResult().getSuperclass().toString().equals("java.lang.Object")) {
             throw new GenerationException("@" + Result.class.getSimpleName() + " should not inherit other classes.",
                     info.getResult());
         }
@@ -410,6 +411,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("            Pair p = pairs[c];");
         pw.println("            " + r + " r = p.r;");
         pw.println("            " + s + " s = p.s;");
+
         if (info.getArbiter() != null) {
             if (isStateItself) {
                 emitMethod(pw, info.getArbiter(), "            s." + info.getArbiter().getSimpleName(), "s", "r", true);
@@ -417,6 +419,21 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 emitMethod(pw, info.getArbiter(), "            test." + info.getArbiter().getSimpleName(), "s", "r", true);
             }
         }
+
+        // If state is trivial, we can reset its fields directly, without
+        // reallocating the object.
+
+        if (allFieldsAreDefault(info.getState())) {
+            for (VariableElement var : ElementFilter.fieldsIn(info.getState().getEnclosedElements())) {
+                if (var.getModifiers().contains(Modifier.STATIC)) continue;
+                pw.print("            s." + var.getSimpleName().toString() + " = ");
+                pw.print(getDefaultVal(var));
+                pw.println(";");
+            }
+        } else {
+            pw.println("            p.s = new " + s + "();");
+        }
+
         pw.println("            cnt.record(r);");
 
         for (VariableElement var : ElementFilter.fieldsIn(info.getResult().getEnclosedElements())) {
@@ -425,7 +442,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println(";");
         }
 
-        pw.println("            p.s = new " + s + "();");
         pw.println("        }");
         pw.println("    }");
         pw.println();
@@ -525,6 +541,61 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.close();
     }
 
+    /**
+     * @param el to check
+     * @return true, if all instance fields are initialized to default values
+     */
+    private boolean allFieldsAreDefault(TypeElement el) {
+        // No fields in superclasses
+        if (!el.getSuperclass().toString().equals("java.lang.Object")) {
+            return false;
+        }
+        for (VariableElement v : ElementFilter.fieldsIn(el.getEnclosedElements())) {
+            Set<Modifier> mods = v.getModifiers();
+
+            // Bypass static fields, these do not affect instances
+            if (mods.contains(Modifier.STATIC)) continue;
+
+            // No final, private, or protected fields
+            if (mods.contains(Modifier.FINAL)) return false;
+            if (mods.contains(Modifier.PRIVATE)) return false;
+            if (mods.contains(Modifier.PROTECTED)) return false;
+        }
+
+        Trees trees = Trees.instance(processingEnv);
+        ClassTree tree = trees.getTree(el);
+
+        if (tree == null) {
+            // Assume the worst.
+            return false;
+        }
+
+        for (Tree member : tree.getMembers()) {
+            if (member.getKind() == Tree.Kind.METHOD) {
+                MethodTree m = (MethodTree) member;
+                if (m.getName().toString().equals("<init>")) {
+                    BlockTree body = m.getBody();
+                    List<? extends StatementTree> b = body.getStatements();
+
+                    // no non-trivial constructors
+                    if (b.size() != 1) return false;
+                    if (!b.get(0).toString().equals("super();")) return false;
+                }
+            }
+            if (member.getKind() == Tree.Kind.VARIABLE) {
+                VariableTree t = (VariableTree) member;
+
+                // no field initializers of any kind
+                if (t.getInitializer() != null) return false;
+            }
+            if (member.getKind() == Tree.Kind.BLOCK) {
+                // no instance initializers of any kind
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void generateTrapSubclass(TypeElement el) {
         String name = getGeneratedName(el);
 
@@ -567,11 +638,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
             case "boolean":
                 val = "false";
                 break;
-            case "java.lang.String":
-                val = "\"\"";
-                break;
             default:
-                throw new GenerationException("Unable to handle @" + Result.class.getSimpleName() + " field of type " + type, var);
+                val = "null";
         }
         return val;
     }
