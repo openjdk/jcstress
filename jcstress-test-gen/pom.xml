@@ -132,4 +132,12 @@ questions.
 
     </build>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.openjdk.jcstress</groupId>
+            <artifactId>jcstress-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
 </project>

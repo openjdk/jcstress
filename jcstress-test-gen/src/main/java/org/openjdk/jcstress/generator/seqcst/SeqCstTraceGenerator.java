@@ -27,6 +27,8 @@ package org.openjdk.jcstress.generator.seqcst;
 import org.openjdk.jcstress.generator.ResultGenerator;
 import org.openjdk.jcstress.generator.TestGenerator;
 import org.openjdk.jcstress.generator.Utils;
+import org.openjdk.jcstress.util.HashMultiset;
+import org.openjdk.jcstress.util.Multiset;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -154,6 +156,7 @@ public class SeqCstTraceGenerator {
                 .filter(MultiThread::isMultiThread)               // really have multiple threads
                 .filter(MultiThread::hasNoSingleLoadThreads)      // threads with single loads produce duplicate tests
                 .filter(MultiThread::hasNoThreadsWithSameLoads)   // threads with the same loads produce duplicate tests
+                .filter(MultiThread::hasNoIntraThreadPairs)       // has no operations that do not span threads
                 .collect(Collectors.toList());
 
         System.out.print(multiThreads.size() + " interesting... ");
@@ -629,6 +632,22 @@ public class SeqCstTraceGenerator {
                     if (!eq.add(trace.id()))
                         return false;
                 }
+            }
+            return true;
+        }
+
+        public boolean hasNoIntraThreadPairs() {
+            Multiset<Integer> vars = new HashMultiset<>();
+            for (Trace trace : threads) {
+                Set<Integer> touched =
+                        trace.ops.stream()
+                                .map(Op::getVarId)
+                                .collect(Collectors.toSet());
+                touched.forEach(vars::add);
+            }
+
+            for (Integer v : vars.keys()) {
+                if (vars.count(v) == 1) return false;
             }
             return true;
         }
