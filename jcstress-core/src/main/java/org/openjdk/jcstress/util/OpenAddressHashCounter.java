@@ -48,14 +48,16 @@ public class OpenAddressHashCounter<R> implements Counter<R>, Serializable {
      *     minuscule;
      */
 
-    static final int MAX_TRIES = 3;
+    private static final int RECIPROCAL_LOAD_FACTOR = 10;
+    private static final int INITIAL_CAPACITY = 64;
 
-    Object[] keys;
-    long[] counts;
-    int length;
+    private Object[] keys;
+    private long[] counts;
+    private int length;
+    private int keyCount;
 
     public OpenAddressHashCounter() {
-        this(16);
+        this(INITIAL_CAPACITY);
     }
 
     public OpenAddressHashCounter(int len) {
@@ -69,28 +71,15 @@ public class OpenAddressHashCounter<R> implements Counter<R>, Serializable {
 
     @Override
     public void record(R result) {
-        recordWithTries(result, 1, MAX_TRIES);
+        record(result, 1);
     }
 
     @Override
     public void record(R result, long count) {
-        recordWithTries(result, count, MAX_TRIES);
-    }
-
-    @Override
-    public void merge(Counter<R> other) {
-        for (R key : other.elementSet()) {
-            record(key, other.count(key));
-        }
-    }
-
-    private void recordWithTries(R result, long count, int maxTries) {
         int idx = result.hashCode() & (length - 1);
 
-        int tryCount = 0;
         Object k = keys[idx];
         while (k != null) {
-
             // hit the bucket, update and exit
             if (k.equals(result)) {
                 counts[idx] += count;
@@ -100,20 +89,28 @@ public class OpenAddressHashCounter<R> implements Counter<R>, Serializable {
             // trying the next bucket
             idx = (idx + 1) & (length - 1);
             k = keys[idx];
+        }
 
-            // whoops, map is overloaded, resize to make up
-            // the space, try again (succeeding), and exit;
-            // we might want to resize early
-            if (tryCount++ > maxTries) {
-                resize();
-                recordWithTries(result, count, Integer.MAX_VALUE);
-                return;
-            }
+        // whoops, map is overloaded, resize to make up
+        // the space, try again (succeeding), and exit;
+        // we might want to resize early
+        if (keyCount * RECIPROCAL_LOAD_FACTOR > length) {
+            resize();
+            record(result, count);
+            return;
         }
 
         // completely new key, insert, and exit
+        keyCount++;
         keys[idx] = decouple(result);
         counts[idx] = count;
+    }
+
+    @Override
+    public void merge(Counter<R> other) {
+        for (R key : other.elementSet()) {
+            record(key, other.count(key));
+        }
     }
 
     private void resize() {
