@@ -32,10 +32,10 @@ questions.
         <artifactId>jcstress-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>jcstress-tests-chapter-1a</artifactId>
+    <artifactId>jcstress-tests-chapter-2a</artifactId>
     <packaging>jar</packaging>
 
-    <name>Chapter 1.a: Library Foundations: VarHandles, Basic Properties</name>
+    <name>Chapter 2.b: Library Foundations: Atomics, Memory Effects</name>
     <url>http://maven.apache.org</url>
 
     <scm>
@@ -52,20 +52,37 @@ questions.
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.9</source>
-                    <target>1.9</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                     <debug>false</debug>
                     <meminitial>4096</meminitial>
                     <fork>true</fork>
-                    <compilerArgs>
-                        <!--
-                            No, compiler, we need that sun.misc.Contended here.
-                            Stop complaining sun.misc package is invisible. You can't?
-                            Huh, I guess no module access checks for you then:
-                        -->
-                        <arg>-XDnoModules</arg>
-                    </compilerArgs>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <id>gen</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>
+                            generate-sources
+                        </phase>
+                        <configuration>
+                            <executable>${java.home}/bin/java</executable>
+                            <arguments>
+                                <argument>-jar</argument>
+                                <argument>../jcstress-test-gen/target/test-gen.jar</argument>
+                                <argument>${project.build.directory}/generated-sources/tests/</argument>
+                                <argument>${project.build.directory}/generated-resources/</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

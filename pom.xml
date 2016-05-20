@@ -45,7 +45,7 @@ questions.
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>2.4</version>
+                    <version>3.5.1</version>
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
@@ -168,6 +168,7 @@ questions.
         <module>tests-chapter-0b</module>
         <module>tests-chapter-0c</module>
         <module>tests-chapter-1a</module>
+        <module>tests-chapter-2b</module>
         <module>tests-all</module>
     </modules>
 
