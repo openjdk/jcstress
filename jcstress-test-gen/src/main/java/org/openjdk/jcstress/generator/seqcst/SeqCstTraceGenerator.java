@@ -27,8 +27,6 @@ package org.openjdk.jcstress.generator.seqcst;
 import org.openjdk.jcstress.generator.ResultGenerator;
 import org.openjdk.jcstress.generator.TestGenerator;
 import org.openjdk.jcstress.generator.Utils;
-import org.openjdk.jcstress.util.HashMultiset;
-import org.openjdk.jcstress.util.Multiset;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -136,7 +134,7 @@ public class SeqCstTraceGenerator {
                 }
 
                 long ticket = c;
-                for (Op op : trace.ops) {
+                for (Op op : trace.ops()) {
                     int thread = (int)(ticket & 3);
                     newT.get(thread).add(op);
                     ticket = ticket >> 2;
@@ -222,7 +220,7 @@ public class SeqCstTraceGenerator {
 
         String klass = mt.canonicalId() + "Test";
 
-        Class[] klasses = new Class[mt.original.loadCount()];
+        Class[] klasses = new Class[mt.loadCount()];
         for (int c = 0; c < klasses.length; c++) {
             klasses[c] = int.class;
         }
@@ -236,7 +234,7 @@ public class SeqCstTraceGenerator {
             throw new IllegalStateException(e);
         }
 
-        int threads = mt.threads.size();
+        int threads = mt.threads().size();
 
         pw.println("package " + pkg + ";");
         pw.println();
@@ -255,8 +253,8 @@ public class SeqCstTraceGenerator {
         pw.println();
 
         Set<Integer> exist = new HashSet<>();
-        for (Trace trace : mt.threads)  {
-            for (Op op : trace.ops) {
+        for (Trace trace : mt.threads())  {
+            for (Op op : trace.ops()) {
                 if (exist.add(op.getVarId())) {
                     switch (target) {
                         case VOLATILE:
@@ -277,7 +275,7 @@ public class SeqCstTraceGenerator {
             pw.println("    @Actor");
             pw.println("    public void actor" + (t+1) + "(" + resultName + " r) {");
 
-            for (Op op : mt.threads.get(t).ops) {
+            for (Op op : mt.threads().get(t).ops()) {
                 switch (op.getType()) {
                     case LOAD:
                         if (target == Target.SYNCHRONIZED) {
@@ -319,391 +317,6 @@ public class SeqCstTraceGenerator {
             }
         }
         return newTraces;
-    }
-
-    public class Trace {
-        private final List<Op> ops;
-
-        public Trace() {
-            ops = new ArrayList<>();
-        }
-
-        public Trace(Collection<Op> extOps) {
-            ops = new ArrayList<>(extOps);
-        }
-
-        public Trace pushHead(Op op) {
-            Trace nT = new Trace();
-            nT.ops.add(op);
-            nT.ops.addAll(ops);
-            return nT;
-        }
-
-        public Trace pushTail(Op op) {
-            Trace nT = new Trace();
-            nT.ops.addAll(ops);
-            nT.ops.add(op);
-            return nT;
-        }
-
-        @Override
-        public String toString() {
-            return "{" + ops + '}';
-        }
-
-        public int getLength() {
-            return ops.size();
-        }
-
-        public SortedMap<Result, Value> interpret() {
-            int vars = 0;
-            for (Op op : ops) {
-                vars = Math.max(vars, op.getVarId());
-            }
-
-            Map<Integer, Value> values = new HashMap<>();
-            for (int v = 0; v <= vars; v++) {
-                values.put(v, Value.defaultOne());
-            }
-
-            SortedMap<Result, Value> resValues = new TreeMap<>();
-
-            for (Op op : ops) {
-                switch (op.getType()) {
-                    case LOAD:
-                        Value v = values.get(op.getVarId());
-                        resValues.put(op.getResult(), v);
-                        break;
-                    case STORE:
-                        values.put(op.getVarId(), op.getValue());
-                        break;
-                    default:
-                        throw new IllegalStateException();
-                }
-            }
-
-            return resValues;
-        }
-
-        public Trace removeFirst() {
-            Trace nT = new Trace();
-            nT.ops.addAll(ops);
-            nT.ops.remove(0);
-            return nT;
-        }
-
-        public boolean hasLoads() {
-            for (Op op : ops) {
-                if (op.isLoad()) return true;
-            }
-            return false;
-        }
-
-        public boolean hasStores() {
-            for (Op op : ops) {
-                if (op.isStore()) return true;
-            }
-            return false;
-        }
-
-        public int loadCount() {
-            int count = 0;
-            for (Op op : ops) {
-                if (op.isLoad()) count++;
-            }
-            return count;
-        }
-
-        public int storeCount() {
-            int count = 0;
-            for (Op op : ops) {
-                if (op.isStore()) count++;
-            }
-            return count;
-        }
-
-        public String id() {
-            StringBuilder sb = new StringBuilder();
-            for (Op op : ops) {
-                switch (op.getType()) {
-                    case LOAD:
-                        sb.append("L");
-                        break;
-                    case STORE:
-                        sb.append("S");
-                        break;
-                    default:
-                        throw new IllegalStateException();
-                }
-                sb.append(op.getVarId() + 1);
-                sb.append("_");
-            }
-            return sb.toString();
-        }
-
-        public String loadStoreSeq() {
-            StringBuilder sb = new StringBuilder();
-            for (Op op : ops) {
-                switch (op.getType()) {
-                    case LOAD:
-                        sb.append("L");
-                        break;
-                    case STORE:
-                        sb.append("S");
-                        break;
-                    default:
-                        throw new IllegalStateException();
-                }
-            }
-            return sb.toString();
-        }
-
-        public String canonicalId() {
-            int varId = 0;
-            Map<Integer, Integer> varMap = new HashMap<>();
-            for (Op op : ops) {
-                Integer id = varMap.get(op.getVarId());
-                if (id == null) {
-                    id = varId++;
-                    varMap.put(op.getVarId(), id);
-                }
-            }
-
-            StringBuilder sb = new StringBuilder();
-            for (Op op : ops) {
-                switch (op.getType()) {
-                    case LOAD:
-                        sb.append("L");
-                        break;
-                    case STORE:
-                        sb.append("S");
-                        break;
-                    default:
-                        throw new IllegalStateException();
-                }
-                sb.append(varMap.get(op.getVarId()) + 1);
-                sb.append("_");
-            }
-            return sb.toString();
-        }
-
-        public boolean matchedLoadStores() {
-            Set<Integer> loads = new HashSet<>();
-            Set<Integer> stores = new HashSet<>();
-            for (Op op : ops) {
-                switch (op.getType()) {
-                    case STORE:
-                        stores.add(op.getVarId());
-                        break;
-                    case LOAD:
-                        loads.add(op.getVarId());
-                        break;
-                }
-            }
-
-            return loads.equals(stores);
-        }
-
-        public void assignResults() {
-            Value.reset();
-            int resId = 1;
-            for (int c = 0; c < ops.size(); c++) {
-                Op op = ops.get(c);
-                switch (op.getType()) {
-                    case LOAD: {
-                        ops.set(c, Op.newLoad(op, new Result(resId++)));
-                        break;
-                    }
-                    case STORE: {
-                        ops.set(c, Op.newStore(op, Value.newOne()));
-                        break;
-                    }
-                    default:
-                        throw new IllegalStateException();
-                }
-            }
-        }
-    }
-
-    public class MultiThread {
-        private final Trace original;
-        private final List<Trace> threads;
-
-        public MultiThread(Trace original, Collection<Trace> copy) {
-            this.original = original;
-
-            this.threads = new ArrayList<>();
-            for (Trace t : copy) {
-                if (!t.ops.isEmpty())
-                    threads.add(t);
-            }
-        }
-
-        /**
-         * @return all executions from linearizing the thread operations.
-         */
-        public List<Trace> linearize() {
-            if (threads.isEmpty()) {
-                return Collections.singletonList(new Trace());
-            }
-
-            List<Trace> newTraces = new ArrayList<>();
-
-            for (int t = 0; t < threads.size(); t++) {
-                List<Trace> copy = new ArrayList<>();
-                copy.addAll(threads);
-
-                Trace cT = copy.get(t);
-                if (cT.ops.isEmpty()) {
-                    copy.remove(t);
-                    newTraces.addAll(new MultiThread(original, copy).linearize());
-                } else {
-                    Op op = cT.ops.get(0);
-                    copy.set(t, cT.removeFirst());
-
-                    if (cT.ops.isEmpty()) {
-                        copy.remove(t);
-                    }
-
-                    for (Trace trace : new MultiThread(original, copy).linearize()) {
-                        newTraces.add(trace.pushHead(op));
-                    }
-                }
-            }
-
-            return newTraces;
-        }
-
-        @Override
-        public String toString() {
-            return "{" + threads + '}';
-        }
-
-        public String canonicalId() {
-            // Renumber the variable IDs.
-
-            List<Trace> lsTrace = new ArrayList<>();
-            lsTrace.addAll(threads);
-            Collections.sort(lsTrace,
-                    Comparator.comparing(Trace::loadStoreSeq)
-                              .thenComparing(Trace::id));
-
-            int varId = 0;
-            Map<Integer, Integer> varMap = new HashMap<>();
-            for (Trace trace : lsTrace) {
-                for (Op op : trace.ops) {
-                    Integer id = varMap.get(op.getVarId());
-                    if (id == null) {
-                        id = varId++;
-                        varMap.put(op.getVarId(), id);
-                    }
-                }
-            }
-
-            StringBuilder sb = new StringBuilder();
-            for (Trace trace : lsTrace) {
-                for (Op op : trace.ops) {
-                    switch (op.getType()) {
-                        case LOAD:
-                            sb.append("L");
-                            break;
-                        case STORE:
-                            sb.append("S");
-                            break;
-                        default:
-                            throw new IllegalStateException();
-                    }
-                    sb.append(varMap.get(op.getVarId()) + 1);
-                    sb.append("_");
-                }
-                sb.append("_");
-            }
-            return sb.toString();
-        }
-
-        public boolean hasNoSingleLoadThreads() {
-            for (Trace trace : threads) {
-                if (trace.loadCount() == 1 && trace.storeCount() == 0) return false;
-            }
-            return true;
-        }
-
-        public boolean hasNoThreadsWithSameLoads() {
-            Set<String> eq = new HashSet<>();
-            for (Trace trace : threads) {
-                if (trace.storeCount() == 0) {
-                    if (!eq.add(trace.id()))
-                        return false;
-                }
-            }
-            return true;
-        }
-
-        public boolean hasNoIntraThreadPairs() {
-            Multiset<Integer> vars = new HashMultiset<>();
-            for (Trace trace : threads) {
-                Set<Integer> touched =
-                        trace.ops.stream()
-                                .map(Op::getVarId)
-                                .collect(Collectors.toSet());
-                touched.forEach(vars::add);
-            }
-
-            for (Integer v : vars.keys()) {
-                if (vars.count(v) == 1) return false;
-            }
-            return true;
-        }
-
-        public boolean isMultiThread() {
-            return threads.size() > 1;
-        }
-
-        public Set<Result> allResults() {
-            return threads.stream()
-                    .flatMap(t -> t.ops.stream())
-                    .filter(Op::isLoad)
-                    .map(Op::getResult)
-                    .collect(Collectors.toSet());
-        }
-
-        public Set<Value> allValues() {
-            return threads.stream()
-                    .flatMap(t -> t.ops.stream())
-                    .filter(Op::isStore)
-                    .map(Op::getValue)
-                    .collect(Collectors.toSet());
-        }
-
-        /**
-         * @return The set of outcomes where every load can see every store.
-         */
-        public Set<Map<Result, Value>> racyResults() {
-            Set<Map<Result, Value>> allResults = new HashSet<>();
-            allResults.add(new HashMap<>());
-
-            for (Result r : allResults()) {
-                Set<Map<Result, Value>> temp = new HashSet<>();
-
-                for (Map<Result, Value> sub : allResults) {
-                    for (Value v : allValues()) {
-                        Map<Result, Value> newMap = new HashMap<>(sub);
-                        newMap.put(r, v);
-                        temp.add(newMap);
-                    }
-
-                    {
-                        Map<Result, Value> newMap = new HashMap<>(sub);
-                        newMap.put(r, Value.defaultOne());
-                        temp.add(newMap);
-                    }
-                }
-
-                allResults = temp;
-            }
-
-            return allResults;
-        }
     }
 
 }
