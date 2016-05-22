@@ -31,6 +31,7 @@ import org.openjdk.jcstress.generator.Utils;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class SeqCstTraceGenerator {
@@ -149,27 +150,23 @@ public class SeqCstTraceGenerator {
         /*
            Step 4. Apply more filters to reduce
          */
+        Set<String> canonicalIds = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
-        multiThreads = multiThreads.stream()
+        multiThreads = multiThreads.parallelStream()
                 .filter(MultiThread::isMultiThread)               // really have multiple threads
                 .filter(MultiThread::hasNoSingleLoadThreads)      // threads with single loads produce duplicate tests
-                .filter(MultiThread::hasNoThreadsWithSameLoads)   // threads with the same loads produce duplicate tests
                 .filter(MultiThread::hasNoIntraThreadPairs)       // has no operations that do not span threads
-                .collect(Collectors.toList());
-
-        System.out.print(multiThreads.size() + " interesting... ");
-
-        Set<String> canonicalIds = new HashSet<>();
-        multiThreads = multiThreads.stream()
                 .filter(mt -> canonicalIds.add(mt.canonicalId())) // pass only one canonical
                 .collect(Collectors.toList());
 
-        System.out.println(multiThreads.size() + " unique.");
+        System.out.println(multiThreads.size() + " interesting.");
 
         /*
             Step 5. Figure out what executions are sequentially consistent (needed for grading!),
             and emit the tests.
          */
+
+        Set<String> generatedIds = new HashSet<>();
 
         System.out.print("Figuring out SC outcomes for the testcases: ");
         int testCount = 0;
@@ -191,13 +188,14 @@ public class SeqCstTraceGenerator {
                 throw new IllegalStateException("SC results should be subset of all results");
             }
 
-            // regardless of the reorderings, all results appear SC.
-            //    => the violations are undetectable
-
             if (scResults.equals(allResults)) {
+                // all racy results are indistinguishable from SC
+                //    => the violations are undetectable
                 // nothing to do here,
                 continue;
             }
+
+            generatedIds.add(mt.canonicalId());
 
             List<String> mappedResult = new ArrayList<>();
             for (Map<Result, Value> m : scResults) {
@@ -213,12 +211,52 @@ public class SeqCstTraceGenerator {
         }
         System.out.println();
         System.out.println("Found " + testCount + " interesting test cases");
+
+        /*
+            Step 6. Check that no important cases were filtered.
+
+            The nomenclature is derived from Maranget, Sarkar, Sewell,
+              "A Tutorial Introduction to the ARM and POWER Relaxed Memory Models"
+         */
+        check(generatedIds, "L1_L2__S2_S1", "MP");
+
+        // TODO: Have mismatched stores: need arbiter to judge the final result
+        // check(generatedIds, "L1_S2__S2_S1", "S");
+        // check(generatedIds, "S1_L2__S2_S1", "R");
+        // check(generatedIds, "S1_S2__S2_S1", "2+2W");
+        // check(generatedIds, "L1_S2__S1__S2_L1", "WRW+WR");
+        // check(generatedIds, "L1_S2__S1__S2_S1", "WRR+2W");
+
+        check(generatedIds, "S1_L2__S2_L1", "SB");
+        check(generatedIds, "L1_S2__L2_S1", "LB");
+
+        check(generatedIds, "L1_L2__L2_S1__S2", "WRC");
+        check(generatedIds, "L1_S2__L2_S1__S1", "WWC");
+        check(generatedIds, "L1_L2__S1__S2_L1", "RWC");
+        check(generatedIds, "L1_L2__S1__S2_S1", "WRR+2W");
+
+        check(generatedIds, "L1_L2__S2_S1", "PPO");
+        check(generatedIds, "L1_L2__L2_L1__S1__S2", "IRIW");
+        check(generatedIds, "L1_L2__L2_S1__S1__S2", "IRRWIW");
+        check(generatedIds, "L1_S2__L2_S1__S1__S2", "IRWIW");
+
+        check(generatedIds, "L1_L1__S1_S1", "CoRR0");
+        check(generatedIds, "L1_L1__S1", "CoRR1");
+        check(generatedIds, "L1_L1__L1_L1__S1__S1", "CoRR2");
+        check(generatedIds, "L1_S1__S1", "CoRW");
+        check(generatedIds, "S1__S1_L1", "CoWR");
+    }
+
+    private void check(Set<String> ids, String id, String info) {
+        if (!ids.contains(id)) {
+            throw new IllegalStateException("Generated cases should contain " + info);
+        }
     }
 
     private void emit(MultiThread mt, List<String> scResults) {
         String pathname = Utils.ensureDir(srcDir + "/" + pkg.replaceAll("\\.", "/"));
 
-        String klass = mt.canonicalId() + "Test";
+        String klass = mt.canonicalId() + "_Test";
 
         Class[] klasses = new Class[mt.loadCount()];
         for (int c = 0; c < klasses.length; c++) {

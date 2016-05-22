@@ -214,7 +214,7 @@ public class Trace {
     }
 
     public void assignResults() {
-        Value.reset();
+        int valId = Value.initial();
         int resId = 1;
         for (int c = 0; c < ops.size(); c++) {
             Op op = ops.get(c);
@@ -224,7 +224,7 @@ public class Trace {
                     break;
                 }
                 case STORE: {
-                    ops.set(c, Op.newStore(op, Value.newOne()));
+                    ops.set(c, Op.newStore(op, Value.newOne(valId++)));
                     break;
                 }
                 default:

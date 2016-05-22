@@ -26,25 +26,19 @@ package org.openjdk.jcstress.generator.seqcst;
 
 public class Value {
 
-    private static int id;
-
-    {
-        reset();
+    static int initial() {
+        return 1;
     }
 
-    static void reset() {
-        id = 1;
-    }
-
-    static Value newOne() {
-        return new Value(id++);
+    static Value newOne(int id) {
+        return new Value(id);
     }
 
     static Value defaultOne() {
         return new Value(0);
     }
 
-    private int v;
+    private final int v;
 
     public Value(int v) {
         this.v = v;

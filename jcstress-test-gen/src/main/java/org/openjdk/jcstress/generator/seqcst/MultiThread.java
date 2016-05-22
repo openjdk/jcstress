@@ -123,23 +123,13 @@ public class MultiThread {
             }
             sb.append("_");
         }
+        sb.delete(sb.length() - 2, sb.length());
         return sb.toString();
     }
 
     public boolean hasNoSingleLoadThreads() {
         for (Trace trace : threads) {
             if (trace.loadCount() == 1 && trace.storeCount() == 0) return false;
-        }
-        return true;
-    }
-
-    public boolean hasNoThreadsWithSameLoads() {
-        Set<String> eq = new HashSet<>();
-        for (Trace trace : threads) {
-            if (trace.storeCount() == 0) {
-                if (!eq.add(trace.id()))
-                    return false;
-            }
         }
         return true;
     }
