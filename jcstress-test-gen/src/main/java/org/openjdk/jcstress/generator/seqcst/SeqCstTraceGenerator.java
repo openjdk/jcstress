@@ -31,8 +31,6 @@ import org.openjdk.jcstress.generator.Utils;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class SeqCstTraceGenerator {
 
@@ -54,114 +52,25 @@ public class SeqCstTraceGenerator {
 
     public void generate() {
         /*
-           Step 1. Generate all possible traces from the available ops:
+           Step 1. Distribute load-stores between threads, yielding all possible scenarios.
          */
-
-        System.out.print("Generating load/store permutations... ");
-
-        List<Trace> allTraces = new ArrayList<>();
-        {
-            List<Op> possibleOps = new ArrayList<>();
-            for (int v = 0; v < 2; v++) {
-                possibleOps.add(Op.newStore(v));
-                possibleOps.add(Op.newLoad(v));
-                possibleOps.add(Op.newLoad(v));
-            }
-
-            List<Trace> traces = Collections.singletonList(new Trace());
-            for (int l = 0; l < possibleOps.size(); l++) {
-                traces = product(traces, possibleOps);
-                allTraces.addAll(traces);
-            }
-        }
-
-        {
-            List<Op> possibleOps = new ArrayList<>();
-            for (int v = 0; v < 3; v++) {
-                possibleOps.add(Op.newStore(v));
-                possibleOps.add(Op.newLoad(v));
-            }
-
-            List<Trace> traces = Collections.singletonList(new Trace());
-            for (int l = 0; l < possibleOps.size(); l++) {
-                traces = product(traces, possibleOps);
-                allTraces.addAll(traces);
-            }
-        }
-
-        List<Trace> traces = allTraces;
-        System.out.print(" " + traces.size() + " found... ");
-
-        /*
-           Step 2. Filter out non-interesting traces.
-         */
-
-        Set<String> canonicalTraces = new HashSet<>();
-        traces = allTraces.stream()
-                .filter(Trace::hasStores)                          // Has modifications to observe
-                .filter(Trace::matchedLoads)                       // All loads have at least one matching store
-                .filter(t -> canonicalTraces.add(t.canonicalId())) // Only a canonical order of vars accepted
-                .collect(Collectors.toList());
-
-        for (Trace trace : traces) {
-            trace.assignResults();
-        }
-
-        System.out.println(traces.size() + " are interesting.");
-
-        /*
-           Step 3. Distribute load-stores between threads, yielding all possible scenarios.
-         */
-        final int THREADS = 4;
-
-        System.out.print("Generating test cases that distribute load/stores among " + THREADS + " threads... ");
-
         List<MultiThread> multiThreads = new ArrayList<>();
-        for (Trace trace : traces) {
 
-            int len = trace.getLength();
-            int bitsNeeded = 2*len;
-            if (bitsNeeded > 63) {
-                throw new IllegalStateException("Cannot handle large traces like that");
-            }
+        final int MAX_COUNT = 6;
+        final int MAX_VARS = 3;
+        final int MAX_THREADS = 4;
 
-            long bound = 1 << bitsNeeded;
-
-            for (long c = 0; c < bound; c++) {
-                Map<Integer, List<Op>> newT = new HashMap<>();
-                for (int t = 0; t < THREADS; t++) {
-                    newT.put(t, new ArrayList<>());
+        for (int count = 1; count <= MAX_COUNT; count++) {
+            for (int vars = 1; vars <= Math.min(MAX_VARS, count); vars++) {
+                for (int threads = Math.max(2, count / 2); threads <= Math.min(MAX_THREADS, count); threads++) {
+                    multiThreads.addAll(new Phase(count, vars, threads).run());
                 }
-
-                long ticket = c;
-                for (Op op : trace.ops()) {
-                    int thread = (int)(ticket & 3);
-                    newT.get(thread).add(op);
-                    ticket = ticket >> 2;
-                }
-
-                MultiThread mt = new MultiThread(trace, newT.values().stream().map(Trace::new).collect(Collectors.toList()));
-                multiThreads.add(mt);
             }
         }
-        System.out.print(multiThreads.size() + " testcases generated... ");
+        System.out.println(multiThreads.size() + " interesting testcases");
 
         /*
-           Step 4. Apply more filters to reduce
-         */
-        Set<String> canonicalIds = Collections.newSetFromMap(new ConcurrentHashMap<>());
-
-        multiThreads = multiThreads.parallelStream()
-                .filter(MultiThread::isMultiThread)               // really have multiple threads
-                .filter(MultiThread::hasNoSingleLoadThreads)      // threads with single loads produce duplicate tests
-                .filter(MultiThread::hasNoIntraThreadPairs)       // has no operations that do not span threads
-                .filter(mt -> canonicalIds.add(mt.canonicalId())) // pass only one canonical
-                .collect(Collectors.toList());
-
-        System.out.println(multiThreads.size() + " interesting.");
-
-        /*
-            Step 5. Figure out what executions are sequentially consistent (needed for grading!),
+            Step 2. Figure out what executions are sequentially consistent (needed for grading!),
             and emit the tests.
          */
 
@@ -201,10 +110,10 @@ public class SeqCstTraceGenerator {
                 System.out.print(".");
         }
         System.out.println();
-        System.out.println("Found " + testCount + " interesting test cases");
+        System.out.println("Generated " + testCount + " interesting testcases");
 
         /*
-            Step 6. Check that no important cases were filtered.
+            Step 3. Check that no important cases were filtered.
 
             The nomenclature is derived from Maranget, Sarkar, Sewell,
               "A Tutorial Introduction to the ARM and POWER Relaxed Memory Models"

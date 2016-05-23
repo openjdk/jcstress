@@ -97,10 +97,15 @@ public class TreeMultimap<K, V> implements Multimap<K, V>, Serializable {
     @Override
     public Collection<V> values() {
         Collection<V> result = new ArrayList<>();
-        for (K key : map.keySet()) {
-            result.addAll(map.get(key));
+        for (Collection<V> vs : map.values()) {
+            result.addAll(vs);
         }
         return result;
+    }
+
+    @Override
+    public Collection<Collection<V>> valueGroups() {
+        return map.values();
     }
 
     @Override

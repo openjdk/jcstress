@@ -65,14 +65,9 @@ public class Trace {
     }
 
     public TraceResult interpret() {
-        int vars = 0;
-        for (Op op : ops) {
-            vars = Math.max(vars, op.getVarId());
-        }
-
         Map<Integer, Value> values = new HashMap<>();
-        for (int v = 0; v <= vars; v++) {
-            values.put(v, Value.defaultOne());
+        for (Op op : ops) {
+            values.put(op.getVarId(), Value.defaultOne());
         }
 
         SortedMap<Result, Value> resValues = new TreeMap<>();
@@ -167,87 +162,4 @@ public class Trace {
         return sb.toString();
     }
 
-    public String canonicalId() {
-        int varId = 0;
-        Map<Integer, Integer> varMap = new HashMap<>();
-        for (Op op : ops) {
-            Integer id = varMap.get(op.getVarId());
-            if (id == null) {
-                id = varId++;
-                varMap.put(op.getVarId(), id);
-            }
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (Op op : ops) {
-            switch (op.getType()) {
-                case LOAD:
-                    sb.append("L");
-                    break;
-                case STORE:
-                    sb.append("S");
-                    break;
-                default:
-                    throw new IllegalStateException();
-            }
-            sb.append(varMap.get(op.getVarId()) + 1);
-            sb.append("_");
-        }
-        return sb.toString();
-    }
-
-    public boolean matchedLoadStores() {
-        Set<Integer> loads = new HashSet<>();
-        Set<Integer> stores = new HashSet<>();
-        for (Op op : ops) {
-            switch (op.getType()) {
-                case STORE:
-                    stores.add(op.getVarId());
-                    break;
-                case LOAD:
-                    loads.add(op.getVarId());
-                    break;
-            }
-        }
-
-        return loads.equals(stores);
-    }
-
-    public boolean matchedLoads() {
-        Set<Integer> loads = new HashSet<>();
-        Set<Integer> stores = new HashSet<>();
-        for (Op op : ops) {
-            switch (op.getType()) {
-                case STORE:
-                    stores.add(op.getVarId());
-                    loads.add(op.getVarId());
-                    break;
-                case LOAD:
-                    loads.add(op.getVarId());
-                    break;
-            }
-        }
-
-        return loads.equals(stores);
-    }
-
-    public void assignResults() {
-        int valId = Value.initial();
-        int resId = 1;
-        for (int c = 0; c < ops.size(); c++) {
-            Op op = ops.get(c);
-            switch (op.getType()) {
-                case LOAD: {
-                    ops.set(c, Op.newLoad(op, new Result(resId++)));
-                    break;
-                }
-                case STORE: {
-                    ops.set(c, Op.newStore(op, Value.newOne(valId++)));
-                    break;
-                }
-                default:
-                    throw new IllegalStateException();
-            }
-        }
-    }
 }

@@ -93,6 +93,8 @@ public interface Multimap<K, V> {
 
     Collection<V> values();
 
+    Collection<Collection<V>> valueGroups();
+
     void remove(K key);
 
 }

@@ -25,22 +25,17 @@
 package org.openjdk.jcstress.generator.seqcst;
 
 import org.openjdk.jcstress.util.HashMultimap;
-import org.openjdk.jcstress.util.HashMultiset;
 import org.openjdk.jcstress.util.Multimap;
-import org.openjdk.jcstress.util.Multiset;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class MultiThread {
-    private final Trace original;
     private final List<Trace> threads;
 
-    public MultiThread(Trace original, Collection<Trace> copy) {
-        this.original = original;
-
+    public MultiThread(Collection<Trace> ts) {
         this.threads = new ArrayList<>();
-        for (Trace t : copy) {
+        for (Trace t : ts) {
             if (!t.ops().isEmpty())
                 threads.add(t);
         }
@@ -63,7 +58,7 @@ public class MultiThread {
             Trace cT = copy.get(t);
             if (cT.ops().isEmpty()) {
                 copy.remove(t);
-                newTraces.addAll(new MultiThread(original, copy).linearize());
+                newTraces.addAll(new MultiThread(copy).linearize());
             } else {
                 Op op = cT.ops().get(0);
                 copy.set(t, cT.removeFirst());
@@ -72,7 +67,7 @@ public class MultiThread {
                     copy.remove(t);
                 }
 
-                for (Trace trace : new MultiThread(original, copy).linearize()) {
+                for (Trace trace : new MultiThread(copy).linearize()) {
                     newTraces.add(trace.pushHead(op));
                 }
             }
@@ -137,23 +132,22 @@ public class MultiThread {
     }
 
     public boolean hasNoIntraThreadPairs() {
-        Multiset<Integer> vars = new HashMultiset<>();
+        BitSet global = new BitSet();
+        BitSet touched = new BitSet();
+
         for (Trace trace : threads) {
-            Set<Integer> touched =
-                    trace.ops().stream()
-                            .map(Op::getVarId)
-                            .collect(Collectors.toSet());
-            touched.forEach(vars::add);
+            BitSet thisThreadTouched = new BitSet();
+            for (Op op : trace.ops()) {
+                int id = op.getVarId();
+                if (touched.get(id)) {
+                    global.set(id);
+                } else {
+                    thisThreadTouched.set(id);
+                }
+            }
+            touched.or(thisThreadTouched);
         }
-
-        for (Integer v : vars.keys()) {
-            if (vars.count(v) == 1) return false;
-        }
-        return true;
-    }
-
-    public boolean isMultiThread() {
-        return threads.size() > 1;
+        return global.equals(touched);
     }
 
     public Set<Result> allResults() {

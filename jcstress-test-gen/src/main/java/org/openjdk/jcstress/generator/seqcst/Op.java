@@ -31,26 +31,6 @@ public abstract class Op {
     private final Type type;
     protected final int varId;
 
-    public static Op newLoad(int varId) {
-        return new LoadOp(varId);
-    }
-
-    public static Op newLoad(Op op, Result res) {
-        LoadOp t = new LoadOp(op.getVarId());
-        t.setResult(res);
-        return t;
-    }
-
-    public static Op newStore(int varId) {
-        return new StoreOp(varId);
-    }
-
-    public static Op newStore(Op op, Value value) {
-        StoreOp t = new StoreOp(op.getVarId());
-        t.setValue(value);
-        return t;
-    }
-
     private Op(Type type, int varId) {
         this.type = type;
         this.varId = varId;
@@ -73,16 +53,14 @@ public abstract class Op {
     }
 
     public abstract Result getResult();
-    public abstract void setResult(Result res);
-
     public abstract Value getValue();
-    public abstract void setValue(Value value);
 
     public static class LoadOp extends Op {
-        private Result res;
+        private final Result res;
 
-        public LoadOp(int varId) {
+        public LoadOp(int varId, Result res) {
             super(Type.LOAD, varId);
+            this.res = res;
         }
 
         @Override
@@ -91,17 +69,7 @@ public abstract class Op {
         }
 
         @Override
-        public void setResult(Result res) {
-            this.res = res;
-        }
-
-        @Override
         public Value getValue() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void setValue(Value value) {
             throw new UnsupportedOperationException();
         }
 
@@ -113,19 +81,15 @@ public abstract class Op {
     }
 
     public static class StoreOp extends Op {
-        private Value value;
+        private final Value value;
 
-        public StoreOp(int varId) {
+        public StoreOp(int varId, Value value) {
             super(Type.STORE, varId);
+            this.value = value;
         }
 
         @Override
         public Result getResult() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void setResult(Result res) {
             throw new UnsupportedOperationException();
         }
 
@@ -135,11 +99,6 @@ public abstract class Op {
                 throw new IllegalStateException("valueId unset");
             }
             return value;
-        }
-
-        @Override
-        public void setValue(Value value) {
-            this.value = value;
         }
 
         @Override
