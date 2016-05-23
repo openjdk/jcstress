@@ -226,6 +226,13 @@ public class SeqCstTraceGenerator {
         // check(generatedIds, "S1_S2__S2_S1", "2+2W");
         // check(generatedIds, "L1_S2__S1__S2_L1", "WRW+WR");
         // check(generatedIds, "L1_S2__S1__S2_S1", "WRR+2W");
+        // check(generatedIds, "L1_S2__S2_L3__S3_S1", "Z6.0");
+        // check(generatedIds, "L1_S2__S2_S3__S3_S1", "Z6.1");
+        // check(generatedIds, "L1_S2__L2_S3__S3_S1", "Z6.2");
+        // check(generatedIds, "L1_L2__S2_S3__S3_S1", "Z6.3");
+        // check(generatedIds, "S1_L2__S2_L3__S3_S1", "Z6.4");
+        // check(generatedIds, "S1_L2__S2_S3__S3_S1", "Z6.5");
+        // check(generatedIds, "S1_S2__S2_S3__S3_S1", "3.2W");
 
         check(generatedIds, "S1_L2__S2_L1", "SB");
         check(generatedIds, "L1_S2__L2_S1", "LB");
@@ -245,6 +252,12 @@ public class SeqCstTraceGenerator {
         check(generatedIds, "L1_L1__L1_L1__S1__S1", "CoRR2");
         check(generatedIds, "L1_S1__S1", "CoRW");
         check(generatedIds, "S1__S1_L1", "CoWR");
+
+        check(generatedIds, "L1_L2__L3_S1__S2_S3", "ISA2");
+        check(generatedIds, "L1_S2__L2_S3__L3_S1", "3.LB");
+        check(generatedIds, "S1_L2__S2_L3__S3_L1", "3.SB");
+
+        check(generatedIds, "L1_L2__S2_L3__S3_S1", "W+RWC");
     }
 
     private void check(Set<String> ids, String id, String info) {
