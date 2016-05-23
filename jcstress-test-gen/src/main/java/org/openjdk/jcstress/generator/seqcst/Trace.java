@@ -64,7 +64,7 @@ public class Trace {
         return ops.size();
     }
 
-    public SortedMap<Result, Value> interpret() {
+    public TraceResult interpret() {
         int vars = 0;
         for (Op op : ops) {
             vars = Math.max(vars, op.getVarId());
@@ -91,7 +91,7 @@ public class Trace {
             }
         }
 
-        return resValues;
+        return new TraceResult(resValues, values);
     }
 
     public Trace removeFirst() {
@@ -203,6 +203,24 @@ public class Trace {
             switch (op.getType()) {
                 case STORE:
                     stores.add(op.getVarId());
+                    break;
+                case LOAD:
+                    loads.add(op.getVarId());
+                    break;
+            }
+        }
+
+        return loads.equals(stores);
+    }
+
+    public boolean matchedLoads() {
+        Set<Integer> loads = new HashSet<>();
+        Set<Integer> stores = new HashSet<>();
+        for (Op op : ops) {
+            switch (op.getType()) {
+                case STORE:
+                    stores.add(op.getVarId());
+                    loads.add(op.getVarId());
                     break;
                 case LOAD:
                     loads.add(op.getVarId());

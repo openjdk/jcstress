@@ -24,7 +24,9 @@
  */
 package org.openjdk.jcstress.generator.seqcst;
 
+import org.openjdk.jcstress.util.HashMultimap;
 import org.openjdk.jcstress.util.HashMultiset;
+import org.openjdk.jcstress.util.Multimap;
 import org.openjdk.jcstress.util.Multiset;
 
 import java.util.*;
@@ -170,10 +172,21 @@ public class MultiThread {
                 .collect(Collectors.toSet());
     }
 
+    public Set<Integer> allVariables() {
+        return threads.stream()
+                .flatMap(t -> t.ops().stream())
+                .map(Op::getVarId)
+                .collect(Collectors.toSet());
+    }
+
     /**
      * @return The set of outcomes where every load can see every store.
      */
-    public Set<Map<Result, Value>> racyResults() {
+    public Set<TraceResult> racyResults() {
+        /*
+           Step 1. Produce all possible results:
+           (Results can see all writes
+         */
         Set<Map<Result, Value>> allResults = new HashSet<>();
         allResults.add(new HashMap<>());
 
@@ -197,7 +210,46 @@ public class MultiThread {
             allResults = temp;
         }
 
-        return allResults;
+        /*
+           Step 2. Produce all possible variable values:
+         */
+        Multimap<Integer, Value> possibleValues = new HashMultimap<>();
+        for (Trace t : threads) {
+            for (Op op : t.ops()) {
+                if (op.isStore()) {
+                    possibleValues.put(op.getVarId(), op.getValue());
+                }
+            }
+        }
+
+        Set<Map<Integer, Value>> allValues = new HashSet<>();
+        allValues.add(new HashMap<>());
+
+        for (Integer varId : possibleValues.keys()) {
+            Set<Map<Integer, Value>> temp = new HashSet<>();
+
+            for (Map<Integer, Value> m : allValues) {
+                for (Value val : possibleValues.get(varId)) {
+                    Map<Integer, Value> newMap = new HashMap<>(m);
+                    newMap.put(varId, val);
+                    temp.add(newMap);
+                }
+            }
+
+            allValues = temp;
+        }
+
+        /*
+           Step 3. Results, product of all possible results and values:
+         */
+        Set<TraceResult> answer = new HashSet<>();
+        for (Map<Result, Value> results : allResults) {
+            for (Map<Integer, Value> values : allValues) {
+                answer.add(new TraceResult(results, values));
+            }
+        }
+
+        return answer;
     }
 
     public int loadCount() {

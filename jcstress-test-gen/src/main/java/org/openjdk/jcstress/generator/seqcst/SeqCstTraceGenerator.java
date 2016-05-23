@@ -98,9 +98,8 @@ public class SeqCstTraceGenerator {
 
         Set<String> canonicalTraces = new HashSet<>();
         traces = allTraces.stream()
-                .filter(Trace::hasLoads)            // Has observable effects
-                .filter(Trace::hasStores)           // Has modifications to observe
-                .filter(Trace::matchedLoadStores)   // All modifications are observed; no observing non-modified
+                .filter(Trace::hasStores)                          // Has modifications to observe
+                .filter(Trace::matchedLoads)                       // All loads have at least one matching store
                 .filter(t -> canonicalTraces.add(t.canonicalId())) // Only a canonical order of vars accepted
                 .collect(Collectors.toList());
 
@@ -171,15 +170,15 @@ public class SeqCstTraceGenerator {
         System.out.print("Figuring out SC outcomes for the testcases: ");
         int testCount = 0;
         for (MultiThread mt : multiThreads) {
-            Set<Map<Result, Value>> scResults = new HashSet<>();
+            Set<TraceResult> scResults = new HashSet<>();
 
             // Compute all SC results from the linearization of MT
             for (Trace linear : mt.linearize()) {
-                SortedMap<Result, Value> results = linear.interpret();
+                TraceResult results = linear.interpret();
                 scResults.add(results);
             }
 
-            Set<Map<Result, Value>> allResults = mt.racyResults();
+            Set<TraceResult> allResults = mt.racyResults();
 
             if (!allResults.containsAll(scResults)) {
                 System.out.println(mt.canonicalId());
@@ -197,15 +196,7 @@ public class SeqCstTraceGenerator {
 
             generatedIds.add(mt.canonicalId());
 
-            List<String> mappedResult = new ArrayList<>();
-            for (Map<Result, Value> m : scResults) {
-                List<String> mappedValues = new ArrayList<>();
-                for (Value v : m.values()) {
-                    mappedValues.add(v.toString());
-                }
-                mappedResult.add(mappedValues.toString());
-            }
-            emit(mt, mappedResult);
+            emit(mt, scResults);
             if ((testCount++ % 100) == 0)
                 System.out.print(".");
         }
@@ -220,19 +211,11 @@ public class SeqCstTraceGenerator {
          */
         check(generatedIds, "L1_L2__S2_S1", "MP");
 
-        // TODO: Have mismatched stores: need arbiter to judge the final result
-        // check(generatedIds, "L1_S2__S2_S1", "S");
-        // check(generatedIds, "S1_L2__S2_S1", "R");
-        // check(generatedIds, "S1_S2__S2_S1", "2+2W");
-        // check(generatedIds, "L1_S2__S1__S2_L1", "WRW+WR");
-        // check(generatedIds, "L1_S2__S1__S2_S1", "WRR+2W");
-        // check(generatedIds, "L1_S2__S2_L3__S3_S1", "Z6.0");
-        // check(generatedIds, "L1_S2__S2_S3__S3_S1", "Z6.1");
-        // check(generatedIds, "L1_S2__L2_S3__S3_S1", "Z6.2");
-        // check(generatedIds, "L1_L2__S2_S3__S3_S1", "Z6.3");
-        // check(generatedIds, "S1_L2__S2_L3__S3_S1", "Z6.4");
-        // check(generatedIds, "S1_L2__S2_S3__S3_S1", "Z6.5");
-        // check(generatedIds, "S1_S2__S2_S3__S3_S1", "3.2W");
+        check(generatedIds, "L1_S2__S2_S1", "S");
+        check(generatedIds, "S1_L2__S2_S1", "R");
+        check(generatedIds, "S1_S2__S2_S1", "2+2W");
+        check(generatedIds, "L1_S2__S1__S2_L1", "WRW+WR");
+        check(generatedIds, "L1_S2__S1__S2_S1", "WRR+2W");
 
         check(generatedIds, "S1_L2__S2_L1", "SB");
         check(generatedIds, "L1_S2__L2_S1", "LB");
@@ -258,6 +241,14 @@ public class SeqCstTraceGenerator {
         check(generatedIds, "S1_L2__S2_L3__S3_L1", "3.SB");
 
         check(generatedIds, "L1_L2__S2_L3__S3_S1", "W+RWC");
+
+        check(generatedIds, "L1_S2__S2_L3__S3_S1", "Z6.0");
+        check(generatedIds, "L1_S2__S2_S3__S3_S1", "Z6.1");
+        check(generatedIds, "L1_S2__L2_S3__S3_S1", "Z6.2");
+        check(generatedIds, "L1_L2__S2_S3__S3_S1", "Z6.3");
+        check(generatedIds, "S1_L2__S2_L3__S3_S1", "Z6.4");
+        check(generatedIds, "S1_L2__S2_S3__S3_S1", "Z6.5");
+        check(generatedIds, "S1_S2__S2_S3__S3_S1", "3.2W");
     }
 
     private void check(Set<String> ids, String id, String info) {
@@ -266,12 +257,12 @@ public class SeqCstTraceGenerator {
         }
     }
 
-    private void emit(MultiThread mt, List<String> scResults) {
+    private void emit(MultiThread mt, Collection<TraceResult> scResults) {
         String pathname = Utils.ensureDir(srcDir + "/" + pkg.replaceAll("\\.", "/"));
 
         String klass = mt.canonicalId() + "_Test";
 
-        Class[] klasses = new Class[mt.loadCount()];
+        Class[] klasses = new Class[mt.loadCount() + mt.allVariables().size()];
         for (int c = 0; c < klasses.length; c++) {
             klasses[c] = int.class;
         }
@@ -294,8 +285,16 @@ public class SeqCstTraceGenerator {
         pw.println();
         pw.println("@JCStressTest");
         pw.println("@Outcome(id = {");
-        for (String r : scResults) {
-            pw.println("            \"" + r + "\",");
+
+        for (TraceResult r : scResults) {
+            List<String> mappedValues = new ArrayList<>();
+            for (Value v : r.getResults().values()) {
+                mappedValues.add(v.toString());
+            }
+            for (Value v : r.getVars().values()) {
+                mappedValues.add(v.toString());
+            }
+            pw.println("            \"" + mappedValues.toString() + "\",");
         }
         pw.println("}, expect = Expect.ACCEPTABLE, desc = \"Sequential consistency.\")");
 
@@ -354,6 +353,16 @@ public class SeqCstTraceGenerator {
             pw.println("    }");
             pw.println();
         }
+
+        pw.println("    @Arbiter");
+        pw.println("    public void arbiter(" + resultName + " r) {");
+        int idx = mt.loadCount() + 1;
+        for (Integer varId : mt.allVariables()) {
+            pw.println("        r.r" + idx + " = x" + varId + ";");
+            idx++;
+        }
+        pw.println("    }");
+        pw.println();
 
         pw.println("}");
 
