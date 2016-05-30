@@ -317,8 +317,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("public class " + className + " extends Runner<" + r + "> {");
         pw.println();
 
-        pw.println("    static final AtomicIntegerFieldUpdater<" + className + "> EPOCH = AtomicIntegerFieldUpdater.newUpdater(" + className + ".class, \"epoch\");");
-
         for (ExecutableElement a : info.getActors()) {
             pw.println("    OpenAddressHashCounter<" + r + "> counter_" + a.getSimpleName() + ";");
         }
@@ -447,6 +445,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
 
         pw.println("    public final void jcstress_updateHolder(StateHolder<Pair> holder) {");
+        pw.println("        if (!holder.tryStartUpdate()) return;");
         pw.println("        Pair[] pairs = holder.pairs;");
         pw.println("        int len = pairs.length;");
         pw.println();
@@ -464,14 +463,13 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("         }");
         pw.println();
         pw.println("        version = new StateHolder<>(control.isStopped, newPairs, " + actorsCount + ", config.spinLoopStyle);");
-        pw.println("        holder.notConsumed = false;");
+        pw.println("        holder.finishUpdate();");
         pw.println("   }");
 
         int n = 0;
         for (ExecutableElement a : info.getActors()) {
             pw.println();
             pw.println("    public final Void " + a.getSimpleName() + "() {");
-            pw.println("        int curEpoch = 0;");
             pw.println();
             if (!isStateItself) {
                 pw.println("        " + t + " lt = test;");
@@ -514,16 +512,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("            holder.postRun();");
             pw.println();
             pw.println("            jcstress_consume(holder, counter_" + a.getSimpleName() + ", " + n + ", " + actorsCount + ");");
+            pw.println("            jcstress_updateHolder(holder);");
             pw.println();
-            pw.println("            int ticket = EPOCH.incrementAndGet(this);");
-            pw.println("            if (ticket == curEpoch + " + actorsCount + ") {");
-            pw.println("                jcstress_updateHolder(holder);");
-            pw.println("                EPOCH.incrementAndGet(this);");
-            pw.println("            }");
-            pw.println();
-            pw.println("            curEpoch += " + (actorsCount + 1) + ";");
-            pw.println();
-            pw.println("            holder.postConsume();");
+            pw.println("            holder.postUpdate();");
             pw.println("        }");
             pw.println("    }");
             n++;
@@ -862,11 +853,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
     private void printImports(PrintWriter pw, TestInfo info) {
         Class<?>[] imports = new Class<?>[] {
                 ArrayList.class, Arrays.class, Collection.class,
-                Callable.class, ExecutorService.class, Future.class, TimeUnit.class,
-                AtomicIntegerFieldUpdater.class,
+                ExecutorService.class, Future.class, TimeUnit.class,
                 TestConfig.class, TestResultCollector.class,
-                Control.class, Runner.class, StateHolder.class,
-                ArrayUtils.class, Counter.class,
+                Runner.class, StateHolder.class, Counter.class,
                 WhiteBoxSupport.class, OpenAddressHashCounter.class, ExecutionException.class
         };
 

@@ -24,6 +24,7 @@
  */
 package org.openjdk.jcstress.infra.runners;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -34,8 +35,8 @@ public class StateHolder<P> {
     public final P[] pairs;
     public final int countWorkers;
     public final SpinLoopStyle spinStyle;
-    public final AtomicInteger started, ready, finished;
-    public volatile boolean notAllStarted, notAllReady, notAllFinished, notConsumed;
+    public final AtomicInteger started, ready, finished, consumed;
+    public volatile boolean notAllStarted, notAllReady, notAllFinished, notUpdated;
     public volatile boolean hasLaggedWorkers;
 
     public StateHolder(boolean stopped, P[] pairs, int expectedWorkers, SpinLoopStyle spinStyle) {
@@ -46,10 +47,11 @@ public class StateHolder<P> {
         this.ready = new AtomicInteger(expectedWorkers);
         this.started = new AtomicInteger(expectedWorkers);
         this.finished = new AtomicInteger(expectedWorkers);
+        this.consumed = new AtomicInteger(expectedWorkers);
         this.notAllReady = true;
         this.notAllFinished = true;
         this.notAllStarted = true;
-        this.notConsumed = true;
+        this.notUpdated = true;
     }
 
     public void preRun() {
@@ -92,18 +94,25 @@ public class StateHolder<P> {
         }
     }
 
-    public void postConsume() {
+    public boolean tryStartUpdate()  {
+        return (consumed.decrementAndGet() == 0);
+    }
+
+    public void finishUpdate() {
+        notUpdated = false;
+    }
+
+    public void postUpdate() {
         switch (spinStyle) {
             case THREAD_YIELD:
-                while (notConsumed) Thread.yield();
+                while (notUpdated) Thread.yield();
                 break;
             case THREAD_SPIN_WAIT:
-                while (notConsumed) Thread.onSpinWait();
+                while (notUpdated) Thread.onSpinWait();
                 break;
             default:
-                while (notConsumed);
+                while (notUpdated);
         }
-
     }
 
 }
