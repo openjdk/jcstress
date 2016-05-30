@@ -35,7 +35,7 @@ public class TestConfig implements Serializable {
 
     public static final Comparator<TestConfig> COMPARATOR_NAME = Comparator.comparing((c) -> c.name);
 
-    public final boolean shouldYield;
+    public final SpinLoopStyle spinLoopStyle;
     public final boolean verbose;
     public final int minStride;
     public final int maxStride;
@@ -62,7 +62,7 @@ public class TestConfig implements Serializable {
         minStride = opts.getMinStride();
         maxStride = opts.getMaxStride();
         iters = opts.getIterations();
-        shouldYield = opts.shouldYield();
+        spinLoopStyle = opts.getSpinStyle();
         verbose = opts.isVerbose();
         deoptRatio = opts.deoptRatio();
         threads = info.threads();
@@ -77,7 +77,7 @@ public class TestConfig implements Serializable {
 
         TestConfig that = (TestConfig) o;
 
-        if (shouldYield != that.shouldYield) return false;
+        if (spinLoopStyle != that.spinLoopStyle) return false;
         if (minStride != that.minStride) return false;
         if (maxStride != that.maxStride) return false;
         if (time != that.time) return false;
@@ -92,7 +92,7 @@ public class TestConfig implements Serializable {
 
     @Override
     public int hashCode() {
-        int result = (shouldYield ? 1 : 0);
+        int result = spinLoopStyle.hashCode();
         result = 31 * result + minStride;
         result = 31 * result + maxStride;
         result = 31 * result + time;

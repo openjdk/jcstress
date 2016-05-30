@@ -34,11 +34,17 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 public class VMSupport {
 
     private static final List<String> ADD_JVM_FLAGS = new ArrayList<>();
     private static final Collection<Collection<String>> AVAIL_JVM_MODES = new ArrayList<>();
+    private static volatile boolean THREAD_SPIN_WAIT_AVAILABLE;
+
+    public static boolean spinWaitHintAvailable() {
+        return THREAD_SPIN_WAIT_AVAILABLE;
+    }
 
     public static void initSupport() {
         System.out.println("Initializing and probing the target VM: ");
@@ -64,17 +70,26 @@ public class VMSupport {
                 "-XX:+WhiteBoxAPI",
                 DeoptTestMain.class);
 
+        THREAD_SPIN_WAIT_AVAILABLE =
+                detect("Trying Thread.onSpinWait",
+                "",
+                ThreadSpinWaitTestMain.class);
+
         System.out.println();
     }
 
-    private static void detect(String label, String opt, Class<?> mainClass) {
+    private static boolean detect(String label, String opt, Class<?> mainClass) {
         try {
             tryWith(opt, mainClass.getName());
-            ADD_JVM_FLAGS.add(opt);
+            if (!opt.isEmpty()) {
+                ADD_JVM_FLAGS.add(opt);
+            }
             System.out.printf("----- %s %s%n", "[OK]", label);
+            return true;
         } catch (VMSupportException ex) {
             System.out.printf("----- %s %s%n", "[FAILED]", label);
             System.out.println(ex.getMessage());
+            return false;
         }
     }
 
@@ -124,7 +139,10 @@ public class VMSupport {
     public static void tryWith(String... lines) throws VMSupportException {
         try {
             List<String> commandString = getJavaInvokeLine();
-            commandString.addAll(Arrays.asList(lines));
+            commandString.addAll(
+                    Arrays.stream(lines)
+                            .filter(s -> !s.isEmpty())
+                            .collect(Collectors.toList()));
 
             ProcessBuilder pb = new ProcessBuilder(commandString);
             Process p = pb.start();

@@ -33,32 +33,40 @@ public class StateHolder<P> {
     public final boolean stopped;
     public final P[] pairs;
     public final int countWorkers;
+    public final SpinLoopStyle spinStyle;
     public final AtomicInteger started, ready, finished;
-    public volatile boolean notAllStarted, notAllReady, notAllFinished;
+    public volatile boolean notAllStarted, notAllReady, notAllFinished, notConsumed;
     public volatile boolean hasLaggedWorkers;
 
-    public StateHolder(boolean stopped, P[] pairs, int expectedWorkers) {
+    public StateHolder(boolean stopped, P[] pairs, int expectedWorkers, SpinLoopStyle spinStyle) {
         this.stopped = stopped;
         this.pairs = pairs;
         this.countWorkers = expectedWorkers;
+        this.spinStyle = spinStyle;
         this.ready = new AtomicInteger(expectedWorkers);
         this.started = new AtomicInteger(expectedWorkers);
         this.finished = new AtomicInteger(expectedWorkers);
         this.notAllReady = true;
         this.notAllFinished = true;
         this.notAllStarted = true;
+        this.notConsumed = true;
     }
 
-    public void preRun(boolean shouldYield) {
+    public void preRun() {
         int v = ready.decrementAndGet();
         if (v == 0) {
             notAllReady = false;
         }
-        if (v < 0) {
-            throw new IllegalStateException("Oops: " + v);
-        }
-        while (notAllReady) {
-            if (shouldYield) Thread.yield();
+
+        switch (spinStyle) {
+            case THREAD_YIELD:
+                while (notAllReady) Thread.yield();
+                break;
+            case THREAD_SPIN_WAIT:
+                while (notAllReady) Thread.onSpinWait();
+                break;
+            default:
+                while (notAllReady);
         }
 
         if (started.decrementAndGet() == 0) {
@@ -66,15 +74,36 @@ public class StateHolder<P> {
         }
     }
 
-    public void postRun(boolean shouldYield) {
+    public void postRun() {
         if (finished.decrementAndGet() == 0) {
             notAllFinished = false;
         }
         hasLaggedWorkers |= notAllStarted;
 
-        while (notAllFinished) {
-            if (shouldYield) Thread.yield();
+        switch (spinStyle) {
+            case THREAD_YIELD:
+                while (notAllFinished) Thread.yield();
+                break;
+            case THREAD_SPIN_WAIT:
+                while (notAllFinished) Thread.onSpinWait();
+                break;
+            default:
+                while (notAllFinished);
         }
+    }
+
+    public void postConsume() {
+        switch (spinStyle) {
+            case THREAD_YIELD:
+                while (notConsumed) Thread.yield();
+                break;
+            case THREAD_SPIN_WAIT:
+                while (notConsumed) Thread.onSpinWait();
+                break;
+            default:
+                while (notConsumed);
+        }
+
     }
 
 }

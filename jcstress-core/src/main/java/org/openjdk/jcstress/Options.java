@@ -28,6 +28,7 @@ import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import org.openjdk.jcstress.infra.runners.SpinLoopStyle;
 import org.openjdk.jcstress.util.OptionFormatter;
 import org.openjdk.jcstress.util.Promise;
 import org.openjdk.jcstress.util.StringUtils;
@@ -234,12 +235,7 @@ public class Options {
     }
 
     public void printSettingsOn(PrintStream out) {
-        out.printf("  Hardware threads in use/available: %d/%d, ", getUserCPUs(), getSystemCPUs());
-        if (userYield) {
-            out.printf("user requested yielding in busy loops.\n");
-        } else {
-            out.printf("no yielding in use.\n");
-        }
+        out.printf("  Hardware threads in use/available: %d/%d, %s%n", getUserCPUs(), getSystemCPUs(), getSpinStyle());
         out.printf("  Test preset mode: \"%s\"\n", mode);
         out.printf("  Writing the test results to \"%s\"\n", resultFile);
         out.printf("  Parsing results to \"%s\"\n", resultDir);
@@ -269,8 +265,16 @@ public class Options {
         return time;
     }
 
-    public boolean shouldYield() {
-        return userYield;
+    public SpinLoopStyle getSpinStyle() {
+        if (VMSupport.spinWaitHintAvailable()) {
+            return SpinLoopStyle.THREAD_SPIN_WAIT;
+        } else {
+            if (userYield) {
+                return SpinLoopStyle.THREAD_YIELD;
+            } else {
+                return SpinLoopStyle.PLAIN;
+            }
+        }
     }
 
     public boolean shouldParse() {
