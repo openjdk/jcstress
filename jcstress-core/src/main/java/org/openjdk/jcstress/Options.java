@@ -30,10 +30,13 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.openjdk.jcstress.util.OptionFormatter;
 import org.openjdk.jcstress.util.Promise;
+import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Options.
@@ -57,6 +60,7 @@ public class Options {
     private boolean userYield;
     private String resultFile;
     private int deoptRatio;
+    private Collection<String> jvmArgs;
 
     public Options(String[] args) {
         this.args = args;
@@ -114,6 +118,11 @@ public class Options {
         OptionSpec<Integer> deoptRatio = parser.accepts("deoptRatio", "De-optimize (roughly) every N-th iteration. Larger " +
                 "value improves test performance, but decreases the chance we hit unlucky compilation.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
+
+        OptionSpec<String> optJvmArgs = parser.accepts("jvmArgs", "Use given JVM arguments. This disables JVM flags auto-detection, " +
+                "and runs only the single JVM mode. Either a single space-separated option line, or multiple options are accepted. " +
+                "This option only affects forked runs.")
+                .withRequiredArg().ofType(String.class).describedAs("string");
 
         parser.accepts("v", "Be extra verbose.");
         parser.accepts("h", "Print this help.");
@@ -196,6 +205,21 @@ public class Options {
             System.err.println();
             parser.printHelpOn(System.err);
             return false;
+        }
+
+        if (set.hasArgument(optJvmArgs)) {
+            try {
+                List<String> vals = optJvmArgs.values(set);
+                if (vals.size() != 1) {
+                    jvmArgs = vals;
+                } else {
+                    jvmArgs = StringUtils.splitQuotedEscape(optJvmArgs.value(set));
+                }
+            } catch (OptionException e) {
+                jvmArgs = StringUtils.splitQuotedEscape(optJvmArgs.value(set));
+            }
+        } else {
+            jvmArgs = null;
         }
 
         return true;
@@ -283,5 +307,9 @@ public class Options {
 
     public String getResultFile() {
         return resultFile;
+    }
+
+    public Collection<String> getJvmArgs() {
+        return jvmArgs;
     }
 }

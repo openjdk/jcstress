@@ -38,7 +38,7 @@ import java.util.concurrent.Future;
 public class VMSupport {
 
     private static final List<String> ADD_JVM_FLAGS = new ArrayList<>();
-    private static final List<List<String>> AVAIL_JVM_MODES = new ArrayList<>();
+    private static final Collection<Collection<String>> AVAIL_JVM_MODES = new ArrayList<>();
 
     public static void initSupport() {
         System.out.println("Initializing and probing the target VM: ");
@@ -78,31 +78,36 @@ public class VMSupport {
         }
     }
 
-    public static void detectAvailableVMModes() {
-        List<List<String>> modes = Arrays.asList(
-                // Intepreted
-                Arrays.asList("-Xint"),
+    public static void detectAvailableVMModes(Collection<String> jvmArgs) {
+        Collection<Collection<String>> modes;
 
-                // Tiered C1
-                Arrays.asList("-XX:TieredStopAtLevel=1"),
+        if (jvmArgs != null) {
+            modes = Collections.singleton(jvmArgs);
+        } else {
+            modes = Arrays.asList(
+                    // Intepreted
+                    Arrays.asList("-Xint"),
 
-                // Non-tiered C1
-                Arrays.asList("-client"),
-                Arrays.asList("-client", "-XX:-TieredCompilation"),
+                    // Tiered C1
+                    Arrays.asList("-XX:TieredStopAtLevel=1"),
 
-                // Tiered C2
-                Arrays.asList("-server"),
-                Arrays.asList("-server", "-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM"),
+                    // Non-tiered C1
+                    Arrays.asList("-client"),
+                    Arrays.asList("-client", "-XX:-TieredCompilation"),
 
-                // Non-tiered C2
-                Arrays.asList("-server", "-XX:-TieredCompilation"),
-                Arrays.asList("-server", "-XX:-TieredCompilation", "-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM")
-        );
+                    // Tiered C2
+                    Arrays.asList("-server"),
+                    Arrays.asList("-server", "-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM"),
+
+                    // Non-tiered C2
+                    Arrays.asList("-server", "-XX:-TieredCompilation"),
+                    Arrays.asList("-server", "-XX:-TieredCompilation", "-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM"));
+        }
 
         System.out.println("Probing what VM modes are available:");
         System.out.println(" (failures are non-fatal, but may miss some interesting cases)");
         System.out.println();
-        for (List<String> mode : modes) {
+        for (Collection<String> mode : modes) {
             try {
                 List<String> line = new ArrayList<>(mode);
                 line.add(SimpleTestMain.class.getName());
@@ -181,7 +186,7 @@ public class VMSupport {
     }
 
 
-    public static List<List<String>> getAvailableVMModes() {
+    public static Collection<Collection<String>> getAvailableVMModes() {
         return AVAIL_JVM_MODES;
     }
 

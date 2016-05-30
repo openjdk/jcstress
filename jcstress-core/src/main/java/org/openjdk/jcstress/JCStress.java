@@ -108,7 +108,7 @@ public class JCStress {
 
     public void run() throws Exception {
         VMSupport.initSupport();
-        VMSupport.detectAvailableVMModes();
+        VMSupport.detectAvailableVMModes(opts.getJvmArgs());
 
         opts.printSettingsOn(out);
 
@@ -164,7 +164,7 @@ public class JCStress {
         if (opts.shouldFork()) {
             List<String> inputArgs = ManagementFactory.getRuntimeMXBean().getInputArguments();
             for (String test : tests) {
-                for (List<String> jvmArgs : VMSupport.getAvailableVMModes()) {
+                for (Collection<String> jvmArgs : VMSupport.getAvailableVMModes()) {
                     List<String> fullArgs = new ArrayList<>();
                     fullArgs.addAll(inputArgs);
                     fullArgs.addAll(jvmArgs);

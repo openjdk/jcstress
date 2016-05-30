@@ -24,6 +24,10 @@
  */
 package org.openjdk.jcstress.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 public class StringUtils {
 
     public static String cutoff(String src, int len) {
@@ -41,6 +45,33 @@ public class StringUtils {
         } else {
             return substring;
         }
+    }
+
+    public static Collection<String> splitQuotedEscape(String src) {
+        List<String> results = new ArrayList<>();
+
+        StringBuilder sb = new StringBuilder();
+        boolean escaped = false;
+        for (char ch : src.toCharArray()) {
+            if (ch == ' ' && !escaped) {
+                String s = sb.toString();
+                if (!s.isEmpty()) {
+                    results.add(s);
+                    sb = new StringBuilder();
+                }
+            } else if (ch == '\"') {
+                escaped ^= true;
+            } else {
+                sb.append(ch);
+            }
+        }
+
+        String s = sb.toString();
+        if (!s.isEmpty()) {
+            results.add(s);
+        }
+
+        return results;
     }
 
     public static String chunkName(String name) {
