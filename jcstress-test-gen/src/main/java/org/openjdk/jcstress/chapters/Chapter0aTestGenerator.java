@@ -26,14 +26,10 @@ package org.openjdk.jcstress.chapters;
 
 import org.openjdk.jcstress.Spp;
 import org.openjdk.jcstress.Values;
+import org.openjdk.jcstress.util.StringUtils;
 
 import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Chapter0aTestGenerator {
 
@@ -48,84 +44,84 @@ public class Chapter0aTestGenerator {
 
         makeTests(
                 dest,
-                readFromResource("/accessAtomic/X-FieldAtomicityTest.java.template"),
+                GeneratorUtils.readFromResource("/accessAtomic/X-FieldAtomicityTest.java.template"),
                 "accessAtomic.fields",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/defaultValues/X-FieldDefaultValuesTest.java.template"),
+                GeneratorUtils.readFromResource("/defaultValues/X-FieldDefaultValuesTest.java.template"),
                 "defaultValues.fields",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/init/X-FieldInitTest.java.template"),
+                GeneratorUtils.readFromResource("/init/X-FieldInitTest.java.template"),
                 "init.fields",
                 new String[]{ "", "volatile", "final" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/tearing/X-FieldTearingTest.java.template"),
+                GeneratorUtils.readFromResource("/tearing/X-FieldTearingTest.java.template"),
                 "tearing.fields",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/defaultValues/X-ArrayDefaultValuesTest.java.template"),
+                GeneratorUtils.readFromResource("/defaultValues/X-ArrayDefaultValuesTest.java.template"),
                 "defaultValues.arrays.small",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/defaultValues/X-ArrayLargeDefaultValuesTest.java.template"),
+                GeneratorUtils.readFromResource("/defaultValues/X-ArrayLargeDefaultValuesTest.java.template"),
                 "defaultValues.arrays.large",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/init/X-ArrayInitTest.java.template"),
+                GeneratorUtils.readFromResource("/init/X-ArrayInitTest.java.template"),
                 "init.arrays.small",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/init/X-ArrayLargeInitTest.java.template"),
+                GeneratorUtils.readFromResource("/init/X-ArrayLargeInitTest.java.template"),
                 "init.arrays.large",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/accessAtomic/X-ArrayAtomicityTest.java.template"),
+                GeneratorUtils.readFromResource("/accessAtomic/X-ArrayAtomicityTest.java.template"),
                 "accessAtomic.arrays.small",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/accessAtomic/X-ArrayLargeAtomicityTest.java.template"),
+                GeneratorUtils.readFromResource("/accessAtomic/X-ArrayLargeAtomicityTest.java.template"),
                 "accessAtomic.arrays.large",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/tearing/X-ArrayTearingTest.java.template"),
+                GeneratorUtils.readFromResource("/tearing/X-ArrayTearingTest.java.template"),
                 "tearing.arrays.small",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                readFromResource("/tearing/X-ArrayLargeTearingTest.java.template"),
+                GeneratorUtils.readFromResource("/tearing/X-ArrayLargeTearingTest.java.template"),
                 "tearing.arrays.large",
                 new String[]{ "", "volatile" }
         );
@@ -140,20 +136,17 @@ public class Chapter0aTestGenerator {
                         keys(modifier, type),
                         vars(modifier, type, pack, name));
 
-                writeOut(dest, pack, name, res);
+                GeneratorUtils.writeOut(dest, pack, name, res);
             }
         }
     }
 
-    private static String upcaseFirst(String s) {
-        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
-    }
 
     private static Map<String, String> vars(String modifier, String type, String pack, String name) {
         Map<String, String> map = new HashMap<>();
         map.put("type", type);
         map.put("TYPE", type.toUpperCase());
-        map.put("Type", upcaseFirst(type));
+        map.put("Type", StringUtils.upcaseFirst(type));
         map.put("name", name);
         map.put("default", Values.DEFAULTS.get(type));
         map.put("defaultLiteral", Values.DEFAULTS_LITERAL.get(type));
@@ -179,44 +172,7 @@ public class Chapter0aTestGenerator {
     }
 
     private static String testName(String type) {
-        return upcaseFirst(type) + "Test";
-    }
-
-    private static void writeOut(String destination, String pkg, String name, String contents) throws IOException {
-        Path dir = Paths.get(destination, pkg.replaceAll("\\.", File.separator));
-        Path file = Paths.get(destination, pkg.replaceAll("\\.", File.separator), name + ".java");
-        Files.createDirectories(dir);
-
-        boolean doWrite = true;
-        try {
-            List<String> l = Files.readAllLines(file);
-            String exists = l.stream().collect(Collectors.joining(System.lineSeparator()));
-            if (contents.equals(exists)) {
-                doWrite = false;
-            }
-        } catch (IOException e) {
-            // Moving on...
-        }
-
-        if (doWrite) {
-            System.out.println("Generating: " + file);
-            Files.write(file, Arrays.asList(contents), Charset.defaultCharset());
-        } else {
-            System.out.println("Skip, no modifications: " + file);
-        }
-    }
-
-    private static String readFromResource(String name) throws IOException {
-        InputStream is = Chapter0aTestGenerator.class.getResourceAsStream(name);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-
-        StringBuilder sb = new StringBuilder();
-        String l;
-        while ((l = reader.readLine()) != null) {
-            sb.append(l);
-            sb.append(System.lineSeparator());
-        }
-        return sb.toString();
+        return StringUtils.upcaseFirst(type) + "Test";
     }
 
 }

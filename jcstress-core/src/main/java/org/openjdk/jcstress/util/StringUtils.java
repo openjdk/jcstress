@@ -78,4 +78,8 @@ public class StringUtils {
         return name.replace("org.openjdk.jcstress.tests", "o.o.j.t");
     }
 
+    public static String upcaseFirst(String s) {
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    }
+
 }
