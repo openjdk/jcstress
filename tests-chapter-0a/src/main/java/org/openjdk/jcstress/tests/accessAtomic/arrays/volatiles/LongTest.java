@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.accessAtomic.arrays.large.volatiles;
+package org.openjdk.jcstress.tests.accessAtomic.arrays.volatiles;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.*;
@@ -33,32 +33,23 @@ import org.openjdk.jcstress.infra.results.*;
  * Tests if fields experience non-atomic reads/writes.
  */
 @JCStressTest
-@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "Have not seen the array yet.")
-@Outcome(id = "1",  expect = Expect.ACCEPTABLE, desc = "Seen all elements set.")
-@Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
+@Outcome(id = "0", expect = Expect.ACCEPTABLE, desc = "Default value for the element. Allowed to see this: data race.")
+@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
+@Outcome(expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec")
+@Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
 @State
-public class FloatTest {
+public class LongTest {
 
-    volatile float[] arr = new float[2 * 1024 * 1024];
+    volatile long[] a = new long[1];
 
     @Actor
     public void actor1() {
-        float[] a = arr;
-        for (int c = 0; c < a.length; c++) a[c] = 2.3509528E-38F;
+        a[0] = -1L;
     }
 
     @Actor
-    public void actor2(IntResult1 r) {
-        float[] a = arr;
-        if (a == null) {
-            r.r1 = -1;
-        } else {
-            boolean allCorrect = true;
-            for (float v : a) {
-                allCorrect &= (v == 2.3509528E-38F || v == 0F);
-            }
-            r.r1 = allCorrect ? 1 : 0;
-        }
+    public void actor2(LongResult1 r) {
+        r.r1 = a[0];
     }
 
 }

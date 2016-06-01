@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.accessAtomic.arrays.large.plain;
+package org.openjdk.jcstress.tests.accessAtomic.arrays.plain;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.*;
@@ -33,33 +33,23 @@ import org.openjdk.jcstress.infra.results.*;
  * Tests if fields experience non-atomic reads/writes.
  */
 @JCStressTest
-@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "Have not seen the array yet.")
-@Outcome(id = "1",  expect = Expect.ACCEPTABLE, desc = "Seen all elements set.")
+@Outcome(id = "0.0", expect = Expect.ACCEPTABLE, desc = "Default value for the element. Allowed to see this: data race.")
+@Outcome(id = "1.39067116124321E-309", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
 @Outcome(expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec")
 @Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
 @State
-public class LongTest {
+public class DoubleTest {
 
-    long[] arr = new long[2 * 1024 * 1024];
+    double[] a = new double[1];
 
     @Actor
     public void actor1() {
-        long[] a = arr;
-        for (int c = 0; c < a.length; c++) a[c] = -1L;
+        a[0] = 1.39067116124321E-309;
     }
 
     @Actor
-    public void actor2(IntResult1 r) {
-        long[] a = arr;
-        if (a == null) {
-            r.r1 = -1;
-        } else {
-            boolean allCorrect = true;
-            for (long v : a) {
-                allCorrect &= (v == -1L || v == 0L);
-            }
-            r.r1 = allCorrect ? 1 : 0;
-        }
+    public void actor2(DoubleResult1 r) {
+        r.r1 = a[0];
     }
 
 }

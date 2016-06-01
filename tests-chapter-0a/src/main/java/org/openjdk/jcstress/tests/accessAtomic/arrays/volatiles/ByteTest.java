@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.accessAtomic.arrays.small.plain;
+package org.openjdk.jcstress.tests.accessAtomic.arrays.volatiles;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.*;
@@ -33,22 +33,21 @@ import org.openjdk.jcstress.infra.results.*;
  * Tests if fields experience non-atomic reads/writes.
  */
 @JCStressTest
-@Outcome(id = "0.0", expect = Expect.ACCEPTABLE, desc = "Default value for the element. Allowed to see this: data race.")
-@Outcome(id = "1.39067116124321E-309", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
-@Outcome(expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec")
-@Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
+@Outcome(id = "0", expect = Expect.ACCEPTABLE, desc = "Default value for the element. Allowed to see this: data race.")
+@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
+@Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
 @State
-public class DoubleTest {
+public class ByteTest {
 
-    double[] a = new double[1];
+    volatile byte[] a = new byte[1];
 
     @Actor
     public void actor1() {
-        a[0] = 1.39067116124321E-309;
+        a[0] = (byte) -1;
     }
 
     @Actor
-    public void actor2(DoubleResult1 r) {
+    public void actor2(ByteResult1 r) {
         r.r1 = a[0];
     }
 

@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.accessAtomic.arrays.large.plain;
+package org.openjdk.jcstress.tests.accessAtomic.arrays.volatiles;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.*;
@@ -33,32 +33,22 @@ import org.openjdk.jcstress.infra.results.*;
  * Tests if fields experience non-atomic reads/writes.
  */
 @JCStressTest
-@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "Have not seen the array yet.")
-@Outcome(id = "1",  expect = Expect.ACCEPTABLE, desc = "Seen all elements set.")
+@Outcome(id = "\u0000", expect = Expect.ACCEPTABLE, desc = "Default value for the element. Allowed to see this: data race.")
+@Outcome(id = "A", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
 @Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
 @State
-public class ByteTest {
+public class CharTest {
 
-    byte[] arr = new byte[2 * 1024 * 1024];
+    volatile char[] a = new char[1];
 
     @Actor
     public void actor1() {
-        byte[] a = arr;
-        for (int c = 0; c < a.length; c++) a[c] = (byte) -1;
+        a[0] = 'A';
     }
 
     @Actor
-    public void actor2(IntResult1 r) {
-        byte[] a = arr;
-        if (a == null) {
-            r.r1 = -1;
-        } else {
-            boolean allCorrect = true;
-            for (byte v : a) {
-                allCorrect &= (v == (byte) -1 || v == 0);
-            }
-            r.r1 = allCorrect ? 1 : 0;
-        }
+    public void actor2(CharResult1 r) {
+        r.r1 = a[0];
     }
 
 }

@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.accessAtomic.arrays.small.volatiles;
+package org.openjdk.jcstress.tests.accessAtomic.arrays.plain;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.*;
@@ -35,19 +35,20 @@ import org.openjdk.jcstress.infra.results.*;
 @JCStressTest
 @Outcome(id = "0", expect = Expect.ACCEPTABLE, desc = "Default value for the element. Allowed to see this: data race.")
 @Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
-@Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
+@Outcome(expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec")
+@Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
 @State
-public class IntTest {
+public class LongTest {
 
-    volatile int[] a = new int[1];
+    long[] a = new long[1];
 
     @Actor
     public void actor1() {
-        a[0] = -1;
+        a[0] = -1L;
     }
 
     @Actor
-    public void actor2(IntResult1 r) {
+    public void actor2(LongResult1 r) {
         r.r1 = a[0];
     }
 

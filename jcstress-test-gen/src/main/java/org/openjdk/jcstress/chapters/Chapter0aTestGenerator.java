@@ -101,14 +101,7 @@ public class Chapter0aTestGenerator {
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/accessAtomic/X-ArrayAtomicityTest.java.template"),
-                "accessAtomic.arrays.small",
-                new String[]{ "", "volatile" }
-        );
-
-        makeTests(
-                dest,
-                GeneratorUtils.readFromResource("/accessAtomic/X-ArrayLargeAtomicityTest.java.template"),
-                "accessAtomic.arrays.large",
+                "accessAtomic.arrays",
                 new String[]{ "", "volatile" }
         );
 

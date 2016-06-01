@@ -22,48 +22,34 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package $package$;
+package org.openjdk.jcstress.tests.accessAtomic.arrays.plain;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.*;
 
-#warn
+// -- This file was mechanically generated: Do not edit! -- //
 
 /**
  * Tests if fields experience non-atomic reads/writes.
  */
 @JCStressTest
-@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "Have not seen the array yet.")
-@Outcome(id = "1",  expect = Expect.ACCEPTABLE, desc = "Seen all elements set.")
-#if[alwaysAtomic]
+@Outcome(id = "0", expect = Expect.ACCEPTABLE, desc = "Default value for the element. Allowed to see this: data race.")
+@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
 @Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
-#else[alwaysAtomic]
-@Outcome(expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec")
-@Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
-#end[alwaysAtomic]
 @State
-public class $name$ {
+public class ByteTest {
 
-    $modifier$$type$[] arr = new $type$[2 * 1024 * 1024];
+    byte[] a = new byte[1];
 
     @Actor
     public void actor1() {
-        $type$[] a = arr;
-        for (int c = 0; c < a.length; c++) a[c] = $setLiteral$;
+        a[0] = (byte) -1;
     }
 
     @Actor
-    public void actor2(IntResult1 r) {
-        $type$[] a = arr;
-        if (a == null) {
-            r.r1 = -1;
-        } else {
-            boolean allCorrect = true;
-            for ($type$ v : a) {
-                allCorrect &= (v == $setLiteral$ || v == $defaultLiteral$);
-            }
-            r.r1 = allCorrect ? 1 : 0;
-        }
+    public void actor2(ByteResult1 r) {
+        r.r1 = a[0];
     }
 
 }
+

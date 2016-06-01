@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.accessAtomic.arrays.small.plain;
+package org.openjdk.jcstress.tests.accessAtomic.arrays.plain;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.*;
@@ -33,21 +33,21 @@ import org.openjdk.jcstress.infra.results.*;
  * Tests if fields experience non-atomic reads/writes.
  */
 @JCStressTest
-@Outcome(id = "null", expect = Expect.ACCEPTABLE, desc = "Default value for the element. Allowed to see this: data race.")
-@Outcome(id = "object", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
+@Outcome(id = "0", expect = Expect.ACCEPTABLE, desc = "Default value for the element. Allowed to see this: data race.")
+@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
 @Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
 @State
-public class StringTest {
+public class IntTest {
 
-    String[] a = new String[1];
+    int[] a = new int[1];
 
     @Actor
     public void actor1() {
-        a[0] = "object";
+        a[0] = -1;
     }
 
     @Actor
-    public void actor2(StringResult1 r) {
+    public void actor2(IntResult1 r) {
         r.r1 = a[0];
     }
 
