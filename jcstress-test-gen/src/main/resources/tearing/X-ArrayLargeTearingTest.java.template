@@ -34,13 +34,12 @@ import java.util.concurrent.*;
  * Tests if fields writes are not word-teared.
  */
 @JCStressTest
-@Outcome(id = "[$set$, $set$]", expect = Expect.ACCEPTABLE, desc = "Seeing the set value.")
+@Outcome(id = "$set$, $set$", expect = Expect.ACCEPTABLE, desc = "Seeing the set value.")
 #if[alwaysAtomic]
 @Outcome(expect = Expect.FORBIDDEN, desc = "Should see the set values only")
 #else[alwaysAtomic]
-@Outcome(id = "[$default$, $default$]", expect = Expect.FORBIDDEN, desc = "Cannot see default values.")
-@Outcome(id = "[$set$, $default$]", expect = Expect.FORBIDDEN, desc = "Cannot see default values.")
-@Outcome(id = "[$default$, $set$]", expect = Expect.FORBIDDEN, desc = "Cannot see default values.")
+@Outcome(id = "$default$, .*", expect = Expect.FORBIDDEN, desc = "Cannot see default values.")
+@Outcome(id = ".*, $default$", expect = Expect.FORBIDDEN, desc = "Cannot see default values.")
 @Outcome(expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec")
 @Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
 #end[alwaysAtomic]

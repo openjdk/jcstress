@@ -33,7 +33,7 @@ import org.openjdk.jcstress.infra.results.*;
  * Tests if fields are initialized to default values.
  */
 @JCStressTest
-@Outcome(id = "[false, false, false, false]", expect = Expect.ACCEPTABLE, desc = "Default value for the field.")
+@Outcome(id = "false, false, false, false", expect = Expect.ACCEPTABLE, desc = "Default value for the field.")
 @Outcome(expect = Expect.FORBIDDEN, desc = "Non-default values are forbidden.")
 @State
 public class BooleanTest {

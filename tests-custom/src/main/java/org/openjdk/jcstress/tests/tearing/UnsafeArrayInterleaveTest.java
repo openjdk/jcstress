@@ -36,7 +36,7 @@ import org.openjdk.jcstress.util.UnsafeHolder;
 
 @JCStressTest
 @Description("Tests the word-tearing guarantees for byte[] via Unsafe.")
-@Outcome(id = "[0, 128, 128]", expect = Expect.ACCEPTABLE, desc = "Seeing all updates intact.")
+@Outcome(id = "0, 128, 128", expect = Expect.ACCEPTABLE, desc = "Seeing all updates intact.")
 @State
 public class UnsafeArrayInterleaveTest {
 

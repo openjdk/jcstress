@@ -37,9 +37,9 @@ import java.util.BitSet;
 
 @JCStressTest
 @Description("Tests if racy update to BitSet experiences word tearing.")
-@Outcome(id = "[true, false]", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Thread 1 has intervened, word tearing occurred.")
-@Outcome(id = "[false, true]", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Thread 2 has intervened, word tearing occurred.")
-@Outcome(id = "[true, true]",  expect = Expect.ACCEPTABLE_INTERESTING, desc = "Observed both thread writes.")
+@Outcome(id = "true, false", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Thread 1 has intervened, word tearing occurred.")
+@Outcome(id = "false, true", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Thread 2 has intervened, word tearing occurred.")
+@Outcome(id = "true, true",  expect = Expect.ACCEPTABLE_INTERESTING, desc = "Observed both thread writes.")
 @State
 public class BitSetTest {
 

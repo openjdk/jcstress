@@ -33,8 +33,8 @@ import org.openjdk.jcstress.infra.results.*;
  * Tests if fields experience non-atomic reads/writes.
  */
 @JCStressTest
-@Outcome(id = "[-1]", expect = Expect.ACCEPTABLE, desc = "Have not seen the array yet.")
-@Outcome(id = "[1]",  expect = Expect.ACCEPTABLE, desc = "Seen all elements set.")
+@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "Have not seen the array yet.")
+@Outcome(id = "1",  expect = Expect.ACCEPTABLE, desc = "Seen all elements set.")
 @Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
 @State
 public class ShortTest {

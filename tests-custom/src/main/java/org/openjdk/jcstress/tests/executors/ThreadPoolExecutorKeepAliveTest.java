@@ -39,9 +39,9 @@ import java.util.concurrent.TimeUnit;
 
 @JCStressTest
 @Description("Tests if ThreadPoolExecutor invariant can be violated: keepAliveTime == 0 &#8658; !allowCoreThreadTimeOut")
-@Outcome(id = "[1, 1]", expect = Expect.ACCEPTABLE, desc = "allowCoreThreadTimeOut had changed, and keepAliveTime failed to change.")
-@Outcome(id = "[0, 0]", expect = Expect.ACCEPTABLE, desc = "keepAliveTime had changed, and allowCoreThreadTimeOut failed to change.")
-@Outcome(id = "[1, 0]", expect = Expect.ACCEPTABLE_INTERESTING, desc = "The update under race can break the (keepAliveTime == 0 &#8658; !allowCoreThreadTimeOut) invariant.")
+@Outcome(id = "1, 1", expect = Expect.ACCEPTABLE, desc = "allowCoreThreadTimeOut had changed, and keepAliveTime failed to change.")
+@Outcome(id = "0, 0", expect = Expect.ACCEPTABLE, desc = "keepAliveTime had changed, and allowCoreThreadTimeOut failed to change.")
+@Outcome(id = "1, 0", expect = Expect.ACCEPTABLE_INTERESTING, desc = "The update under race can break the (keepAliveTime == 0 &#8658; !allowCoreThreadTimeOut) invariant.")
 @State
 public class ThreadPoolExecutorKeepAliveTest {
 

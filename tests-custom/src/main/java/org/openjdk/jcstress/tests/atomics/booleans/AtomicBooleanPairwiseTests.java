@@ -42,8 +42,8 @@ public class AtomicBooleanPairwiseTests {
     }
 
     @Description("Tests the atomicity of pairwise AtomicBoolean operations")
-    @Outcome(id = "[0, 1]", expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution")
-    @Outcome(id = "[1, 0]", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")
+    @Outcome(id = "0, 1", expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution")
+    @Outcome(id = "1, 0", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")
     public static class Meta {
 
     }

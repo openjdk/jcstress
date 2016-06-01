@@ -36,9 +36,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @JCStressTest
 @Description("Tests the visibility of AtomicIntegerArray initial values.")
-@Outcome(id = "[-1]", expect = Expect.ACCEPTABLE, desc = "Seeing null AtomicX, this is a legal race.")
-@Outcome(id = "[1]",  expect = Expect.ACCEPTABLE, desc = "Acceptable to see the initial value.")
-@Outcome(id = "[0]",  expect = Expect.ACCEPTABLE, desc = "Acceptable to see a default value!")
+@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "Seeing null AtomicX, this is a legal race.")
+@Outcome(id = "1",  expect = Expect.ACCEPTABLE, desc = "Acceptable to see the initial value.")
+@Outcome(id = "0",  expect = Expect.ACCEPTABLE, desc = "Acceptable to see a default value!")
 @State
 public class AtomicIntegerInitialValueTest {
 

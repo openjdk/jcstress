@@ -72,6 +72,6 @@ public class StringResult4 implements Serializable {
 
     @Override
     public String toString() {
-        return "[" + r1 + ", " + r2 + ", " + r3 + ", " + r4 + ']';
+        return r1 + ", " + r2 + ", " + r3 + ", " + r4;
     }
 }

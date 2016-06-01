@@ -29,7 +29,7 @@ import org.openjdk.jcstress.infra.results.StringResult1;
 
 @JCStressTest
 @Description("Tests the StringBuilders are working good under concurrent updates.")
-@Outcome(id = "[bbbbbbbbbbbbbbbbbbbb]", expect = Expect.ACCEPTABLE, desc = "All appends are visible.")
+@Outcome(id = "b{20}", expect = Expect.ACCEPTABLE, desc = "All appends are visible.")
 @Outcome(expect = Expect.ACCEPTABLE_INTERESTING, desc = "Other values are expected, threads are messing with each other.")
 @State
 public class StringBuilderTest {

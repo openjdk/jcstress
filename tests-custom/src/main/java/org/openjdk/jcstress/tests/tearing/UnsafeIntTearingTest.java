@@ -38,7 +38,7 @@ import java.util.Random;
 
 @JCStressTest
 @Description("Tests the word-tearing guarantees for byte[] via Unsafe.")
-@Outcome(id = "[-1431655766, 1431655765]", expect = Expect.ACCEPTABLE, desc = "Seeing all updates intact.")
+@Outcome(id = "-1431655766, 1431655765", expect = Expect.ACCEPTABLE, desc = "Seeing all updates intact.")
 @State
 public class UnsafeIntTearingTest {
 

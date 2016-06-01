@@ -28,7 +28,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.Outcome;
 
 
-@Outcome(id = "[-1.0, -1.0, -1.0, -1.0]", expect = Expect.ACCEPTABLE, desc = "Seeing the null object. This is legal case since there is a race between actor and observer.")
-@Outcome(id = "[0.0, 0.0, 0.0, 0.0]",     expect = Expect.ACCEPTABLE, desc = "Seeing the completely initialized objects, and all elements are with default values.")
+@Outcome(id = "-1.0, -1.0, -1.0, -1.0", expect = Expect.ACCEPTABLE, desc = "Seeing the null object. This is legal case since there is a race between actor and observer.")
+@Outcome(id = "0.0, 0.0, 0.0, 0.0",     expect = Expect.ACCEPTABLE, desc = "Seeing the completely initialized objects, and all elements are with default values.")
 public class Grading_AllZeroesFloat {
 }

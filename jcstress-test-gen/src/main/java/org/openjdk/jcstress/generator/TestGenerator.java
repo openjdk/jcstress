@@ -116,10 +116,10 @@ public class TestGenerator {
         pw.println("import org.openjdk.jcstress.annotations.Expect;");
         pw.println();
         pw.println("@JCStressTest");
-        pw.println("@Outcome(id = \"[" + getDefaultValue(types.type(0)) +", " + getDefaultValue(types.type(1)) + "]\", expect = Expect.ACCEPTABLE, desc = \"Seeing default guard, can see any value\")");
-        pw.println("@Outcome(id = \"[" + getDefaultValue(types.type(0)) +", " + getSetValue(types.type(1)) + "]\", expect = Expect.ACCEPTABLE, desc = \"Seeing default guard, can see any value\")");
-        pw.println("@Outcome(id = \"[" + getSetValue(types.type(0)) +", " + getSetValue(types.type(1)) + "]\", expect = Expect.ACCEPTABLE, desc = \"Seeing set guard, seeing the updated value\")");
-        pw.println("@Outcome(id = \"[" + getSetValue(types.type(0)) +", " + getDefaultValue(types.type(1)) + "]\", expect = Expect.FORBIDDEN, desc = \"Seeing set guard, not seeing the updated value\")");
+        pw.println("@Outcome(id = \"" + getDefaultValue(types.type(0)) +", " + getDefaultValue(types.type(1)) + "\", expect = Expect.ACCEPTABLE, desc = \"Seeing default guard, can see any value\")");
+        pw.println("@Outcome(id = \"" + getDefaultValue(types.type(0)) +", " + getSetValue(types.type(1)) + "\", expect = Expect.ACCEPTABLE, desc = \"Seeing default guard, can see any value\")");
+        pw.println("@Outcome(id = \"" + getSetValue(types.type(0)) +", " + getSetValue(types.type(1)) + "\", expect = Expect.ACCEPTABLE, desc = \"Seeing set guard, seeing the updated value\")");
+        pw.println("@Outcome(id = \"" + getSetValue(types.type(0)) +", " + getDefaultValue(types.type(1)) + "\", expect = Expect.FORBIDDEN, desc = \"Seeing set guard, not seeing the updated value\")");
         pw.println("@State");
         pw.println("public class " + klass + " {");
         pw.println();

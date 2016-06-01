@@ -55,7 +55,7 @@ public class DoubleResult1 implements Serializable {
 
     @Override
     public String toString() {
-        return "[" + r1 + ']';
+        return "" + r1;
     }
 
 }

@@ -34,9 +34,9 @@ import org.openjdk.jcstress.infra.results.IntResult1;
 
 @JCStressTest
 @Description("Tests if unsafe publication is unsafe.")
-@Outcome(id = "[-1]", expect = Expect.ACCEPTABLE,             desc = "The object is not yet published")
-@Outcome(id = "[0]",  expect = Expect.ACCEPTABLE_INTERESTING, desc = "The object is published, but the fields has the default value.")
-@Outcome(id = "[1]",  expect = Expect.ACCEPTABLE,             desc = "The object is published, and all fields are visible.")
+@Outcome(id = "-1", expect = Expect.ACCEPTABLE,             desc = "The object is not yet published")
+@Outcome(id = "0",  expect = Expect.ACCEPTABLE_INTERESTING, desc = "The object is published, but the fields has the default value.")
+@Outcome(id = "1",  expect = Expect.ACCEPTABLE,             desc = "The object is published, and all fields are visible.")
 @State
 public class UnsafePublicationTest {
 

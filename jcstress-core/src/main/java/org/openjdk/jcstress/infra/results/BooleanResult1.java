@@ -54,7 +54,7 @@ public class BooleanResult1 implements Serializable {
 
     @Override
     public String toString() {
-        return "[" + r1 + ']';
+        return "" + r1;
     }
 
 }

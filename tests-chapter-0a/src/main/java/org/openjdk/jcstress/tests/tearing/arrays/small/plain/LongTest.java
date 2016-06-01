@@ -33,10 +33,9 @@ import org.openjdk.jcstress.infra.results.*;
  * Tests if fields writes are not word-teared.
  */
 @JCStressTest
-@Outcome(id = "[-1, -1]", expect = Expect.ACCEPTABLE, desc = "Seeing the set value.")
-@Outcome(id = "[0, 0]", expect = Expect.FORBIDDEN, desc = "Cannot see default values.")
-@Outcome(id = "[-1, 0]", expect = Expect.FORBIDDEN, desc = "Cannot see default values.")
-@Outcome(id = "[0, -1]", expect = Expect.FORBIDDEN, desc = "Cannot see default values.")
+@Outcome(id = "-1, -1", expect = Expect.ACCEPTABLE, desc = "Seeing the set value.")
+@Outcome(id = "$default, .*", expect = Expect.FORBIDDEN, desc = "Cannot see default values.")
+@Outcome(id = ".*, 0", expect = Expect.FORBIDDEN, desc = "Cannot see default values.")
 @Outcome(expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec")
 @Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
 @State

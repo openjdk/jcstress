@@ -29,9 +29,9 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.Outcome;
 
 @Description("Tests if the synchronized section provides the essential barriers")
-@Outcome(id = {"[0, 0]", "[0, 2]"}, expect = Expect.ACCEPTABLE, desc = "The write to $b is not visible yet; we can observe whatever in $a.")
-@Outcome(id = {"[1, 2]"},           expect = Expect.ACCEPTABLE, desc = "The write to $b is observed, expected to see $a == 1.")
-@Outcome(id = {"[1, 0]"},           expect = Expect.ACCEPTABLE_INTERESTING,
+@Outcome(id = {"0, 0", "0, 2"}, expect = Expect.ACCEPTABLE, desc = "The write to $b is not visible yet; we can observe whatever in $a.")
+@Outcome(id = {"1, 2"},         expect = Expect.ACCEPTABLE, desc = "The write to $b is observed, expected to see $a == 1.")
+@Outcome(id = {"1, 0"},         expect = Expect.ACCEPTABLE_INTERESTING,
         desc = "The write to $b is observed, but write to $a is not. This is the counter-intuitive behavior," +
                "but the coding pattern is incorrect: alone \"sync\" barrier is not enough to get the proper" +
                "acquire/release semantics.")

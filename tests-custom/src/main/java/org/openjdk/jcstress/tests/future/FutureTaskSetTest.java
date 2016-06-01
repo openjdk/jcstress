@@ -41,8 +41,8 @@ import java.util.concurrent.TimeoutException;
 
 @JCStressTest
 @Description("Tests if FutureTask.set() is racy.")
-@Outcome(id = "[-1]", expect = Expect.FORBIDDEN,  desc = "Future.get() had returned, but the value is null.")
-@Outcome(id = "[42]", expect = Expect.ACCEPTABLE, desc = "Future.get() returns, and the value is intact.")
+@Outcome(id = "-1", expect = Expect.FORBIDDEN,  desc = "Future.get() had returned, but the value is null.")
+@Outcome(id = "42", expect = Expect.ACCEPTABLE, desc = "Future.get() returns, and the value is intact.")
 @Ref("http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7132378")
 public class FutureTaskSetTest {
 

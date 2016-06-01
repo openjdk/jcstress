@@ -43,7 +43,8 @@ import java.lang.annotation.Target;
 public @interface Outcome {
 
     /**
-     * @return observed outcome; empty string or no parameter if the case is default
+     * @return observed outcome; empty string or no parameter if the case is default.
+     * ID support regular expressions.
      */
     String[] id() default { "" };
 

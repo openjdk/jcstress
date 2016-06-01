@@ -38,7 +38,7 @@ public class Values {
         DEFAULTS = new HashMap<>();
         DEFAULTS.put("boolean", "false");
         DEFAULTS.put("byte",    "0");
-        DEFAULTS.put("char",    "\0");
+        DEFAULTS.put("char",    "\\\\\\u0000");
         DEFAULTS.put("short",   "0");
         DEFAULTS.put("int",     "0");
         DEFAULTS.put("float",   String.valueOf(0F));

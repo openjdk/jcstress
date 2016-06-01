@@ -48,11 +48,6 @@ public class IntResult4 implements Serializable {
     public int r4;
 
     @Override
-    public String toString() {
-        return "[" + r1 + ", " + r2 + ", " + r3 + ", " + r4 + ']';
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -74,6 +69,11 @@ public class IntResult4 implements Serializable {
         result = 31 * result + r3;
         result = 31 * result + r4;
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return r1 + ", " + r2 + ", " + r3 + ", " + r4;
     }
 
 }

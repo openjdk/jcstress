@@ -33,8 +33,8 @@ import org.openjdk.jcstress.infra.results.*;
  * Tests if fields initialization is visible via racy publication.
  */
 @JCStressTest
-@Outcome(id = "[null]", expect = Expect.ACCEPTABLE, desc = "Default value for the field. Allowed to see this: data race.")
-@Outcome(id = "[object]", expect = Expect.ACCEPTABLE, desc = "Seeing the set value.")
+@Outcome(id = "null", expect = Expect.ACCEPTABLE, desc = "Default value for the field. Allowed to see this: data race.")
+@Outcome(id = "object", expect = Expect.ACCEPTABLE, desc = "Seeing the set value.")
 @Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
 @State
 public class StringTest {

@@ -31,10 +31,10 @@ import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
 
 @JCStressTest
-@Outcome(id = {"[0, 0]"}, expect = ACCEPTABLE, desc = "Doing both reads early.")
-@Outcome(id = {"[1, 1]"}, expect = ACCEPTABLE, desc = "Doing both reads late.")
-@Outcome(id = {"[0, 1]"}, expect = ACCEPTABLE, desc = "Doing first read early, not surprising.")
-@Outcome(id = {"[1, 0]"}, expect = ACCEPTABLE_INTERESTING, desc = "First read seen racy value early, and the second one did not.")
+@Outcome(id = "0, 0", expect = ACCEPTABLE, desc = "Doing both reads early.")
+@Outcome(id = "1, 1", expect = ACCEPTABLE, desc = "Doing both reads late.")
+@Outcome(id = "0, 1", expect = ACCEPTABLE, desc = "Doing first read early, not surprising.")
+@Outcome(id = "1, 0", expect = ACCEPTABLE_INTERESTING, desc = "First read seen racy value early, and the second one did not.")
 @State
 public class ReadAfterReadTest {
 

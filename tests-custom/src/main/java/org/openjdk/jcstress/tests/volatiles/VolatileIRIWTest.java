@@ -35,8 +35,8 @@ import org.openjdk.jcstress.infra.results.IntResult4;
 
 @JCStressTest
 @Description("Tests the IRIW sequential consistency.")
-@Outcome(id = "[0, 1, 1, 0]", expect = Expect.ACCEPTABLE, desc = "This is a rare event, because it requires precise juxtaposition of threads to observe.")
-@Outcome(id = "[1, 0, 0, 1]", expect = Expect.FORBIDDEN,  desc = "Threads see the updates in the inconsistent order")
+@Outcome(id = "0, 1, 1, 0", expect = Expect.ACCEPTABLE, desc = "This is a rare event, because it requires precise juxtaposition of threads to observe.")
+@Outcome(id = "1, 0, 0, 1", expect = Expect.FORBIDDEN,  desc = "Threads see the updates in the inconsistent order")
 @Outcome(                     expect = Expect.ACCEPTABLE, desc =  "All other cases are acceptable.")
 @Ref("http://cs.oswego.edu/pipermail/concurrency-interest/2013-January/010608.html")
 @State

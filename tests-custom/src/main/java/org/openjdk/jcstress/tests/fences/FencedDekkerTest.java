@@ -41,8 +41,8 @@ import sun.misc.Contended;
  */
 @JCStressTest
 @Description("Tests the sequential consistency on Dekker-like construction using explicit fences, not volatiles")
-@Outcome(id = {"[0, 1]", "[1, 0]", "[1, 1]"}, expect = Expect.ACCEPTABLE, desc = "Acceptable under sequential consistency")
-@Outcome(id = {"[0, 0]"},                     expect = Expect.FORBIDDEN,  desc = "Un-acceptable under sequential consistency")
+@Outcome(id = {"0, 1", "1, 0", "1, 1"}, expect = Expect.ACCEPTABLE, desc = "Acceptable under sequential consistency")
+@Outcome(id = {"0, 0"},                 expect = Expect.FORBIDDEN,  desc = "Un-acceptable under sequential consistency")
 @State
 public class FencedDekkerTest {
 

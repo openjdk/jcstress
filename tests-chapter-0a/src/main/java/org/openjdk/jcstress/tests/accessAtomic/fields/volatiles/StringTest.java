@@ -33,8 +33,8 @@ import org.openjdk.jcstress.infra.results.*;
  * Tests if fields experience non-atomic reads/writes.
  */
 @JCStressTest
-@Outcome(id = "[null]", expect = Expect.ACCEPTABLE, desc = "Default value for the field. Allowed to see this: data race.")
-@Outcome(id = "[object]", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
+@Outcome(id = "null", expect = Expect.ACCEPTABLE, desc = "Default value for the field. Allowed to see this: data race.")
+@Outcome(id = "object", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
 @Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
 @State
 public class StringTest {

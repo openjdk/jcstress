@@ -60,7 +60,7 @@ public class StringResult2 implements Serializable {
 
     @Override
     public String toString() {
-        return "[" + r1 + ", " + r2 + ']';
+        return r1 + ", " + r2;
     }
 
 }

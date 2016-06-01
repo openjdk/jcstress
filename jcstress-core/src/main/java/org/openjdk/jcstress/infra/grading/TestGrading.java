@@ -64,7 +64,7 @@ public class TestGrading {
 
             Expect ex = c.expect();
             for (String s : r.getStateKeys()) {
-                if (c.state().equals(s)) {
+                if (c.matches(s)) {
                     long count = r.getCount(s);
                     isPassed &= passed(ex, count);
                     hasInteresting |= hasInteresting(ex, count);

@@ -34,9 +34,9 @@ import java.util.concurrent.*;
  * Tests if fields are initialized to default values.
  */
 @JCStressTest
-@Outcome(id = "[0]",  expect = Expect.ACCEPTABLE, desc = "Default value for the element.")
-@Outcome(id = "[-1]", expect = Expect.ACCEPTABLE, desc = "Have not seen the array yet.")
-@Outcome(id = "[1]",  expect = Expect.FORBIDDEN, desc = "Non-default values are forbidden.")
+@Outcome(id = "0",  expect = Expect.ACCEPTABLE, desc = "Default value for the element.")
+@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "Have not seen the array yet.")
+@Outcome(id = "1",  expect = Expect.FORBIDDEN, desc = "Non-default values are forbidden.")
 @State
 public class BooleanTest {
 

@@ -31,6 +31,7 @@ import org.openjdk.jcstress.generator.Utils;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SeqCstTraceGenerator {
 
@@ -203,7 +204,7 @@ public class SeqCstTraceGenerator {
             for (Value v : r.getVars().values()) {
                 mappedValues.add(v.toString());
             }
-            pw.println("            \"" + mappedValues.toString() + "\",");
+            pw.println("            \"" + mappedValues.stream().collect(Collectors.joining(", ")) + "\",");
         }
         pw.println("}, expect = Expect.ACCEPTABLE, desc = \"Sequential consistency.\")");
 

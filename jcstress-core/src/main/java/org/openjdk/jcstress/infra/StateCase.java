@@ -26,21 +26,19 @@ package org.openjdk.jcstress.infra;
 
 import org.openjdk.jcstress.annotations.Expect;
 
+import java.util.regex.Pattern;
+
 
 public class StateCase {
 
-    private final String state;
+    private final Pattern state;
     private final Expect expect;
     private final String description;
 
-    public StateCase(String state, Expect expect, String description) {
+    public StateCase(Pattern state, Expect expect, String description) {
         this.state = state;
         this.expect = expect;
         this.description = description;
-    }
-
-    public String state() {
-        return state;
     }
 
     public Expect expect() {
@@ -49,5 +47,13 @@ public class StateCase {
 
     public String description() {
         return description;
+    }
+
+    public boolean matches(String s) {
+        return state.matcher(s).matches();
+    }
+
+    public String matchPattern() {
+        return state.toString();
     }
 }

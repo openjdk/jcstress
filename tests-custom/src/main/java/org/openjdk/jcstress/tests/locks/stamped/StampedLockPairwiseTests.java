@@ -40,8 +40,8 @@ import java.util.concurrent.locks.StampedLock;
 public class StampedLockPairwiseTests {
 
     @Description("Tests if StampedLock successfully guards against non-atomic read/writes.")
-    @Outcome(id = "[0, 0]", expect = Expect.ACCEPTABLE, desc = "Seeing the default values.")
-    @Outcome(id = "[1, 2]", expect = Expect.ACCEPTABLE, desc = "Seeing the complete update.")
+    @Outcome(id = "0, 0", expect = Expect.ACCEPTABLE, desc = "Seeing the default values.")
+    @Outcome(id = "1, 2", expect = Expect.ACCEPTABLE, desc = "Seeing the complete update.")
     public static class G {
 
     }

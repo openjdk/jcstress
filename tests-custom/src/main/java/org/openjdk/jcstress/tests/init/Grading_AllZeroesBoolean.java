@@ -27,6 +27,6 @@ package org.openjdk.jcstress.tests.init;
 import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.Outcome;
 
-@Outcome(id = "[false, false, false, false]", expect = Expect.ACCEPTABLE, desc = "Seeing the completely initialized objects, and all elements are with default values.")
+@Outcome(id = "false, false, false, false", expect = Expect.ACCEPTABLE, desc = "Seeing the completely initialized objects, and all elements are with default values.")
 public class Grading_AllZeroesBoolean {
 }

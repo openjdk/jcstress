@@ -31,9 +31,9 @@ import sun.misc.Contended;
 
 @JCStressTest
 @Description("Tests if Unsafe.putOrderedInt is in-order")
-@Outcome(id = "[1, 1]", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")
-@Outcome(id = "[0, 0]", expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution")
-@Outcome(id = "[0, 1]", expect = Expect.ACCEPTABLE, desc = "T2 observes TOP early")
+@Outcome(id = "1, 1", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")
+@Outcome(id = "0, 0", expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution")
+@Outcome(id = "0, 1", expect = Expect.ACCEPTABLE, desc = "T2 observes TOP early")
 @State
 public class UnsafePutOrderedTwice {
 

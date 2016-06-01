@@ -29,9 +29,8 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.Outcome;
 
 @Description("Tests the mutual exclusion")
-@Outcome(id = "[1, 0]",               expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")
-@Outcome(id = "[0, 1]",               expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution")
-@Outcome(id = {"[-1, 1]", "[1, -1]"}, expect = Expect.ACCEPTABLE, desc = "One of the threads fails to acquire the lock. Other thread had succeeded.")
-@Outcome(id = "[-1, -1]",             expect = Expect.ACCEPTABLE, desc = "Both threads have failed")
+@Outcome(id = "1, 0",               expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")
+@Outcome(id = "0, 1",               expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution")
+@Outcome(id = {"-1, .*", ".*, -1"}, expect = Expect.ACCEPTABLE, desc = "One of the threads fails to acquire the lock. Other thread had succeeded.")
 public class NoOneSucceeds {
 }

@@ -31,7 +31,7 @@ import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 
 @JCStressTest
 @Description("Sample test")
-@Outcome(expect = ACCEPTABLE,  desc = "All acceptable")
+@Outcome(id = ".*", expect = ACCEPTABLE,  desc = "All acceptable")
 @State
 public class SampleTest {
 

@@ -34,12 +34,12 @@ import org.openjdk.jcstress.infra.results.IntResult1;
 
 @JCStressTest
 @Description("Tests if unsafe publication is unsafe.")
-@Outcome(id = "[-1]", expect = Expect.ACCEPTABLE,             desc = "The object is not yet published")
-@Outcome(id = "[0]",  expect = Expect.ACCEPTABLE_INTERESTING, desc = "The object is published, but all fields are 0.")
-@Outcome(id = "[1]",  expect = Expect.ACCEPTABLE_INTERESTING, desc = "The object is published, 1 field is visible.")
-@Outcome(id = "[2]",  expect = Expect.ACCEPTABLE_INTERESTING, desc = "The object is published, 2 fields are visible.")
-@Outcome(id = "[3]",  expect = Expect.ACCEPTABLE_INTERESTING, desc = "The object is published, 3 fields are visible.")
-@Outcome(id = "[4]",  expect = Expect.ACCEPTABLE,             desc = "The object is published, all fields are visible.")
+@Outcome(id = "-1", expect = Expect.ACCEPTABLE,             desc = "The object is not yet published")
+@Outcome(id = "0",  expect = Expect.ACCEPTABLE_INTERESTING, desc = "The object is published, but all fields are 0.")
+@Outcome(id = "1",  expect = Expect.ACCEPTABLE_INTERESTING, desc = "The object is published, 1 field is visible.")
+@Outcome(id = "2",  expect = Expect.ACCEPTABLE_INTERESTING, desc = "The object is published, 2 fields are visible.")
+@Outcome(id = "3",  expect = Expect.ACCEPTABLE_INTERESTING, desc = "The object is published, 3 fields are visible.")
+@Outcome(id = "4",  expect = Expect.ACCEPTABLE,             desc = "The object is published, all fields are visible.")
 @State
 public class UnsafeConstructionTest {
 

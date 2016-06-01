@@ -32,13 +32,13 @@ import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult3;
 
 @JCStressTest
-@Outcome(id = "[0, 0, 0]", expect = Expect.ACCEPTABLE, desc = "Legal: No updates had occured.")
-@Outcome(id = "[1, 0, 0]", expect = Expect.FORBIDDEN,  desc = "Illegal to see the stale $data once $guard1 is visible")
-@Outcome(id = "[1, 0, 1]", expect = Expect.FORBIDDEN,  desc = "Illegal to see the stale $data once $guard1 is visible")
-@Outcome(id = "[0, 0, 1]", expect = Expect.ACCEPTABLE, desc = "Legal: Seeing the update for $guard2, but no other updates.")
-@Outcome(id = "[0, 1, 0]", expect = Expect.ACCEPTABLE, desc = "Legal: Seeing the early update for $data, while no updates for guards are visible.")
-@Outcome(id = "[0, 1, 1]", expect = Expect.ACCEPTABLE, desc = "Legal: Seeing the update for $data and $guard2.")
-@Outcome(id = "[1, 1, 1]", expect = Expect.ACCEPTABLE, desc = "Legal: Seeing all updates.")
+@Outcome(id = "0, 0, 0", expect = Expect.ACCEPTABLE, desc = "Legal: No updates had occured.")
+@Outcome(id = "1, 0, 0", expect = Expect.FORBIDDEN,  desc = "Illegal to see the stale $data once $guard1 is visible")
+@Outcome(id = "1, 0, 1", expect = Expect.FORBIDDEN,  desc = "Illegal to see the stale $data once $guard1 is visible")
+@Outcome(id = "0, 0, 1", expect = Expect.ACCEPTABLE, desc = "Legal: Seeing the update for $guard2, but no other updates.")
+@Outcome(id = "0, 1, 0", expect = Expect.ACCEPTABLE, desc = "Legal: Seeing the early update for $data, while no updates for guards are visible.")
+@Outcome(id = "0, 1, 1", expect = Expect.ACCEPTABLE, desc = "Legal: Seeing the update for $data and $guard2.")
+@Outcome(id = "1, 1, 1", expect = Expect.ACCEPTABLE, desc = "Legal: Seeing all updates.")
 @State
 public class DoubleVolatileTest {
 

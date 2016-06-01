@@ -410,7 +410,7 @@ public class HTMLReportPrinter {
                 boolean matched = false;
 
                 for (String s : r.getStateKeys()) {
-                    if (c.state().equals(s)) {
+                    if (c.matches(s)) {
                         // match!
                         output.println("<tr bgColor=" + selectHTMLColor(c.expect(), r.getCount(s) == 0) + ">");
                         output.println("<td>" + s + "</td>");
@@ -425,7 +425,7 @@ public class HTMLReportPrinter {
 
                 if (!matched) {
                     output.println("<tr bgColor=" + selectHTMLColor(c.expect(), true) + ">");
-                    output.println("<td>" + c.state() + "</td>");
+                    output.println("<td>" + c.matchPattern() + "</td>");
                     output.println("<td align=center>" + 0 + "</td>");
                     output.println("<td align=center>" + c.expect() + "</td>");
                     output.println("<td>" + c.description() + "</td>");

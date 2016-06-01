@@ -32,8 +32,8 @@ import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IntResult2;
 
 @JCStressTest
-@Outcome(id = "[1, 0]", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution.")
-@Outcome(id = "[0, 2]", expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution.")
+@Outcome(id = "1, 0", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution.")
+@Outcome(id = "0, 2", expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution.")
 @State
 public class SynchronizedMutexTest {
 

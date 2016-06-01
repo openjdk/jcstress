@@ -40,8 +40,8 @@ import java.lang.reflect.Field;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 @JCStressTest
-@Outcome(id = "[0]",  expect = Expect.ACCEPTABLE, desc = "Default value for the field. Observers are allowed to see the default value for the field, because there is the data race between reader and writer.")
-@Outcome(id = "[-1]", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
+@Outcome(id = "0",  expect = Expect.ACCEPTABLE, desc = "Default value for the field. Observers are allowed to see the default value for the field, because there is the data race between reader and writer.")
+@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
 @State
 public class VolatileShortAtomicityTest {
 

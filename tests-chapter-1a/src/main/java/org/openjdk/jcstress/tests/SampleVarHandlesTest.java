@@ -31,8 +31,8 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
 @JCStressTest
-@Outcome(id = "[0]", expect = Expect.ACCEPTABLE, desc = "Default value")
-@Outcome(id = "[42424242]", expect = Expect.ACCEPTABLE, desc = "Set value")
+@Outcome(id = "0", expect = Expect.ACCEPTABLE, desc = "Default value")
+@Outcome(id = "42424242", expect = Expect.ACCEPTABLE, desc = "Set value")
 @State
 public class SampleVarHandlesTest {
 

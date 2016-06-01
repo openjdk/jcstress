@@ -38,10 +38,10 @@ import org.openjdk.jcstress.util.UnsafeHolder;
  *  @author Doug Lea (dl@cs.oswego.edu)
  */
 @JCStressTest
-@Outcome(id = "[0, 0]", expect = Expect.ACCEPTABLE, desc = "Data not yet published")
-@Outcome(id = "[0, 1]", expect = Expect.ACCEPTABLE, desc = "Data not yet published")
-@Outcome(id = "[1, 0]", expect = Expect.FORBIDDEN,  desc = "Reads the default value for field $x after publication.")
-@Outcome(id = "[1, 1]", expect = Expect.ACCEPTABLE, desc = "Must read the written value for $x after publication.")
+@Outcome(id = "0, 0", expect = Expect.ACCEPTABLE, desc = "Data not yet published")
+@Outcome(id = "0, 1", expect = Expect.ACCEPTABLE, desc = "Data not yet published")
+@Outcome(id = "1, 0", expect = Expect.FORBIDDEN,  desc = "Reads the default value for field $x after publication.")
+@Outcome(id = "1, 1", expect = Expect.ACCEPTABLE, desc = "Must read the written value for $x after publication.")
 @State
 public class FencedPublicationTest {
 

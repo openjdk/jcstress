@@ -35,8 +35,8 @@ import org.openjdk.jcstress.util.UnsafeHolder;
 
 @JCStressTest
 @Description("Tests if Unsafe breaks the atomicity while doing cross cache-line reads/writes.")
-@Outcome(id = "[0]",  expect = Expect.ACCEPTABLE,             desc = "Seeing the default value, this is a legal race.")
-@Outcome(id = "[-1]", expect = Expect.ACCEPTABLE,             desc = "Seeing the full value, this is a legal behavior.")
+@Outcome(id = "0",  expect = Expect.ACCEPTABLE,             desc = "Seeing the default value, this is a legal race.")
+@Outcome(id = "-1", expect = Expect.ACCEPTABLE,             desc = "Seeing the full value, this is a legal behavior.")
 @Outcome(             expect = Expect.ACCEPTABLE_INTERESTING, desc = "Other cases exhibit the breach of read/write atomicity.")
 @State
 public class UnsafeAtomicityTest {

@@ -28,6 +28,7 @@ import org.openjdk.jcstress.annotations.Expect;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 public class TestInfo {
     private final String name;
@@ -45,15 +46,15 @@ public class TestInfo {
         this.description = description;
         this.threads = threads;
         this.requiresFork = requiresFork;
-        this.stateCases = new ArrayList<StateCase>();
-        this.refs = new ArrayList<String>();
+        this.stateCases = new ArrayList<>();
+        this.refs = new ArrayList<>();
     }
 
     public StateCase unmatched() {
         if (unmatched != null) {
             return unmatched;
         } else {
-            return new StateCase("", Expect.FORBIDDEN, "No default case provided, assume " + Expect.FORBIDDEN);
+            return new StateCase(Pattern.compile(".*"), Expect.FORBIDDEN, "No default case provided, assume " + Expect.FORBIDDEN);
         }
     }
 
@@ -62,7 +63,7 @@ public class TestInfo {
     }
 
     public void addCase(StateCase aStateCase) {
-        if (aStateCase.state().trim().isEmpty()) {
+        if (aStateCase.matchPattern().isEmpty()) {
             unmatched = aStateCase;
         } else {
             stateCases.add(aStateCase);

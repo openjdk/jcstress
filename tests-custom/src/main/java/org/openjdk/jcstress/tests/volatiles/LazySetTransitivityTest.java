@@ -35,12 +35,12 @@ import org.openjdk.jcstress.infra.results.IntResult3;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @JCStressTest
-@Outcome(id = "[1, 0, 1]", expect = Expect.ACCEPTABLE, desc = "Legal: T3 reads B=0, and there are no guarantees about the value of A.")
-@Outcome(id = "[1, 0, 0]", expect = Expect.ACCEPTABLE, desc = "Legal: T3 reads B=0, and there are no guarantees about the value of A.")
-@Outcome(id = "[0, 0, 0]", expect = Expect.ACCEPTABLE, desc = "Legal: T3 reads B=0, and there are no guarantees about the value of A.")
-@Outcome(id = "[0, 0, 1]", expect = Expect.ACCEPTABLE, desc = "Legal: T3 reads B=0, and there are no guarantees about the value of A.")
-@Outcome(id = "[1, 1, 1]", expect = Expect.ACCEPTABLE, desc = "Legal: T3 observes (B=1, A=1). This looks like the evidence for transitivity.")
-@Outcome(id = "[1, 1, 0]", expect = Expect.FORBIDDEN,  desc = "Illegal: T3 observes stale value for A.")
+@Outcome(id = "1, 0, 1", expect = Expect.ACCEPTABLE, desc = "Legal: T3 reads B=0, and there are no guarantees about the value of A.")
+@Outcome(id = "1, 0, 0", expect = Expect.ACCEPTABLE, desc = "Legal: T3 reads B=0, and there are no guarantees about the value of A.")
+@Outcome(id = "0, 0, 0", expect = Expect.ACCEPTABLE, desc = "Legal: T3 reads B=0, and there are no guarantees about the value of A.")
+@Outcome(id = "0, 0, 1", expect = Expect.ACCEPTABLE, desc = "Legal: T3 reads B=0, and there are no guarantees about the value of A.")
+@Outcome(id = "1, 1, 1", expect = Expect.ACCEPTABLE, desc = "Legal: T3 observes (B=1, A=1). This looks like the evidence for transitivity.")
+@Outcome(id = "1, 1, 0", expect = Expect.FORBIDDEN,  desc = "Illegal: T3 observes stale value for A.")
 @Ref("http://cs.oswego.edu/pipermail/concurrency-interest/2013-January/010669.html")
 @State
 public class LazySetTransitivityTest {

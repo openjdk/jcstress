@@ -175,7 +175,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
             }
 
             for (StateCase c : test.cases()) {
-                idLen = Math.max(idLen, c.state().length());
+                idLen = Math.max(idLen, c.matchPattern().length());
                 expectLen = Math.max(expectLen, c.expect().toString().length());
             }
             expectLen = Math.max(expectLen, test.unmatched().expect().toString().length());
@@ -193,7 +193,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 boolean matched = false;
 
                 for (String s : r.getStateKeys()) {
-                    if (c.state().equals(s)) {
+                    if (c.matches(s)) {
                         // match!
                         output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
                                 StringUtils.cutoff(s, idLen),
@@ -207,7 +207,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
                 if (!matched) {
                     output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
-                                StringUtils.cutoff(c.state(), idLen),
+                                StringUtils.cutoff(c.matchPattern(), idLen),
                                 0,
                                 c.expect(),
                                 StringUtils.cutoff(c.description(), descLen));

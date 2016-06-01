@@ -39,9 +39,9 @@ import java.util.concurrent.TimeUnit;
 
 @JCStressTest
 @Description(" Tests if ThreadPoolExecutor invariant can be violated: corePoolSize &#8804; maxPoolSize")
-@Outcome(id = "[3, 4]", expect = Expect.ACCEPTABLE, desc = "corePoolSize had changed, and maxPoolSize failed to change.")
-@Outcome(id = "[1, 2]", expect = Expect.ACCEPTABLE, desc = "maxPoolSize had changed, and corePoolSize failed to change.")
-@Outcome(id = "[3, 2]", expect = Expect.ACCEPTABLE_INTERESTING, desc = "The update under race can break the (core &#8804; maxPool) invariant.")
+@Outcome(id = "3, 4", expect = Expect.ACCEPTABLE, desc = "corePoolSize had changed, and maxPoolSize failed to change.")
+@Outcome(id = "1, 2", expect = Expect.ACCEPTABLE, desc = "maxPoolSize had changed, and corePoolSize failed to change.")
+@Outcome(id = "3, 2", expect = Expect.ACCEPTABLE_INTERESTING, desc = "The update under race can break the (core &#8804; maxPool) invariant.")
 @State
 public class ThreadPoolExecutorSizesTest {
 

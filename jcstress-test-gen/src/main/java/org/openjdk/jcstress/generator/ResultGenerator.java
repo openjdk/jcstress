@@ -136,7 +136,7 @@ public class ResultGenerator {
         pw.println("    }");
 
         pw.println("    public String toString() {");
-        pw.print("        return \"[\" + ");
+        pw.print("        return \"\" + ");
 
         {
             int n = 1;
@@ -150,7 +150,7 @@ public class ResultGenerator {
                 }
                 n++;
             }
-            pw.println("+ \"]\";");
+            pw.println(";");
         }
 
         pw.println("    }");

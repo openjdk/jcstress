@@ -34,7 +34,7 @@ import java.util.concurrent.*;
  * Tests if fields writes are not word-teared.
  */
 @JCStressTest
-@Outcome(id = "[1.39067116124321E-309, 1.39067116124321E-309]", expect = Expect.ACCEPTABLE, desc = "Seeing the set value.")
+@Outcome(id = "1.39067116124321E-309, 1.39067116124321E-309", expect = Expect.ACCEPTABLE, desc = "Seeing the set value.")
 @Outcome(expect = Expect.FORBIDDEN, desc = "Should see the set values only")
 @State
 public class DoubleTest {

@@ -39,14 +39,14 @@ import sun.misc.Contended;
  *  @author Doug Lea (dl@cs.oswego.edu)
  */
 @JCStressTest
-@Outcome(id = "[0, 0]", expect = Expect.ACCEPTABLE, desc = "Before observing releasing write to, any value is OK for $x.")
-@Outcome(id = "[0, 1]", expect = Expect.ACCEPTABLE, desc = "Before observing releasing write to, any value is OK for $x.")
-@Outcome(id = "[0, 2]", expect = Expect.ACCEPTABLE, desc = "Before observing releasing write to, any value is OK for $x.")
-@Outcome(id = "[0, 3]", expect = Expect.ACCEPTABLE, desc = "Before observing releasing write to, any value is OK for $x.")
-@Outcome(id = "[1, 0]", expect = Expect.FORBIDDEN,  desc = "Can not read the default or old value for $x after $y is observed.")
-@Outcome(id = "[1, 1]", expect = Expect.FORBIDDEN,  desc = "Can not read the default or old value for $x after $y is observed.")
-@Outcome(id = "[1, 2]", expect = Expect.ACCEPTABLE, desc = "Can see a released value of $x if $y is observed.")
-@Outcome(id = "[1, 3]", expect = Expect.ACCEPTABLE, desc = "Can see a released value of $x if $y is observed.")
+@Outcome(id = "0, 0", expect = Expect.ACCEPTABLE, desc = "Before observing releasing write to, any value is OK for $x.")
+@Outcome(id = "0, 1", expect = Expect.ACCEPTABLE, desc = "Before observing releasing write to, any value is OK for $x.")
+@Outcome(id = "0, 2", expect = Expect.ACCEPTABLE, desc = "Before observing releasing write to, any value is OK for $x.")
+@Outcome(id = "0, 3", expect = Expect.ACCEPTABLE, desc = "Before observing releasing write to, any value is OK for $x.")
+@Outcome(id = "1, 0", expect = Expect.FORBIDDEN,  desc = "Can not read the default or old value for $x after $y is observed.")
+@Outcome(id = "1, 1", expect = Expect.FORBIDDEN,  desc = "Can not read the default or old value for $x after $y is observed.")
+@Outcome(id = "1, 2", expect = Expect.ACCEPTABLE, desc = "Can see a released value of $x if $y is observed.")
+@Outcome(id = "1, 3", expect = Expect.ACCEPTABLE, desc = "Can see a released value of $x if $y is observed.")
 @State
 public class FencedAcquireReleaseTest {
 

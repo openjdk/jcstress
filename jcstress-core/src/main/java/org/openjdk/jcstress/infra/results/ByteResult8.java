@@ -64,11 +64,6 @@ public class ByteResult8 implements Serializable {
     public byte r8;
 
     @Override
-    public String toString() {
-        return "[" + r1 + ", " + r2 + ", " + r3 + ", " + r4 + ", " + r5 + ", " + r6 + ", " + r7 + ", " + r8 + ']';
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -100,4 +95,8 @@ public class ByteResult8 implements Serializable {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return r1 + ", " + r2 + ", " + r3 + ", " + r4 + ", " + r5 + ", " + r6 + ", " + r7 + ", " + r8;
+    }
 }

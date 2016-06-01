@@ -33,9 +33,9 @@ import org.openjdk.jcstress.infra.results.*;
  * Tests if fields initialization is visible via racy publication.
  */
 @JCStressTest
-@Outcome(id = "[0]",  expect = Expect.ACCEPTABLE, desc = "Default value for the element. Allowed to see this: data race.")
-@Outcome(id = "[-1]", expect = Expect.ACCEPTABLE, desc = "Have not seen the array yet.")
-@Outcome(id = "[1]",  expect = Expect.ACCEPTABLE, desc = "Seen all elements set.")
+@Outcome(id = "0",  expect = Expect.ACCEPTABLE, desc = "Default value for the element. Allowed to see this: data race.")
+@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "Have not seen the array yet.")
+@Outcome(id = "1",  expect = Expect.ACCEPTABLE, desc = "Seen all elements set.")
 @State
 public class IntTest {
 

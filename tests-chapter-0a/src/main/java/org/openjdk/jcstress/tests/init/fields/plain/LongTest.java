@@ -33,8 +33,8 @@ import org.openjdk.jcstress.infra.results.*;
  * Tests if fields initialization is visible via racy publication.
  */
 @JCStressTest
-@Outcome(id = "[0]", expect = Expect.ACCEPTABLE, desc = "Default value for the field. Allowed to see this: data race.")
-@Outcome(id = "[-1]", expect = Expect.ACCEPTABLE, desc = "Seeing the set value.")
+@Outcome(id = "0", expect = Expect.ACCEPTABLE, desc = "Default value for the field. Allowed to see this: data race.")
+@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "Seeing the set value.")
 @Outcome(expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec.")
 @Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
 @State

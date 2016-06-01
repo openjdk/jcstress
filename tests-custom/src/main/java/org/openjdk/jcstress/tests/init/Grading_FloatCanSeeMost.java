@@ -28,8 +28,8 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.Outcome;
 
 
-@Outcome(id = "[0.0]",  expect = Expect.ACCEPTABLE, desc = "Seeing the default value for field. The update to the field in the constructor is lost. This is a legal JMM behavior")
-@Outcome(id = "[NaN]",  expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
-@Outcome(id = "[42.0]", expect = Expect.ACCEPTABLE, desc = "The observer sees the empty shell. This is a legal JMM behavior, since there is a race between actor and observer.")
+@Outcome(id = "0.0",  expect = Expect.ACCEPTABLE, desc = "Seeing the default value for field. The update to the field in the constructor is lost. This is a legal JMM behavior")
+@Outcome(id = "NaN",  expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
+@Outcome(id = "42.0", expect = Expect.ACCEPTABLE, desc = "The observer sees the empty shell. This is a legal JMM behavior, since there is a race between actor and observer.")
 public class Grading_FloatCanSeeMost {
 }

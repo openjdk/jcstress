@@ -35,7 +35,7 @@ import org.openjdk.jcstress.infra.results.IntResult3;
 
 @JCStressTest
 @Description("Tests the word-tearing guarantees for byte[].")
-@Outcome(id = "[0, 128, 128]", expect = Expect.ACCEPTABLE, desc = "Seeing all updates intact.")
+@Outcome(id = "0, 128, 128", expect = Expect.ACCEPTABLE, desc = "Seeing all updates intact.")
 @State
 public class ArrayInterleaveTest {
 

@@ -33,9 +33,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class TestList {
 
@@ -71,8 +73,9 @@ public class TestList {
                             String desc    = read.nextString();
                             int stateCount = read.nextInt();
                             for (int s = 0; s < stateCount; s++) {
-                                String state = read.nextString();
-                                testInfo.addCase(new StateCase(state, expect, desc));
+                                String regex = read.nextString();
+                                Pattern pattern = Pattern.compile(regex);
+                                testInfo.addCase(new StateCase(pattern, expect, desc));
                             }
                         }
 

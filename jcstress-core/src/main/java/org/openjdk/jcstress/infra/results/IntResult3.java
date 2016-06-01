@@ -67,7 +67,7 @@ public class IntResult3 implements Serializable {
 
     @Override
     public String toString() {
-        return "[" + r1 + ", " + r2 + ", " + r3 + ']';
+        return r1 + ", " + r2 + ", " + r3;
     }
 
 }

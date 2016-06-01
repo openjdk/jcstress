@@ -29,7 +29,7 @@ import org.openjdk.jcstress.infra.results.StringResult1;
 
 @JCStressTest
 @Description("Tests the StringBuffers are working good under concurrent updates.")
-@Outcome(id = "[bbbbbbbbbbbbbbbbbbbb]", expect = Expect.ACCEPTABLE, desc = "All appends are visible")
+@Outcome(id = "b{20}", expect = Expect.ACCEPTABLE, desc = "All appends are visible")
 @State
 public class StringBufferTest {
 

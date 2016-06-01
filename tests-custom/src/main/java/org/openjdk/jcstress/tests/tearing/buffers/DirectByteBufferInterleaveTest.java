@@ -38,7 +38,7 @@ import java.nio.ByteOrder;
 
 @JCStressTest
 @Description("Tests the word-tearing guarantees for DirectByteBuffer.")
-@Outcome(id = "[0, 128, 128]", expect = Expect.ACCEPTABLE, desc = "Seeing all updates intact.")
+@Outcome(id = "0, 128, 128", expect = Expect.ACCEPTABLE, desc = "Seeing all updates intact.")
 @State
 public class DirectByteBufferInterleaveTest {
 

@@ -29,7 +29,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.Outcome;
 
 @Description("Tests the mutual exclusion")
-@Outcome(id = "[1, 0]", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")
-@Outcome(id = "[0, 1]", expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution")
+@Outcome(id = "1, 0", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")
+@Outcome(id = "0, 1", expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution")
 public class BothSucceed {
 }
