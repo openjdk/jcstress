@@ -35,7 +35,8 @@ import org.openjdk.jcstress.infra.results.*;
 @JCStressTest
 @Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "Have not seen the array yet.")
 @Outcome(id = "1",  expect = Expect.ACCEPTABLE, desc = "Seen all elements set.")
-@Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
+@Outcome(expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec")
+@Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
 @State
 public class LongTest {
 

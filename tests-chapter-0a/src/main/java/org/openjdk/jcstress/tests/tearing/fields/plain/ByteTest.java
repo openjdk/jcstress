@@ -34,7 +34,7 @@ import org.openjdk.jcstress.infra.results.*;
  */
 @JCStressTest
 @Outcome(id = "-1, -1", expect = Expect.ACCEPTABLE, desc = "Seeing the set value.")
-@Outcome(expect = Expect.FORBIDDEN, desc = "Should see the set values only")
+@Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden.")
 @State
 public class ByteTest {
 

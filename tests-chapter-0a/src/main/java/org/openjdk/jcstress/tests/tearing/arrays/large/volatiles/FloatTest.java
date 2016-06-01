@@ -35,7 +35,7 @@ import java.util.concurrent.*;
  */
 @JCStressTest
 @Outcome(id = "2.3509528E-38, 2.3509528E-38", expect = Expect.ACCEPTABLE, desc = "Seeing the set value.")
-@Outcome(expect = Expect.FORBIDDEN, desc = "Should see the set values only")
+@Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden.")
 @State
 public class FloatTest {
 

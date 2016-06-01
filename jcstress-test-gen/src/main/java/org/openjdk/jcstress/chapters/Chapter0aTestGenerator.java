@@ -133,7 +133,7 @@ public class Chapter0aTestGenerator {
             for (String type : TYPES) {
                 String name = testName(type);
                 String res = Spp.spp(template,
-                        keys(modifier, type),
+                        keys(modifier, type, label),
                         vars(modifier, type, pack, name));
 
                 GeneratorUtils.writeOut(dest, pack, name, res);
@@ -157,18 +157,19 @@ public class Chapter0aTestGenerator {
         return map;
     }
 
-    private static Set<String> keys(String modifier, String type) {
+    private static Set<String> keys(String modifier, String type, String label) {
         Set<String> set = new HashSet<>();
         set.add(type);
-        if (alwaysAtomic(modifier, type)) {
+        if (alwaysAtomic(modifier, type, label)) {
             set.add("alwaysAtomic");
         }
         set.add(modifier);
         return set;
     }
 
-    private static boolean alwaysAtomic(String modifier, String type) {
-        return modifier.equals("volatile") || !(type.equals("double") || type.equals("long"));
+    private static boolean alwaysAtomic(String modifier, String type, String label) {
+        return (modifier.equals("volatile") && !label.contains("array")) ||
+                !(type.equals("double") || type.equals("long"));
     }
 
     private static String testName(String type) {

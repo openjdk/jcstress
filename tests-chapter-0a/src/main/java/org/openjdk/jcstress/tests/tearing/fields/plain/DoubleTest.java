@@ -34,10 +34,7 @@ import org.openjdk.jcstress.infra.results.*;
  */
 @JCStressTest
 @Outcome(id = "1.39067116124321E-309, 1.39067116124321E-309", expect = Expect.ACCEPTABLE, desc = "Seeing the set value.")
-@Outcome(id = "0.0, .*", expect = Expect.FORBIDDEN, desc = "Cannot see default values.")
-@Outcome(id = ".*, 0.0", expect = Expect.FORBIDDEN, desc = "Cannot see default values.")
-@Outcome(expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec")
-@Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
+@Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden.")
 @State
 public class DoubleTest {
 
