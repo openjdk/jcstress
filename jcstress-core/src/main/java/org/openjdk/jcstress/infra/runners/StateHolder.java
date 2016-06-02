@@ -24,7 +24,6 @@
  */
 package org.openjdk.jcstress.infra.runners;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -37,8 +36,19 @@ public class StateHolder<P> {
     public final SpinLoopStyle spinStyle;
     public final AtomicInteger started, ready, finished, consumed;
     public volatile boolean notAllStarted, notAllReady, notAllFinished, notUpdated;
-    public volatile boolean hasLaggedWorkers;
+    public volatile boolean updateStride;
 
+    /**
+     * Initial version
+     */
+    public StateHolder(P[] pairs, int expectedWorkers, SpinLoopStyle spinStyle) {
+        this(false, pairs, expectedWorkers, spinStyle);
+        updateStride = true;
+    }
+
+    /**
+     * Updated version
+     */
     public StateHolder(boolean stopped, P[] pairs, int expectedWorkers, SpinLoopStyle spinStyle) {
         this.stopped = stopped;
         this.pairs = pairs;
@@ -80,7 +90,7 @@ public class StateHolder<P> {
         if (finished.decrementAndGet() == 0) {
             notAllFinished = false;
         }
-        hasLaggedWorkers |= notAllStarted;
+        updateStride |= notAllStarted;
 
         switch (spinStyle) {
             case THREAD_YIELD:

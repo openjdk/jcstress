@@ -325,7 +325,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("    " + t + " test;");
         }
         pw.println("    volatile StateHolder<Pair> version;");
-        pw.println("    volatile int epoch;");
         pw.println();
 
         pw.println("    public " + className + "(TestConfig config, TestResultCollector collector, ExecutorService pool) {");
@@ -366,8 +365,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         if (!isStateItself) {
             pw.println("        test = new " + t + "();");
         }
-        pw.println("        version = new StateHolder<>(false, new Pair[0], " + actorsCount + ", config.spinLoopStyle);");
-        pw.println("        epoch = 0;");
+        pw.println("        version = new StateHolder<>(new Pair[0], " + actorsCount + ", config.spinLoopStyle);");
 
         for (ExecutableElement a : info.getActors()) {
             pw.println("        counter_" + a.getSimpleName() + " = new OpenAddressHashCounter<>();");
@@ -449,7 +447,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        Pair[] pairs = holder.pairs;");
         pw.println("        int len = pairs.length;");
         pw.println();
-        pw.println("        int newLen = holder.hasLaggedWorkers ? Math.max(config.minStride, Math.min(len * 2, config.maxStride)) : len;");
+        pw.println("        int newLen = holder.updateStride ? Math.max(config.minStride, Math.min(len * 2, config.maxStride)) : len;");
         pw.println();
         pw.println("        Pair[] newPairs = pairs;");
         pw.println("        if (newLen > len) {");
