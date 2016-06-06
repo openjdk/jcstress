@@ -33,33 +33,33 @@ import java.util.*;
 
 public class ReportUtils {
 
-    public static Map<TestConfig, TestResult> mergedByConfig(Collection<TestResult> src) {
+    public static List<TestResult> mergedByConfig(Collection<TestResult> src) {
         Multimap<TestConfig, TestResult> multiResults = new HashMultimap<>();
         for (TestResult r : src) {
             multiResults.put(r.getConfig(), r);
         }
 
-        Map<TestConfig, TestResult> results = new HashMap<>();
+        List<TestResult> results = new ArrayList<>();
         for (TestConfig config : multiResults.keys()) {
             Collection<TestResult> mergeable = multiResults.get(config);
             TestResult root = merged(config, mergeable);
-            results.put(config, root);
+            results.add(root);
         }
 
         return results;
     }
 
-    public static Map<String, TestResult> mergedByName(Collection<TestResult> src) {
+    public static List<TestResult> mergedByName(Collection<TestResult> src) {
         Multimap<String, TestResult> multiResults = new HashMultimap<>();
         for (TestResult r : src) {
             multiResults.put(r.getConfig().name, r);
         }
 
-        Map<String, TestResult> results = new HashMap<>();
+        List<TestResult> results = new ArrayList<>();
         for (String name : multiResults.keys()) {
             Collection<TestResult> mergeable = multiResults.get(name);
             TestResult root = merged(mergeable.iterator().next().getConfig(), mergeable);
-            results.put(name, root);
+            results.add(root);
         }
 
         return results;
@@ -67,9 +67,8 @@ public class ReportUtils {
 
     public static Multimap<String, TestResult> byName(Collection<TestResult> src) {
         Multimap<String, TestResult> result = new HashMultimap<>();
-        Map<TestConfig, TestResult> m = mergedByConfig(src);
-        for (TestConfig key : m.keySet()) {
-            result.put(key.name, m.get(key));
+        for (TestResult r : mergedByConfig(src)) {
+            result.put(r.getName(), r);
         }
         return result;
     }

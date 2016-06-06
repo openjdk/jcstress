@@ -56,20 +56,10 @@ public class ExceptionReportPrinter {
     }
 
     public void parse() throws FileNotFoundException, JAXBException {
-        Map<TestConfig, TestResult> results = ReportUtils.mergedByConfig(collector.getTestResults());
+        List<TestResult> results = ReportUtils.mergedByConfig(collector.getTestResults());
 
-        // build prefixes
-        Multimap<String, TestConfig> packages = new TreeMultimap<>();
-        for (TestConfig k : results.keySet()) {
-            String name = k.name;
-            String pack = name.substring(0, name.lastIndexOf("."));
-            packages.put(pack, k);
-        }
-
-        for (TestConfig k : results.keySet()) {
-            TestInfo test = TestList.getInfo(k.name);
-            TestResult result = results.get(k);
-            emitTest(result, test);
+        for (TestResult k : results) {
+            emitTest(k);
         }
 
         if (!failures.isEmpty()) {
@@ -81,7 +71,7 @@ public class ExceptionReportPrinter {
         }
     }
 
-    public void emitTest(TestResult result, TestInfo description) throws FileNotFoundException, JAXBException {
+    public void emitTest(TestResult result) throws FileNotFoundException, JAXBException {
         switch (result.status()) {
             case CHECK_TEST_ERROR:
                 failures.add(result.getName() + " had failed with the pre-test error.");
@@ -96,15 +86,11 @@ public class ExceptionReportPrinter {
                 failures.add(result.getName() + " had failed with the VM error.");
                 break;
             case NORMAL:
-                if (description != null) {
-                    TestGrading grading = new TestGrading(result, description);
-                    if (!grading.failureMessages.isEmpty()) {
-                        for (String msg : grading.failureMessages) {
-                            failures.add(result.getName() + ": " + msg);
-                        }
+                TestGrading grading = TestGrading.grade(result);
+                if (!grading.failureMessages.isEmpty()) {
+                    for (String msg : grading.failureMessages) {
+                        failures.add(result.getName() + ": " + msg);
                     }
-                } else {
-                    failures.add("TEST BUG: " + result.getName() + " description is not found.");
                 }
                 break;
             case API_MISMATCH:

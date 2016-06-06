@@ -27,12 +27,10 @@ package org.openjdk.jcstress.infra.grading;
 
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.annotations.Expect;
-import org.openjdk.jcstress.infra.StateCase;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.InProcessCollector;
 import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.*;
 
@@ -67,7 +65,7 @@ public class HTMLReportPrinter {
     }
 
     public void parse() throws FileNotFoundException {
-        Map<String, TestResult> byName = ReportUtils.mergedByName(collector.getTestResults());
+        List<TestResult> byName = ReportUtils.mergedByName(collector.getTestResults());
 
         PrintWriter output = new PrintWriter(resultDir + "/index.html");
 
@@ -81,12 +79,9 @@ public class HTMLReportPrinter {
             int passedCount = 0;
             int failedCount = 0;
             int sanityFailedCount = 0;
-            for (String name : byName.keySet()) {
-                TestResult result = byName.get(name);
-                TestInfo test = TestList.getInfo(name);
-
+            for (TestResult result : byName) {
                 if (result.status() == Status.NORMAL) {
-                    if (new TestGrading(result, test).isPassed) {
+                    if (TestGrading.grade(result).isPassed) {
                         passedCount++;
                     } else {
                         failedCount++;
@@ -132,8 +127,7 @@ public class HTMLReportPrinter {
 
         {
             SortedMap<String, String> env = new TreeMap<>();
-            for (String k : byName.keySet()) {
-                TestResult result = byName.get(k);
+            for (TestResult result : byName) {
                 if (result != null) {
                     for (Map.Entry<String, String> kv : result.getEnv().entries().entrySet()) {
                         String key = kv.getKey();
@@ -207,9 +201,8 @@ public class HTMLReportPrinter {
         emitTestReports(ReportUtils.byName(collector.getTestResults()));
 
         if (verbose) {
-            Map<TestConfig, TestResult> byConfig = ReportUtils.mergedByConfig(collector.getTestResults());
-            for (TestConfig k : byConfig.keySet()) {
-                TestResult result = byConfig.get(k);
+            List<TestResult> byConfig = ReportUtils.mergedByConfig(collector.getTestResults());
+            for (TestResult result : byConfig) {
                 printer.add(result);
             }
         }
@@ -247,7 +240,7 @@ public class HTMLReportPrinter {
                 "<body>");
     }
 
-    private void printXTests(Map<String, TestResult> byName,
+    private void printXTests(List<TestResult> byName,
                              PrintWriter output,
                              String header,
                              String subheader,
@@ -259,15 +252,13 @@ public class HTMLReportPrinter {
         output.println("<table cellspacing=0 cellpadding=3 width=\"100%\">");
 
         boolean hadAnyTests = false;
-        for (String name : byName.keySet()) {
-            TestInfo test = TestList.getInfo(name);
-            TestResult result = byName.get(name);
-            TestGrading grading = new TestGrading(result, test);
+        for (TestResult result : byName) {
+            TestGrading grading = TestGrading.grade(result);
             if (filterStatus.test(result.status()) && filterGrading.test(grading)) {
                 if (result.status() == Status.NORMAL) {
-                    emitTest(output, result, test);
+                    emitTest(output, result);
                 } else {
-                    emitTestFailure(output, result, test);
+                    emitTestFailure(output, result);
                 }
                 hadAnyTests = true;
             }
@@ -282,77 +273,64 @@ public class HTMLReportPrinter {
         output.println("<br>");
     }
 
-    public void emitTest(PrintWriter output, TestResult result, TestInfo description) {
+    public void emitTest(PrintWriter output, TestResult result) {
         cellStyle = 3 - cellStyle;
         output.println("<tr class=\"cell" + cellStyle + "\">");
         output.println("<td>&nbsp;&nbsp;&nbsp;<a href=\"" + result.getName() + ".html\">" + StringUtils.chunkName(result.getName()) + "</a></td>");
         output.printf("<td>%s</td>", getRoughCount(result));
-        if (description != null) {
-            TestGrading grading = new TestGrading(result, description);
-            if (grading.isPassed) {
-                output.println("<td class=\"passed\">PASSED</td>");
-            } else {
-                output.println("<td class=\"failed\">FAILED</td>");
-            }
 
-            if (grading.hasInteresting) {
-                output.println("<td class=\"interesting\">INTERESTING</td>");
-            } else {
-                output.println("<td class=\"interesting\"></td>");
-            }
-            if (grading.hasSpec) {
-                output.println("<td class=\"spec\">SPEC</td>");
-            } else {
-                output.println("<td class=\"spec\"></td>");
-            }
-            output.println("<td class=\"passed\"></td>");
+        TestGrading grading = TestGrading.grade(result);
+        if (grading.isPassed) {
+            output.println("<td class=\"passed\">PASSED</td>");
         } else {
-            output.println("<td class=\"failed\">MISSING DESCRIPTION</td>");
-            output.println("<td class=\"failed\"></td>");
-            output.println("<td class=\"failed\"></td>");
-            output.println("<td class=\"failed\"></td>");
+            output.println("<td class=\"failed\">FAILED</td>");
         }
+
+        if (grading.hasInteresting) {
+            output.println("<td class=\"interesting\">INTERESTING</td>");
+        } else {
+            output.println("<td class=\"interesting\"></td>");
+        }
+        if (grading.hasSpec) {
+            output.println("<td class=\"spec\">SPEC</td>");
+        } else {
+            output.println("<td class=\"spec\"></td>");
+        }
+        output.println("<td class=\"passed\"></td>");
         output.println("</tr>");
     }
 
-    public void emitTestFailure(PrintWriter output, TestResult result, TestInfo description) {
+    public void emitTestFailure(PrintWriter output, TestResult result) {
         cellStyle = 3 - cellStyle;
         output.println("<tr class=\"cell" + cellStyle + "\">");
         output.println("<td>&nbsp;&nbsp;&nbsp;<a href=\"" + result.getName() + ".html\">" + StringUtils.chunkName(result.getName()) + "</a></td>");
         output.println("<td></td>");
-        if (description != null) {
-            switch (result.status()) {
-                case API_MISMATCH:
-                    output.println("<td class=\"interesting\">API MISMATCH</td>");
-                    output.println("<td class=\"interesting\"></td>");
-                    output.println("<td class=\"interesting\"></td>");
-                    output.println("<td class=\"interesting\">Sanity check failed, API mismatch?</td>");
-                    break;
-                case TEST_ERROR:
-                case CHECK_TEST_ERROR:
-                    output.println("<td class=\"failed\">ERROR</td>");
-                    output.println("<td class=\"failed\"></td>");
-                    output.println("<td class=\"failed\"></td>");
-                    output.println("<td class=\"failed\">Error while running the test</td>");
-                    break;
-                case TIMEOUT_ERROR:
-                    output.println("<td class=\"failed\">ERROR</td>");
-                    output.println("<td class=\"failed\"></td>");
-                    output.println("<td class=\"failed\"></td>");
-                    output.println("<td class=\"failed\">Timeout while running the test</td>");
-                    break;
-                case VM_ERROR:
-                    output.println("<td class=\"failed\">VM ERROR</td>");
-                    output.println("<td class=\"failed\"></td>");
-                    output.println("<td class=\"failed\"></td>");
-                    output.println("<td class=\"failed\">Error running the VM</td>");
-                    break;
-            }
-        } else {
-            output.println("<td class=\"failed\">MISSING DESCRIPTION</td>");
-            output.println("<td class=\"failed\"></td>");
-            output.println("<td class=\"failed\"></td>");
-            output.println("<td class=\"failed\"></td>");
+        switch (result.status()) {
+            case API_MISMATCH:
+                output.println("<td class=\"interesting\">API MISMATCH</td>");
+                output.println("<td class=\"interesting\"></td>");
+                output.println("<td class=\"interesting\"></td>");
+                output.println("<td class=\"interesting\">Sanity check failed, API mismatch?</td>");
+                break;
+            case TEST_ERROR:
+            case CHECK_TEST_ERROR:
+                output.println("<td class=\"failed\">ERROR</td>");
+                output.println("<td class=\"failed\"></td>");
+                output.println("<td class=\"failed\"></td>");
+                output.println("<td class=\"failed\">Error while running the test</td>");
+                break;
+            case TIMEOUT_ERROR:
+                output.println("<td class=\"failed\">ERROR</td>");
+                output.println("<td class=\"failed\"></td>");
+                output.println("<td class=\"failed\"></td>");
+                output.println("<td class=\"failed\">Timeout while running the test</td>");
+                break;
+            case VM_ERROR:
+                output.println("<td class=\"failed\">VM ERROR</td>");
+                output.println("<td class=\"failed\"></td>");
+                output.println("<td class=\"failed\"></td>");
+                output.println("<td class=\"failed\">Error running the VM</td>");
+                break;
         }
         output.println("</tr>");
     }
@@ -403,42 +381,13 @@ public class HTMLReportPrinter {
             output.println("<th>Interpretation</th>");
             output.println("</tr>");
 
-            List<String> unmatchedStates = new ArrayList<>();
-            unmatchedStates.addAll(r.getStateKeys());
-            for (StateCase c : test.cases()) {
-
-                boolean matched = false;
-
-                for (String s : r.getStateKeys()) {
-                    if (c.matches(s)) {
-                        // match!
-                        output.println("<tr bgColor=" + selectHTMLColor(c.expect(), r.getCount(s) == 0) + ">");
-                        output.println("<td>" + s + "</td>");
-                        output.println("<td align=center>" + r.getCount(s) + "</td>");
-                        output.println("<td align=center>" + c.expect() + "</td>");
-                        output.println("<td>" + c.description() + "</td>");
-                        output.println("</tr>");
-                        matched = true;
-                        unmatchedStates.remove(s);
-                    }
-                }
-
-                if (!matched) {
-                    output.println("<tr bgColor=" + selectHTMLColor(c.expect(), true) + ">");
-                    output.println("<td>" + c.matchPattern() + "</td>");
-                    output.println("<td align=center>" + 0 + "</td>");
-                    output.println("<td align=center>" + c.expect() + "</td>");
-                    output.println("<td>" + c.description() + "</td>");
-                    output.println("</tr>");
-                }
-            }
-
-            for (String s : unmatchedStates) {
-                output.println("<tr bgColor=" + selectHTMLColor(test.unmatched().expect(), r.getCount(s) == 0) + ">");
-                output.println("<td>" + s + "</td>");
-                output.println("<td align=center>" + r.getCount(s) + "</td>");
-                output.println("<td align=center>" + test.unmatched().expect() + "</td>");
-                output.println("<td>" + test.unmatched().expect() + "</td>");
+            TestGrading grading = TestGrading.grade(r);
+            for (GradingResult c : grading.gradingResults) {
+                output.println("<tr bgColor=" + selectHTMLColor(c.expect, c.count == 0) + ">");
+                output.println("<td>" + c.id + "</td>");
+                output.println("<td align=center>" + c.count + "</td>");
+                output.println("<td align=center>" + c.expect + "</td>");
+                output.println("<td>" + c.description + "</td>");
                 output.println("</tr>");
             }
 

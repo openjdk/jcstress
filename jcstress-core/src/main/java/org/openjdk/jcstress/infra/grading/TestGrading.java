@@ -28,6 +28,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.infra.StateCase;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.TestResult;
+import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.NonNullArrayList;
 
 import java.util.ArrayList;
@@ -40,18 +41,17 @@ public class TestGrading {
     public boolean isPassed;
     public boolean hasInteresting;
     public boolean hasSpec;
+    public final List<GradingResult> gradingResults;
     public final List<String> failureMessages;
 
-    public TestGrading(TestResult r, TestInfo test) {
-        failureMessages = new NonNullArrayList<>();
+    public static TestGrading grade(TestResult r) {
+        return new TestGrading(r);
+    }
 
-        if (test == null) {
-            isPassed = false;
-            hasInteresting = false;
-            hasSpec = false;
-            failureMessages.add("No test.");
-            return;
-        }
+    private TestGrading(TestResult r) {
+        TestInfo test = TestList.getInfo(r.getName());
+        gradingResults = new ArrayList<>();
+        failureMessages = new NonNullArrayList<>();
 
         isPassed = true;
         hasInteresting = false;
@@ -59,6 +59,7 @@ public class TestGrading {
 
         List<String> unmatchedStates = new ArrayList<>();
         unmatchedStates.addAll(r.getStateKeys());
+
         for (StateCase c : test.cases()) {
             boolean matched = false;
 
@@ -72,6 +73,13 @@ public class TestGrading {
                     failureMessages.add(failureMessage(s, ex, count));
                     matched = true;
                     unmatchedStates.remove(s);
+
+                    gradingResults.add(new GradingResult(
+                            c.matchPattern(),
+                            c.expect(),
+                            r.getCount(s),
+                            c.description()
+                    ));
                 }
             }
 
@@ -80,6 +88,13 @@ public class TestGrading {
                 hasInteresting |= hasInteresting(ex, 0);
                 hasSpec |= hasSpec(ex, 0);
                 failureMessages.add(failureMessage("N/A", ex, 0));
+
+                gradingResults.add(new GradingResult(
+                        c.matchPattern(),
+                        c.expect(),
+                        0,
+                        c.description()
+                ));
             }
         }
 
@@ -90,6 +105,13 @@ public class TestGrading {
             hasInteresting |= hasInteresting(expect, count);
             hasSpec |= hasSpec(expect, count);
             failureMessages.add(failureMessage(s, expect, count));
+
+            gradingResults.add(new GradingResult(
+                    s,
+                    test.unmatched().expect(),
+                    r.getCount(s),
+                    test.unmatched().description()
+            ));
         }
     }
 

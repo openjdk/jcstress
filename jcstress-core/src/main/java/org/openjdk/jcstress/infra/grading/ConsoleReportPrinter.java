@@ -92,6 +92,8 @@ public class ConsoleReportPrinter implements TestResultCollector {
     }
 
     private void printResult(TestResult r, boolean isVerbose) {
+        TestGrading grading = TestGrading.grade(r);
+
         switch (r.status()) {
             case TIMEOUT_ERROR:
                 printLine("TIMEOUT", r);
@@ -121,22 +123,14 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 softErrors++;
                 return;
             case NORMAL:
-                TestInfo test = TestList.getInfo(r.getName());
-                if (test == null) {
-                    output.println();
-                    printLine("UNKNOWN", r);
-                    isVerbose = true;
+                if (grading.isPassed) {
+                    printLine("OK", r);
+                    passed++;
                 } else {
-                    TestGrading grading = new TestGrading(r, test);
-                    if (grading.isPassed) {
-                        printLine("OK", r);
-                        passed++;
-                    } else {
-                        output.println();
-                        printLine("FAILED", r);
-                        isVerbose = true;
-                        failed++;
-                    }
+                    output.println();
+                    printLine("FAILED", r);
+                    isVerbose = true;
+                    failed++;
                 }
                 break;
             default:
@@ -162,18 +156,6 @@ public class ConsoleReportPrinter implements TestResultCollector {
             }
 
             TestInfo test = TestList.getInfo(r.getName());
-            if (test == null) {
-                output.printf("%" + idLen + "s %" + occLen +"s %" + expectLen + "s  %-" + descLen + "s%n", "Observed state", "Occurrences", "Expectation", "Interpretation");
-                for (String s : r.getStateKeys()) {
-                    output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
-                            StringUtils.cutoff(s, idLen),
-                            r.getCount(s),
-                            Expect.UNKNOWN,
-                            "N/A");
-                }
-                return;
-            }
-
             for (StateCase c : test.cases()) {
                 idLen = Math.max(idLen, c.matchPattern().length());
                 expectLen = Math.max(expectLen, c.expect().toString().length());
@@ -186,40 +168,12 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
             output.printf("%" + idLen + "s %" + occLen +"s %" + expectLen + "s  %-" + descLen + "s%n", "Observed state", "Occurrences", "Expectation", "Interpretation");
 
-            List<String> unmatchedStates = new ArrayList<>();
-            unmatchedStates.addAll(r.getStateKeys());
-
-            for (StateCase c : test.cases()) {
-                boolean matched = false;
-
-                for (String s : r.getStateKeys()) {
-                    if (c.matches(s)) {
-                        // match!
-                        output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
-                                StringUtils.cutoff(s, idLen),
-                                r.getCount(s),
-                                c.expect(),
-                                StringUtils.cutoff(c.description(), descLen));
-                        matched = true;
-                        unmatchedStates.remove(s);
-                    }
-                }
-
-                if (!matched) {
-                    output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
-                                StringUtils.cutoff(c.matchPattern(), idLen),
-                                0,
-                                c.expect(),
-                                StringUtils.cutoff(c.description(), descLen));
-                }
-            }
-
-            for (String s : unmatchedStates) {
+            for (GradingResult gradeRes : grading.gradingResults) {
                 output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
-                        StringUtils.cutoff(s, idLen),
-                        r.getCount(s),
-                        test.unmatched().expect(),
-                        StringUtils.cutoff(test.unmatched().description(), descLen));
+                        StringUtils.cutoff(gradeRes.id, idLen),
+                        gradeRes.count,
+                        gradeRes.expect,
+                        StringUtils.cutoff(gradeRes.description, descLen));
             }
 
             output.println();

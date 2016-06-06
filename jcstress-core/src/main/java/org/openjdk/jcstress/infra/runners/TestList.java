@@ -107,6 +107,10 @@ public class TestList {
     }
 
     public static TestInfo getInfo(String name) {
-        return getTests().get(name);
+        TestInfo info = getTests().get(name);
+        if (info == null) {
+            throw new IllegalArgumentException("Unable to find info for test: " + name);
+        }
+        return info;
     }
 }
