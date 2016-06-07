@@ -42,15 +42,16 @@ public class ForkedMain {
             // expected on JDK 7 and lower, parent should have printed the message for user
         }
 
-        if (args.length < 2) {
-            throw new IllegalStateException("Expected two arguments");
+        if (args.length < 3) {
+            throw new IllegalStateException("Expected three arguments");
         }
 
         String host = args[0];
         int port = Integer.valueOf(args[1]);
+        int token = Integer.valueOf(args[2]);
 
         BinaryLinkClient link = new BinaryLinkClient(host, port);
-        TestConfig config = link.nextJob();
+        TestConfig config = link.nextJob(token);
 
         new JCStress(null).runEmbedded(config, link);
         link.close();

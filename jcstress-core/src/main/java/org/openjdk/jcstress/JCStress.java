@@ -160,6 +160,8 @@ public class JCStress {
     }
 
     private List<TestConfig> prepareRunProgram(Set<String> tests) {
+        int tokenCounter = 0;
+
         List<TestConfig> configs = new ArrayList<>();
         if (opts.shouldFork()) {
             List<String> inputArgs = ManagementFactory.getRuntimeMXBean().getInputArguments();
@@ -169,7 +171,7 @@ public class JCStress {
                     fullArgs.addAll(inputArgs);
                     fullArgs.addAll(jvmArgs);
                     for (int f = 0; f < opts.getForks(); f++) {
-                        configs.add(new TestConfig(opts, TestList.getInfo(test), TestConfig.RunMode.FORKED, f, fullArgs));
+                        configs.add(new TestConfig(tokenCounter++, opts, TestList.getInfo(test), TestConfig.RunMode.FORKED, f, fullArgs));
                     }
                 }
             }
@@ -177,7 +179,7 @@ public class JCStress {
             for (String test : tests) {
                 TestInfo info = TestList.getInfo(test);
                 TestConfig.RunMode mode = info.requiresFork() ? TestConfig.RunMode.FORKED : TestConfig.RunMode.EMBEDDED;
-                configs.add(new TestConfig(opts, info, mode, -1, Collections.emptyList()));
+                configs.add(new TestConfig(tokenCounter++, opts, info, mode, -1, Collections.emptyList()));
             }
         }
 
@@ -201,6 +203,9 @@ public class JCStress {
 
             command.add(server.getHost());
             command.add(String.valueOf(server.getPort()));
+
+            // which config should the forked VM pull?
+            command.add(String.valueOf(config.uniqueToken));
 
             ProcessBuilder pb = new ProcessBuilder(command);
             Process p = pb.start();

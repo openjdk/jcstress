@@ -32,8 +32,8 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Accepts the binary data from the forked VM and pushes it to parent VM
@@ -47,11 +47,11 @@ public final class BinaryLinkServer {
     private final Acceptor acceptor;
     private final Collection<Handler> handlers;
     private final TestResultCollector out;
-    private final Queue<TestConfig> configs;
+    private final ConcurrentMap<Integer, TestConfig> configs;
 
     public BinaryLinkServer(TestResultCollector out) throws IOException {
         this.out = out;
-        this.configs = new ConcurrentLinkedDeque<>();
+        this.configs = new ConcurrentHashMap<>();
         acceptor = new Acceptor();
         acceptor.start();
 
@@ -99,7 +99,7 @@ public final class BinaryLinkServer {
     }
 
     public void addTask(TestConfig cfg) {
-        configs.add(cfg);
+        configs.put(cfg.uniqueToken, cfg);
     }
 
     private final class Acceptor extends Thread {
@@ -208,7 +208,7 @@ public final class BinaryLinkServer {
         }
 
         private void handleHandshake(JobRequestFrame obj) throws IOException {
-            TestConfig poll = configs.poll();
+            TestConfig poll = configs.remove(obj.getToken());
             if (poll == null) {
                 throw new IllegalStateException("No jobs left, this should not happen");
             }

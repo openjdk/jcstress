@@ -106,9 +106,9 @@ public final class BinaryLinkClient implements TestResultCollector {
         }
     }
 
-    public TestConfig nextJob() throws IOException, ClassNotFoundException {
+    public TestConfig nextJob(int token) throws IOException, ClassNotFoundException {
         synchronized (lock) {
-            pushFrame(new JobRequestFrame());
+            pushFrame(new JobRequestFrame(token));
 
             Object reply = readFrame();
             if (reply instanceof JobResponseFrame) {

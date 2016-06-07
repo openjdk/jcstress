@@ -28,4 +28,13 @@ import java.io.Serializable;
 
 class JobRequestFrame implements Serializable {
     private static final long serialVersionUID = 2082214387637725282L;
+    private int token;
+
+    public JobRequestFrame(int token) {
+        this.token = token;
+    }
+
+    public int getToken() {
+        return token;
+    }
 }

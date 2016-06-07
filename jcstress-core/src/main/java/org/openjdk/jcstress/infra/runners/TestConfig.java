@@ -35,6 +35,7 @@ public class TestConfig implements Serializable {
 
     public static final Comparator<TestConfig> COMPARATOR_NAME = Comparator.comparing((c) -> c.name);
 
+    public final int uniqueToken;
     public final SpinLoopStyle spinLoopStyle;
     public final boolean verbose;
     public final int minStride;
@@ -54,7 +55,8 @@ public class TestConfig implements Serializable {
         FORKED,
     }
 
-    public TestConfig(Options opts, TestInfo info, RunMode runMode, int forkId, List<String> jvmArgs) {
+    public TestConfig(int uniqueToken, Options opts, TestInfo info, RunMode runMode, int forkId, List<String> jvmArgs) {
+        this.uniqueToken = uniqueToken;
         this.runMode = runMode;
         this.forkId = forkId;
         this.jvmArgs = jvmArgs;
