@@ -57,60 +57,66 @@ public class TestGrading {
         hasInteresting = false;
         hasSpec = false;
 
-        List<String> unmatchedStates = new ArrayList<>();
-        unmatchedStates.addAll(r.getStateKeys());
+        List<StateCase> unmatchedStates = new ArrayList<>();
+        unmatchedStates.addAll(test.cases());
 
-        for (StateCase c : test.cases()) {
-            boolean matched = false;
+        for (String s : r.getStateKeys()) {
 
-            Expect ex = c.expect();
-            for (String s : r.getStateKeys()) {
-                if (c.matches(s)) {
-                    long count = r.getCount(s);
-                    isPassed &= passed(ex, count);
-                    hasInteresting |= hasInteresting(ex, count);
-                    hasSpec |= hasSpec(ex, count);
-                    failureMessages.add(failureMessage(s, ex, count));
-                    matched = true;
-                    unmatchedStates.remove(s);
-
-                    gradingResults.add(new GradingResult(
-                            c.matchPattern(),
-                            c.expect(),
-                            r.getCount(s),
-                            c.description()
-                    ));
+            // Figure out all matching cases, look for the exact match first:
+            StateCase matched = null;
+            for (StateCase c : test.cases()) {
+                if (c.matchesExactly(s)) {
+                    matched = c;
+                    break;
                 }
             }
 
-            if (!matched) {
-                isPassed &= passed(ex, 0);
-                hasInteresting |= hasInteresting(ex, 0);
-                hasSpec |= hasSpec(ex, 0);
-                failureMessages.add(failureMessage("N/A", ex, 0));
-
-                gradingResults.add(new GradingResult(
-                        c.matchPattern(),
-                        c.expect(),
-                        0,
-                        c.description()
-                ));
+            // Look for pattern match next:
+            if (matched == null) {
+                for (StateCase c : test.cases()) {
+                    if (c.matches(s)) {
+                        matched = c;
+                        break;
+                    }
+                }
             }
-        }
 
-        for (String s : unmatchedStates) {
-            Expect expect = test.unmatched().expect();
+            if (matched != null) {
+                // Has the match:
+                unmatchedStates.remove(matched);
+            } else {
+                // Otherwise, map to unmatched:
+                matched = test.unmatched();
+            }
+
             long count = r.getCount(s);
-            isPassed &= passed(expect, count);
-            hasInteresting |= hasInteresting(expect, count);
-            hasSpec |= hasSpec(expect, count);
-            failureMessages.add(failureMessage(s, expect, count));
+            Expect ex = matched.expect();
+            isPassed &= passed(ex, count);
+            hasInteresting |= hasInteresting(ex, count);
+            hasSpec |= hasSpec(ex, count);
+            failureMessages.add(failureMessage(s, ex, count));
 
             gradingResults.add(new GradingResult(
                     s,
-                    test.unmatched().expect(),
-                    r.getCount(s),
-                    test.unmatched().description()
+                    matched.expect(),
+                    count,
+                    matched.description()
+            ));
+        }
+
+        // Record unmatched cases from the test description itself
+        for (StateCase c : unmatchedStates) {
+            Expect ex = c.expect();
+            isPassed &= passed(ex, 0);
+            hasInteresting |= hasInteresting(ex, 0);
+            hasSpec |= hasSpec(ex, 0);
+            failureMessages.add(failureMessage("N/A", ex, 0));
+
+            gradingResults.add(new GradingResult(
+                    c.matchPattern(),
+                    ex,
+                    0,
+                    c.description()
             ));
         }
     }

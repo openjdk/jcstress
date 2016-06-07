@@ -53,7 +53,11 @@ public class StateCase {
         return state.matcher(s).matches();
     }
 
+    public boolean matchesExactly(String s) {
+        return matchPattern().equals(s);
+    }
+
     public String matchPattern() {
-        return state.toString();
+        return state.pattern();
     }
 }
