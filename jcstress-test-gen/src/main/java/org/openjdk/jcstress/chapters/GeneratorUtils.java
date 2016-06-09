@@ -70,4 +70,8 @@ public class GeneratorUtils {
         }
         return sb.toString();
     }
+
+    static String upcaseFirst(String s) {
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    }
 }

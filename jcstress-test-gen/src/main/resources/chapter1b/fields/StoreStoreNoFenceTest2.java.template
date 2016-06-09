@@ -1,0 +1,85 @@
+/*
+ * Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
+package $package$;
+
+import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Expect;
+import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
+import org.openjdk.jcstress.annotations.Ref;
+import org.openjdk.jcstress.annotations.State;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.infra.results.$Type$Result2;
+
+import static java.nio.ByteOrder.BIG_ENDIAN;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.util.Random;
+import java.nio.ByteBuffer;
+
+
+@JCStressTest
+@Description("Tests VarHandle methods which eliminate effect of store store fence on a volatile variable.")
+@Outcome(id = "$value0$, $value0$", expect = Expect.ACCEPTABLE, desc = "actor2 observe the variables before actor1 update")
+@Outcome(id = "$value0$, $value1$", expect = Expect.ACCEPTABLE, desc = "actor2 observe the variables after x is already updated but var hasn't yet")
+@Outcome(id = "$value1$, $value0$", expect = Expect.ACCEPTABLE,  desc = "store var is reordered with store y")
+@Outcome(id = "$value1$, $value1$", expect = Expect.ACCEPTABLE,  desc = "actor2 observe the variables after actor1 update completely")
+#if[alwaysAtomic]
+@Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
+#else[alwaysAtomic]
+@Outcome(expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec, reordering may happen, both may read half-value")
+@Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
+#end[alwaysAtomic]
+@State
+public class $TestClassName$ {
+
+    $type$ y;
+    
+    volatile $type$ field;
+
+    static final VarHandle vh;
+
+    static {
+        try {
+            vh = MethodHandles.lookup().findVarHandle($TestClassName$.class, "field", $type$.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    @Actor
+    public void actor1() {
+        %Set<$valueLiteral1$>%
+        y = $valueLiteral1$;
+    }
+
+    @Actor
+    public void actor2($Type$Result2 r) {
+        r.r1 = y;
+        VarHandle.fullFence();
+        r.r2 = field;
+    }
+
+}
