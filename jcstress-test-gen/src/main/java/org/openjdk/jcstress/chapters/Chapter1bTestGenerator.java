@@ -219,7 +219,7 @@ public class Chapter1bTestGenerator {
 
                 String pkg = BASE_PKG + "." + vhType + "." + templateName;
                 String testName = operation.method.name() + upcaseFirst(type.type);
-                int length = getVLength(type);
+                int length = getArrayLength(type);
 
                 String currentResult = Spp.spp(result, keys(type),
                         arrayVars(type, "array", pkg, testName + "Begin", String.valueOf(length), "0", ", 0"));
@@ -250,7 +250,7 @@ public class Chapter1bTestGenerator {
 
                 String pkg = BASE_PKG + "." + vhType + bufferType.pkgAppendix() + "." + templateName;
                 String testName = operation.method.name() + upcaseFirst(type.type);
-                int length = getVLength(type);
+                int length = getArrayLength(type);
 
                 String currentResult = Spp.spp(result, keys(type),
                         viewVars(type, object, pkg, testName + "Begin", String.valueOf(length), "off",
@@ -273,7 +273,8 @@ public class Chapter1bTestGenerator {
     private static String generateConcreteOperation(String result, String target, String concreteOp,
             String getOp, String setOp) {
         result = result.replaceAll(target, concreteOp);
-        return result.replaceAll("%GetVar%", getOp).replaceAll("%SetVar<(.+)>%", setOp)
+        return result.replaceAll("%GetVar%", getOp)
+                .replaceAll("%SetVar<(.+)>%", setOp)
                 .replaceAll("%CompareAndSet<(.+), (.+)>%", COMPAREANDSET.operation);
     }
 
@@ -322,7 +323,7 @@ public class Chapter1bTestGenerator {
         return map;
     }
 
-    private static int getVLength(Type type) {
+    private static int getArrayLength(Type type) {
         final int TOTAL_BYTES = 256; // to ensure 2 cache lines. If it's array
                                      // and type is String, the real total bytes
                                      // may be 512
@@ -334,18 +335,76 @@ public class Chapter1bTestGenerator {
         void write(String pkg, String testName, String result) throws IOException;
     }
 
-    static enum Type {
-        INT("int", Integer.BYTES, true, new String[] { "-2", "7" }, new String[] { "-2", "7" }), // here value2 should equal value0 + value1 + value1, to meet GetAndAdd, AddAndGet tests
-        LONG("long", Long.BYTES, false, new String[] { "-2L", "7" }, new String[] { "-2", "7" }), // here value2 should equal value0 + value1 + value1, to meet GetAndAdd, AddAndGet tests
-        STRING("String", 4, true, new String[] { "\"2\"", "\"7\"" }, new String[] { "2", "7" }), // reference may be compressed on 64-bits, 4 is to make sure the real total bytes exceed 256
-        BOOLEAN("boolean", 1, true, new String[] {}, new String[] {}),
-        BYTE("byte", Byte.BYTES, true, new String[] {}, new String[] {}),
-        SHORT("short", Short.BYTES, true, new String[] {}, new String[] {}),
-        CHAR("char", Character.BYTES, true, new String[] {}, new String[] {}),
-        FLOAT("float", Float.BYTES, true, new String[] { "2", "7" }, new String[] { "2.0", "7.0" }),
-        DOUBLE("double", Double.BYTES, false, new String[] { "2", "7" }, new String[] { "2.0", "7.0" });
+    enum Type {
+        INT("int",
+                Integer.BYTES,
+                true,
 
-        private Type(String type, int sizeInArray, boolean alwaysAtomic, String[] extraValueLiterals,
+                // here value2 should equal value0 + value1 + value1, to meet GetAndAdd, AddAndGet tests
+                new String[] { "-2", "7" },
+                new String[] { "-2", "7" }
+        ),
+
+        LONG("long",
+                Long.BYTES,
+                false,
+
+                // here value2 should equal value0 + value1 + value1, to meet GetAndAdd, AddAndGet tests
+                new String[] { "-2L", "7" },
+                new String[] { "-2", "7" }
+        ),
+
+        STRING("String",
+                4,
+                true,
+                // reference may be compressed on 64-bits, 4 is to make sure the real total bytes exceed 256
+                new String[] { "\"2\"", "\"7\"" },
+                new String[] { "2", "7" }
+        ),
+
+        BOOLEAN("boolean",
+                1,
+                true,
+                new String[] {},
+                new String[] {}
+        ),
+
+        BYTE("byte",
+                Byte.BYTES,
+                true,
+                new String[] {},
+                new String[] {}
+        ),
+
+        SHORT("short",
+                Short.BYTES,
+                true,
+                new String[] {},
+                new String[] {}
+        ),
+
+        CHAR("char",
+                Character.BYTES,
+                true,
+                new String[] {},
+                new String[] {}
+        ),
+
+        FLOAT("float",
+                Float.BYTES,
+                true,
+                new String[] { "2", "7" },
+                new String[] { "2.0", "7.0" }
+        ),
+
+        DOUBLE("double",
+                Double.BYTES,
+                false,
+                new String[] { "2", "7" },
+                new String[] { "2.0", "7.0" }
+        );
+
+        Type(String type, int sizeInArray, boolean alwaysAtomic, String[] extraValueLiterals,
                 String[] extraValues) {
             this.type = type;
             this.sizeInArray = sizeInArray;
@@ -354,14 +413,12 @@ public class Chapter1bTestGenerator {
             valueLiterals = new String[extraValueLiterals.length + 2];
             valueLiterals[0] = Values.DEFAULTS_LITERAL.get(type);
             valueLiterals[1] = Values.VALUES_LITERAL.get(type);
-            for (int i = 0; i < extraValueLiterals.length; i++)
-                valueLiterals[i + 2] = extraValueLiterals[i];
+            System.arraycopy(extraValueLiterals, 0, valueLiterals, 2, extraValueLiterals.length);
 
             values = new String[extraValues.length + 2];
             values[0] = Values.DEFAULTS.get(type);
             values[1] = Values.VALUES.get(type);
-            for (int i = 0; i < extraValues.length; i++)
-                values[i + 2] = extraValues[i];
+            System.arraycopy(extraValues, 0, values, 2, extraValues.length);
         }
 
         String type;
@@ -376,11 +433,8 @@ public class Chapter1bTestGenerator {
 
         protected abstract boolean supported(Method method, Type type);
 
-        protected boolean commonSupported(Method method) {
-            if (method.type == GET_SET || method.type == STATIC_FENCE)
-                return true;
-            else
-                return false;
+        boolean commonSupported(Method method) {
+            return (method.type == GET_SET || method.type == STATIC_FENCE);
         }
 
         static final Source DATA_SOURCE = new Source() {
@@ -434,27 +488,44 @@ public class Chapter1bTestGenerator {
 
     }
 
-    static enum Method {
-        Get(GET_SET), GetVolatile(GET_SET), GetOpaque(GET_SET), GetAcquire(GET_SET),
-        Set(GET_SET), SetVolatile(GET_SET), SetOpaque(GET_SET), SetRelease(GET_SET),
+    enum Method {
+        Get(GET_SET),
+        GetVolatile(GET_SET),
+        GetOpaque(GET_SET),
+        GetAcquire(GET_SET),
 
-        FullFence(STATIC_FENCE), AcquireFence(STATIC_FENCE), ReleaseFence(STATIC_FENCE),
-        LoadLoadFence(STATIC_FENCE), StoreStoreFence(STATIC_FENCE),
+        Set(GET_SET),
+        SetVolatile(GET_SET),
+        SetOpaque(GET_SET),
+        SetRelease(GET_SET),
 
-        CompareAndSet(ATOMIC_UPDATE), CompareAndExchangeVolatile(ATOMIC_UPDATE),
-        CompareAndExchangeAcquire(ATOMIC_UPDATE), CompareAndExchangeRelease(ATOMIC_UPDATE),
-        WeakCompareAndSet(ATOMIC_UPDATE), WeakCompareAndSetAcquire(ATOMIC_UPDATE),
-        WeakCompareAndSetRelease(ATOMIC_UPDATE), WeakCompareAndSetVolatile(ATOMIC_UPDATE), GetAndSet(ATOMIC_UPDATE),
+        FullFence(STATIC_FENCE),
+        AcquireFence(STATIC_FENCE),
+        ReleaseFence(STATIC_FENCE),
+        LoadLoadFence(STATIC_FENCE),
+        StoreStoreFence(STATIC_FENCE),
 
-        GetAndAdd(NUMERIC_ATOMIC_UPDATE), AddAndGet(NUMERIC_ATOMIC_UPDATE);
+        CompareAndSet(ATOMIC_UPDATE),
+        CompareAndExchangeVolatile(ATOMIC_UPDATE),
+        CompareAndExchangeAcquire(ATOMIC_UPDATE),
+        CompareAndExchangeRelease(ATOMIC_UPDATE),
 
-        private Method(Type type) {
+        WeakCompareAndSet(ATOMIC_UPDATE),
+        WeakCompareAndSetAcquire(ATOMIC_UPDATE),
+        WeakCompareAndSetRelease(ATOMIC_UPDATE),
+        WeakCompareAndSetVolatile(ATOMIC_UPDATE),
+        GetAndSet(ATOMIC_UPDATE),
+
+        GetAndAdd(NUMERIC_ATOMIC_UPDATE),
+        AddAndGet(NUMERIC_ATOMIC_UPDATE);
+
+        Method(Type type) {
             this.type = type;
         }
 
         Type type;
 
-        static enum Type {
+        enum Type {
             GET_SET, STATIC_FENCE, ATOMIC_UPDATE, NUMERIC_ATOMIC_UPDATE;
         }
     }
@@ -462,33 +533,108 @@ public class Chapter1bTestGenerator {
     private static final String LNSEP = System.getProperty("line.separator");
 
     enum Target {
-        T_ADDANDGET("%AddAndGet<(.+)>%", of(ADDANDGET)),
-        T_GETANDADD("%GetAndAdd<(.+)>%", of(GETANDADD)),
-        T_GETANDSET("%GetAndSet<(.+)>%", of(GETANDSET)),
-        T_CAE("%CAE<(.+), (.+)>%", of(COMPAREANDEXCHANGEVOLATILE, COMPAREANDEXCHANGERELEASE, COMPAREANDEXCHANGEACQUIRE)),
-        T_CAS("%CAS<(.+), (.+)>%", of(COMPAREANDSET)),
-        T_WEAKCAS("%WeakCAS<(.+), (.+)>%", of(WEAKCOMPAREANDSETRELEASE, WEAKCOMPAREANDSETACQUIRE, WEAKCOMPAREANDSET, WEAKCOMPAREANDSETVOLATILE)),
+        T_ADDANDGET(
+                "%AddAndGet<(.+)>%",
+                of(ADDANDGET)
+        ),
 
-        T_GETLOADLOADFENCE("%GetLoadLoadFence<>%", of(GETVOLATILE, GETACQUIRE, GET_ACQUIREFENCE, GET_LOADLOADFENCE, GET_FULLFENCE, GET_COMPAREANDSET_FAIL, COMPAREANDEXCHANGEVOLATILE_FAIL, COMPAREANDEXCHANGEACQUIRE_FAIL, WEAKCOMPAREANDSETACQUIRE_FAIL, WEAKCOMPAREANDSETVOLATILE_FAIL, ADDANDGET_ZERO, GETANDADD_ZERO, GETANDSET_OUT)),
-        T_LOADSTOREFENCESET("%LoadStoreFenceSet<(.+)>%", of(SETVOLATILE, SETRELEASE, RELEASEFENCE_SET, FULLFENCE_SET, COMPAREANDSET_SUC, COMPAREANDEXCHANGEVOLATILE_SUC, COMPAREANDEXCHANGERELEASE_SUC, WEAKCOMPAREANDSETRELEASE_SUC, WEAKCOMPAREANDSETVOLATILE_SUC, ADDANDGET, GETANDADD, GETANDSET)),
-        // GET_FULLFENCE is redundant for T_GETLOADSTOREFENCE, in this case, load + fullFence + store, in previous case, also load + fullFence + store
-        T_GETLOADSTOREFENCE("%GetLoadStoreFence<>%", of(GETVOLATILE, GETACQUIRE, GET_ACQUIREFENCE, GET_COMPAREANDSET_FAIL, COMPAREANDEXCHANGEVOLATILE_FAIL, COMPAREANDEXCHANGEACQUIRE_FAIL, WEAKCOMPAREANDSETACQUIRE_FAIL, WEAKCOMPAREANDSETVOLATILE_FAIL, ADDANDGET_ZERO, GETANDADD_ZERO, GETANDSET_OUT)),
+        T_GETANDADD(
+                "%GetAndAdd<(.+)>%",
+                of(GETANDADD)
+        ),
 
-        T_STORESTOREFENCESET("%StoreStoreFenceSet<(.+)>%", of(SETVOLATILE, SETRELEASE, RELEASEFENCE_SET, STORESTOREFENCE_SET, FULLFENCE_SET, COMPAREANDSET_SUC, COMPAREANDEXCHANGEVOLATILE_SUC, COMPAREANDEXCHANGERELEASE_SUC, WEAKCOMPAREANDSETRELEASE_SUC, WEAKCOMPAREANDSETVOLATILE_SUC, ADDANDGET, GETANDADD, GETANDSET)),
-        //FULLFENCE_SET, is redundant
-        //atomic update operations are also redundant in some sense, in some previous cases, it's getVolatile + store/load semantics already be tested,
-        //in following cases, setVolatile + store/load be tested, but for atomic update operations, its setVolatile always be with getVolatile, so can't identify which semantics take effect
-        T_SETSTORESTOREFENCE("%SetStoreStoreFence<(.+)>%", of(SETVOLATILE, COMPAREANDSET_SUC, COMPAREANDEXCHANGEVOLATILE_SUC, ADDANDGET, GETANDADD, GETANDSET)),
-        T_SETSTORELOADFENCE("%SetStoreLoadFence<(.+)>%", of(SETVOLATILE, SET_FULLFENCE, COMPAREANDSET_SUC, COMPAREANDEXCHANGEVOLATILE_SUC, ADDANDGET, GETANDADD, GETANDSET)),
+        T_GETANDSET(
+                "%GetAndSet<(.+)>%",
+                of(GETANDSET)
+        ),
 
-        T_WEAKSETSTORELOADFENCE("%WeakSetStoreLoadFence<(.+)>%", of(WEAKCOMPAREANDSETVOLATILE_SUC)),
-        T_WEAKSETSTORESTOREFENCE("%WeakSetStoreStoreFence<(.+)>%", of(WEAKCOMPAREANDSETVOLATILE_SUC)),
+        T_CAE(
+                "%CAE<(.+), (.+)>%",
+                of(COMPAREANDEXCHANGEVOLATILE, COMPAREANDEXCHANGERELEASE, COMPAREANDEXCHANGEACQUIRE)
+        ),
 
-        T_GET("%Get<>%", of(GET, COMPAREANDEXCHANGERELEASE_FAIL, WEAKCOMPAREANDSET_RETURN, WEAKCOMPAREANDSETRELEASE_RETURN)),
-        T_SET("%Set<(.+)>%", of(SET, WEAKCOMPAREANDSET_SUC, COMPAREANDEXCHANGEACQUIRE_SUC, WEAKCOMPAREANDSETACQUIRE_SUC)),
+        T_CAS(
+                "%CAS<(.+), (.+)>%",
+                of(COMPAREANDSET)
+        ),
 
-        T_SETOPAQUE("%SetOpaque<(.+)>%", of(SETOPAQUE)),
-        T_GETOPAQUE("%GetOpaque<>%", of(GETOPAQUE));
+        T_WEAKCAS(
+                "%WeakCAS<(.+), (.+)>%",
+                of(WEAKCOMPAREANDSETRELEASE, WEAKCOMPAREANDSETACQUIRE, WEAKCOMPAREANDSET, WEAKCOMPAREANDSETVOLATILE)
+        ),
+
+        T_GETLOADLOADFENCE(
+                "%GetLoadLoadFence<>%",
+                of(GETVOLATILE, GETACQUIRE, GET_ACQUIREFENCE, GET_LOADLOADFENCE,
+                        GET_FULLFENCE, GET_COMPAREANDSET_FAIL, COMPAREANDEXCHANGEVOLATILE_FAIL,
+                        COMPAREANDEXCHANGEACQUIRE_FAIL, WEAKCOMPAREANDSETACQUIRE_FAIL,
+                        WEAKCOMPAREANDSETVOLATILE_FAIL, ADDANDGET_ZERO, GETANDADD_ZERO, GETANDSET_OUT)
+        ),
+
+        T_LOADSTOREFENCESET(
+                "%LoadStoreFenceSet<(.+)>%",
+                of(SETVOLATILE, SETRELEASE, RELEASEFENCE_SET, FULLFENCE_SET, COMPAREANDSET_SUC,
+                        COMPAREANDEXCHANGEVOLATILE_SUC, COMPAREANDEXCHANGERELEASE_SUC,
+                        WEAKCOMPAREANDSETRELEASE_SUC, WEAKCOMPAREANDSETVOLATILE_SUC,
+                        ADDANDGET, GETANDADD, GETANDSET)
+        ),
+
+        T_GETLOADSTOREFENCE(
+                "%GetLoadStoreFence<>%",
+                of(GETVOLATILE, GETACQUIRE, GET_ACQUIREFENCE, GET_COMPAREANDSET_FAIL,
+                        COMPAREANDEXCHANGEVOLATILE_FAIL, COMPAREANDEXCHANGEACQUIRE_FAIL,
+                        WEAKCOMPAREANDSETACQUIRE_FAIL, WEAKCOMPAREANDSETVOLATILE_FAIL,
+                        ADDANDGET_ZERO, GETANDADD_ZERO, GETANDSET_OUT)
+        ),
+
+        T_STORESTOREFENCESET(
+                "%StoreStoreFenceSet<(.+)>%",
+                of(SETVOLATILE, SETRELEASE, RELEASEFENCE_SET, STORESTOREFENCE_SET,
+                        FULLFENCE_SET, COMPAREANDSET_SUC, COMPAREANDEXCHANGEVOLATILE_SUC,
+                        COMPAREANDEXCHANGERELEASE_SUC, WEAKCOMPAREANDSETRELEASE_SUC,
+                        WEAKCOMPAREANDSETVOLATILE_SUC,
+                        ADDANDGET, GETANDADD, GETANDSET)
+        ),
+
+        T_SETSTORESTOREFENCE(
+                "%SetStoreStoreFence<(.+)>%",
+                of(SETVOLATILE, COMPAREANDSET_SUC, COMPAREANDEXCHANGEVOLATILE_SUC,
+                        ADDANDGET, GETANDADD, GETANDSET)
+        ),
+
+        T_SETSTORELOADFENCE(
+                "%SetStoreLoadFence<(.+)>%",
+                of(SETVOLATILE, SET_FULLFENCE, COMPAREANDSET_SUC, COMPAREANDEXCHANGEVOLATILE_SUC,
+                        ADDANDGET, GETANDADD, GETANDSET)),
+
+        T_WEAKSETSTORELOADFENCE(
+                "%WeakSetStoreLoadFence<(.+)>%",
+                of(WEAKCOMPAREANDSETVOLATILE_SUC)
+        ),
+
+        T_WEAKSETSTORESTOREFENCE(
+                "%WeakSetStoreStoreFence<(.+)>%",
+                of(WEAKCOMPAREANDSETVOLATILE_SUC)
+        ),
+
+        T_GET(
+                "%Get<>%",
+                of(GET, COMPAREANDEXCHANGERELEASE_FAIL, WEAKCOMPAREANDSET_RETURN, WEAKCOMPAREANDSETRELEASE_RETURN)
+        ),
+
+        T_SET(
+                "%Set<(.+)>%",
+                of(SET, WEAKCOMPAREANDSET_SUC, COMPAREANDEXCHANGEACQUIRE_SUC, WEAKCOMPAREANDSETACQUIRE_SUC)),
+
+        T_SETOPAQUE(
+                "%SetOpaque<(.+)>%",
+                of(SETOPAQUE)
+        ),
+
+        T_GETOPAQUE(
+                "%GetOpaque<>%",
+                of(GETOPAQUE)
+        );
 
         Target(String target, Set<Operation> operations) {
             this.target = target;
@@ -499,57 +645,230 @@ public class Chapter1bTestGenerator {
         Set<Operation> operations;
 
         enum Operation {
-            SETVOLATILE("vh.setVolatile(\\$object\\$\\$index_para\\$, $1);", SetVolatile),
-            SETRELEASE("vh.setRelease(\\$object\\$\\$index_para\\$, $1);", SetRelease),
-            RELEASEFENCE_SET("VarHandle.releaseFence();" + LNSEP + "%SetVar<$1>%", ReleaseFence),
-            FULLFENCE_SET("VarHandle.fullFence();" + LNSEP + "%SetVar<$1>%", FullFence),
-            COMPAREANDSET_SUC("vh.compareAndSet(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);", CompareAndSet),
-            COMPAREANDEXCHANGEVOLATILE_SUC("vh.compareAndExchangeVolatile(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);", CompareAndExchangeVolatile),
-            COMPAREANDEXCHANGERELEASE_SUC("vh.compareAndExchangeRelease(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);", CompareAndExchangeRelease),
-            WEAKCOMPAREANDSETRELEASE_SUC("vh.weakCompareAndSetRelease(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);", WeakCompareAndSetRelease), //in fact, it may fail spuriously, however, if it suc test will run as expected, if it fail, the result will still fall in ACCEPTABLE range. Other WEAKXXX_SUC/RETURN are same as this except some cases of WEAKCOMPAREANDSETVOLATILE_SUC
-            WEAKCOMPAREANDSETVOLATILE_SUC("vh.weakCompareAndSetVolatile(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);", WeakCompareAndSetVolatile), //if it is used for SetStoreLoadFence and SetStoreStoreFence, the spurious failure will break the ACCEPTABLE Outcome, so have to write particular cases for it.
-            ADDANDGET("vh.addAndGet(\\$object\\$\\$index_para\\$, $1);", AddAndGet),
-            GETANDADD("vh.getAndAdd(\\$object\\$\\$index_para\\$, $1);", GetAndAdd),
-            GETANDSET("vh.getAndSet(\\$object\\$\\$index_para\\$, $1);", GetAndSet),
-            STORESTOREFENCE_SET("VarHandle.storeStoreFence();" + LNSEP + "%SetVar<$1>%", StoreStoreFence),
+            SETVOLATILE(
+                    "vh.setVolatile(\\$object\\$\\$index_para\\$, $1);",
+                    SetVolatile
+            ),
 
-            GETVOLATILE("(\\$type\\$) vh.getVolatile(\\$object\\$\\$index_para\\$);", GetVolatile),
-            GETACQUIRE("(\\$type\\$) vh.getAcquire(\\$object\\$\\$index_para\\$);", GetAcquire),
-            GET_ACQUIREFENCE("%GetVar%;" + LNSEP + "VarHandle.acquireFence();", AcquireFence),
-            GET_FULLFENCE("%GetVar%;" + LNSEP + "VarHandle.fullFence();", FullFence),
-            GET_COMPAREANDSET_FAIL("%GetVar%;" + LNSEP + "vh.compareAndSet(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);", CompareAndSet),
-            COMPAREANDEXCHANGEVOLATILE_FAIL("(\\$type\\$) vh.compareAndExchangeVolatile(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);", CompareAndExchangeVolatile),
-            COMPAREANDEXCHANGEACQUIRE_FAIL("(\\$type\\$) vh.compareAndExchangeAcquire(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);", CompareAndExchangeAcquire),
-            WEAKCOMPAREANDSETACQUIRE_FAIL("%GetVar%;" + LNSEP + "vh.weakCompareAndSetAcquire(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);", WeakCompareAndSetAcquire),
-            WEAKCOMPAREANDSETVOLATILE_FAIL("%GetVar%;" + LNSEP + "vh.weakCompareAndSetVolatile(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);", WeakCompareAndSetVolatile),
-            ADDANDGET_ZERO("(\\$type\\$) vh.addAndGet(\\$object\\$\\$index_para\\$, 0);", AddAndGet),
-            GETANDADD_ZERO("(\\$type\\$) vh.getAndAdd(\\$object\\$\\$index_para\\$, 0);", GetAndAdd),
-            GETANDSET_OUT("(\\$type\\$) vh.getAndSet(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$);", GetAndSet),
-            GET_LOADLOADFENCE("%GetVar%;" + LNSEP + "VarHandle.loadLoadFence();", LoadLoadFence),
+            SETRELEASE(
+                    "vh.setRelease(\\$object\\$\\$index_para\\$, $1);",
+                    SetRelease
+            ),
 
-            SET_FULLFENCE("%SetVar<$1>%" + LNSEP + "VarHandle.fullFence();", FullFence),
+            RELEASEFENCE_SET(
+                    "VarHandle.releaseFence();" + LNSEP + "%SetVar<$1>%",
+                    ReleaseFence
+            ),
 
-            COMPAREANDEXCHANGEVOLATILE("(\\$type\\$) vh.compareAndExchangeVolatile(\\$object\\$\\$index_para\\$, $1, $2);", CompareAndExchangeVolatile),
-            COMPAREANDEXCHANGERELEASE("(\\$type\\$) vh.compareAndExchangeRelease(\\$object\\$\\$index_para\\$, $1, $2);", CompareAndExchangeRelease),
-            COMPAREANDEXCHANGEACQUIRE("(\\$type\\$) vh.compareAndExchangeAcquire(\\$object\\$\\$index_para\\$, $1, $2);", CompareAndExchangeAcquire),
-            COMPAREANDSET("vh.compareAndSet(\\$object\\$\\$index_para\\$, $1, $2);", CompareAndSet),
-            WEAKCOMPAREANDSETRELEASE("vh.weakCompareAndSetRelease(\\$object\\$\\$index_para\\$, $1, $2);", WeakCompareAndSetRelease),
-            WEAKCOMPAREANDSETACQUIRE("vh.weakCompareAndSetAcquire(\\$object\\$\\$index_para\\$, $1, $2);", WeakCompareAndSetAcquire),
-            WEAKCOMPAREANDSET("vh.weakCompareAndSet(\\$object\\$\\$index_para\\$, $1, $2);", WeakCompareAndSet),
-            WEAKCOMPAREANDSETVOLATILE("vh.weakCompareAndSetVolatile(\\$object\\$\\$index_para\\$, $1, $2);", WeakCompareAndSetVolatile),
+            FULLFENCE_SET(
+                    "VarHandle.fullFence();" + LNSEP + "%SetVar<$1>%",
+                    FullFence
+            ),
 
-            SET("vh.set(\\$object\\$\\$index_para\\$, $1);", Set),
-            WEAKCOMPAREANDSET_SUC("vh.weakCompareAndSet(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);", WeakCompareAndSet),
-            COMPAREANDEXCHANGEACQUIRE_SUC("vh.compareAndExchangeAcquire(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);", CompareAndExchangeAcquire),
-            WEAKCOMPAREANDSETACQUIRE_SUC("vh.weakCompareAndSetAcquire(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);", WeakCompareAndSetAcquire),
+            COMPAREANDSET_SUC(
+                    "vh.compareAndSet(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);",
+                    CompareAndSet
+            ),
 
-            GET("(\\$type\\$) vh.get(\\$object\\$\\$index_para\\$);", Get),
-            COMPAREANDEXCHANGERELEASE_FAIL("(\\$type\\$) vh.compareAndExchangeRelease(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);", CompareAndExchangeRelease),
-            WEAKCOMPAREANDSET_RETURN("vh.weakCompareAndSet(\\$object\\$\\$index_para\\$, \\$valueLiteral1\\$, \\$valueLiteral3\\$) ? \\$valueLiteral1\\$ : \\$valueLiteral0\\$;", WeakCompareAndSet), //I suspect it should be incorrect to compare with 0
-            WEAKCOMPAREANDSETRELEASE_RETURN("vh.weakCompareAndSetRelease(\\$object\\$\\$index_para\\$, \\$valueLiteral1\\$, \\$valueLiteral3\\$) ? \\$valueLiteral1\\$ : \\$valueLiteral0\\$;", WeakCompareAndSetRelease), //I suspect it should be incorrect to compare with 0
+            COMPAREANDEXCHANGEVOLATILE_SUC(
+                    "vh.compareAndExchangeVolatile(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);",
+                    CompareAndExchangeVolatile
+            ),
 
-            SETOPAQUE("vh.setOpaque(\\$object\\$\\$index_para\\$, $1);", SetOpaque),
-            GETOPAQUE("(\\$type\\$) vh.getOpaque(\\$object\\$\\$index_para\\$);", GetOpaque);
+            COMPAREANDEXCHANGERELEASE_SUC(
+                    "vh.compareAndExchangeRelease(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);",
+                    CompareAndExchangeRelease
+            ),
+
+            WEAKCOMPAREANDSETRELEASE_SUC(
+                    "vh.weakCompareAndSetRelease(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);",
+                    WeakCompareAndSetRelease
+            ),
+
+            WEAKCOMPAREANDSETVOLATILE_SUC(
+                    "vh.weakCompareAndSetVolatile(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);",
+                    WeakCompareAndSetVolatile
+            ),
+
+            ADDANDGET(
+                    "vh.addAndGet(\\$object\\$\\$index_para\\$, $1);",
+                    AddAndGet
+            ),
+
+            GETANDADD(
+                    "vh.getAndAdd(\\$object\\$\\$index_para\\$, $1);",
+                    GetAndAdd
+            ),
+
+            GETANDSET(
+                    "vh.getAndSet(\\$object\\$\\$index_para\\$, $1);",
+                    GetAndSet
+            ),
+
+            STORESTOREFENCE_SET(
+                    "VarHandle.storeStoreFence();" + LNSEP + "%SetVar<$1>%",
+                    StoreStoreFence
+            ),
+
+            GETVOLATILE(
+                    "(\\$type\\$) vh.getVolatile(\\$object\\$\\$index_para\\$);",
+                    GetVolatile
+            ),
+
+            GETACQUIRE(
+                    "(\\$type\\$) vh.getAcquire(\\$object\\$\\$index_para\\$);",
+                    GetAcquire
+            ),
+
+            GET_ACQUIREFENCE(
+                    "%GetVar%;" + LNSEP + "VarHandle.acquireFence();",
+                    AcquireFence
+            ),
+
+            GET_FULLFENCE(
+                    "%GetVar%;" + LNSEP + "VarHandle.fullFence();",
+                    FullFence
+            ),
+
+            GET_COMPAREANDSET_FAIL(
+                    "%GetVar%;" + LNSEP + "vh.compareAndSet(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);",
+                    CompareAndSet
+            ),
+
+            COMPAREANDEXCHANGEVOLATILE_FAIL(
+                    "(\\$type\\$) vh.compareAndExchangeVolatile(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);",
+                    CompareAndExchangeVolatile
+            ),
+
+            COMPAREANDEXCHANGEACQUIRE_FAIL(
+                    "(\\$type\\$) vh.compareAndExchangeAcquire(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);",
+                    CompareAndExchangeAcquire
+            ),
+
+            WEAKCOMPAREANDSETACQUIRE_FAIL(
+                    "%GetVar%;" + LNSEP + "vh.weakCompareAndSetAcquire(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);",
+                    WeakCompareAndSetAcquire
+            ),
+
+            WEAKCOMPAREANDSETVOLATILE_FAIL(
+                    "%GetVar%;" + LNSEP + "vh.weakCompareAndSetVolatile(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);",
+                    WeakCompareAndSetVolatile
+            ),
+
+            ADDANDGET_ZERO(
+                    "(\\$type\\$) vh.addAndGet(\\$object\\$\\$index_para\\$, 0);",
+                    AddAndGet
+            ),
+
+            GETANDADD_ZERO(
+                    "(\\$type\\$) vh.getAndAdd(\\$object\\$\\$index_para\\$, 0);",
+                    GetAndAdd
+            ),
+
+            GETANDSET_OUT(
+                    "(\\$type\\$) vh.getAndSet(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$);",
+                    GetAndSet
+            ),
+
+            GET_LOADLOADFENCE(
+                    "%GetVar%;" + LNSEP + "VarHandle.loadLoadFence();",
+                    LoadLoadFence
+            ),
+
+            SET_FULLFENCE(
+                    "%SetVar<$1>%" + LNSEP + "VarHandle.fullFence();",
+                    FullFence
+            ),
+
+            COMPAREANDEXCHANGEVOLATILE(
+                    "(\\$type\\$) vh.compareAndExchangeVolatile(\\$object\\$\\$index_para\\$, $1, $2);",
+                    CompareAndExchangeVolatile
+            ),
+
+            COMPAREANDEXCHANGERELEASE(
+                    "(\\$type\\$) vh.compareAndExchangeRelease(\\$object\\$\\$index_para\\$, $1, $2);",
+                    CompareAndExchangeRelease
+            ),
+
+            COMPAREANDEXCHANGEACQUIRE(
+                    "(\\$type\\$) vh.compareAndExchangeAcquire(\\$object\\$\\$index_para\\$, $1, $2);",
+                    CompareAndExchangeAcquire
+            ),
+
+            COMPAREANDSET(
+                    "vh.compareAndSet(\\$object\\$\\$index_para\\$, $1, $2);",
+                    CompareAndSet
+            ),
+
+            WEAKCOMPAREANDSETRELEASE(
+                    "vh.weakCompareAndSetRelease(\\$object\\$\\$index_para\\$, $1, $2);",
+                    WeakCompareAndSetRelease
+            ),
+
+            WEAKCOMPAREANDSETACQUIRE(
+                    "vh.weakCompareAndSetAcquire(\\$object\\$\\$index_para\\$, $1, $2);",
+                    WeakCompareAndSetAcquire
+            ),
+
+            WEAKCOMPAREANDSET(
+                    "vh.weakCompareAndSet(\\$object\\$\\$index_para\\$, $1, $2);",
+                    WeakCompareAndSet
+            ),
+
+            WEAKCOMPAREANDSETVOLATILE(
+                    "vh.weakCompareAndSetVolatile(\\$object\\$\\$index_para\\$, $1, $2);",
+                    WeakCompareAndSetVolatile
+            ),
+
+            SET(
+                    "vh.set(\\$object\\$\\$index_para\\$, $1);",
+                    Set
+            ),
+
+            WEAKCOMPAREANDSET_SUC(
+                    "vh.weakCompareAndSet(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);",
+                    WeakCompareAndSet
+            ),
+
+            COMPAREANDEXCHANGEACQUIRE_SUC(
+                    "vh.compareAndExchangeAcquire(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);",
+                    CompareAndExchangeAcquire
+            ),
+
+            WEAKCOMPAREANDSETACQUIRE_SUC(
+                    "vh.weakCompareAndSetAcquire(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);",
+                    WeakCompareAndSetAcquire
+            ),
+
+            GET(
+                    "(\\$type\\$) vh.get(\\$object\\$\\$index_para\\$);",
+                    Get
+            ),
+
+            COMPAREANDEXCHANGERELEASE_FAIL(
+                    "(\\$type\\$) vh.compareAndExchangeRelease(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);",
+                    CompareAndExchangeRelease
+            ),
+
+            WEAKCOMPAREANDSET_RETURN(
+                    "vh.weakCompareAndSet(\\$object\\$\\$index_para\\$, \\$valueLiteral1\\$, \\$valueLiteral3\\$) ? \\$valueLiteral1\\$ : \\$valueLiteral0\\$;",
+                    WeakCompareAndSet
+            ),
+
+            WEAKCOMPAREANDSETRELEASE_RETURN(
+                    "vh.weakCompareAndSetRelease(\\$object\\$\\$index_para\\$, \\$valueLiteral1\\$, \\$valueLiteral3\\$) ? \\$valueLiteral1\\$ : \\$valueLiteral0\\$;",
+                    WeakCompareAndSetRelease
+            ),
+
+            SETOPAQUE(
+                    "vh.setOpaque(\\$object\\$\\$index_para\\$, $1);",
+                    SetOpaque
+            ),
+
+            GETOPAQUE(
+                    "(\\$type\\$) vh.getOpaque(\\$object\\$\\$index_para\\$);",
+                    GetOpaque
+            );
 
             Operation(String operation, Method method) {
                 this.operation = operation;
@@ -562,7 +881,9 @@ public class Chapter1bTestGenerator {
     }
 
     private enum BufferType {
-        ARRAY("", ""), HEAP("heap", "ByteBuffer.allocate"), DIRECT("direct", "ByteBuffer.allocateDirect");
+        ARRAY("", ""),
+        HEAP("heap", "ByteBuffer.allocate"),
+        DIRECT("direct", "ByteBuffer.allocateDirect");
 
         BufferType(String type, String allocateOp) {
             this.type = type;
@@ -579,7 +900,8 @@ public class Chapter1bTestGenerator {
 
     private static final Map<String, Target> TEMPLATES = Map.ofEntries(
             entry("AddAndGetTest", T_ADDANDGET),
-            entry("CAETest", T_CAE), entry("CASTest", T_CAS),
+            entry("CAETest", T_CAE),
+            entry("CASTest", T_CAS),
             entry("GetAndAddTest", T_GETANDADD),
             entry("GetAndSetTest", T_GETANDSET),
             entry("LoadLoadFenceTest", T_GETLOADLOADFENCE),
@@ -599,6 +921,6 @@ public class Chapter1bTestGenerator {
             entry("WeakCASTest", T_WEAKCAS),
             entry("WeakCASContendStrongTest", T_WEAKCAS));
 
-    private static final String BASE_PKG = "org.openjdk.jcstress.tests.varhandles";
+    private static final String BASE_PKG = "org.openjdk.jcstress.tests.varHandles";
 
 }
