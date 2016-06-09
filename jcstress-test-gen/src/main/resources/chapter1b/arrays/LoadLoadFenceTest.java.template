@@ -57,10 +57,8 @@ import java.nio.ByteBuffer;
 public class $TestClassName$ {
 
     $type$ x;
-    
-    $type$[] array = new $type$[$length$];
 
-    static final int random = new Random().nextInt($length$ - 2) + 1;
+    $type$[] array = new $type$[1];
 
     static final VarHandle vh;
 
@@ -71,13 +69,13 @@ public class $TestClassName$ {
             throw new RuntimeException(e);
         }
     }
-    
-    
+
+
     @Actor
     public void actor1() {
         x = $valueLiteral1$;
         VarHandle.fullFence();
-        array[$index$] = $valueLiteral1$;
+        array[0] = $valueLiteral1$;
     }
 
     @Actor

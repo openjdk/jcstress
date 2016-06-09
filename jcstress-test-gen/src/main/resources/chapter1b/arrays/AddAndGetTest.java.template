@@ -48,9 +48,7 @@ import org.openjdk.jcstress.infra.results.$Type$Result3;
 @State
 public class $TestClassName$ {
 
-    $type$[] array = new $type$[$length$];
-
-    static final int random = new Random().nextInt($length$ - 2) + 1;
+    $type$[] array = new $type$[1];
 
     static final VarHandle vh;
 
@@ -61,20 +59,20 @@ public class $TestClassName$ {
             throw new RuntimeException(e);
         }
     }
-    
+
     @Actor
     public void actor1($Type$Result3 r) {
         r.r1 = ($type$) %AddAndGet<$valueLiteral1$>%
     }
-    
+
     @Actor
     public void actor2($Type$Result3 r) {
         r.r2 = ($type$) %AddAndGet<$valueLiteral1$>%
     }
 
-    @Arbiter 
+    @Arbiter
     public void arbiter1($Type$Result3 r) {
-        r.r3 = array[$index$];
+        r.r3 = array[0];
     }
 
 }

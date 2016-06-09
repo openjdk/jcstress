@@ -50,9 +50,7 @@ import org.openjdk.jcstress.infra.results.Bool2$Type$Result;
 @State
 public class $TestClassName$ {
 
-    $type$[] array = new $type$[$length$];
-
-    static final int random = new Random().nextInt($length$ - 2) + 1;
+    $type$[] array = new $type$[1];
 
     static final VarHandle vh;
 
@@ -63,20 +61,20 @@ public class $TestClassName$ {
             throw new RuntimeException(e);
         }
     }
-    
+
     @Actor
     public void actor1(Bool2$Type$Result r) {
         r.r1 = %WeakCAS<$valueLiteral0$, $valueLiteral1$>%
     }
-    
+
     @Actor
     public void actor2(Bool2$Type$Result r) {
         r.r2 = %CompareAndSet<$valueLiteral0$, $valueLiteral2$>%
     }
 
-    @Arbiter 
+    @Arbiter
     public void arbiter1(Bool2$Type$Result r) {
-        r.r3 = array[$index$];
+        r.r3 = array[0];
     }
 
 }

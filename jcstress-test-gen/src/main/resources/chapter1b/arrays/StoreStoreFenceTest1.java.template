@@ -57,10 +57,8 @@ import java.nio.ByteBuffer;
 public class $TestClassName$ {
 
     $type$ x;
-    
-    $type$[] array = new $type$[$length$];
 
-    static final int random = new Random().nextInt($length$ - 2) + 1;
+    $type$[] array = new $type$[1];
 
     static final VarHandle vh;
 
@@ -81,7 +79,7 @@ public class $TestClassName$ {
 
     @Actor
     public void actor2($Type$Result2 r) {
-        r.r1 = array[$index$];
+        r.r1 = array[0];
         VarHandle.fullFence();
         r.r2 = x;
     }

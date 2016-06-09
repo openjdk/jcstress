@@ -59,10 +59,8 @@ import org.openjdk.jcstress.infra.results.$Type$Result2;
 public class $TestClassName$ {
 
     $type$ x;
-    
-    $type$[] array = new $type$[$length$];
 
-    static final int random = new Random().nextInt($length$ - 2) + 1;
+    $type$[] array = new $type$[1];
 
     static final VarHandle vh;
 
@@ -73,17 +71,17 @@ public class $TestClassName$ {
             throw new RuntimeException(e);
         }
     }
-    
+
     @Actor
     public void actor1($Type$Result2 r) {
         %SetStoreLoadFence<$valueLiteral1$>%
         r.r1 = x;
     }
-    
+
     @Actor
     public void actor2($Type$Result2 r) {
         x = $valueLiteral1$;
         VarHandle.fullFence();
-        r.r2 = array[$index$];
+        r.r2 = array[0];
     }
 }

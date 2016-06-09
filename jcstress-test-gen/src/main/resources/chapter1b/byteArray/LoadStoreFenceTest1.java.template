@@ -54,14 +54,7 @@ import org.openjdk.jcstress.infra.results.$Type$Result2;
 @State
 public class $TestClassName$ {
 
-    $type$ x;
-    
-    static final int unaligned_rand = (new Random().nextInt($length$ - 3) + 1) * $unit_size$;
-    
-    byte[] byteArray = new byte[$length$ * $unit_size$];
-    int off = ByteBuffer.wrap(byteArray).alignmentOffset(0, $unit_size$);
-    int end = off == 0 ? ($length$ - 1) * $unit_size$ : ($length$ - 1) * $unit_size$ - off;
-    int random = off == 0 ? unaligned_rand + $unit_size$ : unaligned_rand + off;
+    static final int OFF = ByteBuffer.wrap(new byte[128]).alignmentOffset(0, 8);
 
     static final VarHandle vh;
 
@@ -73,17 +66,20 @@ public class $TestClassName$ {
         }
     }
 
-    
+    byte[] byteArray = new byte[OFF + 8];
+
+    $type$ x;
+
     @Actor
     public void actor1($Type$Result2 r) {
         $type$ i = x;
         %LoadStoreFenceSet<$valueLiteral1$>%
         r.r2 = i;
     }
-    
+
     @Actor
     public void actor2($Type$Result2 r) {
-        r.r1 = ($type$) vh.get(byteArray$index_para$);
+        r.r1 = ($type$) vh.get(byteArray, OFF);
         x = r.r1;
     }
 }

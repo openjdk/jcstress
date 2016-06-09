@@ -201,8 +201,10 @@ public class Chapter1bTestGenerator {
                 String pkg = BASE_PKG + "." + vhType + "." + templateName;
                 String testName = operation.method.name() + upcaseFirst(type.type);
 
-                result = Spp.spp(result, keys(type), vars(type, "this", pkg, testName));
-                writer.write(pkg, testName, result);
+                writer.write(pkg, testName, Spp.spp(result,
+                        keys(type),
+                        fieldVars(type, "this", pkg, testName)
+                ));
             }
         }
     }
@@ -215,23 +217,15 @@ public class Chapter1bTestGenerator {
                     break;
 
                 String result = generateConcreteOperation(template, target.target, operation.operation,
-                        "array[\\$index\\$]", "array[\\$index\\$] = $1;");
+                        "array[0]", "array[0] = $1;");
 
                 String pkg = BASE_PKG + "." + vhType + "." + templateName;
                 String testName = operation.method.name() + upcaseFirst(type.type);
-                int length = getArrayLength(type);
 
-                String currentResult = Spp.spp(result, keys(type),
-                        arrayVars(type, "array", pkg, testName + "Begin", String.valueOf(length), "0", ", 0"));
-                writer.write(pkg, testName + "Begin", currentResult);
-
-                currentResult = Spp.spp(result, keys(type),
-                        arrayVars(type, "array", pkg, testName + "End", String.valueOf(length), String.valueOf(length - 1), ", " + String.valueOf(length - 1)));
-                writer.write(pkg, testName + "End", currentResult);
-
-                currentResult = Spp.spp(result, keys(type),
-                        arrayVars(type, "array", pkg, testName + "Random", String.valueOf(length), "random", ", random"));
-                writer.write(pkg, testName + "Random", currentResult);
+                writer.write(pkg, testName, Spp.spp(result,
+                        keys(type),
+                        arrayVars(type, "array", pkg, testName)
+                ));
             }
         }
     }
@@ -250,22 +244,11 @@ public class Chapter1bTestGenerator {
 
                 String pkg = BASE_PKG + "." + vhType + bufferType.pkgAppendix() + "." + templateName;
                 String testName = operation.method.name() + upcaseFirst(type.type);
-                int length = getArrayLength(type);
 
-                String currentResult = Spp.spp(result, keys(type),
-                        viewVars(type, object, pkg, testName + "Begin", String.valueOf(length), "off",
-                                ", off", String.valueOf(type.sizeInArray), bufferType.allocateOp));
-                writer.write(pkg, testName + "Begin", currentResult);
-
-                currentResult = Spp.spp(result, keys(type),
-                        viewVars(type, object, pkg, testName + "End", String.valueOf(length), "end", ", end",
-                                String.valueOf(type.sizeInArray), bufferType.allocateOp));
-                writer.write(pkg, testName + "End", currentResult);
-
-                currentResult = Spp.spp(result,keys(type),
-                        viewVars(type, object, pkg, testName + "Random", String.valueOf(length), "random",
-                                ", random", String.valueOf(type.sizeInArray), bufferType.allocateOp));
-                writer.write(pkg, testName + "Random", currentResult);
+                writer.write(pkg, testName, Spp.spp(result,
+                        keys(type),
+                        viewVars(type, object, pkg, testName, bufferType.allocateOp)
+                ));
             }
         }
     }
@@ -285,7 +268,7 @@ public class Chapter1bTestGenerator {
             return of();
     }
 
-    private static Map<String, String> vars(Type type, String object, String pkg, String testName) {
+    private static Map<String, String> commonVars(Type type, String object, String pkg, String testName) {
         Map<String, String> map = new HashMap<>();
         map.put("type", type.type);
         map.put("Type", upcaseFirst(type.type));
@@ -298,36 +281,28 @@ public class Chapter1bTestGenerator {
             map.put("valueLiteral" + i, type.valueLiterals[i]);
         }
 
-        map.put("index", "");
-        map.put("index_para", "");
-
         return map;
     }
 
-    private static Map<String, String> arrayVars(Type type, String object, String pkg, String testName,
-            String length, String index, String indexPara) {
-        Map<String, String> map = vars(type, object, pkg, testName);
-        map.put("length", length);
-        map.put("index", index);
-        map.put("index_para", indexPara);
+    private static Map<String, String> fieldVars(Type type, String object, String pkg, String testName) {
+        Map<String, String> map = commonVars(type, object, pkg, testName);
+        map.put("index_para", "");
+        return map;
+    }
 
+    private static Map<String, String> arrayVars(Type type, String object, String pkg, String testName) {
+        Map<String, String> map = commonVars(type, object, pkg, testName);
+        map.put("index_para", ", 0");
         return map;
     }
 
     private static Map<String, String> viewVars(Type type, String object, String pkg, String testName,
-            String length, String index, String indexPara, String unitSize, String bufferAllocateOp) {
-        Map<String, String> map = arrayVars(type, object, pkg, testName, length, index, indexPara);
-        map.put("unit_size", unitSize);
+            String bufferAllocateOp) {
+        Map<String, String> map = commonVars(type, object, pkg, testName);
+        map.put("index_para", ", 0");
+        map.put("unit_size", String.valueOf(type.sizeInArray));
         map.put("buffer_allocate", bufferAllocateOp);
-
         return map;
-    }
-
-    private static int getArrayLength(Type type) {
-        final int TOTAL_BYTES = 256; // to ensure 2 cache lines. If it's array
-                                     // and type is String, the real total bytes
-                                     // may be 512
-        return TOTAL_BYTES / type.sizeInArray;
     }
 
     @FunctionalInterface

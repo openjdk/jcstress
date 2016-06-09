@@ -64,10 +64,8 @@ import java.nio.ByteBuffer;
 public class $TestClassName$ {
 
     $type$ y;
-    
-    $type$[] array = new $type$[$length$];
 
-    static final int random = new Random().nextInt($length$ - 2) + 1;
+    $type$[] array = new $type$[1];
 
     static final VarHandle vh;
 
@@ -84,7 +82,6 @@ public class $TestClassName$ {
     public void actor1($Type$Result3 r) {
         boolean result = %WeakSetStoreStoreFence<$valueLiteral1$>%
         y = $valueLiteral1$;
-        
         r.r3 = result ? $valueLiteral1$ : $valueLiteral0$;
     }
 
@@ -92,7 +89,7 @@ public class $TestClassName$ {
     public void actor2($Type$Result3 r) {
         r.r1 = y;
         VarHandle.fullFence();
-        r.r2 = array[$index$];
+        r.r2 = array[0];
     }
 
 }

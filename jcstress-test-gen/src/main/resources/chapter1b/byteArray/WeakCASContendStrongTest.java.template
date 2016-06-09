@@ -50,12 +50,7 @@ import org.openjdk.jcstress.infra.results.Bool2$Type$Result;
 @State
 public class $TestClassName$ {
 
-    static final int unaligned_rand = (new Random().nextInt($length$ - 3) + 1) * $unit_size$;
-    
-    byte[] byteArray = new byte[$length$ * $unit_size$];
-    int off = ByteBuffer.wrap(byteArray).alignmentOffset(0, $unit_size$);
-    int end = off == 0 ? ($length$ - 1) * $unit_size$ : ($length$ - 1) * $unit_size$ - off;
-    int random = off == 0 ? unaligned_rand + $unit_size$ : unaligned_rand + off;
+    static final int OFF = ByteBuffer.wrap(new byte[128]).alignmentOffset(0, 8);
 
     static final VarHandle vh;
 
@@ -66,20 +61,22 @@ public class $TestClassName$ {
             throw new RuntimeException(e);
         }
     }
-    
+
+    byte[] byteArray = new byte[OFF + 8];
+
     @Actor
     public void actor1(Bool2$Type$Result r) {
         r.r1 = %WeakCAS<$valueLiteral0$, $valueLiteral1$>%
     }
-    
+
     @Actor
     public void actor2(Bool2$Type$Result r) {
         r.r2 = %CompareAndSet<$valueLiteral0$, $valueLiteral2$>%
     }
 
-    @Arbiter 
+    @Arbiter
     public void arbiter1(Bool2$Type$Result r) {
-        r.r3 = ($type$) vh.get(byteArray$index_para$);
+        r.r3 = ($type$) vh.get(byteArray, OFF);
     }
 
 }
