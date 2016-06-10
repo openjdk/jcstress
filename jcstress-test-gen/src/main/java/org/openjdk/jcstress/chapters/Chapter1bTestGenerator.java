@@ -46,11 +46,6 @@ import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.Set;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.SetVolatile;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.SetOpaque;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.SetRelease;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.FullFence;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.AcquireFence;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.ReleaseFence;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.LoadLoadFence;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.StoreStoreFence;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.GetAndAdd;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.AddAndGet;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.CompareAndSet;
@@ -63,7 +58,6 @@ import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.WeakCo
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.WeakCompareAndSetVolatile;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.GetAndSet;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.Type.GET_SET;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.Type.STATIC_FENCE;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.Type.ATOMIC_UPDATE;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.Type.NUMERIC_ATOMIC_UPDATE;
 
@@ -94,19 +88,19 @@ public class Chapter1bTestGenerator {
             final Target target = template.getValue();
 
             makeFieldTests(dest, target, "fields", templateName,
-                    readFromResource("/chapter1b/fields/" + templateName + ".java.template"));
+                    readFromResource("/operationAtomic/fields/" + templateName + ".java.template"));
 
             makeArrayTests(dest, target, "arrays", templateName,
-                    readFromResource("/chapter1b/arrays/" + templateName + ".java.template"));
+                    readFromResource("/operationAtomic/arrays/" + templateName + ".java.template"));
 
             makeByteBufferTests(dest, target, "byteArray", "byteArray", BufferType.ARRAY, templateName,
-                    readFromResource("/chapter1b/byteArray/" + templateName + ".java.template"));
+                    readFromResource("/operationAtomic/byteArray/" + templateName + ".java.template"));
 
             makeByteBufferTests(dest, target, "byteBuffer", "byteBuffer", BufferType.HEAP, templateName,
-                    readFromResource("/chapter1b/byteBuffer/" + templateName + ".java.template"));
+                    readFromResource("/operationAtomic/byteBuffer/" + templateName + ".java.template"));
 
             makeByteBufferTests(dest, target, "byteBuffer", "byteBuffer", BufferType.DIRECT, templateName,
-                    readFromResource("/chapter1b/byteBuffer/" + templateName + ".java.template"));
+                    readFromResource("/operationAtomic/byteBuffer/" + templateName + ".java.template"));
         }
     }
 
@@ -119,7 +113,7 @@ public class Chapter1bTestGenerator {
                 String result = generateConcreteOperation(template, target.target, operation.operation,
                         "field", "field = $1;");
 
-                String pkg = BASE_PKG + "." + vhType + "." + templateName;
+                String pkg = BASE_PKG + "." + vhType + "." + templateName.replaceAll("^X-", "");
                 String testName = operation.method.name() + upcaseFirst(type.type);
 
                 writeOut(dest, pkg, testName, Spp.spp(result,
@@ -139,7 +133,7 @@ public class Chapter1bTestGenerator {
                 String result = generateConcreteOperation(template, target.target, operation.operation,
                         "array[0]", "array[0] = $1;");
 
-                String pkg = BASE_PKG + "." + vhType + "." + templateName;
+                String pkg = BASE_PKG + "." + vhType + "." + templateName.replaceAll("^X-", "");
                 String testName = operation.method.name() + upcaseFirst(type.type);
 
                 writeOut(dest, pkg, testName, Spp.spp(result,
@@ -162,7 +156,7 @@ public class Chapter1bTestGenerator {
                         "(\\$type\\$) vh.get(\\$object\\$\\$index_para\\$)",
                         "vh.set(\\$object\\$\\$index_para\\$, $1);");
 
-                String pkg = BASE_PKG + "." + vhType + bufferType.pkgAppendix() + "." + templateName;
+                String pkg = BASE_PKG + "." + vhType + bufferType.pkgAppendix() + "." + templateName.replaceAll("^X-", "");
                 String testName = operation.method.name() + upcaseFirst(type.type);
 
                 writeOut(dest, pkg, testName, Spp.spp(result,
@@ -324,7 +318,7 @@ public class Chapter1bTestGenerator {
         protected abstract boolean supported(Method method, Type type);
 
         boolean commonSupported(Method method) {
-            return (method.type == GET_SET || method.type == STATIC_FENCE);
+            return (method.type == GET_SET);
         }
 
         static final Source DATA_SOURCE = new Source() {
@@ -389,12 +383,6 @@ public class Chapter1bTestGenerator {
         SetOpaque(GET_SET),
         SetRelease(GET_SET),
 
-        FullFence(STATIC_FENCE),
-        AcquireFence(STATIC_FENCE),
-        ReleaseFence(STATIC_FENCE),
-        LoadLoadFence(STATIC_FENCE),
-        StoreStoreFence(STATIC_FENCE),
-
         CompareAndSet(ATOMIC_UPDATE),
         CompareAndExchangeVolatile(ATOMIC_UPDATE),
         CompareAndExchangeAcquire(ATOMIC_UPDATE),
@@ -416,7 +404,7 @@ public class Chapter1bTestGenerator {
         Type type;
 
         enum Type {
-            GET_SET, STATIC_FENCE, ATOMIC_UPDATE, NUMERIC_ATOMIC_UPDATE;
+            GET_SET, ATOMIC_UPDATE, NUMERIC_ATOMIC_UPDATE;
         }
     }
 
@@ -470,36 +458,6 @@ public class Chapter1bTestGenerator {
         T_GETOPAQUE(
                 "%GetOpaque<>%",
                 of(GETOPAQUE)
-        ),
-
-        T_GET_LOADLOADFENCE(
-                "%GetLoadLoadFence<>%",
-                of(GET_ACQUIREFENCE, GET_LOADLOADFENCE, GET_FULLFENCE)
-        ),
-
-        T_LOADSTOREFENCE_SET(
-                "%LoadStoreFenceSet<(.+)>%",
-                of(RELEASEFENCE_SET, FULLFENCE_SET)
-        ),
-
-        T_GET_LOADSTOREFENCE(
-                "%GetLoadStoreFence<>%",
-                of(GET_ACQUIREFENCE, GET_FULLFENCE)
-        ),
-
-        T_STORESTOREFENCE_SET(
-                "%StoreStoreFenceSet<(.+)>%",
-                of(RELEASEFENCE_SET, STORESTOREFENCE_SET, FULLFENCE_SET)
-        ),
-
-        T_SET_STORESTOREFENCE(
-                "%SetStoreStoreFence<(.+)>%",
-                of(SET_RELEASEFENCE, SET_STORESTOREFENCE, SET_FULLFENCE)
-        ),
-
-        T_SET_STORELOADFENCE(
-                "%SetStoreLoadFence<(.+)>%",
-                of(SET_FULLFENCE)
         ),
 
         ;
@@ -683,58 +641,6 @@ public class Chapter1bTestGenerator {
                     GetOpaque
             ),
 
-            /* -------------------------------- fences -------------------------------- */
-
-            GET_LOADLOADFENCE(
-                    "%GetVar%;" + LNSEP + "VarHandle.loadLoadFence();",
-                    LoadLoadFence
-            ),
-
-            STORESTOREFENCE_SET(
-                    "VarHandle.storeStoreFence();" + LNSEP + "%SetVar<$1>%",
-                    StoreStoreFence
-            ),
-
-            SET_STORESTOREFENCE(
-                    "%SetVar<$1>%" + LNSEP + "VarHandle.storeStoreFence();",
-                    StoreStoreFence
-            ),
-
-            GET_ACQUIREFENCE(
-                    "%GetVar%;" + LNSEP + "VarHandle.acquireFence();",
-                    AcquireFence
-            ),
-
-            RELEASEFENCE_SET(
-                    "VarHandle.releaseFence();" + LNSEP + "%SetVar<$1>%",
-                    ReleaseFence
-            ),
-
-            SET_RELEASEFENCE(
-                    "%SetVar<$1>%" + LNSEP + "VarHandle.releaseFence();",
-                    ReleaseFence
-            ),
-
-            SET_FULLFENCE(
-                    "%SetVar<$1>%" + LNSEP + "VarHandle.fullFence();",
-                    FullFence
-            ),
-
-            FULLFENCE_SET(
-                    "VarHandle.fullFence();" + LNSEP + "%SetVar<$1>%",
-                    FullFence
-            ),
-
-            GET_FULLFENCE(
-                    "%GetVar%;" + LNSEP + "VarHandle.fullFence();",
-                    FullFence
-            ),
-
-            FULLFENCE_GET(
-                    "VarHandle.fullFence();" + LNSEP + "%GetVar%;",
-                    FullFence
-            ),
-
             ;
 
             Operation(String operation, Method method) {
@@ -766,22 +672,15 @@ public class Chapter1bTestGenerator {
     }
 
     private static final Map<String, Target> TEMPLATES = Map.ofEntries(
-            entry("AddAndGetTest", T_ADDANDGET),
-            entry("CAETest", T_CAE),
-            entry("CASTest", T_CAS),
-            entry("GetAndAddTest", T_GETANDADD),
-            entry("GetAndSetTest", T_GETANDSET),
-            entry("WeakCASTest", T_WEAKCAS),
-            entry("WeakCASContendStrongTest", T_WEAKCAS),
-            entry("LoadLoadFenceTest", T_GET_LOADLOADFENCE),
-            entry("LoadStoreFenceTest1", T_LOADSTOREFENCE_SET),
-            entry("LoadStoreFenceTest2", T_GET_LOADSTOREFENCE),
-            entry("StoreLoadFenceTest", T_SET_STORELOADFENCE),
-            entry("StoreStoreFenceTest1", T_STORESTOREFENCE_SET),
-            entry("StoreStoreFenceTest2", T_SET_STORESTOREFENCE)
+            entry("X-AddAndGetTest", T_ADDANDGET),
+            entry("X-CAETest", T_CAE),
+            entry("X-CASTest", T_CAS),
+            entry("X-GetAndAddTest", T_GETANDADD),
+            entry("X-GetAndSetTest", T_GETANDSET),
+            entry("X-WeakCASTest", T_WEAKCAS),
+            entry("X-WeakCASContendStrongTest", T_WEAKCAS)
     );
 
-
-    private static final String BASE_PKG = "org.openjdk.jcstress.tests.varHandles";
+    private static final String BASE_PKG = "org.openjdk.jcstress.tests.varHandles.atomicity";
 
 }

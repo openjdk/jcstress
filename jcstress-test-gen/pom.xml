@@ -139,17 +139,33 @@ questions.
                         </configuration>
                     </execution>
                     <execution>
-                        <id>chapter1b-generator</id>
+                        <id>operationAtomic-generator</id>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>chapter1b-generator</finalName>
+                            <finalName>operationAtomic-generator</finalName>
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.openjdk.jcstress.chapters.Chapter1bTestGenerator</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>chapter1c-generator</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>chapter1c-generator</finalName>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.openjdk.jcstress.chapters.Chapter1cTestGenerator</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

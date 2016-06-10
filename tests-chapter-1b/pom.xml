@@ -35,7 +35,7 @@ questions.
     <artifactId>jcstress-tests-chapter-1b</artifactId>
     <packaging>jar</packaging>
 
-    <name>Chapter 1.b: Core Library Foundations: Experimental VarHandles tests</name>
+    <name>Chapter 1.b: Library Foundations: VarHandles, Atomicity</name>
     <url>http://maven.apache.org</url>
 
     <scm>
@@ -84,7 +84,7 @@ questions.
                             <executable>${java.home}/bin/java</executable>
                             <arguments>
                                 <argument>-jar</argument>
-                                <argument>../jcstress-test-gen/target/chapter1b-generator.jar</argument>
+                                <argument>../jcstress-test-gen/target/operationAtomic-generator.jar</argument>
                                 <argument>${project.build.directory}/generated-sources/tests/</argument>
                             </arguments>
                         </configuration>

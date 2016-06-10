@@ -41,48 +41,46 @@ import java.nio.ByteBuffer;
 
 
 @JCStressTest
-@Description("Tests VarHandle methods which take effect of store store fence.")
+@Description("Tests VarHandle methods which take effect of load load fence.")
 @Outcome(id = "$value0$, $value0$", expect = Expect.ACCEPTABLE, desc = "actor2 observe the variables before actor1 update")
-@Outcome(id = "$value0$, $value1$", expect = Expect.ACCEPTABLE, desc = "actor2 observe the variables after var is already updated but y hasn't yet")
-@Outcome(id = "$value1$, $value0$", expect = Expect.FORBIDDEN,  desc = "y won't be observed to be updated before var is updated")
+@Outcome(id = "$value0$, $value1$", expect = Expect.ACCEPTABLE, desc = "actor2 observe the variables after x is already updated but var hasn't yet")
+@Outcome(id = "$value1$, $value0$", expect = Expect.FORBIDDEN,  desc = "var won't be observed to be updated before x is updated")
 @Outcome(id = "$value1$, $value1$", expect = Expect.ACCEPTABLE,  desc = "actor2 observe the variables after actor1 update completely")
 #if[alwaysAtomic]
 @Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
 #else[alwaysAtomic]
-@Outcome(id = "$value0$, .*", expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec, when load var in actor2 before storestore Fence in actor1")
-@Outcome(id = ".*, $value1$", expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec, if r1 is half-value, load var must get a full-value")
+@Outcome(id = "$value0$, .*", expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec, when load x in actor2 before fullFence in actor1")
+@Outcome(id = ".*, $value1$", expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec, if r1 is half-value, load x must get a full-value")
 @Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
 #end[alwaysAtomic]
 @State
 public class $TestClassName$ {
 
-    static final int OFF = ByteBuffer.wrap(new byte[128]).alignmentOffset(0, 8);
+    $type$ x;
+
+    $type$ field;
 
     static final VarHandle vh;
 
     static {
         try {
-            vh = MethodHandles.byteBufferViewVarHandle($type$[].class, BIG_ENDIAN);
+            vh = MethodHandles.lookup().findVarHandle($TestClassName$.class, "field", $type$.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    ByteBuffer byteBuffer = $buffer_allocate$(OFF + 8);
-
-    $type$ y;
-
     @Actor
     public void actor1() {
-        %SetStoreStoreFence<$valueLiteral1$>%
-        y = $valueLiteral1$;
+        x = $valueLiteral1$;
+        VarHandle.fullFence();
+        field = $valueLiteral1$;
     }
 
     @Actor
     public void actor2($Type$Result2 r) {
-        r.r1 = y;
-        VarHandle.fullFence();
-        r.r2 = ($type$) vh.get(byteBuffer, OFF);
+        r.r1 = %GetLoadLoadFence<>%
+        r.r2 = x;
     }
 
 }

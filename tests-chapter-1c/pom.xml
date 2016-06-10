@@ -32,11 +32,10 @@ questions.
         <artifactId>jcstress-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-
-    <artifactId>jcstress-tests-all</artifactId>
+    <artifactId>jcstress-tests-chapter-1c</artifactId>
     <packaging>jar</packaging>
 
-    <name>All Tests Bundle</name>
+    <name>Chapter 1.c: Library Foundations: VarHandles, Fences</name>
     <url>http://maven.apache.org</url>
 
     <scm>
@@ -49,6 +48,68 @@ questions.
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.9</source>
+                    <target>1.9</target>
+                    <debug>false</debug>
+                    <meminitial>4096</meminitial>
+                    <fork>true</fork>
+                    <compilerArgs>
+                        <!--
+                            No, compiler, we need that sun.misc.Contended here.
+                            Stop complaining sun.misc package is invisible. You can't?
+                            Huh, I guess no module access checks for you then:
+                        -->
+                        <arg>-XDnoModules</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <id>gen</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>
+                            generate-sources
+                        </phase>
+                        <configuration>
+                            <executable>${java.home}/bin/java</executable>
+                            <arguments>
+                                <argument>-jar</argument>
+                                <argument>../jcstress-test-gen/target/chapter1c-generator.jar</argument>
+                                <argument>${project.build.directory}/generated-sources/tests/</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/tests/</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -75,39 +136,14 @@ questions.
     <dependencies>
         <dependency>
             <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>jcstress-tests-custom</artifactId>
+            <artifactId>jcstress-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>jcstress-tests-chapter-0a</artifactId>
+            <artifactId>jcstress-test-gen</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>jcstress-tests-chapter-0b</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>jcstress-tests-chapter-0c</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>jcstress-tests-chapter-1a</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>jcstress-tests-chapter-1b</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>jcstress-tests-chapter-1c</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
     </dependencies>
 </project>
