@@ -78,8 +78,6 @@ import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_SETS
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_SETSTORELOADFENCE;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_WEAKSETSTORELOADFENCE;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_WEAKSETSTORESTOREFENCE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_GET;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_SET;
 
 import org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation;
 
@@ -153,43 +151,24 @@ public class Chapter1bTestGenerator {
             final String templateName = template.getKey();
             final Target target = template.getValue();
 
-            String templateFile = "/chapter1b/fields/" + templateName + ".java.template";
-            if (Chapter1bTestGenerator.class.getResource(templateFile) != null) {
-                makeFieldTests(target, "fields", templateName, readFromResource(templateFile),
-                        (pkg, testName, result) -> writeOut(dest, pkg, testName, result));
-            }
+            makeFieldTests(dest, target, "fields", templateName,
+                    readFromResource("/chapter1b/fields/" + templateName + ".java.template"));
 
-            templateFile = "/chapter1b/arrays/" + templateName + ".java.template";
-            if (Chapter1bTestGenerator.class.getResource(templateFile) != null) {
-                makeArrayTests(target, "arrays", templateName, readFromResource(templateFile),
-                        (pkg, testName, result) -> writeOut(dest, pkg, testName, result));
-            }
+            makeArrayTests(dest, target, "arrays", templateName,
+                    readFromResource("/chapter1b/arrays/" + templateName + ".java.template"));
 
-            templateFile = "/chapter1b/byteArray/" + templateName + ".java.template";
-            if (Chapter1bTestGenerator.class.getResource(templateFile) != null) {
-                makeByteBufferTests(target, "byteArray", "byteArray", BufferType.ARRAY, templateName,
-                        readFromResource(templateFile),
-                        (pkg, testName, result) -> writeOut(dest, pkg, testName, result));
-            }
+            makeByteBufferTests(dest, target, "byteArray", "byteArray", BufferType.ARRAY, templateName,
+                    readFromResource("/chapter1b/byteArray/" + templateName + ".java.template"));
 
-            templateFile = "/chapter1b/byteBuffer/" + templateName + ".java.template";
-            if (Chapter1bTestGenerator.class.getResource(templateFile) != null) {
-                makeByteBufferTests(target, "byteBuffer", "byteBuffer", BufferType.HEAP, templateName,
-                        readFromResource(templateFile),
-                        (pkg, testName, result) -> writeOut(dest, pkg, testName, result));
-            }
+            makeByteBufferTests(dest, target, "byteBuffer", "byteBuffer", BufferType.HEAP, templateName,
+                    readFromResource("/chapter1b/byteBuffer/" + templateName + ".java.template"));
 
-            templateFile = "/chapter1b/byteBuffer/" + templateName + ".java.template";
-            if (Chapter1bTestGenerator.class.getResource(templateFile) != null) {
-                makeByteBufferTests(target, "byteBuffer", "byteBuffer", BufferType.DIRECT, templateName,
-                        readFromResource(templateFile),
-                        (pkg, testName, result) -> writeOut(dest, pkg, testName, result));
-            }
+            makeByteBufferTests(dest, target, "byteBuffer", "byteBuffer", BufferType.DIRECT, templateName,
+                    readFromResource("/chapter1b/byteBuffer/" + templateName + ".java.template"));
         }
     }
 
-    private static void makeFieldTests(Target target, String vhType, String templateName, String template,
-            FileWriter writer) throws IOException {
+    private static void makeFieldTests(String dest, Target target, String vhType, String templateName, String template) throws IOException {
         for (Type type : DATA_SOURCE.supportedTypes()) {
             for (Operation operation : target.operations) {
                 if (!DATA_SOURCE.supported(operation.method, type))
@@ -201,7 +180,7 @@ public class Chapter1bTestGenerator {
                 String pkg = BASE_PKG + "." + vhType + "." + templateName;
                 String testName = operation.method.name() + upcaseFirst(type.type);
 
-                writer.write(pkg, testName, Spp.spp(result,
+                writeOut(dest, pkg, testName, Spp.spp(result,
                         keys(type),
                         fieldVars(type, "this", pkg, testName)
                 ));
@@ -209,8 +188,7 @@ public class Chapter1bTestGenerator {
         }
     }
 
-    private static void makeArrayTests(Target target, String vhType, String templateName, String template,
-            FileWriter writer) throws IOException {
+    private static void makeArrayTests(String dest, Target target, String vhType, String templateName, String template) throws IOException {
         for (Type type : DATA_SOURCE.supportedTypes()) {
             for (Operation operation : target.operations) {
                 if (!DATA_SOURCE.supported(operation.method, type))
@@ -222,7 +200,7 @@ public class Chapter1bTestGenerator {
                 String pkg = BASE_PKG + "." + vhType + "." + templateName;
                 String testName = operation.method.name() + upcaseFirst(type.type);
 
-                writer.write(pkg, testName, Spp.spp(result,
+                writeOut(dest, pkg, testName, Spp.spp(result,
                         keys(type),
                         arrayVars(type, "array", pkg, testName)
                 ));
@@ -230,8 +208,8 @@ public class Chapter1bTestGenerator {
         }
     }
 
-    private static void makeByteBufferTests(Target target, String vhType, String object,
-            BufferType bufferType, String templateName, String template, FileWriter writer)
+    private static void makeByteBufferTests(String dest, Target target, String vhType, String object,
+            BufferType bufferType, String templateName, String template)
             throws IOException {
         for (Type type : VIEW_SOURCE.supportedTypes()) {
             for (Operation operation : target.operations) {
@@ -245,7 +223,7 @@ public class Chapter1bTestGenerator {
                 String pkg = BASE_PKG + "." + vhType + bufferType.pkgAppendix() + "." + templateName;
                 String testName = operation.method.name() + upcaseFirst(type.type);
 
-                writer.write(pkg, testName, Spp.spp(result,
+                writeOut(dest, pkg, testName, Spp.spp(result,
                         keys(type),
                         viewVars(type, object, pkg, testName, bufferType.allocateOp)
                 ));
@@ -303,11 +281,6 @@ public class Chapter1bTestGenerator {
         map.put("unit_size", String.valueOf(type.sizeInArray));
         map.put("buffer_allocate", bufferAllocateOp);
         return map;
-    }
-
-    @FunctionalInterface
-    private interface FileWriter {
-        void write(String pkg, String testName, String result) throws IOException;
     }
 
     enum Type {
@@ -880,19 +853,13 @@ public class Chapter1bTestGenerator {
             entry("GetAndAddTest", T_GETANDADD),
             entry("GetAndSetTest", T_GETANDSET),
             entry("LoadLoadFenceTest", T_GETLOADLOADFENCE),
-            entry("LoadLoadNoFenceTest", T_GET),
             entry("LoadStoreFenceTest1", T_LOADSTOREFENCESET),
             entry("LoadStoreFenceTest2", T_GETLOADSTOREFENCE),
-            entry("LoadStoreNoFenceTest1", T_SET),
-            entry("LoadStoreNoFenceTest2", T_GET),
             entry("StoreLoadFenceTest", T_SETSTORELOADFENCE),
             entry("StoreLoadFenceTestWeak", T_WEAKSETSTORELOADFENCE),
-            entry("StoreLoadNoFenceTest", T_SET),
             entry("StoreStoreFenceTest1", T_STORESTOREFENCESET),
             entry("StoreStoreFenceTest2", T_SETSTORESTOREFENCE),
             entry("StoreStoreFenceTest2Weak", T_WEAKSETSTORESTOREFENCE),
-            entry("StoreStoreNoFenceTest1", T_SET),
-            entry("StoreStoreNoFenceTest2", T_SET),
             entry("WeakCASTest", T_WEAKCAS),
             entry("WeakCASContendStrongTest", T_WEAKCAS));
 
