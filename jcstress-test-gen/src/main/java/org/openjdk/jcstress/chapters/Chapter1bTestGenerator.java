@@ -64,6 +64,7 @@ import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.Type.N
 import org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation;
 
 import java.io.IOException;
+import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -154,17 +155,22 @@ public class Chapter1bTestGenerator {
                 if (!VIEW_SOURCE.supported(operation.method, type))
                     break;
 
-                String result = generateConcreteOperation(template, target.target, operation.operation,
-                        "(\\$type\\$) vh.get(\\$object\\$\\$index_para\\$)",
-                        "vh.set(\\$object\\$\\$index_para\\$, $1);");
+                for (ByteOrder bo : new ByteOrder[] { ByteOrder.BIG_ENDIAN, ByteOrder.LITTLE_ENDIAN }) {
+                    String result = generateConcreteOperation(template, target.target, operation.operation,
+                            "(\\$type\\$) vh.get(\\$object\\$\\$index_para\\$)",
+                            "vh.set(\\$object\\$\\$index_para\\$, $1);");
 
-                String pkg = BASE_PKG + "." + vhType + bufferType.pkgAppendix() + "." + templateName.replaceAll("^X-", "");
-                String testName = operation.method.name() + upcaseFirst(type.type);
+                    String pkg = BASE_PKG + "." + vhType + bufferType.pkgAppendix() + "." +
+                            bo.toString().toLowerCase().replace("_endian", "") + "." +
+                            templateName.replaceAll("^X-", "");
 
-                writeOut(dest, pkg, testName, Spp.spp(result,
-                        keys(type),
-                        viewVars(type, object, pkg, testName, bufferType.allocateOp)
-                ));
+                    String testName = operation.method.name() + upcaseFirst(type.type);
+
+                    writeOut(dest, pkg, testName, Spp.spp(result,
+                            keys(type),
+                            viewVars(type, object, pkg, testName, bufferType.allocateOp, bo)
+                    ));
+                }
             }
         }
     }
@@ -213,11 +219,12 @@ public class Chapter1bTestGenerator {
     }
 
     private static Map<String, String> viewVars(Type type, String object, String pkg, String testName,
-            String bufferAllocateOp) {
+                                                String bufferAllocateOp, ByteOrder bo) {
         Map<String, String> map = commonVars(type, object, pkg, testName);
         map.put("index_para", ", 0");
         map.put("unit_size", String.valueOf(type.sizeInArray));
         map.put("buffer_allocate", bufferAllocateOp);
+        map.put("byte_order", bo.toString());
         return map;
     }
 

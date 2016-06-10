@@ -24,11 +24,11 @@
  */
 package $package$;
 
-import static java.nio.ByteOrder.BIG_ENDIAN;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Random;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Arbiter;
@@ -54,7 +54,7 @@ public class $TestClassName$ {
 
     static {
         try {
-            vh = MethodHandles.byteArrayViewVarHandle($type$[].class, BIG_ENDIAN);
+            vh = MethodHandles.byteArrayViewVarHandle($type$[].class, ByteOrder.$byte_order$);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
