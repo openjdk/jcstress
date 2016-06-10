@@ -77,6 +77,8 @@ import static org.openjdk.jcstress.chapters.GeneratorUtils.upcaseFirst;
 import static org.openjdk.jcstress.chapters.GeneratorUtils.writeOut;
 
 public class Chapter1bTestGenerator {
+    private static final String BASE_PKG = "org.openjdk.jcstress.tests.atomicity.varHandles";
+
     public static void main(String[] args) throws Exception {
         if (args.length < 1) {
             throw new IllegalStateException("Need a destination argument");
@@ -680,7 +682,5 @@ public class Chapter1bTestGenerator {
             entry("X-WeakCASTest", T_WEAKCAS),
             entry("X-WeakCASContendStrongTest", T_WEAKCAS)
     );
-
-    private static final String BASE_PKG = "org.openjdk.jcstress.tests.varHandles.atomicity";
 
 }

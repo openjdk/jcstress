@@ -58,7 +58,7 @@ public class $TestClassName$ {
 
     @Actor
     public void actor2($Type$Result2 r) {
-        r.r1 = %GetLoadLoadFence<>%
+        r.r1 = %GetLoadLoadFence%
         r.r2 = x;
     }
 

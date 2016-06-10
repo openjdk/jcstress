@@ -51,7 +51,7 @@ public class $TestClassName$ {
     @Actor
     public void actor1($Type$Result2 r) {
         $type$ i = x;
-        %LoadStoreFenceSet<$valueLiteral1$>%
+        %LoadStoreFenceSet%
         r.r2 = i;
     }
 

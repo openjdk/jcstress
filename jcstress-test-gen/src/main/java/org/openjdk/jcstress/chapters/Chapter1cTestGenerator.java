@@ -31,10 +31,8 @@ import org.openjdk.jcstress.Values;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
-import static java.util.Map.entry;
 import static java.util.Set.of;
 import static org.openjdk.jcstress.chapters.Chapter1cTestGenerator.Method.*;
 import static org.openjdk.jcstress.chapters.Chapter1cTestGenerator.Target.Operation.*;
@@ -43,7 +41,8 @@ import static org.openjdk.jcstress.chapters.GeneratorUtils.*;
 
 public class Chapter1cTestGenerator {
 
-    public static final String[] TYPES = new String[]{"byte", "boolean", "char", "short", "int", "float", "long", "double", "String"};
+    private static final String BASE_PKG = "org.openjdk.jcstress.tests.fences.varHandles";
+    private static final String[] TYPES = new String[]{"byte", "boolean", "char", "short", "int", "float", "long", "double", "String"};
 
     public static void main(String[] args) throws Exception {
         if (args.length < 1) {
@@ -51,21 +50,17 @@ public class Chapter1cTestGenerator {
         }
         String dest = args[0];
 
-        for(Entry<String, Target> template : TEMPLATES.entrySet()) {
-            final String templateName = template.getKey();
-            final Target target = template.getValue();
-
+        for(Target target : Target.values()) {
+            final String templateName = target.template;
             makeFieldTests(dest, target, templateName,
                     readFromResource("/fences/" + templateName + ".java.template"));
-
         }
     }
 
     private static void makeFieldTests(String dest, Target target, String templateName, String template) throws IOException {
         for (String type : TYPES) {
             for (Operation operation : target.operations) {
-                String result = generateConcreteOperation(template, target.target, operation.operation,
-                        "field", "field = $1;");
+                String result = template.replaceAll(target.target, operation.operation);
 
                 String pkg = BASE_PKG + "." + templateName.replaceAll("^X-", "");
                 String testName = operation.method.name() + upcaseFirst(type);
@@ -76,14 +71,6 @@ public class Chapter1cTestGenerator {
                 ));
             }
         }
-    }
-
-    private static String generateConcreteOperation(String result, String target, String concreteOp,
-            String getOp, String setOp) {
-        return result
-                .replaceAll(target, concreteOp)
-                .replaceAll("%GetVar%", getOp)
-                .replaceAll("%SetVar<(.+)>%", setOp);
     }
 
     private static boolean alwaysAtomic(String type) {
@@ -124,88 +111,96 @@ public class Chapter1cTestGenerator {
 
     enum Target {
         T_GET_LOADLOADFENCE(
-                "%GetLoadLoadFence<>%",
+                "X-LoadLoadFenceTest",
+                "%GetLoadLoadFence%",
                 of(GET_ACQUIREFENCE, GET_LOADLOADFENCE, GET_FULLFENCE)
         ),
 
         T_LOADSTOREFENCE_SET(
-                "%LoadStoreFenceSet<(.+)>%",
+                "X-LoadStoreFenceTest1",
+                "%LoadStoreFenceSet%",
                 of(RELEASEFENCE_SET, FULLFENCE_SET)
         ),
 
         T_GET_LOADSTOREFENCE(
-                "%GetLoadStoreFence<>%",
+                "X-LoadStoreFenceTest2",
+                "%GetLoadStoreFence%",
                 of(GET_ACQUIREFENCE, GET_FULLFENCE)
         ),
 
         T_STORESTOREFENCE_SET(
-                "%StoreStoreFenceSet<(.+)>%",
+                "X-StoreStoreFenceTest1",
+                "%StoreStoreFenceSet%",
                 of(RELEASEFENCE_SET, STORESTOREFENCE_SET, FULLFENCE_SET)
         ),
 
         T_SET_STORESTOREFENCE(
-                "%SetStoreStoreFence<(.+)>%",
+                "X-StoreStoreFenceTest2",
+                "%SetStoreStoreFence%",
                 of(SET_RELEASEFENCE, SET_STORESTOREFENCE, SET_FULLFENCE)
         ),
 
         T_SET_STORELOADFENCE(
-                "%SetStoreLoadFence<(.+)>%",
+                "X-StoreLoadFenceTest",
+                "%SetStoreLoadFence%",
                 of(SET_FULLFENCE)
         ),
 
         ;
 
-        Target(String target, Set<Operation> operations) {
+        Target(String template, String target, Set<Operation> operations) {
+            this.template = template;
             this.target = target;
             this.operations = operations;
         }
 
+        String template;
         String target;
         Set<Operation> operations;
 
         enum Operation {
             GET_LOADLOADFENCE(
-                    "%GetVar%;" + LNSEP + "VarHandle.loadLoadFence();",
+                    "field;" + LNSEP + "VarHandle.loadLoadFence();",
                     LoadLoadFence
             ),
 
             STORESTOREFENCE_SET(
-                    "VarHandle.storeStoreFence();" + LNSEP + "%SetVar<$1>%",
+                    "VarHandle.storeStoreFence();" + LNSEP + "field = \\$valueLiteral1\\$;",
                     StoreStoreFence
             ),
 
             SET_STORESTOREFENCE(
-                    "%SetVar<$1>%" + LNSEP + "VarHandle.storeStoreFence();",
+                    "field = \\$valueLiteral1\\$;" + LNSEP + "VarHandle.storeStoreFence();",
                     StoreStoreFence
             ),
 
             GET_ACQUIREFENCE(
-                    "%GetVar%;" + LNSEP + "VarHandle.acquireFence();",
+                    "field;" + LNSEP + "VarHandle.acquireFence();",
                     AcquireFence
             ),
 
             RELEASEFENCE_SET(
-                    "VarHandle.releaseFence();" + LNSEP + "%SetVar<$1>%",
+                    "VarHandle.releaseFence();" + LNSEP + "field = \\$valueLiteral1\\$;",
                     ReleaseFence
             ),
 
             SET_RELEASEFENCE(
-                    "%SetVar<$1>%" + LNSEP + "VarHandle.releaseFence();",
+                    "field = \\$valueLiteral1\\$;" + LNSEP + "VarHandle.releaseFence();",
                     ReleaseFence
             ),
 
             SET_FULLFENCE(
-                    "%SetVar<$1>%" + LNSEP + "VarHandle.fullFence();",
+                    "field = \\$valueLiteral1\\$;" + LNSEP + "VarHandle.fullFence();",
                     FullFence
             ),
 
             FULLFENCE_SET(
-                    "VarHandle.fullFence();" + LNSEP + "%SetVar<$1>%",
+                    "VarHandle.fullFence();" + LNSEP + "field = \\$valueLiteral1\\$;",
                     FullFence
             ),
 
             GET_FULLFENCE(
-                    "%GetVar%;" + LNSEP + "VarHandle.fullFence();",
+                    "field;" + LNSEP + "VarHandle.fullFence();",
                     FullFence
             ),
 
@@ -220,17 +215,5 @@ public class Chapter1cTestGenerator {
             Method method;
         }
     }
-
-    private static final Map<String, Target> TEMPLATES = Map.ofEntries(
-            entry("X-LoadLoadFenceTest",    T_GET_LOADLOADFENCE),
-            entry("X-LoadStoreFenceTest1",  T_LOADSTOREFENCE_SET),
-            entry("X-LoadStoreFenceTest2",  T_GET_LOADSTOREFENCE),
-            entry("X-StoreLoadFenceTest",   T_SET_STORELOADFENCE),
-            entry("X-StoreStoreFenceTest1", T_STORESTOREFENCE_SET),
-            entry("X-StoreStoreFenceTest2", T_SET_STORESTOREFENCE)
-    );
-
-
-    private static final String BASE_PKG = "org.openjdk.jcstress.tests.varHandles.fences";
 
 }
