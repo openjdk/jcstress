@@ -29,6 +29,8 @@ import static java.util.Map.entry;
 import static java.util.Set.of;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Source.DATA_SOURCE;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Source.VIEW_SOURCE;
+import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.*;
+import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.*;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Type.SHORT;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Type.CHAR;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Type.INT;
@@ -64,68 +66,8 @@ import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.Type.G
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.Type.STATIC_FENCE;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.Type.ATOMIC_UPDATE;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.Type.NUMERIC_ATOMIC_UPDATE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_ADDANDGET;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_GETANDADD;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_GETANDSET;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_CAE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_CAS;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_WEAKCAS;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_GETLOADLOADFENCE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_LOADSTOREFENCESET;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_GETLOADSTOREFENCE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_STORESTOREFENCESET;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_SETSTORESTOREFENCE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_SETSTORELOADFENCE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_WEAKSETSTORELOADFENCE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.T_WEAKSETSTORESTOREFENCE;
 
 import org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation;
-
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.SETVOLATILE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.SETRELEASE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.RELEASEFENCE_SET;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.FULLFENCE_SET;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.COMPAREANDSET_SUC;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.COMPAREANDEXCHANGEVOLATILE_SUC;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.COMPAREANDEXCHANGERELEASE_SUC;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.WEAKCOMPAREANDSETRELEASE_SUC;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.WEAKCOMPAREANDSETVOLATILE_SUC;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.ADDANDGET;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.GETANDADD;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.GETANDSET;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.STORESTOREFENCE_SET;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.GETVOLATILE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.GETACQUIRE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.GET_ACQUIREFENCE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.GET_FULLFENCE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.GET_COMPAREANDSET_FAIL;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.COMPAREANDEXCHANGEVOLATILE_FAIL;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.COMPAREANDEXCHANGEACQUIRE_FAIL;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.WEAKCOMPAREANDSETACQUIRE_FAIL;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.WEAKCOMPAREANDSETVOLATILE_FAIL;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.ADDANDGET_ZERO;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.GETANDADD_ZERO;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.GETANDSET_OUT;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.GET_LOADLOADFENCE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.SET_FULLFENCE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.COMPAREANDEXCHANGEVOLATILE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.COMPAREANDEXCHANGERELEASE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.COMPAREANDEXCHANGEACQUIRE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.COMPAREANDSET;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.WEAKCOMPAREANDSETRELEASE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.WEAKCOMPAREANDSETACQUIRE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.WEAKCOMPAREANDSET;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.WEAKCOMPAREANDSETVOLATILE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.SET;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.WEAKCOMPAREANDSET_SUC;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.COMPAREANDEXCHANGEACQUIRE_SUC;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.WEAKCOMPAREANDSETACQUIRE_SUC;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.GET;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.COMPAREANDEXCHANGERELEASE_FAIL;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.WEAKCOMPAREANDSET_RETURN;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.WEAKCOMPAREANDSETRELEASE_RETURN;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.SETOPAQUE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.Operation.GETOPAQUE;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -511,60 +453,6 @@ public class Chapter1bTestGenerator {
                 of(WEAKCOMPAREANDSETRELEASE, WEAKCOMPAREANDSETACQUIRE, WEAKCOMPAREANDSET, WEAKCOMPAREANDSETVOLATILE)
         ),
 
-        T_GETLOADLOADFENCE(
-                "%GetLoadLoadFence<>%",
-                of(GETVOLATILE, GETACQUIRE, GET_ACQUIREFENCE, GET_LOADLOADFENCE,
-                        GET_FULLFENCE, GET_COMPAREANDSET_FAIL, COMPAREANDEXCHANGEVOLATILE_FAIL,
-                        COMPAREANDEXCHANGEACQUIRE_FAIL, WEAKCOMPAREANDSETACQUIRE_FAIL,
-                        WEAKCOMPAREANDSETVOLATILE_FAIL, ADDANDGET_ZERO, GETANDADD_ZERO, GETANDSET_OUT)
-        ),
-
-        T_LOADSTOREFENCESET(
-                "%LoadStoreFenceSet<(.+)>%",
-                of(SETVOLATILE, SETRELEASE, RELEASEFENCE_SET, FULLFENCE_SET, COMPAREANDSET_SUC,
-                        COMPAREANDEXCHANGEVOLATILE_SUC, COMPAREANDEXCHANGERELEASE_SUC,
-                        WEAKCOMPAREANDSETRELEASE_SUC, WEAKCOMPAREANDSETVOLATILE_SUC,
-                        ADDANDGET, GETANDADD, GETANDSET)
-        ),
-
-        T_GETLOADSTOREFENCE(
-                "%GetLoadStoreFence<>%",
-                of(GETVOLATILE, GETACQUIRE, GET_ACQUIREFENCE, GET_COMPAREANDSET_FAIL,
-                        COMPAREANDEXCHANGEVOLATILE_FAIL, COMPAREANDEXCHANGEACQUIRE_FAIL,
-                        WEAKCOMPAREANDSETACQUIRE_FAIL, WEAKCOMPAREANDSETVOLATILE_FAIL,
-                        ADDANDGET_ZERO, GETANDADD_ZERO, GETANDSET_OUT)
-        ),
-
-        T_STORESTOREFENCESET(
-                "%StoreStoreFenceSet<(.+)>%",
-                of(SETVOLATILE, SETRELEASE, RELEASEFENCE_SET, STORESTOREFENCE_SET,
-                        FULLFENCE_SET, COMPAREANDSET_SUC, COMPAREANDEXCHANGEVOLATILE_SUC,
-                        COMPAREANDEXCHANGERELEASE_SUC, WEAKCOMPAREANDSETRELEASE_SUC,
-                        WEAKCOMPAREANDSETVOLATILE_SUC,
-                        ADDANDGET, GETANDADD, GETANDSET)
-        ),
-
-        T_SETSTORESTOREFENCE(
-                "%SetStoreStoreFence<(.+)>%",
-                of(SETVOLATILE, COMPAREANDSET_SUC, COMPAREANDEXCHANGEVOLATILE_SUC,
-                        ADDANDGET, GETANDADD, GETANDSET)
-        ),
-
-        T_SETSTORELOADFENCE(
-                "%SetStoreLoadFence<(.+)>%",
-                of(SETVOLATILE, SET_FULLFENCE, COMPAREANDSET_SUC, COMPAREANDEXCHANGEVOLATILE_SUC,
-                        ADDANDGET, GETANDADD, GETANDSET)),
-
-        T_WEAKSETSTORELOADFENCE(
-                "%WeakSetStoreLoadFence<(.+)>%",
-                of(WEAKCOMPAREANDSETVOLATILE_SUC)
-        ),
-
-        T_WEAKSETSTORESTOREFENCE(
-                "%WeakSetStoreStoreFence<(.+)>%",
-                of(WEAKCOMPAREANDSETVOLATILE_SUC)
-        ),
-
         T_GET(
                 "%Get<>%",
                 of(GET, COMPAREANDEXCHANGERELEASE_FAIL, WEAKCOMPAREANDSET_RETURN, WEAKCOMPAREANDSETRELEASE_RETURN)
@@ -582,7 +470,39 @@ public class Chapter1bTestGenerator {
         T_GETOPAQUE(
                 "%GetOpaque<>%",
                 of(GETOPAQUE)
-        );
+        ),
+
+        T_GET_LOADLOADFENCE(
+                "%GetLoadLoadFence<>%",
+                of(GET_ACQUIREFENCE, GET_LOADLOADFENCE, GET_FULLFENCE)
+        ),
+
+        T_LOADSTOREFENCE_SET(
+                "%LoadStoreFenceSet<(.+)>%",
+                of(RELEASEFENCE_SET, FULLFENCE_SET)
+        ),
+
+        T_GET_LOADSTOREFENCE(
+                "%GetLoadStoreFence<>%",
+                of(GET_ACQUIREFENCE, GET_FULLFENCE)
+        ),
+
+        T_STORESTOREFENCE_SET(
+                "%StoreStoreFenceSet<(.+)>%",
+                of(RELEASEFENCE_SET, STORESTOREFENCE_SET, FULLFENCE_SET)
+        ),
+
+        T_SET_STORESTOREFENCE(
+                "%SetStoreStoreFence<(.+)>%",
+                of(SET_RELEASEFENCE, SET_STORESTOREFENCE, SET_FULLFENCE)
+        ),
+
+        T_SET_STORELOADFENCE(
+                "%SetStoreLoadFence<(.+)>%",
+                of(SET_FULLFENCE)
+        ),
+
+        ;
 
         Target(String target, Set<Operation> operations) {
             this.target = target;
@@ -601,16 +521,6 @@ public class Chapter1bTestGenerator {
             SETRELEASE(
                     "vh.setRelease(\\$object\\$\\$index_para\\$, $1);",
                     SetRelease
-            ),
-
-            RELEASEFENCE_SET(
-                    "VarHandle.releaseFence();" + LNSEP + "%SetVar<$1>%",
-                    ReleaseFence
-            ),
-
-            FULLFENCE_SET(
-                    "VarHandle.fullFence();" + LNSEP + "%SetVar<$1>%",
-                    FullFence
             ),
 
             COMPAREANDSET_SUC(
@@ -653,11 +563,6 @@ public class Chapter1bTestGenerator {
                     GetAndSet
             ),
 
-            STORESTOREFENCE_SET(
-                    "VarHandle.storeStoreFence();" + LNSEP + "%SetVar<$1>%",
-                    StoreStoreFence
-            ),
-
             GETVOLATILE(
                     "(\\$type\\$) vh.getVolatile(\\$object\\$\\$index_para\\$);",
                     GetVolatile
@@ -668,39 +573,9 @@ public class Chapter1bTestGenerator {
                     GetAcquire
             ),
 
-            GET_ACQUIREFENCE(
-                    "%GetVar%;" + LNSEP + "VarHandle.acquireFence();",
-                    AcquireFence
-            ),
-
-            GET_FULLFENCE(
-                    "%GetVar%;" + LNSEP + "VarHandle.fullFence();",
-                    FullFence
-            ),
-
             GET_COMPAREANDSET_FAIL(
                     "%GetVar%;" + LNSEP + "vh.compareAndSet(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);",
                     CompareAndSet
-            ),
-
-            COMPAREANDEXCHANGEVOLATILE_FAIL(
-                    "(\\$type\\$) vh.compareAndExchangeVolatile(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);",
-                    CompareAndExchangeVolatile
-            ),
-
-            COMPAREANDEXCHANGEACQUIRE_FAIL(
-                    "(\\$type\\$) vh.compareAndExchangeAcquire(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);",
-                    CompareAndExchangeAcquire
-            ),
-
-            WEAKCOMPAREANDSETACQUIRE_FAIL(
-                    "%GetVar%;" + LNSEP + "vh.weakCompareAndSetAcquire(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);",
-                    WeakCompareAndSetAcquire
-            ),
-
-            WEAKCOMPAREANDSETVOLATILE_FAIL(
-                    "%GetVar%;" + LNSEP + "vh.weakCompareAndSetVolatile(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$, \\$valueLiteral3\\$);",
-                    WeakCompareAndSetVolatile
             ),
 
             ADDANDGET_ZERO(
@@ -716,16 +591,6 @@ public class Chapter1bTestGenerator {
             GETANDSET_OUT(
                     "(\\$type\\$) vh.getAndSet(\\$object\\$\\$index_para\\$, \\$valueLiteral3\\$);",
                     GetAndSet
-            ),
-
-            GET_LOADLOADFENCE(
-                    "%GetVar%;" + LNSEP + "VarHandle.loadLoadFence();",
-                    LoadLoadFence
-            ),
-
-            SET_FULLFENCE(
-                    "%SetVar<$1>%" + LNSEP + "VarHandle.fullFence();",
-                    FullFence
             ),
 
             COMPAREANDEXCHANGEVOLATILE(
@@ -816,7 +681,61 @@ public class Chapter1bTestGenerator {
             GETOPAQUE(
                     "(\\$type\\$) vh.getOpaque(\\$object\\$\\$index_para\\$);",
                     GetOpaque
-            );
+            ),
+
+            /* -------------------------------- fences -------------------------------- */
+
+            GET_LOADLOADFENCE(
+                    "%GetVar%;" + LNSEP + "VarHandle.loadLoadFence();",
+                    LoadLoadFence
+            ),
+
+            STORESTOREFENCE_SET(
+                    "VarHandle.storeStoreFence();" + LNSEP + "%SetVar<$1>%",
+                    StoreStoreFence
+            ),
+
+            SET_STORESTOREFENCE(
+                    "%SetVar<$1>%" + LNSEP + "VarHandle.storeStoreFence();",
+                    StoreStoreFence
+            ),
+
+            GET_ACQUIREFENCE(
+                    "%GetVar%;" + LNSEP + "VarHandle.acquireFence();",
+                    AcquireFence
+            ),
+
+            RELEASEFENCE_SET(
+                    "VarHandle.releaseFence();" + LNSEP + "%SetVar<$1>%",
+                    ReleaseFence
+            ),
+
+            SET_RELEASEFENCE(
+                    "%SetVar<$1>%" + LNSEP + "VarHandle.releaseFence();",
+                    ReleaseFence
+            ),
+
+            SET_FULLFENCE(
+                    "%SetVar<$1>%" + LNSEP + "VarHandle.fullFence();",
+                    FullFence
+            ),
+
+            FULLFENCE_SET(
+                    "VarHandle.fullFence();" + LNSEP + "%SetVar<$1>%",
+                    FullFence
+            ),
+
+            GET_FULLFENCE(
+                    "%GetVar%;" + LNSEP + "VarHandle.fullFence();",
+                    FullFence
+            ),
+
+            FULLFENCE_GET(
+                    "VarHandle.fullFence();" + LNSEP + "%GetVar%;",
+                    FullFence
+            ),
+
+            ;
 
             Operation(String operation, Method method) {
                 this.operation = operation;
@@ -852,16 +771,16 @@ public class Chapter1bTestGenerator {
             entry("CASTest", T_CAS),
             entry("GetAndAddTest", T_GETANDADD),
             entry("GetAndSetTest", T_GETANDSET),
-            entry("LoadLoadFenceTest", T_GETLOADLOADFENCE),
-            entry("LoadStoreFenceTest1", T_LOADSTOREFENCESET),
-            entry("LoadStoreFenceTest2", T_GETLOADSTOREFENCE),
-            entry("StoreLoadFenceTest", T_SETSTORELOADFENCE),
-            entry("StoreLoadFenceTestWeak", T_WEAKSETSTORELOADFENCE),
-            entry("StoreStoreFenceTest1", T_STORESTOREFENCESET),
-            entry("StoreStoreFenceTest2", T_SETSTORESTOREFENCE),
-            entry("StoreStoreFenceTest2Weak", T_WEAKSETSTORESTOREFENCE),
             entry("WeakCASTest", T_WEAKCAS),
-            entry("WeakCASContendStrongTest", T_WEAKCAS));
+            entry("WeakCASContendStrongTest", T_WEAKCAS),
+            entry("LoadLoadFenceTest", T_GET_LOADLOADFENCE),
+            entry("LoadStoreFenceTest1", T_LOADSTOREFENCE_SET),
+            entry("LoadStoreFenceTest2", T_GET_LOADSTOREFENCE),
+            entry("StoreLoadFenceTest", T_SET_STORELOADFENCE),
+            entry("StoreStoreFenceTest1", T_STORESTOREFENCE_SET),
+            entry("StoreStoreFenceTest2", T_SET_STORESTOREFENCE)
+    );
+
 
     private static final String BASE_PKG = "org.openjdk.jcstress.tests.varHandles";
 
