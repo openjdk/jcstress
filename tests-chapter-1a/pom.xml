@@ -63,7 +63,7 @@ questions.
                             Stop complaining sun.misc package is invisible. You can't?
                             Huh, I guess no module access checks for you then:
                         -->
-                        <arg>-XDnoModules</arg>
+                        <arg>-Xmodule:jdk.unsupported</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
