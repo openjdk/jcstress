@@ -31,8 +31,7 @@ import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.NonNullArrayList;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
@@ -119,6 +118,9 @@ public class TestGrading {
                     c.description()
             ));
         }
+
+        Collections.sort(gradingResults,
+                Comparator.comparing(c -> c.id));
     }
 
     public static String failureMessage(String id, Expect expect, long count) {
