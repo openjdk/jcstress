@@ -129,7 +129,6 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 } else {
                     output.println();
                     printLine("FAILED", r);
-                    isVerbose = true;
                     failed++;
                 }
                 break;
@@ -137,7 +136,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 throw new IllegalStateException("Illegal status: " + r.status());
         }
 
-        if (isVerbose) {
+        if (!grading.isPassed || grading.hasInteresting) {
             output.format("    (fork: #%d, iteration #%d, JVM args: %s)%n",
                     r.getConfig().forkId + 1,
                     r.getIteration() + 1,
