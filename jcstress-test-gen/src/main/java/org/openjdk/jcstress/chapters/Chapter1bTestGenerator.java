@@ -221,7 +221,7 @@ public class Chapter1bTestGenerator {
     private static Map<String, String> viewVars(Type type, String object, String pkg, String testName,
                                                 String bufferAllocateOp, ByteOrder bo) {
         Map<String, String> map = commonVars(type, object, pkg, testName);
-        map.put("index_para", ", 0");
+        map.put("index_para", ", OFF");
         map.put("unit_size", String.valueOf(type.sizeInArray));
         map.put("buffer_allocate", bufferAllocateOp);
         map.put("byte_order", bo.toString());
