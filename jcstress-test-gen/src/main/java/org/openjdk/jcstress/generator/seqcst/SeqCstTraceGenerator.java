@@ -26,10 +26,12 @@ package org.openjdk.jcstress.generator.seqcst;
 
 import org.openjdk.jcstress.generator.ResultGenerator;
 import org.openjdk.jcstress.generator.TestGenerator;
-import org.openjdk.jcstress.generator.Utils;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -168,8 +170,6 @@ public class SeqCstTraceGenerator {
     }
 
     private void emit(MultiThread mt, Collection<TraceResult> scResults) {
-        String pathname = Utils.ensureDir(srcDir + "/" + pkg.replaceAll("\\.", "/"));
-
         String klass = mt.canonicalId() + "_Test";
 
         Class[] klasses = new Class[mt.loadCount() + mt.allVariables().size()];
@@ -181,8 +181,11 @@ public class SeqCstTraceGenerator {
 
         PrintWriter pw;
         try {
-            pw = new PrintWriter(pathname + "/" + klass + ".java");
-        } catch (FileNotFoundException e) {
+            Path dir = Paths.get(srcDir, pkg.split("\\."));
+            Path file = dir.resolve(klass + ".java");
+            Files.createDirectories(dir);
+            pw = new PrintWriter(file.toFile());
+        } catch (IOException e) {
             throw new IllegalStateException(e);
         }
 

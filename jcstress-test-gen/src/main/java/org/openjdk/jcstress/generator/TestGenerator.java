@@ -24,8 +24,11 @@
  */
 package org.openjdk.jcstress.generator;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
@@ -48,11 +51,11 @@ public class TestGenerator {
         this.resultGenerator = new ResultGenerator(srcRoot);
     }
 
-    public void run() throws FileNotFoundException {
+    public void run() throws IOException {
         generateMemoryEffects();
     }
 
-    public void generateMemoryEffects() throws FileNotFoundException {
+    public void generateMemoryEffects() throws IOException {
         for (Class<?> varType : Types.SUPPORTED_PRIMITIVES) {
             for (Class<?> guardType : Types.SUPPORTED_PRIMITIVES) {
                 generate(new Types(guardType, varType), new VolatileReadWrite(guardType), "volatile_" + guardType + "_" + varType, "org.openjdk.jcstress.tests.memeffects.basic.volatiles");
@@ -96,12 +99,13 @@ public class TestGenerator {
         }
     }
 
-   public void generate(Types types, Primitive prim, String klass, String pkg) throws FileNotFoundException {
+   public void generate(Types types, Primitive prim, String klass, String pkg) throws IOException {
         String resultName = resultGenerator.generateResult(types);
 
-        String pathname = Utils.ensureDir(srcRoot + "/" + pkg.replaceAll("\\.", "/"));
-
-        PrintWriter pw = new PrintWriter(pathname + "/" + klass + ".java");
+        Path dir = Paths.get(srcRoot, pkg.split("\\."));
+        Path file = dir.resolve(klass + ".java");
+        Files.createDirectories(dir);
+        PrintWriter pw = new PrintWriter(file.toFile());
 
         pw.println("package " + pkg +";");
         pw.println();

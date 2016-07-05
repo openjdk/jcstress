@@ -35,8 +35,8 @@ import java.util.stream.Collectors;
 
 public class GeneratorUtils {
     static void writeOut(String destination, String pkg, String name, String contents) throws IOException {
-        Path dir = Paths.get(destination, pkg.replaceAll("\\.", File.separator));
-        Path file = Paths.get(destination, pkg.replaceAll("\\.", File.separator), name + ".java");
+        Path dir = Paths.get(destination, pkg.split("\\."));
+        Path file = dir.resolve(name + ".java");
         Files.createDirectories(dir);
 
         boolean doWrite = true;

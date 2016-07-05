@@ -24,8 +24,11 @@
  */
 package org.openjdk.jcstress.generator;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -55,12 +58,13 @@ public class ResultGenerator {
         if (!generatedResults.add(name))
             return name;
 
-        String pathname = Utils.ensureDir(srcRoot + "/" + "org.openjdk.jcstress.infra.results.".replaceAll("\\.", "/"));
-
-        PrintWriter pw = null;
+        PrintWriter pw;
         try {
-            pw = new PrintWriter(pathname + "/" + name + ".java");
-        } catch (FileNotFoundException e) {
+            Path dir = Paths.get(srcRoot, "org.openjdk.jcstress.infra.results.".split("\\."));
+            Path file = dir.resolve(name + ".java");
+            Files.createDirectories(dir);
+            pw = new PrintWriter(file.toFile());
+        } catch (IOException e) {
             throw new IllegalStateException(e);
         }
 

@@ -26,11 +26,11 @@ package org.openjdk.jcstress;
 
 import org.openjdk.jcstress.generator.TestGenerator;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class TestGenMain {
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws IOException {
         if (args.length >= 2) {
             new TestGenerator(args[0], args[1]).run();
         } else {
