@@ -50,7 +50,7 @@ import org.openjdk.jcstress.infra.results.Bool2$Type$Result;
 @State
 public class $TestClassName$ {
 
-    static final int OFF = ByteBuffer.wrap(new byte[128]).alignmentOffset(0, 8);
+    static final int OFF = $buffer_allocate$(128).alignmentOffset(0, 8);
 
     static final VarHandle vh;
 
