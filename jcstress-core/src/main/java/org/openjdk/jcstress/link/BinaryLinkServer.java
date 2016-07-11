@@ -77,6 +77,8 @@ public final class BinaryLinkServer {
         } catch (InterruptedException e) {
             // ignore
         }
+
+        handlers.clear();
     }
 
     private InetAddress getListenAddress() {
@@ -200,6 +202,7 @@ public final class BinaryLinkServer {
                 e.printStackTrace(System.out);
             } finally {
                 close();
+                handlers.remove(this);
             }
         }
 
@@ -222,7 +225,6 @@ public final class BinaryLinkServer {
             } catch (IOException e) {
                 // ignore
             }
-            BinaryLinkServer.this.handlers.remove(this);
         }
 
     }
