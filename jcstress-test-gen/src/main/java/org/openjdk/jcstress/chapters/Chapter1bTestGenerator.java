@@ -496,7 +496,7 @@ public class Chapter1bTestGenerator {
             ),
 
             COMPAREANDEXCHANGEVOLATILE_SUC(
-                    "vh.compareAndExchangeVolatile(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);",
+                    "vh.compareAndExchange(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);",
                     CompareAndExchangeVolatile
             ),
 
@@ -561,7 +561,7 @@ public class Chapter1bTestGenerator {
             ),
 
             COMPAREANDEXCHANGEVOLATILE(
-                    "(\\$type\\$) vh.compareAndExchangeVolatile(\\$object\\$\\$index_para\\$, $1, $2);",
+                    "(\\$type\\$) vh.compareAndExchange(\\$object\\$\\$index_para\\$, $1, $2);",
                     CompareAndExchangeVolatile
             ),
 
