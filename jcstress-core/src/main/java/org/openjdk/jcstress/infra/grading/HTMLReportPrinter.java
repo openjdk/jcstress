@@ -203,7 +203,10 @@ public class HTMLReportPrinter {
         if (verbose) {
             List<TestResult> byConfig = ReportUtils.mergedByConfig(collector.getTestResults());
             for (TestResult result : byConfig) {
-                printer.add(result);
+                TestGrading grading = TestGrading.grade(result);
+                if (!grading.isPassed || grading.hasInteresting) {
+                    printer.add(result);
+                }
             }
         }
     }
