@@ -50,7 +50,7 @@ public class ByteTest {
         byte[] a = arr;
         if (a == null) {
             // Pretend we have seen the default values
-            r.r1 = r.r2 = r.r3 = r.r4 = 0;
+            r.r1 = r.r2 = r.r3 = r.r4 = (byte)0;
         } else {
             r.r1 = a[0];
             r.r2 = a[1];

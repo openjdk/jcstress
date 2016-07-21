@@ -55,7 +55,7 @@ public class ShortTest {
         } else {
             boolean allDefault = true;
             for (short v : a) {
-                allDefault &= (v == 0);
+                allDefault &= (v == (short)0);
             }
             r.r1 = allDefault ? 0 : 1;
         }

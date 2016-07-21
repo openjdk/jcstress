@@ -54,7 +54,7 @@ public class ByteTest {
         Data d = this.data;
         if (d == null) {
             // Pretend we have seen the default values
-            r.r1 = r.r2 = r.r3 = r.r4 = 0;
+            r.r1 = r.r2 = r.r3 = r.r4 = (byte)0;
         } else {
             r.r1 = d.v0;
             r.r2 = d.v1;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,44 +22,52 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.defaultValues.arrays.large.plain;
+package org.openjdk.jcstress.infra.results;
 
-import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.*;
-import java.util.concurrent.*;
+import org.openjdk.jcstress.annotations.Result;
 
-// -- This file was mechanically generated: Do not edit! -- //
+import java.io.Serializable;
 
-/**
- * Tests if fields are initialized to default values.
- */
-@JCStressTest
-@Outcome(id = "0",  expect = Expect.ACCEPTABLE, desc = "Default value for the element.")
-@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "Have not seen the array yet.")
-@Outcome(id = "1",  expect = Expect.FORBIDDEN, desc = "Non-default values are forbidden.")
-@State
-public class ShortTest {
+@Result
+public class ShortResult3 implements Serializable {
 
-    short[] arr;
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
+    public short r1;
 
-    @Actor
-    public void actor1() {
-        arr = new short[2 * 1024 * 1024];
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
+    public short r2;
+
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
+    public short r3;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ShortResult3 that = (ShortResult3) o;
+
+        if (r1 != that.r1) return false;
+        if (r2 != that.r2) return false;
+        if (r3 != that.r3) return false;
+
+        return true;
     }
 
-    @Actor
-    public void actor2(IntResult1 r) {
-        short[] a = arr;
-        if (a == null) {
-            r.r1 = -1;
-        } else {
-            boolean allDefault = true;
-            for (short v : a) {
-                allDefault &= (v == (short)0);
-            }
-            r.r1 = allDefault ? 0 : 1;
-        }
+    @Override
+    public int hashCode() {
+        int result = (int) r1;
+        result = 31 * result + (int) r2;
+        result = 31 * result + (int) r3;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return r1 + ", " + r2 + ", " + r3;
     }
 
 }
-

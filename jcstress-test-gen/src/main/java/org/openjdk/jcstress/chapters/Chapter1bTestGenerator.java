@@ -243,7 +243,7 @@ public class Chapter1bTestGenerator {
                 false,
 
                 // here value2 should equal value0 + value1 + value1, to meet GetAndAdd, AddAndGet tests
-                new String[] { "-2L", "7" },
+                new String[] { "-2L", "7L" },
                 new String[] { "-2", "7" }
         ),
 
@@ -258,29 +258,29 @@ public class Chapter1bTestGenerator {
         BOOLEAN("boolean",
                 1,
                 true,
-                new String[] {},
-                new String[] {}
+                new String[] { "true", "true" },
+                new String[] { "true", "true" }
         ),
 
         BYTE("byte",
                 Byte.BYTES,
                 true,
-                new String[] {},
-                new String[] {}
+                new String[] { "(byte)2", "(byte)7" },
+                new String[] { "2", "7" }
         ),
 
         SHORT("short",
                 Short.BYTES,
                 true,
-                new String[] {},
-                new String[] {}
+                new String[] { "(short)2", "(short)7" },
+                new String[] { "2", "7" }
         ),
 
         CHAR("char",
                 Character.BYTES,
                 true,
-                new String[] {},
-                new String[] {}
+                new String[] { "'C'", "'D'" },
+                new String[] { "C", "D" }
         ),
 
         FLOAT("float",
@@ -326,10 +326,6 @@ public class Chapter1bTestGenerator {
 
         protected abstract boolean supported(Method method, Type type);
 
-        boolean commonSupported(Method method) {
-            return (method.type == GET_SET);
-        }
-
         static final Source DATA_SOURCE = new Source() {
 
             @Override
@@ -339,15 +335,14 @@ public class Chapter1bTestGenerator {
 
             @Override
             protected boolean supported(Method method, Type type) {
-                if (commonSupported(method))
-                    return true;
-
-                if ((type == INT || type == LONG || type == STRING) && method.type == ATOMIC_UPDATE)
-                    return true;
-
-                if ((type == INT || type == LONG) && method.type == NUMERIC_ATOMIC_UPDATE)
-                    return true;
-
+                switch (method.type) {
+                    case GET_SET:
+                        return true;
+                    case ATOMIC_UPDATE:
+                        return true;
+                    case NUMERIC_ATOMIC_UPDATE:
+                        return (type == INT || type == LONG);
+                }
                 return false;
             }
 
@@ -362,16 +357,14 @@ public class Chapter1bTestGenerator {
 
             @Override
             protected boolean supported(Method method, Type type) {
-                if (commonSupported(method))
-                    return true;
-
-                if ((type == INT || type == LONG || type == FLOAT || type == DOUBLE)
-                        && method.type == ATOMIC_UPDATE)
-                    return true;
-
-                if ((type == INT || type == LONG) && method.type == NUMERIC_ATOMIC_UPDATE)
-                    return true;
-
+                switch (method.type) {
+                    case GET_SET:
+                        return true;
+                    case ATOMIC_UPDATE:
+                        return (type == INT || type == LONG || type == FLOAT || type == DOUBLE);
+                    case NUMERIC_ATOMIC_UPDATE:
+                        return (type == INT || type == LONG);
+                }
                 return false;
             }
 

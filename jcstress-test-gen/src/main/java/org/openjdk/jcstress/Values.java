@@ -48,9 +48,9 @@ public class Values {
 
         DEFAULTS_LITERAL = new HashMap<>();
         DEFAULTS_LITERAL.put("boolean", "false");
-        DEFAULTS_LITERAL.put("byte",    "0");
-        DEFAULTS_LITERAL.put("char",    "'\0'");
-        DEFAULTS_LITERAL.put("short",   "0");
+        DEFAULTS_LITERAL.put("byte",    "(byte)0");
+        DEFAULTS_LITERAL.put("char",    "'\\\\\\u0000'");
+        DEFAULTS_LITERAL.put("short",   "(short)0");
         DEFAULTS_LITERAL.put("int",     "0");
         DEFAULTS_LITERAL.put("float",   "0F");
         DEFAULTS_LITERAL.put("long",    "0L");

@@ -55,7 +55,7 @@ public class ByteTest {
         } else {
             boolean allDefault = true;
             for (byte v : a) {
-                allDefault &= (v == 0);
+                allDefault &= (v == (byte)0);
             }
             r.r1 = allDefault ? 0 : 1;
         }
