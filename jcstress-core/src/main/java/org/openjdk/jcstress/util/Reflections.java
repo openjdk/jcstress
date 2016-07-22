@@ -72,6 +72,8 @@ public class Reflections {
                 throw new IllegalStateException(e.getMessage(), e);
             } catch (NoClassDefFoundError e) {
                 // may happen in JDK 9+ while trying to load a privileged class
+            } catch (NoSuchMethodError | NoSuchFieldError | ClassFormatError e) {
+                // may happen when trying to load a class from a newer JDK
             }
         }
         return newClasses;

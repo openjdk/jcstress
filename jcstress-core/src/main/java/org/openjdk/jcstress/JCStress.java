@@ -38,10 +38,7 @@ import org.openjdk.jcstress.link.BinaryLinkServer;
 import org.openjdk.jcstress.util.InputStreamDrainer;
 import org.openjdk.jcstress.vm.VMSupport;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -240,8 +237,14 @@ public class JCStress {
             Constructor<?> cnstr = aClass.getConstructor(TestConfig.class, TestResultCollector.class, ExecutorService.class);
             Runner<?> o = (Runner<?>) cnstr.newInstance(config, collector, pool);
             o.run();
+        } catch (ClassFormatError e) {
+            TestResult result = new TestResult(config, Status.API_MISMATCH, 0);
+            result.addAuxData(e.getMessage());
+            collector.add(result);
         } catch (Exception ex) {
-            throw new IllegalStateException("Should have been handled within the Runner");
+            TestResult result = new TestResult(config, Status.TEST_ERROR, 0);
+            result.addAuxData(ex.getMessage());
+            collector.add(result);
         }
     }
 
