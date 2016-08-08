@@ -136,7 +136,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 throw new IllegalStateException("Illegal status: " + r.status());
         }
 
-        if (!grading.isPassed || grading.hasInteresting) {
+        if (!grading.isPassed || grading.hasInteresting || verbose) {
             output.format("    (fork: #%d, iteration #%d, JVM args: %s)%n",
                     r.getConfig().forkId + 1,
                     r.getIteration() + 1,
