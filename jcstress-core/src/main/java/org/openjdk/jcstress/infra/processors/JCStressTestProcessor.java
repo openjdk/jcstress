@@ -762,7 +762,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("            }");
         pw.println();
         pw.println("            try {");
-        pw.println("                t1.join(1000);");
+        pw.println("                t1.join(config.time);");
         pw.println("            } catch (InterruptedException e) {");
         pw.println("                // do nothing");
         pw.println("            }");
