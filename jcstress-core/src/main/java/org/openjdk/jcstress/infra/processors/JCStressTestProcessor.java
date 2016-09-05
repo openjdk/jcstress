@@ -728,6 +728,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("            Thread t1 = new Thread(new Runnable() {");
         pw.println("                public void run() {");
         pw.println("                    try {");
+        pw.println("                        holder.started = true;");
 
         if (info.getTest().equals(info.getState())) {
             emitMethodTermination(pw, actor, "                        state." + actor.getSimpleName(), "state");
@@ -743,10 +744,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("            });");
         pw.println("            t1.start();");
         pw.println();
-        pw.println("            try {");
-        pw.println("                TimeUnit.MILLISECONDS.sleep(10);");
-        pw.println("            } catch (InterruptedException e) {");
-        pw.println("                // do nothing");
+        pw.println("            while (!holder.started) {");
+        pw.println("                try {");
+        pw.println("                    TimeUnit.MILLISECONDS.sleep(1);");
+        pw.println("                } catch (InterruptedException e) {");
+        pw.println("                    // do nothing");
+        pw.println("                }");
         pw.println("            }");
         pw.println();
         pw.println("            try {");
@@ -781,6 +784,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    }");
         pw.println();
         pw.println("    private static class Holder {");
+        pw.println("        volatile boolean started;");
         pw.println("        volatile boolean terminated;");
         pw.println("        volatile boolean error;");
         pw.println("    }");
