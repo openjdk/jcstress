@@ -27,6 +27,7 @@ package org.openjdk.jcstress.chapters;
 
 import static java.util.Map.entry;
 import static java.util.Set.of;
+import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.*;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Source.DATA_SOURCE;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Source.VIEW_SOURCE;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Target.*;
@@ -37,26 +38,6 @@ import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Type.INT;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Type.LONG;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Type.FLOAT;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Type.DOUBLE;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Type.STRING;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.Get;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.GetVolatile;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.GetOpaque;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.GetAcquire;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.Set;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.SetVolatile;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.SetOpaque;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.SetRelease;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.GetAndAdd;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.AddAndGet;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.CompareAndSet;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.CompareAndExchangeVolatile;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.CompareAndExchangeAcquire;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.CompareAndExchangeRelease;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.WeakCompareAndSet;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.WeakCompareAndSetAcquire;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.WeakCompareAndSetRelease;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.WeakCompareAndSetVolatile;
-import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.GetAndSet;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.Type.GET_SET;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.Type.ATOMIC_UPDATE;
 import static org.openjdk.jcstress.chapters.Chapter1bTestGenerator.Method.Type.NUMERIC_ATOMIC_UPDATE;
@@ -386,18 +367,19 @@ public class Chapter1bTestGenerator {
         SetRelease(GET_SET),
 
         CompareAndSet(ATOMIC_UPDATE),
-        CompareAndExchangeVolatile(ATOMIC_UPDATE),
+
+        CompareAndExchange(ATOMIC_UPDATE),
         CompareAndExchangeAcquire(ATOMIC_UPDATE),
         CompareAndExchangeRelease(ATOMIC_UPDATE),
 
         WeakCompareAndSet(ATOMIC_UPDATE),
         WeakCompareAndSetAcquire(ATOMIC_UPDATE),
         WeakCompareAndSetRelease(ATOMIC_UPDATE),
-        WeakCompareAndSetVolatile(ATOMIC_UPDATE),
-        GetAndSet(ATOMIC_UPDATE),
+        WeakCompareAndSetPlain(ATOMIC_UPDATE),
 
+        GetAndSet(ATOMIC_UPDATE),
         GetAndAdd(NUMERIC_ATOMIC_UPDATE),
-        AddAndGet(NUMERIC_ATOMIC_UPDATE);
+        ;
 
         Method(Type type) {
             this.type = type;
@@ -413,11 +395,6 @@ public class Chapter1bTestGenerator {
     private static final String LNSEP = System.getProperty("line.separator");
 
     enum Target {
-        T_ADDANDGET(
-                "%AddAndGet<(.+)>%",
-                of(ADDANDGET)
-        ),
-
         T_GETANDADD(
                 "%GetAndAdd<(.+)>%",
                 of(GETANDADD)
@@ -430,7 +407,7 @@ public class Chapter1bTestGenerator {
 
         T_CAE(
                 "%CAE<(.+), (.+)>%",
-                of(COMPAREANDEXCHANGEVOLATILE, COMPAREANDEXCHANGERELEASE, COMPAREANDEXCHANGEACQUIRE)
+                of(COMPAREANDEXCHANGE, COMPAREANDEXCHANGERELEASE, COMPAREANDEXCHANGEACQUIRE)
         ),
 
         T_CAS(
@@ -440,12 +417,12 @@ public class Chapter1bTestGenerator {
 
         T_WEAKCAS(
                 "%WeakCAS<(.+), (.+)>%",
-                of(WEAKCOMPAREANDSETRELEASE, WEAKCOMPAREANDSETACQUIRE, WEAKCOMPAREANDSET, WEAKCOMPAREANDSETVOLATILE)
+                of(WEAKCOMPAREANDSET, WEAKCOMPAREANDSETRELEASE, WEAKCOMPAREANDSETACQUIRE, WEAKCOMPAREANDSETPLAIN)
         ),
 
         T_GET(
                 "%Get<>%",
-                of(GET, COMPAREANDEXCHANGERELEASE_FAIL, WEAKCOMPAREANDSET_RETURN, WEAKCOMPAREANDSETRELEASE_RETURN)
+                of(GET, COMPAREANDEXCHANGERELEASE_FAIL, WEAKCOMPAREANDSETPLAIN_RETURN, WEAKCOMPAREANDSETRELEASE_RETURN)
         ),
 
         T_SET(
@@ -488,9 +465,9 @@ public class Chapter1bTestGenerator {
                     CompareAndSet
             ),
 
-            COMPAREANDEXCHANGEVOLATILE_SUC(
+            COMPAREANDEXCHANGE_SUC(
                     "vh.compareAndExchange(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);",
-                    CompareAndExchangeVolatile
+                    CompareAndExchange
             ),
 
             COMPAREANDEXCHANGERELEASE_SUC(
@@ -503,14 +480,9 @@ public class Chapter1bTestGenerator {
                     WeakCompareAndSetRelease
             ),
 
-            WEAKCOMPAREANDSETVOLATILE_SUC(
-                    "vh.weakCompareAndSetVolatile(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);",
-                    WeakCompareAndSetVolatile
-            ),
-
-            ADDANDGET(
-                    "vh.addAndGet(\\$object\\$\\$index_para\\$, $1);",
-                    AddAndGet
+            WEAKCOMPAREANDSET_SUC(
+                    "vh.weakCompareAndSet(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);",
+                    WeakCompareAndSet
             ),
 
             GETANDADD(
@@ -538,11 +510,6 @@ public class Chapter1bTestGenerator {
                     CompareAndSet
             ),
 
-            ADDANDGET_ZERO(
-                    "(\\$type\\$) vh.addAndGet(\\$object\\$\\$index_para\\$, 0);",
-                    AddAndGet
-            ),
-
             GETANDADD_ZERO(
                     "(\\$type\\$) vh.getAndAdd(\\$object\\$\\$index_para\\$, 0);",
                     GetAndAdd
@@ -553,9 +520,9 @@ public class Chapter1bTestGenerator {
                     GetAndSet
             ),
 
-            COMPAREANDEXCHANGEVOLATILE(
+            COMPAREANDEXCHANGE(
                     "(\\$type\\$) vh.compareAndExchange(\\$object\\$\\$index_para\\$, $1, $2);",
-                    CompareAndExchangeVolatile
+                    CompareAndExchange
             ),
 
             COMPAREANDEXCHANGERELEASE(
@@ -573,9 +540,9 @@ public class Chapter1bTestGenerator {
                     CompareAndSet
             ),
 
-            WEAKCOMPAREANDSETRELEASE(
-                    "vh.weakCompareAndSetRelease(\\$object\\$\\$index_para\\$, $1, $2);",
-                    WeakCompareAndSetRelease
+            WEAKCOMPAREANDSET(
+                    "vh.weakCompareAndSet(\\$object\\$\\$index_para\\$, $1, $2);",
+                    WeakCompareAndSet
             ),
 
             WEAKCOMPAREANDSETACQUIRE(
@@ -583,14 +550,14 @@ public class Chapter1bTestGenerator {
                     WeakCompareAndSetAcquire
             ),
 
-            WEAKCOMPAREANDSET(
-                    "vh.weakCompareAndSet(\\$object\\$\\$index_para\\$, $1, $2);",
-                    WeakCompareAndSet
+            WEAKCOMPAREANDSETRELEASE(
+                    "vh.weakCompareAndSetRelease(\\$object\\$\\$index_para\\$, $1, $2);",
+                    WeakCompareAndSetRelease
             ),
 
-            WEAKCOMPAREANDSETVOLATILE(
-                    "vh.weakCompareAndSetVolatile(\\$object\\$\\$index_para\\$, $1, $2);",
-                    WeakCompareAndSetVolatile
+            WEAKCOMPAREANDSETPLAIN(
+                    "vh.weakCompareAndSetPlain(\\$object\\$\\$index_para\\$, $1, $2);",
+                    WeakCompareAndSetPlain
             ),
 
             SET(
@@ -598,9 +565,9 @@ public class Chapter1bTestGenerator {
                     Set
             ),
 
-            WEAKCOMPAREANDSET_SUC(
-                    "vh.weakCompareAndSet(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);",
-                    WeakCompareAndSet
+            WEAKCOMPAREANDSETPLAIN_SUC(
+                    "vh.weakCompareAndSetPlain(\\$object\\$\\$index_para\\$, \\$valueLiteral0\\$, $1);",
+                    WeakCompareAndSetPlain
             ),
 
             COMPAREANDEXCHANGEACQUIRE_SUC(
@@ -623,9 +590,9 @@ public class Chapter1bTestGenerator {
                     CompareAndExchangeRelease
             ),
 
-            WEAKCOMPAREANDSET_RETURN(
-                    "vh.weakCompareAndSet(\\$object\\$\\$index_para\\$, \\$valueLiteral1\\$, \\$valueLiteral3\\$) ? \\$valueLiteral1\\$ : \\$valueLiteral0\\$;",
-                    WeakCompareAndSet
+            WEAKCOMPAREANDSETPLAIN_RETURN(
+                    "vh.weakCompareAndSetPlain(\\$object\\$\\$index_para\\$, \\$valueLiteral1\\$, \\$valueLiteral3\\$) ? \\$valueLiteral1\\$ : \\$valueLiteral0\\$;",
+                    WeakCompareAndSetPlain
             ),
 
             WEAKCOMPAREANDSETRELEASE_RETURN(
@@ -674,7 +641,6 @@ public class Chapter1bTestGenerator {
     }
 
     private static final Map<String, Target> TEMPLATES = Map.ofEntries(
-            entry("X-AddAndGetTest", T_ADDANDGET),
             entry("X-CAETest", T_CAE),
             entry("X-CASTest", T_CAS),
             entry("X-GetAndAddTest", T_GETANDADD),
