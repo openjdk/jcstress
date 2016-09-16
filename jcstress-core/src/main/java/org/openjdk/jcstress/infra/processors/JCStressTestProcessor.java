@@ -595,11 +595,19 @@ public class JCStressTestProcessor extends AbstractProcessor {
             return;
         }
 
+        // We have to use the hierarchy trick here, and not @Contended, because Jigsaw prevents us
+        // from accessing sun.misc packages.
         pw.println("package " + getPackageName(el) + ";");
-        pw.println("public class " + name + " extends " + el.getQualifiedName() + "{ ");
-        pw.println("    @sun.misc.Contended");
-        pw.println("    @jdk.internal.vm.annotation.Contended");
+        pw.println("class " + name + "_c2 extends " + el.getQualifiedName() + " {");
+        Paddings.padding(pw);
+        pw.println("}");
+
+        pw.println("class " + name + "_c1 extends " + name + "_c2 {");
         pw.println("    public int trap;");
+        pw.println("}");
+
+        pw.println("public class " + name + " extends " + name + "_c1 {");
+        Paddings.padding(pw);
         pw.println("}");
 
         pw.close();

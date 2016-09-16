@@ -52,13 +52,12 @@ questions.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.4</version>
                 <configuration>
                     <proc>none</proc>
-                    <compilerArguments>
-                        <Xlint:all/>
-                        <Werror/>
-                    </compilerArguments>
+                    <compilerArgs>
+                        <arg>-Xlint:all</arg>
+                        <arg>-Werror</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>

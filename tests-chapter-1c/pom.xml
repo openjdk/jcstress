@@ -57,14 +57,6 @@ questions.
                     <debug>false</debug>
                     <meminitial>4096</meminitial>
                     <fork>true</fork>
-                    <compilerArgs>
-                        <!--
-                            No, compiler, we need that sun.misc.Contended here.
-                            Stop complaining sun.misc package is invisible. You can't?
-                            Huh, I guess no module access checks for you then:
-                        -->
-                        <arg>-Xmodule:jdk.unsupported</arg>
-                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
