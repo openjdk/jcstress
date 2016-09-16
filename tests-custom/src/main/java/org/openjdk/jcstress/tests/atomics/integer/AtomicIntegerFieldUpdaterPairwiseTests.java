@@ -540,6 +540,7 @@ public class AtomicIntegerFieldUpdaterPairwiseTests {
     @JCStressMeta(G.class)
     @Outcome(id = "5, 10", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")
     @Outcome(id = "1, 20", expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution")
+    @Outcome(id = "1, 10", expect = Expect.ACCEPTABLE_SPEC, desc = "T1 and T2 both spuriously failed")
     public static class WCAS_WCAS {
         @Actor public void actor1(S s, IntResult2 r) { r.r1 = s.u.weakCompareAndSet(s, 0, 5) ? 5 : 1; }
         @Actor public void actor2(S s, IntResult2 r) { r.r2 = s.u.weakCompareAndSet(s, 0, 20) ? 20 : 10; }

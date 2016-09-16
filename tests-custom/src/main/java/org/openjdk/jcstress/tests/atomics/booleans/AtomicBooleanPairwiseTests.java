@@ -85,6 +85,7 @@ public class AtomicBooleanPairwiseTests {
 
     @JCStressTest
     @JCStressMeta(Meta.class)
+    @Outcome(id = "0, 0", expect = Expect.ACCEPTABLE_SPEC, desc = "T1 and T2 both spuriously failed")
     public static class WCAS_WCAS {
         @Actor public void actor1(MyState s, IntResult2 r) { r.r1 = s.weakCompareAndSet(false, true) ? 1 : 0; }
         @Actor public void actor2(MyState s, IntResult2 r) { r.r2 = s.weakCompareAndSet(false, true) ? 1 : 0; }
