@@ -72,24 +72,25 @@ public class ExceptionReportPrinter {
     }
 
     public void emitTest(TestResult result) throws FileNotFoundException, JAXBException {
+        String label = result.getName() + " " + result.getConfig().jvmArgs;
         switch (result.status()) {
             case CHECK_TEST_ERROR:
-                failures.add(result.getName() + " had failed with the pre-test error.");
+                failures.add(label + " had failed with the pre-test error.");
                 break;
             case TEST_ERROR:
-                failures.add(result.getName() + " had failed with the test error.");
+                failures.add(label + " had failed with the test error.");
                 break;
             case TIMEOUT_ERROR:
-                failures.add(result.getName() + " had timed out.");
+                failures.add(label + " had timed out.");
                 break;
             case VM_ERROR:
-                failures.add(result.getName() + " had failed with the VM error.");
+                failures.add(label + " had failed with the VM error.");
                 break;
             case NORMAL:
                 TestGrading grading = TestGrading.grade(result);
                 if (!grading.failureMessages.isEmpty()) {
                     for (String msg : grading.failureMessages) {
-                        failures.add(result.getName() + ": " + msg);
+                        failures.add(label + ": " + msg);
                     }
                 }
                 break;
