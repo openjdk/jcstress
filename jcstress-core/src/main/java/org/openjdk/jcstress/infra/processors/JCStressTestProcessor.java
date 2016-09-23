@@ -48,11 +48,16 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
-
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class JCStressTestProcessor extends AbstractProcessor {
 
     private final List<TestInfo> tests = new ArrayList<>();
+
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        // We may claim to support the latest version, since we are not using
+        // any version-specific extensions.
+        return SourceVersion.latest();
+    }
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
