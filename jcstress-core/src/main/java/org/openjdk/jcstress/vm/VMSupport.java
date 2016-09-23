@@ -70,6 +70,10 @@ public class VMSupport {
                 "-XX:+WhiteBoxAPI",
                 DeoptTestMain.class);
 
+        detect("Testing allocation profiling",
+                "",
+                AllocProfileMain.class);
+
         THREAD_SPIN_WAIT_AVAILABLE =
                 detect("Trying Thread.onSpinWait",
                 "",

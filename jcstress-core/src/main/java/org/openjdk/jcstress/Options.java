@@ -48,6 +48,7 @@ public class Options {
     private String resultDir;
     private String testFilter;
     private int minStride, maxStride;
+    private int maxFootprint;
     private int time;
     private int iters;
     private final String[] args;
@@ -106,6 +107,10 @@ public class Options {
                 "the autodetection.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
+        OptionSpec<Integer> maxFootprint = parser.accepts("mf", "Maximum footprint for each test, in megabytes. This " +
+                "affects the stride size: maximum footprint will never be exceeded, regardless of min/max stride sizes.")
+                .withRequiredArg().ofType(Integer.class).describedAs("MB");
+
         OptionSpec<Boolean> shouldYield = parser.accepts("yield", "Call Thread.yield() in busy loops.")
                 .withOptionalArg().ofType(Boolean.class).describedAs("bool");
 
@@ -150,6 +155,7 @@ public class Options {
 
         this.minStride = orDefault(set.valueOf(minStride), 10);
         this.maxStride = orDefault(set.valueOf(maxStride), 10000);
+        this.maxFootprint = orDefault(set.valueOf(maxFootprint), 100);
         this.testFilter = orDefault(set.valueOf(testFilter), ".*");
         this.deoptRatio = orDefault(set.valueOf(deoptRatio), 5);
 
@@ -240,7 +246,7 @@ public class Options {
         out.printf("  Writing the test results to \"%s\"\n", resultFile);
         out.printf("  Parsing results to \"%s\"\n", resultDir);
         out.printf("  Running each test matching \"%s\" for %d forks, %d iterations, %d ms each\n", getTestFilter(), getForks(), getIterations(), getTime());
-        out.printf("  Solo stride size will be autobalanced within [%d, %d] elements\n", getMinStride(), getMaxStride());
+        out.printf("  Solo stride size will be autobalanced within [%d, %d] elements, but taking no more than %d Mb.\n", getMinStride(), getMaxStride(), getMaxFootprintMb());
 
         out.println();
     }
@@ -315,5 +321,9 @@ public class Options {
 
     public Collection<String> getJvmArgs() {
         return jvmArgs;
+    }
+
+    public int getMaxFootprintMb() {
+        return maxFootprint;
     }
 }

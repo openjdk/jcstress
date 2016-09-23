@@ -26,10 +26,12 @@ package org.openjdk.jcstress.infra.runners;
 
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.infra.TestInfo;
+import org.openjdk.jcstress.vm.AllocProfileSupport;
 
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class TestConfig implements Serializable {
 
@@ -38,8 +40,6 @@ public class TestConfig implements Serializable {
     public final int uniqueToken;
     public final SpinLoopStyle spinLoopStyle;
     public final boolean verbose;
-    public final int minStride;
-    public final int maxStride;
     public final int time;
     public final int iters;
     public final int deoptRatio;
@@ -49,6 +49,9 @@ public class TestConfig implements Serializable {
     public final List<String> jvmArgs;
     public final RunMode runMode;
     public final int forkId;
+    public final int maxFootprintMB;
+    public int minStride;
+    public int maxStride;
 
     public enum RunMode {
         EMBEDDED,
@@ -67,9 +70,44 @@ public class TestConfig implements Serializable {
         spinLoopStyle = opts.getSpinStyle();
         verbose = opts.isVerbose();
         deoptRatio = opts.deoptRatio();
+        maxFootprintMB = opts.getMaxFootprintMb();
         threads = info.threads();
         name = info.name();
         generatedRunnerName = info.generatedRunner();
+    }
+
+    public void adjustStrides(Consumer<Integer> tryAllocate) {
+        int count = 1;
+        int succCount = count;
+        while (true) {
+            long start = AllocProfileSupport.getAllocatedBytes();
+            try {
+                tryAllocate.accept(count);
+                long footprint = AllocProfileSupport.getAllocatedBytes() - start;
+
+                if (footprint > maxFootprintMB * 1024 * 1024) {
+                    // blown the footprint estimate
+                    break;
+                }
+            } catch (OutOfMemoryError err) {
+                // blown the heap size
+                break;
+            }
+
+            // success!
+            succCount = count;
+
+            // do not go over the maxStride
+            if (succCount > maxStride) {
+                succCount = maxStride;
+                break;
+            }
+
+            count *= 2;
+        }
+
+        maxStride = Math.min(maxStride, succCount);
+        minStride = Math.min(minStride, succCount);
     }
 
     @Override

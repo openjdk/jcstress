@@ -339,6 +339,11 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         pw.println("    @Override");
         pw.println("    public void sanityCheck() throws Throwable {");
+        pw.println("        sanityCheck_API();");
+        pw.println("        sanityCheck_Footprints();");
+        pw.println("    }");
+        pw.println();
+        pw.println("    private void sanityCheck_API() throws Throwable {");
         pw.println("        final " + t + " t = new " + t + "();");
         pw.println("        final " + s + " s = new " + s + "();");
         pw.println("        final " + r + " r = new " + r + "();");
@@ -361,7 +366,29 @@ public class JCStressTestProcessor extends AbstractProcessor {
         if (info.getArbiter() != null) {
             emitMethod(pw, info.getArbiter(), "        t." + info.getArbiter().getSimpleName(), "s", "r", true);
         }
+        pw.println("    }");
+        pw.println();
 
+        pw.println("    private void sanityCheck_Footprints() throws Throwable {");
+        pw.println("        config.adjustStrides(size -> {");
+        pw.println("            version = new StateHolder<>(new Pair[size], " + actorsCount + ", config.spinLoopStyle);");
+        pw.println("            final " + t + " t = new " + t + "();");
+        pw.println("            for (int c = 0; c < size; c++) {");
+        pw.println("                Pair p = new Pair();");
+        pw.println("                p.r = new " + r + "();");
+        pw.println("                p.s = new " + s + "();");
+        pw.println("                version.pairs[c] = p;");
+        for (ExecutableElement el : info.getActors()) {
+            pw.print("                ");
+            if (isStateItself) {
+                emitMethod(pw, el, "p.s." + el.getSimpleName(), "p.s", "p.r", false);
+            } else {
+                emitMethod(pw, el, "t." + el.getSimpleName(), "p.s", "p.r", false);
+            }
+            pw.println(";");
+        }
+        pw.println("            }");
+        pw.println("        });");
         pw.println("    }");
         pw.println();
 
