@@ -36,6 +36,7 @@ public final class BinaryLinkClient implements TestResultCollector {
 
     private static final int RESET_EACH = Integer.getInteger("jcstress.link.resetEach", 100);
     private static final int BUFFER_SIZE = Integer.getInteger("jcstress.link.bufferSize", 64*1024);
+    private static final int LINK_TIMEOUT_MS = Integer.getInteger("jcstress.link.timeoutMs", 30*1000);
 
     private final Object lock;
 
@@ -48,6 +49,7 @@ public final class BinaryLinkClient implements TestResultCollector {
     public BinaryLinkClient(String hostName, int hostPort) throws IOException {
         this.lock = new Object();
         this.clientSocket = new Socket(hostName, hostPort);
+        clientSocket.setSoTimeout(LINK_TIMEOUT_MS);
 
         // Initialize the OOS first, and flush, letting the other party read the stream header.
         this.oos = new ObjectOutputStream(new BufferedOutputStream(clientSocket.getOutputStream(), BUFFER_SIZE));

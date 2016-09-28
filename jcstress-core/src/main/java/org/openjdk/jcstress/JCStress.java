@@ -116,7 +116,7 @@ public class JCStress {
         DiskWriteCollector diskCollector = new DiskWriteCollector(opts.getResultFile());
         TestResultCollector sink = MuxCollector.of(printer, diskCollector);
 
-        BinaryLinkServer server = new BinaryLinkServer(sink);
+        BinaryLinkServer server = new BinaryLinkServer(opts.getUserCPUs(), sink);
 
         Scheduler scheduler = new Scheduler(opts.getUserCPUs());
         for (TestConfig cfg : configs) {
