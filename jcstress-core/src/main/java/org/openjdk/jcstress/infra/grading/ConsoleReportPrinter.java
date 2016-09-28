@@ -101,21 +101,11 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 return;
             case CHECK_TEST_ERROR:
             case TEST_ERROR:
-                output.println();
                 printLine("ERROR", r);
-                for (String data : r.getAuxData()) {
-                    output.println(data);
-                }
-                output.println();
                 hardErrors++;
                 return;
             case VM_ERROR:
-                output.println();
                 printLine("VM ERROR", r);
-                for (String data : r.getAuxData()) {
-                    output.println(data);
-                }
-                output.println();
                 hardErrors++;
                 return;
             case API_MISMATCH:
@@ -175,6 +165,14 @@ public class ConsoleReportPrinter implements TestResultCollector {
                         StringUtils.cutoff(gradeRes.description, descLen));
             }
 
+            output.println();
+        }
+
+        if (!r.getAuxData().isEmpty()) {
+            output.println("    Messages: ");
+            for (String data : r.getAuxData()) {
+                output.println("        " + data);
+            }
             output.println();
         }
 

@@ -28,12 +28,13 @@ import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.util.Counter;
-import org.openjdk.jcstress.util.NullOutputStream;
 import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -49,9 +50,9 @@ public abstract class Runner<R> {
     protected final Control control;
     protected final TestResultCollector collector;
     protected final ExecutorService pool;
-    protected final PrintWriter testLog;
     protected final String testName;
     protected final TestConfig config;
+    protected final List<String> messages;
 
     public Runner(TestConfig config, TestResultCollector collector, ExecutorService pool, String testName) {
         this.collector = collector;
@@ -59,12 +60,7 @@ public abstract class Runner<R> {
         this.testName = testName;
         this.control = new Control();
         this.config = config;
-
-        if (config.verbose) {
-            testLog = new PrintWriter(System.out, true);
-        } else {
-            testLog = new PrintWriter(new NullOutputStream(), true);
-        }
+        this.messages = new ArrayList<>();
     }
 
     /**
@@ -72,23 +68,16 @@ public abstract class Runner<R> {
      * This method blocks until test is complete
      */
     public void run() {
-        testLog.println("Running " + testName);
-
         try {
             sanityCheck();
         } catch (NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
-            testLog.println("Test sanity check failed, skipping");
-            testLog.println();
-            dumpFailure(-1, Status.API_MISMATCH, e);
+            dumpFailure(-1, Status.API_MISMATCH, "Test sanity check failed, skipping", e);
             return;
         } catch (Throwable e) {
-            testLog.println("Check test failed");
-            testLog.println();
-            dumpFailure(-1, Status.CHECK_TEST_ERROR, e);
+            dumpFailure(-1, Status.CHECK_TEST_ERROR, "Check test failed", e);
             return;
         }
 
-        testLog.print("Iterations ");
         for (int c = 0; c < config.iters; c++) {
             try {
                 WhiteBoxSupport.tryDeopt(config.deoptRatio);
@@ -96,20 +85,28 @@ public abstract class Runner<R> {
                 // gracefully "handle"
             }
 
-            testLog.print(".");
-            testLog.flush();
             dump(c, internalRun());
         }
-        testLog.println();
     }
 
-    protected void dumpFailure(int iteration, Status status) {
+    private TestResult prepareResult(int iteration, Status status) {
         TestResult result = new TestResult(config, status, iteration);
+        for (String msg : messages) {
+            result.addAuxData(msg);
+        }
+        messages.clear();
+        return result;
+    }
+
+    protected void dumpFailure(int iteration, Status status, String message) {
+        messages.add(message);
+        TestResult result = prepareResult(iteration, status);
         collector.add(result);
     }
 
-    protected void dumpFailure(int iteration, Status status, Throwable aux) {
-        TestResult result = new TestResult(config, status, iteration);
+    protected void dumpFailure(int iteration, Status status, String message, Throwable aux) {
+        messages.add(message);
+        TestResult result = prepareResult(iteration, status);
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         aux.printStackTrace(pw);
@@ -119,12 +116,10 @@ public abstract class Runner<R> {
     }
 
     protected void dump(int iteration, Counter<R> results) {
-        TestResult result = new TestResult(config, Status.NORMAL, iteration);
-
+        TestResult result = prepareResult(iteration, Status.NORMAL);
         for (R e : results.elementSet()) {
             result.addState(String.valueOf(e), results.count(e));
         }
-
         collector.add(result);
     }
 
@@ -143,7 +138,7 @@ public abstract class Runner<R> {
                 } catch (TimeoutException e) {
                     allStopped = false;
                 } catch (ExecutionException e) {
-                    dumpFailure(-1, Status.TEST_ERROR, e.getCause());
+                    dumpFailure(-1, Status.TEST_ERROR, "Unrecoverable error while running", e.getCause());
                     return;
                 } catch (InterruptedException e) {
                     return;
@@ -151,7 +146,7 @@ public abstract class Runner<R> {
             }
 
             if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) > Math.max(config.time, 60*1000)) {
-                dumpFailure(-1, Status.TIMEOUT_ERROR);
+                dumpFailure(-1, Status.TIMEOUT_ERROR, "Timeout out waiting for tasks to complete");
                 return;
             }
         }

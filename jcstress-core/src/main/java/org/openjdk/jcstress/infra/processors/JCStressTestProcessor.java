@@ -711,11 +711,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         pw.println("    @Override");
         pw.println("    public void run() {");
-        pw.println("        testLog.println(\"Running \" + testName);");
-        pw.println();
         pw.println("        Counter<Outcome> results = new OpenAddressHashCounter<>();");
         pw.println();
-        pw.println("        testLog.print(\"Iterations \");");
         pw.println("        for (int c = 0; c < config.iters; c++) {");
         pw.println("            try {");
         pw.println("                WhiteBoxSupport.tryDeopt(config.deoptRatio);");
@@ -723,20 +720,16 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("                // gracefully \"handle\"");
         pw.println("            }");
         pw.println();
-        pw.println("            testLog.print(\".\");");
-        pw.println("            testLog.flush();");
         pw.println("            run(results);");
         pw.println();
-        pw.println("            dump(c, results);");
-        pw.println();
         pw.println("            if (results.count(Outcome.STALE) > 0) {");
-        pw.println("                testLog.println(\"Have stale threads, forcing VM to exit\");");
-        pw.println("                testLog.flush();");
-        pw.println("                testLog.close();");
+        pw.println("                messages.add(\"Have stale threads, forcing VM to exit for proper cleanup.\");");
+        pw.println("                dump(c, results);");
         pw.println("                System.exit(0);");
+        pw.println("            } else {");
+        pw.println("                dump(c, results);");
         pw.println("            }");
         pw.println("        }");
-        pw.println("        testLog.println();");
         pw.println("    }");
         pw.println();
         pw.println("    @Override");
