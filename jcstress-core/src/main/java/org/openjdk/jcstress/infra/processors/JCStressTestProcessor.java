@@ -782,6 +782,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("                    holder.terminated = true;");
         pw.println("                }");
         pw.println("            });");
+        pw.println("            t1.setDaemon(true);");
         pw.println("            t1.start();");
         pw.println();
         pw.println("            while (!holder.started) {");

@@ -28,6 +28,8 @@ import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.link.BinaryLinkClient;
 import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
+import java.io.IOException;
+
 /**
  * Entry point for the forked VM run.
  *
@@ -51,10 +53,33 @@ public class ForkedMain {
         int token = Integer.valueOf(args[2]);
 
         BinaryLinkClient link = new BinaryLinkClient(host, port);
-        TestConfig config = link.nextJob(token);
+        Runtime.getRuntime().addShutdownHook(new CloseBinaryLinkHook(link));
 
+        TestConfig config = link.nextJob(token);
         new JCStress(null).runEmbedded(config, link);
-        link.close();
+    }
+
+    /**
+     * Shutdown hook dedicated to properly closing the binary link.
+     * Can be used for regular or exceptional shutdown.
+     */
+    private static class CloseBinaryLinkHook extends Thread {
+        private final BinaryLinkClient link;
+
+        CloseBinaryLinkHook(BinaryLinkClient link) {
+            this.link = link;
+        }
+
+        @Override
+        public void run() {
+            try {
+                link.close();
+            } catch (IOException e) {
+                // IOException on closing the link means we can only communicate the
+                // failure via the exit code.
+                Runtime.getRuntime().halt(1);
+            }
+        }
     }
 
 }
