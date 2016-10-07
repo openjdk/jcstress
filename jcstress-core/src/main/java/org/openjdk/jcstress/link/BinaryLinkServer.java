@@ -31,7 +31,8 @@ import org.openjdk.jcstress.infra.runners.TestConfig;
 
 import java.io.*;
 import java.net.*;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.*;
 
 /**
@@ -51,6 +52,7 @@ public final class BinaryLinkServer {
     private final TestResultCollector out;
     private final ConcurrentMap<Integer, TestConfig> configs;
     private final ExecutorService executor;
+    private final Collection<Handler> outstandingHandlers;
 
     public BinaryLinkServer(int workers, TestResultCollector out) throws IOException {
         this.out = out;
@@ -60,6 +62,7 @@ public final class BinaryLinkServer {
         server = new ServerSocket(LINK_PORT, 50, listenAddress);
         server.setSoTimeout(LINK_TIMEOUT_MS);
         executor = Executors.newFixedThreadPool(workers);
+        outstandingHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
     }
 
     private InetAddress getListenAddress() {
@@ -77,15 +80,19 @@ public final class BinaryLinkServer {
     }
 
     public void terminate() {
+        // no more Handlers to schedule; the Handlers in queue had not
+        // opened the socket yet.
+        executor.shutdownNow();
+
+        // all existing Handlers blocked on accept() should exit now
         try {
             server.close();
         } catch (IOException e) {
             // do nothing
         }
 
-        List<Runnable> outstanding = executor.shutdownNow();
-        for (Runnable r : outstanding) {
-            Handler h = (Handler) r;
+        // all existing Handlers blocked on socket read should exit now:
+        for (Handler h : outstandingHandlers) {
             h.close();
         }
     }
@@ -114,6 +121,8 @@ public final class BinaryLinkServer {
 
         @Override
         public void run() {
+            outstandingHandlers.add(this);
+
             TestConfig config = null;
             try {
                 socket = server.accept();
@@ -154,6 +163,7 @@ public final class BinaryLinkServer {
                 tr.addAuxData(e.getMessage());
                 out.add(tr);
             } finally {
+                outstandingHandlers.remove(this);
                 close();
             }
         }
