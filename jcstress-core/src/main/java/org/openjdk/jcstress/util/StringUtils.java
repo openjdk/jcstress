@@ -31,6 +31,7 @@ import java.util.List;
 public class StringUtils {
 
     public static String cutoff(String src, int len) {
+        src = src.replaceAll("\u0000", " ");
         while (src.contains("  ")) {
             src = src.replaceAll("  ", " ");
         }

@@ -29,7 +29,7 @@ import org.openjdk.jcstress.infra.results.StringResult1;
 
 @JCStressTest
 @Description("Tests the StringBuffers are working good under concurrent updates.")
-@Outcome(id = "b{20}", expect = Expect.ACCEPTABLE, desc = "All appends are visible")
+@Outcome(id = "b{4}", expect = Expect.ACCEPTABLE, desc = "All appends are visible")
 @State
 public class StringBufferTest {
 
@@ -37,14 +37,14 @@ public class StringBufferTest {
 
     @Actor
     public void actor1() {
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 2; ++i) {
             sb.append('b');
         }
     }
 
     @Actor
     public void actor2() {
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 2; ++i) {
             sb.append('b');
         }
     }
