@@ -25,6 +25,7 @@
 package org.openjdk.jcstress.infra.collectors;
 
 import org.openjdk.jcstress.infra.Status;
+import org.openjdk.jcstress.infra.grading.TestGrading;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.util.Environment;
 import org.openjdk.jcstress.util.HashMultiset;
@@ -101,5 +102,9 @@ public class TestResult implements Serializable {
 
     public TestConfig getConfig() {
         return config;
+    }
+
+    public TestGrading grading() {
+        return TestGrading.grade(this);
     }
 }

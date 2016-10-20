@@ -52,10 +52,10 @@ public class ExceptionReportPrinter {
 
     public ExceptionReportPrinter(InProcessCollector collector) throws JAXBException, FileNotFoundException {
         this.collector = collector;
-        failures = new ArrayList<>();
+        this.failures = new ArrayList<>();
     }
 
-    public void parse() throws FileNotFoundException, JAXBException {
+    public void work() throws FileNotFoundException, JAXBException {
         List<TestResult> results = ReportUtils.mergedByConfig(collector.getTestResults());
 
         for (TestResult k : results) {
@@ -87,7 +87,7 @@ public class ExceptionReportPrinter {
                 failures.add(label + " had failed with the VM error.");
                 break;
             case NORMAL:
-                TestGrading grading = TestGrading.grade(result);
+                TestGrading grading = result.grading();
                 if (!grading.failureMessages.isEmpty()) {
                     for (String msg : grading.failureMessages) {
                         failures.add(label + ": " + msg);

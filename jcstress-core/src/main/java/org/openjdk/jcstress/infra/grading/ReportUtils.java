@@ -24,11 +24,16 @@
  */
 package org.openjdk.jcstress.infra.grading;
 
+import org.openjdk.jcstress.annotations.Expect;
+import org.openjdk.jcstress.infra.StateCase;
 import org.openjdk.jcstress.infra.Status;
+import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.TestConfig;
+import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.*;
 
+import java.io.PrintWriter;
 import java.util.*;
 
 public class ReportUtils {
@@ -103,5 +108,73 @@ public class ReportUtils {
         return root;
     }
 
+    public static void printDetails(PrintWriter pw, TestResult r, boolean inProgress) {
+        if (inProgress) {
+            pw.format("    (fork: #%d, iteration #%d, JVM args: %s)%n",
+                    r.getConfig().forkId + 1,
+                    r.getIteration() + 1,
+                    r.getConfig().jvmArgs
+            );
+        } else {
+            pw.format("    (JVM args: %s)%n",
+                    r.getConfig().jvmArgs
+            );
+        }
 
+        int idLen = "Observed state".length();
+        int occLen = "Occurrences".length();
+        int expectLen = "Expectation".length();
+        int descLen = 60;
+
+        for (String s : r.getStateKeys()) {
+            idLen = Math.max(idLen, s.length());
+            occLen = Math.max(occLen, String.format("%,d", r.getCount(s)).length());
+            expectLen = Math.max(expectLen, Expect.UNKNOWN.toString().length());
+        }
+
+        TestInfo test = TestList.getInfo(r.getName());
+        for (StateCase c : test.cases()) {
+            idLen = Math.max(idLen, c.matchPattern().length());
+            expectLen = Math.max(expectLen, c.expect().toString().length());
+        }
+        expectLen = Math.max(expectLen, test.unmatched().expect().toString().length());
+
+        idLen += 2;
+        occLen += 2;
+        expectLen += 2;
+
+        pw.printf("%" + idLen + "s %" + occLen +"s %" + expectLen + "s  %-" + descLen + "s%n", "Observed state", "Occurrences", "Expectation", "Interpretation");
+
+        for (GradingResult gradeRes : r.grading().gradingResults) {
+            pw.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
+                    StringUtils.cutoff(gradeRes.id, idLen),
+                    gradeRes.count,
+                    gradeRes.expect,
+                    StringUtils.cutoff(gradeRes.description, descLen));
+        }
+
+        pw.println();
+    }
+
+    public static String statusToLabel(TestResult result) {
+        switch (result.status()) {
+            case TIMEOUT_ERROR:
+                return "TIMEOUT";
+            case CHECK_TEST_ERROR:
+            case TEST_ERROR:
+                return "ERROR";
+            case VM_ERROR:
+                return "VM ERROR";
+            case API_MISMATCH:
+                return "SKIPPED";
+            case NORMAL:
+                if (result.grading().isPassed) {
+                    return "OK";
+                } else {
+                    return "FAILED";
+                }
+            default:
+                throw new IllegalStateException("Illegal status: " + result.status());
+        }
+    }
 }

@@ -30,6 +30,7 @@ import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.*;
 import org.openjdk.jcstress.infra.grading.ConsoleReportPrinter;
 import org.openjdk.jcstress.infra.grading.ExceptionReportPrinter;
+import org.openjdk.jcstress.infra.grading.TextReportPrinter;
 import org.openjdk.jcstress.infra.grading.HTMLReportPrinter;
 import org.openjdk.jcstress.infra.runners.Runner;
 import org.openjdk.jcstress.infra.runners.TestConfig;
@@ -129,29 +130,27 @@ public class JCStress {
 
         diskCollector.close();
 
+        out.println();
+        out.println();
+        out.println("RUN COMPLETE.");
+        out.println();
+
         parseResults();
     }
 
     public void parseResults() throws Exception {
-        out.println();
-        out.println("Reading the results back... ");
-
         InProcessCollector collector = new InProcessCollector();
         new DiskReadCollector(opts.getResultFile(), collector).dump();
 
-        out.println("Generating the report... ");
-
-        HTMLReportPrinter p = new HTMLReportPrinter(opts, collector);
-        p.parse();
+        new TextReportPrinter(opts, collector).work();
+        new HTMLReportPrinter(opts, collector).work();
 
         out.println();
-        out.println();
-        out.println("Look at " + opts.getResultDest() + "index.html for the complete run results.");
+        out.println("HTML report was generated. Look at " + opts.getResultDest() + "index.html for the complete run results.");
         out.println();
 
         out.println("Will throw any pending exceptions at this point.");
-        ExceptionReportPrinter e = new ExceptionReportPrinter(collector);
-        e.parse();
+        new ExceptionReportPrinter(collector).work();
 
         out.println("Done.");
     }

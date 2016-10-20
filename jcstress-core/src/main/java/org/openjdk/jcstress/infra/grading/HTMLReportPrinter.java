@@ -53,18 +53,13 @@ public class HTMLReportPrinter {
     private final InProcessCollector collector;
     private int cellStyle = 1;
 
-    private final ConsoleReportPrinter printer;
-    private final boolean verbose;
-
     public HTMLReportPrinter(Options opts, InProcessCollector collector) throws FileNotFoundException {
         this.collector = collector;
-        this.printer = new ConsoleReportPrinter(opts, new PrintWriter(System.out, true), 0, 0);
         this.resultDir = opts.getResultDest();
-        this.verbose = opts.isVerbose();
         new File(resultDir).mkdirs();
     }
 
-    public void parse() throws FileNotFoundException {
+    public void work() throws FileNotFoundException {
         List<TestResult> byName = ReportUtils.mergedByName(collector.getTestResults());
 
         PrintWriter output = new PrintWriter(resultDir + "/index.html");
@@ -81,7 +76,7 @@ public class HTMLReportPrinter {
             int sanityFailedCount = 0;
             for (TestResult result : byName) {
                 if (result.status() == Status.NORMAL) {
-                    if (TestGrading.grade(result).isPassed) {
+                    if (result.grading().isPassed) {
                         passedCount++;
                     } else {
                         failedCount++;
@@ -167,48 +162,33 @@ public class HTMLReportPrinter {
         printXTests(byName, output,
                 "FAILED tests",
                 "Strong asserts were violated. Correct implementations should have no assert failures here.",
-                (s) -> s == Status.NORMAL,
-                (g) -> !g.isPassed);
+                r -> r.status() == Status.NORMAL && !r.grading().isPassed);
 
         printXTests(byName, output,
                 "ERROR tests",
                 "Tests break for some reason, other than failing the assert. Correct implementations should have none.",
-                (s) -> s != Status.NORMAL && s != Status.API_MISMATCH,
-                (g) -> true);
+                r -> r.status() != Status.NORMAL && r.status() != Status.API_MISMATCH);
 
         printXTests(byName, output,
                 "SPEC tests",
                 "Formally acceptable, but surprising results are observed. Implementations going beyond the minimal requirements should have none.",
-                (s) -> s == Status.NORMAL,
-                (g) -> g.hasSpec);
+                r -> r.status() == Status.NORMAL && r.grading().hasSpec);
 
         printXTests(byName, output,
                 "INTERESTING tests",
                 "Some interesting behaviors observed. This is for the plain curiosity.",
-                (s) -> s == Status.NORMAL,
-                (g) -> g.hasInteresting);
+                r -> r.status() == Status.NORMAL && r.grading().hasInteresting);
 
         printXTests(byName, output,
                 "All tests",
                 "",
-                (s) -> true,
-                (g) -> true);
+                r -> true);
 
         printFooter(output);
 
         output.close();
 
         emitTestReports(ReportUtils.byName(collector.getTestResults()));
-
-        if (verbose) {
-            List<TestResult> byConfig = ReportUtils.mergedByConfig(collector.getTestResults());
-            for (TestResult result : byConfig) {
-                TestGrading grading = TestGrading.grade(result);
-                if (!grading.isPassed || grading.hasInteresting) {
-                    printer.add(result);
-                }
-            }
-        }
     }
 
     private void printFooter(PrintWriter output) {
@@ -247,8 +227,7 @@ public class HTMLReportPrinter {
                              PrintWriter output,
                              String header,
                              String subheader,
-                             Predicate<Status> filterStatus,
-                             Predicate<TestGrading> filterGrading) {
+                             Predicate<TestResult> filterResults) {
         output.println("<hr>");
         output.println("<h3>" + header + "</h3>");
         output.println("<p>" + subheader + "</p>");
@@ -256,8 +235,7 @@ public class HTMLReportPrinter {
 
         boolean hadAnyTests = false;
         for (TestResult result : byName) {
-            TestGrading grading = TestGrading.grade(result);
-            if (filterStatus.test(result.status()) && filterGrading.test(grading)) {
+            if (filterResults.test(result)) {
                 if (result.status() == Status.NORMAL) {
                     emitTest(output, result);
                 } else {
@@ -282,7 +260,7 @@ public class HTMLReportPrinter {
         output.println("<td>&nbsp;&nbsp;&nbsp;<a href=\"" + result.getName() + ".html\">" + StringUtils.chunkName(result.getName()) + "</a></td>");
         output.printf("<td>%s</td>", getRoughCount(result));
 
-        TestGrading grading = TestGrading.grade(result);
+        TestGrading grading = result.grading();
         if (grading.isPassed) {
             output.println("<td class=\"passed\">PASSED</td>");
         } else {
@@ -384,8 +362,7 @@ public class HTMLReportPrinter {
             output.println("<th>Interpretation</th>");
             output.println("</tr>");
 
-            TestGrading grading = TestGrading.grade(r);
-            for (GradingResult c : grading.gradingResults) {
+            for (GradingResult c : r.grading().gradingResults) {
                 output.println("<tr bgColor=" + selectHTMLColor(c.expect, c.count == 0) + ">");
                 output.println("<td>" + c.id + "</td>");
                 output.println("<td align=center>" + c.count + "</td>");

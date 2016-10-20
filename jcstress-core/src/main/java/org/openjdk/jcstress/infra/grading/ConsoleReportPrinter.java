@@ -88,37 +88,26 @@ public class ConsoleReportPrinter implements TestResultCollector {
         observedIterations++;
         observedCount += r.getTotalCount();
 
-        printResult(r, verbose);
+        printResult(r);
     }
 
-    private void printResult(TestResult r, boolean isVerbose) {
-        TestGrading grading = TestGrading.grade(r);
+    private void printResult(TestResult r) {
+        TestGrading grading = r.grading();
 
         switch (r.status()) {
             case TIMEOUT_ERROR:
-                printLine("TIMEOUT", r);
-                hardErrors++;
-                return;
             case CHECK_TEST_ERROR:
             case TEST_ERROR:
-                printLine("ERROR", r);
-                hardErrors++;
-                return;
             case VM_ERROR:
-                printLine("VM ERROR", r);
                 hardErrors++;
-                return;
+                break;
             case API_MISMATCH:
-                printLine("SKIPPED", r);
                 softErrors++;
-                return;
+                break;
             case NORMAL:
                 if (grading.isPassed) {
-                    printLine("OK", r);
                     passed++;
                 } else {
-                    output.println();
-                    printLine("FAILED", r);
                     failed++;
                 }
                 break;
@@ -126,46 +115,10 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 throw new IllegalStateException("Illegal status: " + r.status());
         }
 
+        printLine(r);
+
         if (!grading.isPassed || grading.hasInteresting || verbose) {
-            output.format("    (fork: #%d, iteration #%d, JVM args: %s)%n",
-                    r.getConfig().forkId + 1,
-                    r.getIteration() + 1,
-                    r.getConfig().jvmArgs
-            );
-
-            int idLen = "Observed state".length();
-            int occLen = "Occurrences".length();
-            int expectLen = "Expectation".length();
-            int descLen = 60;
-
-            for (String s : r.getStateKeys()) {
-                idLen = Math.max(idLen, s.length());
-                occLen = Math.max(occLen, String.format("%,d", r.getCount(s)).length());
-                expectLen = Math.max(expectLen, Expect.UNKNOWN.toString().length());
-            }
-
-            TestInfo test = TestList.getInfo(r.getName());
-            for (StateCase c : test.cases()) {
-                idLen = Math.max(idLen, c.matchPattern().length());
-                expectLen = Math.max(expectLen, c.expect().toString().length());
-            }
-            expectLen = Math.max(expectLen, test.unmatched().expect().toString().length());
-
-            idLen += 2;
-            occLen += 2;
-            expectLen += 2;
-
-            output.printf("%" + idLen + "s %" + occLen +"s %" + expectLen + "s  %-" + descLen + "s%n", "Observed state", "Occurrences", "Expectation", "Interpretation");
-
-            for (GradingResult gradeRes : grading.gradingResults) {
-                output.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
-                        StringUtils.cutoff(gradeRes.id, idLen),
-                        gradeRes.count,
-                        gradeRes.expect,
-                        StringUtils.cutoff(gradeRes.description, descLen));
-            }
-
-            output.println();
+            ReportUtils.printDetails(output, r, true);
         }
 
         if (!r.getAuxData().isEmpty()) {
@@ -179,7 +132,8 @@ public class ConsoleReportPrinter implements TestResultCollector {
         printProgress();
     }
 
-    private void printLine(String label, TestResult r) {
+    private void printLine(TestResult r) {
+        String label = ReportUtils.statusToLabel(r);
         output.printf("\r%" + progressLen + "s\r", "");
         output.printf("%10s %s\n", "[" + label + "]", StringUtils.chunkName(r.getName()));
     }
