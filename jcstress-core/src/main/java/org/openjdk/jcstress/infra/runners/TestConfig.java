@@ -29,13 +29,10 @@ import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.vm.AllocProfileSupport;
 
 import java.io.Serializable;
-import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class TestConfig implements Serializable {
-
-    public static final Comparator<TestConfig> COMPARATOR_NAME = Comparator.comparing((c) -> c.name);
 
     public final int uniqueToken;
     public final SpinLoopStyle spinLoopStyle;

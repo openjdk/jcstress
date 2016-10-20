@@ -56,7 +56,7 @@ public class ForkedMain {
         Runtime.getRuntime().addShutdownHook(new CloseBinaryLinkHook(link));
 
         TestConfig config = link.nextJob(token);
-        new JCStress(null).runEmbedded(config, link);
+        new TestExecutor(0, link, false).runEmbedded(config);
     }
 
     /**
