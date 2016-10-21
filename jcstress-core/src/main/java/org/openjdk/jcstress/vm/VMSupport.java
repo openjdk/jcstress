@@ -62,6 +62,22 @@ public class VMSupport {
                 "-XX:+UnlockDiagnosticVMOptions",
                 SimpleTestMain.class);
 
+        detect("Trimming down the number of compiler threads",
+                "-XX:CICompilerCount=4",
+                SimpleTestMain.class);
+
+        detect("Trimming down the number of parallel GC threads",
+                "-XX:ParallelGCThreads=4",
+                SimpleTestMain.class);
+
+        detect("Trimming down the number of concurrent GC threads",
+                "-XX:ConcGCThreads=4",
+                SimpleTestMain.class);
+
+        detect("Trimming down the number of G1 concurrent refinement GC threads",
+                "-XX:G1ConcRefinementThreads=4",
+                SimpleTestMain.class);
+
         detect("Testing @Contended works on all results",
                 "-XX:-RestrictContended",
                 ContendedTestMain.class);
