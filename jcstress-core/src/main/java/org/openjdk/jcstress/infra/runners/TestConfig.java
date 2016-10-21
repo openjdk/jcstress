@@ -34,7 +34,6 @@ import java.util.function.Consumer;
 
 public class TestConfig implements Serializable {
 
-    public final int uniqueToken;
     public final SpinLoopStyle spinLoopStyle;
     public final boolean verbose;
     public final int time;
@@ -55,8 +54,7 @@ public class TestConfig implements Serializable {
         FORKED,
     }
 
-    public TestConfig(int uniqueToken, Options opts, TestInfo info, RunMode runMode, int forkId, List<String> jvmArgs) {
-        this.uniqueToken = uniqueToken;
+    public TestConfig(Options opts, TestInfo info, RunMode runMode, int forkId, List<String> jvmArgs) {
         this.runMode = runMode;
         this.forkId = forkId;
         this.jvmArgs = jvmArgs;

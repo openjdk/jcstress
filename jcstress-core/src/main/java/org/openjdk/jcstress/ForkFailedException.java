@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,19 +22,23 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.link;
+package org.openjdk.jcstress;
 
-import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 
-class JobRequestFrame implements Serializable {
-    private static final long serialVersionUID = 2082214387637725282L;
-    private String token;
+public class ForkFailedException extends RuntimeException {
+    private List<String> info;
 
-    public JobRequestFrame(String token) {
-        this.token = token;
+    public ForkFailedException(String info) {
+        this.info = Collections.singletonList(info);
     }
 
-    public String getToken() {
-        return token;
+    public ForkFailedException(List<String> info) {
+        this.info = info;
+    }
+
+    public List<String> getInfo() {
+        return info;
     }
 }

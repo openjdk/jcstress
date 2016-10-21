@@ -31,8 +31,10 @@ import org.openjdk.jcstress.infra.runners.TestConfig;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.*;
 
 /**
@@ -50,13 +52,15 @@ public final class BinaryLinkServer {
     private final ServerSocket server;
     private final InetAddress listenAddress;
     private final TestResultCollector out;
-    private final ConcurrentMap<Integer, TestConfig> configs;
+    private final ConcurrentMap<String, List<TestConfig>> configs;
+    private final ConcurrentMap<String, TestConfig> currentTask;
     private final ExecutorService executor;
     private final Collection<Handler> outstandingHandlers;
 
     public BinaryLinkServer(int workers, TestResultCollector out) throws IOException {
         this.out = out;
         this.configs = new ConcurrentHashMap<>();
+        this.currentTask = new ConcurrentHashMap<>();
 
         listenAddress = getListenAddress();
         server = new ServerSocket(LINK_PORT, 50, listenAddress);
@@ -97,9 +101,18 @@ public final class BinaryLinkServer {
         }
     }
 
-    public void addTask(TestConfig cfg) {
-        configs.put(cfg.uniqueToken, cfg);
+    public void addTask(String token, Collection<TestConfig> cfgs) {
+        List<TestConfig> exist = configs.put(token, new ArrayList<>(cfgs));
+        if (exist != null) {
+            throw new IllegalStateException("Trying to overwrite the same token");
+        }
         executor.submit(new Handler(server));
+    }
+
+    public List<TestConfig> removePendingTasks(String token) {
+        List<TestConfig> conf = configs.get(token);
+        configs.remove(token);
+        return conf;
     }
 
     public String getHost() {
@@ -109,6 +122,10 @@ public final class BinaryLinkServer {
     public int getPort() {
         // Poll the actual listen port, in case it is ephemeral
         return server.getLocalPort();
+    }
+
+    public TestConfig getCurrentTask(String token) {
+        return currentTask.get(token);
     }
 
     private final class Handler implements Runnable {
@@ -140,15 +157,21 @@ public final class BinaryLinkServer {
                 Object obj;
                 while ((obj = ois.readObject()) != null) {
                     if (obj instanceof JobRequestFrame) {
-                        config = configs.remove(((JobRequestFrame) obj).getToken());
-                        if (config == null) {
-                            throw new IllegalStateException("No jobs left, this should not happen");
+                        String tkn = ((JobRequestFrame) obj).getToken();
+                        List<TestConfig> cfgs = configs.get(tkn);
+                        if (cfgs.isEmpty()) {
+                            oos.writeObject(new JobResponseFrame(null));
+                        } else {
+                            config = cfgs.remove(0);
+                            currentTask.put(tkn, config);
+                            oos.writeObject(new JobResponseFrame(config));
                         }
-                        oos.writeObject(new JobResponseFrame(config));
                         oos.flush();
                     }
                     if (obj instanceof ResultsFrame) {
-                        out.add(((ResultsFrame) obj).getRes());
+                        ResultsFrame rf = (ResultsFrame) obj;
+                        out.add(rf.getRes());
+                        currentTask.remove(rf.getToken());
                     }
                     if (obj instanceof FinishingFrame) {
                         // close the streams

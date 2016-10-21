@@ -31,12 +31,15 @@ import java.io.Serializable;
 class ResultsFrame implements Serializable {
     private static final long serialVersionUID = -5627086531281515824L;
 
+    private final String token;
     private final TestResult res;
 
-    public ResultsFrame(TestResult res) {
+    public ResultsFrame(String token, TestResult res) {
+        this.token = token;
         this.res = res;
     }
 
+    public String getToken() { return token; }
     public TestResult getRes() {
         return res;
     }

@@ -27,147 +27,257 @@ package org.openjdk.jcstress;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
-import org.openjdk.jcstress.infra.runners.Runner;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.link.BinaryLinkServer;
-import org.openjdk.jcstress.util.InputStreamDrainer;
+import org.openjdk.jcstress.util.HashMultimap;
+import org.openjdk.jcstress.util.Multimap;
 import org.openjdk.jcstress.vm.VMSupport;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Files;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Manages test execution for the entire run.
+ *
+ * This executor is deliberately single-threaded for two reasons:
+ *   a) Tests are heavily multithreaded and spawning new threads here may
+ *      deplete the thread budget sooner rather than later;
+ *   b) Dead-locks in scheduling logic are more visible without threads;
+ */
 public class TestExecutor {
 
-    private final ExecutorService pool;
+    private static final int SPIN_WAIT_DELAY_MS = 100;
+
+    static final AtomicInteger ID = new AtomicInteger();
+
     private final Semaphore semaphore;
     private final BinaryLinkServer server;
     private final int maxThreads;
+    private final int batchSize;
     private final TestResultCollector sink;
+    private final Multimap<BatchKey, TestConfig> tasks;
+    private final Set<VM> vms;
+    private final EmbeddedExecutor embeddedExecutor;
 
-    public TestExecutor(int maxThreads, TestResultCollector sink, boolean possiblyForked) throws IOException {
+    public TestExecutor(int maxThreads, int batchSize, TestResultCollector sink, boolean possiblyForked) throws IOException {
         this.maxThreads = maxThreads;
+        this.batchSize = batchSize;
         this.sink = sink;
-        this.pool = Executors.newCachedThreadPool(new ThreadFactory() {
-            private final AtomicInteger id = new AtomicInteger();
 
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread t = new Thread(r);
-                t.setName("jcstress-worker-" + id.incrementAndGet());
-                t.setDaemon(true);
-                return t;
-            }
-        });
+        this.tasks = new HashMultimap<>();
+        this.vms = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
-        if (possiblyForked) {
-            semaphore = new Semaphore(maxThreads);
-            server = new BinaryLinkServer(maxThreads, sink);
-        } else {
-            semaphore = null;
-            server = null;
-        }
+        semaphore = new Semaphore(maxThreads);
+        server = possiblyForked ? new BinaryLinkServer(maxThreads, sink) : null;
+        embeddedExecutor = new EmbeddedExecutor(sink, (cfg) -> semaphore.release(cfg.threads));
     }
 
-    void runForked(TestConfig config) {
-        try {
-            List<String> command = new ArrayList<>();
+    public void runAll(List<TestConfig> configs) throws InterruptedException {
+        for (TestConfig cfg : configs) {
+            switch (cfg.runMode) {
+                case EMBEDDED:
+                    waitForMoreThreads(cfg.threads);
+                    embeddedExecutor.submit(cfg);
+                    break;
+                case FORKED:
+                    BatchKey batchKey = BatchKey.getFrom(cfg);
+                    tasks.put(batchKey, cfg);
 
-            // basic Java line
-            command.addAll(VMSupport.getJavaInvokeLine());
-
-            // jvm args
-            command.addAll(config.jvmArgs);
-
-            command.add(ForkedMain.class.getName());
-
-            command.add(server.getHost());
-            command.add(String.valueOf(server.getPort()));
-
-            // which config should the forked VM pull?
-            command.add(String.valueOf(config.uniqueToken));
-
-            ProcessBuilder pb = new ProcessBuilder(command);
-            Process p = pb.start();
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-            InputStreamDrainer errDrainer = new InputStreamDrainer(p.getErrorStream(), baos);
-            InputStreamDrainer outDrainer = new InputStreamDrainer(p.getInputStream(), baos);
-
-            errDrainer.start();
-            outDrainer.start();
-
-            int ecode = p.waitFor();
-
-            errDrainer.join();
-            outDrainer.join();
-
-            if (ecode != 0) {
-                // Test had failed, record this.
-                TestResult result = new TestResult(config, Status.VM_ERROR, -1);
-                result.addAuxData(new String(baos.toByteArray()).trim());
-                sink.add(result);
+                    Collection<TestConfig> curBatch = tasks.get(batchKey);
+                    if (curBatch.size() >= batchSize) {
+                        tasks.remove(batchKey);
+                        doSchedule(batchKey, curBatch);
+                    }
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown mode: " + cfg.runMode);
             }
-        } catch (IOException | InterruptedException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public void submit(TestConfig cfg) throws InterruptedException {
-        if (server == null || semaphore == null) {
-            throw new IllegalStateException("Embedded runner cannot accept tasks");
         }
 
-        // Make fat tasks bypass in exclusive mode:
-        final int threads = Math.min(cfg.threads, maxThreads);
-        semaphore.acquire(threads);
-
-        pool.submit(() -> {
-            try {
-                switch (cfg.runMode) {
-                    case EMBEDDED:
-                        runEmbedded(cfg);
-                        break;
-                    case FORKED:
-                        server.addTask(cfg);
-                        runForked(cfg);
-                        break;
-                }
-            } finally {
-                semaphore.release(threads);
+        // Run down the remaining tasks
+        for (BatchKey key : tasks.keys()) {
+            Collection<TestConfig> curBatch = tasks.get(key);
+            if (!curBatch.isEmpty()) {
+                doSchedule(key, curBatch);
             }
-        });
-    }
-
-    public void waitFinish() throws InterruptedException {
-        if (server == null || semaphore == null) {
-            throw new IllegalStateException("Embedded runner cannot accept tasks");
         }
-        semaphore.acquire(maxThreads);
-        pool.shutdown();
-        pool.awaitTermination(1, TimeUnit.DAYS);
+
+        // Wait until all threads are done, which means everything got processed
+        waitForMoreThreads(maxThreads);
+
         server.terminate();
     }
 
-    public void runEmbedded(TestConfig config) {
-        try {
-            Class<?> aClass = Class.forName(config.generatedRunnerName);
-            Constructor<?> cnstr = aClass.getConstructor(TestConfig.class, TestResultCollector.class, ExecutorService.class);
-            Runner<?> o = (Runner<?>) cnstr.newInstance(config, sink, pool);
-            o.run();
-        } catch (ClassFormatError e) {
-            TestResult result = new TestResult(config, Status.API_MISMATCH, 0);
-            result.addAuxData(e.getMessage());
-            sink.add(result);
-        } catch (Exception ex) {
-            TestResult result = new TestResult(config, Status.TEST_ERROR, 0);
-            result.addAuxData(ex.getMessage());
-            sink.add(result);
+    private void doSchedule(BatchKey batchKey, Collection<TestConfig> configs)  {
+        // Make fat tasks bypass in exclusive mode:
+        final int threads = Math.min(batchKey.threads, maxThreads);
+        waitForMoreThreads(threads);
+        startVM(batchKey, configs);
+    }
+
+    private void waitForMoreThreads(int threads) {
+        while (!semaphore.tryAcquire(threads)) {
+            processReadyVMs();
+            try {
+                Thread.sleep(SPIN_WAIT_DELAY_MS);
+            } catch (InterruptedException e) {
+                // do nothing
+            }
+        }
+    }
+
+    private void startVM(BatchKey batchKey, Collection<TestConfig> configs) {
+        String token = "fork-token-" + ID.incrementAndGet();
+        server.addTask(token, configs);
+
+        VM vm = new VM(server.getHost(), server.getPort(), batchKey, token);
+        vms.add(vm);
+        vm.start();
+    }
+
+    private void stopVM(VM vm) {
+        vms.remove(vm);
+        semaphore.release(vm.key.threads);
+    }
+
+    private void processReadyVMs() {
+        for (VM vm : vms) {
+            try {
+                if (vm.checkTermination()) {
+                    stopVM(vm);
+                }
+            } catch (ForkFailedException e) {
+                // Record the failure for the actual test
+                TestConfig failed = server.getCurrentTask(vm.token);
+                if (failed != null) {
+                    // TODO: Handle the VM bootup failure better, when failed == null
+                    TestResult result = new TestResult(failed, Status.VM_ERROR, -1);
+                    for (String i : e.getInfo()) {
+                        result.addAuxData(i);
+                    }
+                    sink.add(result);
+                }
+
+                stopVM(vm);
+
+                // Remaining tasks from the fork need to get back on queue
+                doSchedule(vm.key, server.removePendingTasks(vm.token));
+            }
+        }
+    }
+
+    private static class VM {
+        private final String host;
+        private final int port;
+        private final BatchKey key;
+        private final String token;
+        private final File stdout;
+        private final File stderr;
+        private Process process;
+
+        public VM(String host, int port, BatchKey key, String token) {
+            this.host = host;
+            this.port = port;
+            this.key = key;
+            this.token = token;
+            try {
+                this.stdout = File.createTempFile("jcstress", "stdout");
+                this.stderr = File.createTempFile("jcstress", "stderr");
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        void start() throws ForkFailedException {
+            try {
+                List<String> command = new ArrayList<>();
+
+                // basic Java line
+                command.addAll(VMSupport.getJavaInvokeLine());
+
+                // jvm args
+                command.addAll(key.jvmArgs);
+
+                command.add(ForkedMain.class.getName());
+
+                command.add(host);
+                command.add(String.valueOf(port));
+
+                // which config should the forked VM pull?
+                command.add(token);
+
+                ProcessBuilder pb = new ProcessBuilder(command);
+                pb.redirectOutput(stdout);
+                pb.redirectError(stderr);
+                process = pb.start();
+            } catch (IOException ex) {
+                throw new ForkFailedException(ex.getMessage());
+            }
+        }
+
+        boolean checkTermination() {
+            if (process.isAlive()) {
+                return false;
+            } else {
+                // Try to poll the exit code, and fail if it's not zero.
+                try {
+                    int ecode = process.waitFor();
+                    if (ecode != 0) {
+                        List<String> output = new ArrayList<>();
+                        try {
+                            output.addAll(Files.readAllLines(stdout.toPath()));
+                        } catch (IOException e) {
+                            output.add("Failed to read stdout: " + e.getMessage());
+                        }
+                        try {
+                            output.addAll(Files.readAllLines(stderr.toPath()));
+                        } catch (IOException e) {
+                            output.add("Failed to read stderr: " + e.getMessage());
+                        }
+                        throw new ForkFailedException(output);
+                    }
+                } catch (InterruptedException ex) {
+                    throw new ForkFailedException(ex.getMessage());
+                }
+                return true;
+            }
+        }
+    }
+
+    static class BatchKey {
+        private int threads;
+        private List<String> jvmArgs;
+
+        BatchKey(int threads, List<String> jvmArgs) {
+            this.threads = threads;
+            this.jvmArgs = jvmArgs;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            BatchKey batchKey = (BatchKey) o;
+
+            if (threads != batchKey.threads) return false;
+            return jvmArgs.equals(batchKey.jvmArgs);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = threads;
+            result = 31 * result + jvmArgs.hashCode();
+            return result;
+        }
+
+        static BatchKey getFrom(TestConfig cfg) {
+            return new BatchKey(cfg.threads, cfg.jvmArgs);
         }
     }
 

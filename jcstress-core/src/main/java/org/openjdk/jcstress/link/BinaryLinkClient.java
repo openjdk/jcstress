@@ -25,14 +25,13 @@
 package org.openjdk.jcstress.link;
 
 import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.util.FileUtils;
 
 import java.io.*;
 import java.net.Socket;
 
-public final class BinaryLinkClient implements TestResultCollector {
+public final class BinaryLinkClient {
 
     private static final int RESET_EACH = Integer.getInteger("jcstress.link.resetEach", 100);
     private static final int BUFFER_SIZE = Integer.getInteger("jcstress.link.bufferSize", 64*1024);
@@ -108,7 +107,7 @@ public final class BinaryLinkClient implements TestResultCollector {
         }
     }
 
-    public TestConfig nextJob(int token) throws IOException, ClassNotFoundException {
+    public TestConfig nextJob(String token) throws IOException, ClassNotFoundException {
         synchronized (lock) {
             pushFrame(new JobRequestFrame(token));
 
@@ -121,10 +120,9 @@ public final class BinaryLinkClient implements TestResultCollector {
         }
     }
 
-    @Override
-    public void add(TestResult result) {
+    public void addResult(String token, TestResult result) {
         try {
-            pushFrame(new ResultsFrame(result));
+            pushFrame(new ResultsFrame(token, result));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

@@ -50,13 +50,17 @@ public class ForkedMain {
 
         String host = args[0];
         int port = Integer.valueOf(args[1]);
-        int token = Integer.valueOf(args[2]);
+        String token = args[2];
 
         BinaryLinkClient link = new BinaryLinkClient(host, port);
         Runtime.getRuntime().addShutdownHook(new CloseBinaryLinkHook(link));
 
-        TestConfig config = link.nextJob(token);
-        new TestExecutor(0, link, false).runEmbedded(config);
+        EmbeddedExecutor executor = new EmbeddedExecutor(result -> link.addResult(token, result));
+
+        TestConfig config;
+        while ((config = link.nextJob(token)) != null) {
+            executor.run(config);
+        }
     }
 
     /**

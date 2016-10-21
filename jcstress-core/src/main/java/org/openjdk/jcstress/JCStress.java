@@ -66,11 +66,8 @@ public class JCStress {
         DiskWriteCollector diskCollector = new DiskWriteCollector(opts.getResultFile());
         TestResultCollector sink = MuxCollector.of(printer, diskCollector);
 
-        TestExecutor executor = new TestExecutor(opts.getUserCPUs(), sink, true);
-        for (TestConfig cfg : configs) {
-            executor.submit(cfg);
-        }
-        executor.waitFinish();
+        TestExecutor executor = new TestExecutor(opts.getUserCPUs(), opts.getBatchSize(), sink, true);
+        executor.runAll(configs);
 
         diskCollector.close();
 
@@ -100,8 +97,6 @@ public class JCStress {
     }
 
     private List<TestConfig> prepareRunProgram(Set<String> tests) {
-        int tokenCounter = 0;
-
         List<TestConfig> configs = new ArrayList<>();
         if (opts.shouldFork()) {
             List<String> inputArgs = ManagementFactory.getRuntimeMXBean().getInputArguments();
@@ -111,7 +106,7 @@ public class JCStress {
                     fullArgs.addAll(inputArgs);
                     fullArgs.addAll(jvmArgs);
                     for (int f = 0; f < opts.getForks(); f++) {
-                        configs.add(new TestConfig(tokenCounter++, opts, TestList.getInfo(test), TestConfig.RunMode.FORKED, f, fullArgs));
+                        configs.add(new TestConfig(opts, TestList.getInfo(test), TestConfig.RunMode.FORKED, f, fullArgs));
                     }
                 }
             }
@@ -119,7 +114,7 @@ public class JCStress {
             for (String test : tests) {
                 TestInfo info = TestList.getInfo(test);
                 TestConfig.RunMode mode = info.requiresFork() ? TestConfig.RunMode.FORKED : TestConfig.RunMode.EMBEDDED;
-                configs.add(new TestConfig(tokenCounter++, opts, info, mode, -1, Collections.emptyList()));
+                configs.add(new TestConfig(opts, info, mode, -1, Collections.emptyList()));
             }
         }
 
