@@ -195,22 +195,22 @@ public class Options {
             this.batchSize = 20;
         } else
         if (this.mode.equalsIgnoreCase("quick")) {
-            this.time = 300;
+            this.time = 200;
             this.iters = 5;
             this.forks = 1;
-            this.batchSize = orDefault(set.valueOf(batchSize), 20);
+            this.batchSize = 20;
         } else
         if (this.mode.equalsIgnoreCase("default")) {
-            this.time = orDefault(set.valueOf(time), 1000);
-            this.iters = orDefault(set.valueOf(iters), 5);
-            this.forks = orDefault(set.valueOf(forks), 1);
-            this.batchSize = orDefault(set.valueOf(batchSize), 5);
+            this.time = 1000;
+            this.iters = 5;
+            this.forks = 1;
+            this.batchSize = 5;
         } else
         if (this.mode.equalsIgnoreCase("tough")) {
             this.time = 1000;
             this.iters = 10;
             this.forks = 10;
-            this.batchSize = 1;
+            this.batchSize = 5;
         } else
         if (this.mode.equalsIgnoreCase("stress")) {
             this.time = 1000;
@@ -223,6 +223,12 @@ public class Options {
             parser.printHelpOn(System.err);
             return false;
         }
+
+        // override these, if present
+        this.time = orDefault(set.valueOf(time), this.time);
+        this.iters = orDefault(set.valueOf(iters), this.iters);
+        this.forks = orDefault(set.valueOf(forks), this.forks);
+        this.batchSize = orDefault(set.valueOf(batchSize), this.batchSize);
 
         if (set.hasArgument(optJvmArgs)) {
             try {
