@@ -141,7 +141,6 @@ public final class BinaryLinkServer {
             } catch (EOFException e) {
                 // ignore
             } catch (Exception e) {
-                e.printStackTrace();
                 // ignore, the exit code would be non-zero, and TestExecutor would handle it.
             } finally {
                 if (socket != null) {

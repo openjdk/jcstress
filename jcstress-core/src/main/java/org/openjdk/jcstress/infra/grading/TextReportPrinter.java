@@ -69,55 +69,60 @@ public class TextReportPrinter {
         printXTests(byConfig,
                 "INTERESTING tests",
                 "Some interesting behaviors observed. This is for the plain curiosity.",
-                r -> r.status() == Status.NORMAL && r.grading().hasInteresting);
+                r -> r.status() == Status.NORMAL && r.grading().hasInteresting,
+                true
+        );
 
         printXTests(byConfig,
                 "SPEC tests",
                 "Formally acceptable, but surprising results are observed. Implementations going beyond the minimal requirements should have none.",
-                r -> r.status() == Status.NORMAL && r.grading().hasSpec);
+                r -> r.status() == Status.NORMAL && r.grading().hasSpec,
+                true
+        );
 
         printXTests(byConfig,
                 "FAILED tests",
                 "Strong asserts were violated. Correct implementations should have no assert failures here.",
-                r -> r.status() == Status.NORMAL && !r.grading().isPassed);
+                r -> r.status() == Status.NORMAL && !r.grading().isPassed,
+                true
+        );
 
         printXTests(byConfig,
                 "ERROR tests",
                 "Tests break for some reason, other than failing the assert. Correct implementations should have none.",
-                r -> r.status() != Status.NORMAL && r.status() != Status.API_MISMATCH);
+                r -> r.status() != Status.NORMAL && r.status() != Status.API_MISMATCH,
+                true
+        );
 
-        if (verbose) {
-            printXTests(byConfig,
-                    "All remaining tests",
-                    "Tests that do not fall into any of the previous categories.",
-                    r -> !emittedTests.contains(r));
-        }
+        printXTests(byConfig,
+                "All remaining tests",
+                "Tests that do not fall into any of the previous categories.",
+                r -> !emittedTests.contains(r),
+                verbose);
 
         pw.println("------------------------------------------------------------------------------------------------------------------------");
     }
 
-    private void printXTests(List<TestResult> byName,
+    private void printXTests(List<TestResult> list,
                              String header,
                              String subHeader,
-                             Predicate<TestResult> predicate) {
-        boolean hadHeader = false;
+                             Predicate<TestResult> predicate,
+                             boolean emitDetails) {
 
-        for (TestResult result : byName) {
+        pw.println("*** " + header);
+        pw.println("  " + subHeader);
+        pw.println();
+        pw.println("  " + list.stream().filter(predicate).count() + " matching test results. " + (!emitDetails ? " Use -v to print them." : ""));
 
-            if (predicate.test(result)) {
-                if (!hadHeader) {
-                    pw.println("*** " + header);
-                    pw.println("  " + subHeader);
-                    pw.println();
-                    hadHeader = true;
+        if (emitDetails) {
+            for (TestResult result : list) {
+                if (predicate.test(result)) {
+                    emitTest(result);
                 }
-                emitTest(result);
             }
         }
 
-        if (hadHeader) {
-            pw.println();
-        }
+        pw.println();
     }
 
     public void emitTest(TestResult result) {
