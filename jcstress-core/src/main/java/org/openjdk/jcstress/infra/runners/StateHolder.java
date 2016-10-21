@@ -24,19 +24,69 @@
  */
 package org.openjdk.jcstress.infra.runners;
 
-import java.util.concurrent.atomic.AtomicInteger;
+
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class StateHolder<P> {
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public final boolean stopped;
+
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public final P[] pairs;
+
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public final int countWorkers;
+
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public final SpinLoopStyle spinStyle;
-    public final AtomicInteger started, ready, finished, consumed;
-    public volatile boolean notAllStarted, notAllReady, notAllFinished, notUpdated;
+
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
+    private volatile int started;
+
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
+    private volatile int ready;
+
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
+    private volatile int finished;
+
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
+    private volatile int consumed;
+
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
+    private volatile boolean notAllStarted;
+
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
+    private volatile boolean notAllReady;
+
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
+    private volatile boolean notAllFinished;
+
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
+    private volatile boolean notUpdated;
+
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
     public volatile boolean updateStride;
+
+    static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_STARTED  = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "started");
+    static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_READY    = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "ready");
+    static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_FINISHED = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "finished");
+    static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_CONSUMED = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "consumed");
 
     /**
      * Initial version
@@ -54,10 +104,10 @@ public class StateHolder<P> {
         this.pairs = pairs;
         this.countWorkers = expectedWorkers;
         this.spinStyle = spinStyle;
-        this.ready = new AtomicInteger(expectedWorkers);
-        this.started = new AtomicInteger(expectedWorkers);
-        this.finished = new AtomicInteger(expectedWorkers);
-        this.consumed = new AtomicInteger(expectedWorkers);
+        UPDATER_STARTED.set(this, expectedWorkers);
+        UPDATER_READY.set(this, expectedWorkers);
+        UPDATER_FINISHED.set(this, expectedWorkers);
+        UPDATER_CONSUMED.set(this, expectedWorkers);
         this.notAllReady = true;
         this.notAllFinished = true;
         this.notAllStarted = true;
@@ -65,7 +115,7 @@ public class StateHolder<P> {
     }
 
     public void preRun() {
-        int v = ready.decrementAndGet();
+        int v = UPDATER_READY.decrementAndGet(this);
         if (v == 0) {
             notAllReady = false;
         }
@@ -81,13 +131,13 @@ public class StateHolder<P> {
                 while (notAllReady);
         }
 
-        if (started.decrementAndGet() == 0) {
+        if (UPDATER_STARTED.decrementAndGet(this) == 0) {
             notAllStarted = false;
         }
     }
 
     public void postRun() {
-        if (finished.decrementAndGet() == 0) {
+        if (UPDATER_FINISHED.decrementAndGet(this) == 0) {
             notAllFinished = false;
         }
         updateStride |= notAllStarted;
@@ -105,7 +155,7 @@ public class StateHolder<P> {
     }
 
     public boolean tryStartUpdate()  {
-        return (consumed.decrementAndGet() == 0);
+        return (UPDATER_CONSUMED.decrementAndGet(this) == 0);
     }
 
     public void finishUpdate() {

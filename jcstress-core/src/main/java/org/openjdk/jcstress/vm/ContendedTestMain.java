@@ -25,15 +25,15 @@
 package org.openjdk.jcstress.vm;
 
 import org.openjdk.jcstress.annotations.Result;
+import org.openjdk.jcstress.annotations.State;
+import org.openjdk.jcstress.infra.runners.StateHolder;
 import org.openjdk.jcstress.util.Reflections;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.lang.reflect.Modifier;
+import java.util.*;
 
 public class ContendedTestMain {
 
@@ -47,11 +47,14 @@ public class ContendedTestMain {
             throw new IllegalStateException("Classes not found");
         }
 
+        Set<Class> infraClasses = Collections.singleton(StateHolder.class);
+
         for (Class<?> cl : classes) {
-            if (cl.getAnnotation(Result.class) == null) continue;
+            if (!infraClasses.contains(cl) && cl.getAnnotation(Result.class) == null) continue;
 
             List<FieldDef> fdefs = new ArrayList<>();
             for (Field f : cl.getDeclaredFields()) {
+                if (Modifier.isStatic(f.getModifiers())) continue;
                 fdefs.add(new FieldDef(f));
             }
 

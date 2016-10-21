@@ -430,7 +430,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    }");
         pw.println();
 
-        pw.println("    public final void jcstress_consume(StateHolder<Pair> holder, Counter<" + r + "> cnt, int a, int actors) {");
+        pw.println("    public final void jcstress_consume(StateHolder<Pair> holder, OpenAddressHashCounter<" + r + "> cnt, int a, int actors) {");
         pw.println("        Pair[] pairs = holder.pairs;");
         pw.println("        int len = pairs.length;");
         pw.println("        int left = a * len / actors;");
@@ -504,6 +504,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
             if (!isStateItself) {
                 pw.println("        " + t + " lt = test;");
             }
+
+            pw.println("        OpenAddressHashCounter<" + r + "> counter = counter_" + a.getSimpleName() + ";");
+
             pw.println("        while (true) {");
             pw.println("            StateHolder<Pair> holder = version;");
             pw.println("            if (holder.stopped) {");
@@ -541,7 +544,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println();
             pw.println("            holder.postRun();");
             pw.println();
-            pw.println("            jcstress_consume(holder, counter_" + a.getSimpleName() + ", " + n + ", " + actorsCount + ");");
+            pw.println("            jcstress_consume(holder, counter, " + n + ", " + actorsCount + ");");
             pw.println("            jcstress_updateHolder(holder);");
             pw.println();
             pw.println("            holder.postUpdate();");

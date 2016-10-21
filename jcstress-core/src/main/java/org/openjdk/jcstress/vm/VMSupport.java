@@ -78,7 +78,7 @@ public class VMSupport {
                 "-XX:G1ConcRefinementThreads=4",
                 SimpleTestMain.class);
 
-        detect("Testing @Contended works on all results",
+        detect("Testing @Contended works on all results and infra objects",
                 "-XX:-RestrictContended",
                 ContendedTestMain.class);
 
