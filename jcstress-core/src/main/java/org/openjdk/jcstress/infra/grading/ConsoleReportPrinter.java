@@ -121,13 +121,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
             ReportUtils.printDetails(output, r, true);
         }
 
-        if (!r.getAuxData().isEmpty()) {
-            output.println("    Messages: ");
-            for (String data : r.getAuxData()) {
-                output.println("        " + data);
-            }
-            output.println();
-        }
+        ReportUtils.printMessages(output, r);
 
         printProgress();
     }

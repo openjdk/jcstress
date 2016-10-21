@@ -156,6 +156,16 @@ public class ReportUtils {
         pw.println();
     }
 
+    public static void printMessages(PrintWriter pw, TestResult r) {
+        if (!r.getAuxData().isEmpty()) {
+            pw.println("    Messages: ");
+            for (String data : r.getAuxData()) {
+                pw.println("        " + data);
+            }
+            pw.println();
+        }
+    }
+
     public static String statusToLabel(TestResult result) {
         switch (result.status()) {
             case TIMEOUT_ERROR:
