@@ -24,18 +24,10 @@
  */
 package org.openjdk.jcstress.link;
 
-import org.openjdk.jcstress.infra.Status;
-import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.*;
 
 /**
  * Accepts the binary data from the forked VM and pushes it to parent VM
@@ -44,29 +36,24 @@ import java.util.concurrent.*;
  */
 public final class BinaryLinkServer {
 
-    private static final int BUFFER_SIZE = Integer.getInteger("jcstress.link.bufferSize", 64*1024);
     private static final String LINK_ADDRESS = System.getProperty("jcstress.link.address");
     private static final int LINK_PORT = Integer.getInteger("jcstress.link.port", 0);
-    private static final int LINK_TIMEOUT_MS = Integer.getInteger("jcstress.link.timeoutMs", 30*1000);
+    private static final int LINK_TIMEOUT_MS = Integer.getInteger("jcstress.link.timeoutMs", 30 * 1000);
 
     private final ServerSocket server;
     private final InetAddress listenAddress;
-    private final TestResultCollector out;
-    private final ConcurrentMap<String, List<TestConfig>> configs;
-    private final ConcurrentMap<String, TestConfig> currentTask;
-    private final ExecutorService executor;
-    private final Collection<Handler> outstandingHandlers;
+    private final Handler handler;
+    private final ServerListener listener;
 
-    public BinaryLinkServer(int workers, TestResultCollector out) throws IOException {
-        this.out = out;
-        this.configs = new ConcurrentHashMap<>();
-        this.currentTask = new ConcurrentHashMap<>();
+    public BinaryLinkServer(ServerListener listener) throws IOException {
+        this.listener = listener;
 
         listenAddress = getListenAddress();
         server = new ServerSocket(LINK_PORT, 50, listenAddress);
         server.setSoTimeout(LINK_TIMEOUT_MS);
-        executor = Executors.newFixedThreadPool(workers);
-        outstandingHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+        handler = new Handler(server);
+        handler.start();
     }
 
     private InetAddress getListenAddress() {
@@ -84,9 +71,8 @@ public final class BinaryLinkServer {
     }
 
     public void terminate() {
-        // no more Handlers to schedule; the Handlers in queue had not
-        // opened the socket yet.
-        executor.shutdownNow();
+        // set interrupt flag
+        handler.interrupt();
 
         // all existing Handlers blocked on accept() should exit now
         try {
@@ -95,24 +81,13 @@ public final class BinaryLinkServer {
             // do nothing
         }
 
-        // all existing Handlers blocked on socket read should exit now:
-        for (Handler h : outstandingHandlers) {
-            h.close();
+        // wait for handler to join
+        try {
+            handler.join();
+        } catch (InterruptedException e) {
+            // do nothing
         }
-    }
 
-    public void addTask(String token, Collection<TestConfig> cfgs) {
-        List<TestConfig> exist = configs.put(token, new ArrayList<>(cfgs));
-        if (exist != null) {
-            throw new IllegalStateException("Trying to overwrite the same token");
-        }
-        executor.submit(new Handler(server));
-    }
-
-    public List<TestConfig> removePendingTasks(String token) {
-        List<TestConfig> conf = configs.get(token);
-        configs.remove(token);
-        return conf;
     }
 
     public String getHost() {
@@ -124,13 +99,8 @@ public final class BinaryLinkServer {
         return server.getLocalPort();
     }
 
-    public TestConfig getCurrentTask(String token) {
-        return currentTask.get(token);
-    }
-
-    private final class Handler implements Runnable {
+    private final class Handler extends Thread {
         private final ServerSocket server;
-        private Socket socket;
 
         public Handler(ServerSocket server) {
             this.server = server;
@@ -138,65 +108,48 @@ public final class BinaryLinkServer {
 
         @Override
         public void run() {
-            outstandingHandlers.add(this);
-
-            TestConfig config = null;
-            try {
-                socket = server.accept();
-
-                InputStream is = socket.getInputStream();
-                OutputStream os = socket.getOutputStream();
-
-                // eager OOS initialization, let the other party read the stream header
-                ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(os, BUFFER_SIZE));
-                oos.flush();
-
-                // late OIS initialization, otherwise we'll block reading the header
-                ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(is, BUFFER_SIZE));
-
-                Object obj;
-                while ((obj = ois.readObject()) != null) {
-                    if (obj instanceof JobRequestFrame) {
-                        String tkn = ((JobRequestFrame) obj).getToken();
-                        List<TestConfig> cfgs = configs.get(tkn);
-                        if (cfgs.isEmpty()) {
-                            oos.writeObject(new JobResponseFrame(null));
-                        } else {
-                            config = cfgs.remove(0);
-                            currentTask.put(tkn, config);
-                            oos.writeObject(new JobResponseFrame(config));
-                        }
-                        oos.flush();
-                    }
-                    if (obj instanceof ResultsFrame) {
-                        ResultsFrame rf = (ResultsFrame) obj;
-                        out.add(rf.getRes());
-                        currentTask.remove(rf.getToken());
-                    }
-                    if (obj instanceof FinishingFrame) {
-                        // close the streams
-                        break;
-                    }
-                }
-            } catch (EOFException e) {
-                // ignore
-            } catch (Exception e) {
-                TestResult tr = new TestResult(config, Status.VM_ERROR, -1);
-                tr.addAuxData("<binary link had failed, forked VM corrupted the stream?");
-                tr.addAuxData(e.getMessage());
-                out.add(tr);
-            } finally {
-                outstandingHandlers.remove(this);
-                close();
+            while (!Thread.interrupted()) {
+                acceptAndProcess();
             }
         }
 
-        public void close() {
-            if (socket != null) {
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                    // ignore
+        private void acceptAndProcess() {
+            Socket socket = null;
+            try {
+                socket = server.accept();
+
+                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                Object obj = ois.readObject();
+
+                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+
+                if (obj instanceof JobRequestFrame) {
+                    String tkn = ((JobRequestFrame) obj).getToken();
+                    TestConfig cfg = listener.onJobRequest(tkn);
+                    oos.writeObject(new JobResponseFrame(cfg));
+                } else if (obj instanceof ResultsFrame) {
+                    ResultsFrame rf = (ResultsFrame) obj;
+                    listener.onResult(rf.getToken(), rf.getRes());
+                    oos.writeObject(new OkResponseFrame());
+                } else {
+                    // should always reply something
+                    oos.writeObject(new WTFWasThatFrame());
+                }
+
+                oos.close();
+                ois.close();
+            } catch (EOFException e) {
+                // ignore
+            } catch (Exception e) {
+                e.printStackTrace();
+                // ignore, the exit code would be non-zero, and TestExecutor would handle it.
+            } finally {
+                if (socket != null) {
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+                        // do nothing
+                    }
                 }
             }
         }

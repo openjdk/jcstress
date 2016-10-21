@@ -29,6 +29,7 @@ import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.link.BinaryLinkServer;
+import org.openjdk.jcstress.link.ServerListener;
 import org.openjdk.jcstress.util.HashMultimap;
 import org.openjdk.jcstress.util.Multimap;
 import org.openjdk.jcstress.vm.VMSupport;
@@ -42,11 +43,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Manages test execution for the entire run.
- *
+ * <p>
  * This executor is deliberately single-threaded for two reasons:
- *   a) Tests are heavily multithreaded and spawning new threads here may
- *      deplete the thread budget sooner rather than later;
- *   b) Dead-locks in scheduling logic are more visible without threads;
+ * a) Tests are heavily multithreaded and spawning new threads here may
+ * deplete the thread budget sooner rather than later;
+ * b) Dead-locks in scheduling logic are more visible without threads;
  */
 public class TestExecutor {
 
@@ -60,8 +61,9 @@ public class TestExecutor {
     private final int batchSize;
     private final TestResultCollector sink;
     private final Multimap<BatchKey, TestConfig> tasks;
-    private final Set<VM> vms;
     private final EmbeddedExecutor embeddedExecutor;
+
+    private final Map<String, VM> vmByToken;
 
     public TestExecutor(int maxThreads, int batchSize, TestResultCollector sink, boolean possiblyForked) throws IOException {
         this.maxThreads = maxThreads;
@@ -69,10 +71,21 @@ public class TestExecutor {
         this.sink = sink;
 
         this.tasks = new HashMultimap<>();
-        this.vms = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        this.vmByToken = new ConcurrentHashMap<>();
 
         semaphore = new Semaphore(maxThreads);
-        server = possiblyForked ? new BinaryLinkServer(maxThreads, sink) : null;
+        server = possiblyForked ? new BinaryLinkServer(new ServerListener() {
+            @Override
+            public TestConfig onJobRequest(String token) {
+                return vmByToken.get(token).jobRequest();
+            }
+
+            @Override
+            public void onResult(String token, TestResult result) {
+                vmByToken.get(token).processResult(result);
+                sink.add(result);
+            }
+        }) : null;
         embeddedExecutor = new EmbeddedExecutor(sink, (cfg) -> semaphore.release(cfg.threads));
     }
 
@@ -112,11 +125,15 @@ public class TestExecutor {
         server.terminate();
     }
 
-    private void doSchedule(BatchKey batchKey, Collection<TestConfig> configs)  {
+    private void doSchedule(BatchKey batchKey, Collection<TestConfig> configs) {
         // Make fat tasks bypass in exclusive mode:
         final int threads = Math.min(batchKey.threads, maxThreads);
         waitForMoreThreads(threads);
-        startVM(batchKey, configs);
+
+        String token = "fork-token-" + ID.incrementAndGet();
+        VM vm = new VM(server.getHost(), server.getPort(), batchKey, token, configs);
+        vmByToken.put(token, vm);
+        vm.start();
     }
 
     private void waitForMoreThreads(int threads) {
@@ -130,42 +147,27 @@ public class TestExecutor {
         }
     }
 
-    private void startVM(BatchKey batchKey, Collection<TestConfig> configs) {
-        String token = "fork-token-" + ID.incrementAndGet();
-        server.addTask(token, configs);
-
-        VM vm = new VM(server.getHost(), server.getPort(), batchKey, token);
-        vms.add(vm);
-        vm.start();
-    }
-
-    private void stopVM(VM vm) {
-        vms.remove(vm);
-        semaphore.release(vm.key.threads);
-    }
-
     private void processReadyVMs() {
-        for (VM vm : vms) {
+        for (VM vm : vmByToken.values()) {
             try {
-                if (vm.checkTermination()) {
-                    stopVM(vm);
-                }
+                if (!vm.checkTermination()) continue;
             } catch (ForkFailedException e) {
                 // Record the failure for the actual test
-                TestConfig failed = server.getCurrentTask(vm.token);
-                if (failed != null) {
-                    // TODO: Handle the VM bootup failure better, when failed == null
-                    TestResult result = new TestResult(failed, Status.VM_ERROR, -1);
-                    for (String i : e.getInfo()) {
-                        result.addAuxData(i);
-                    }
-                    sink.add(result);
+                TestConfig failed = vm.getVictimTask();
+                TestResult result = new TestResult(failed, Status.VM_ERROR, -1);
+                for (String i : e.getInfo()) {
+                    result.addAuxData(i);
                 }
+                sink.add(result);
+            }
 
-                stopVM(vm);
+            vmByToken.remove(vm.token, vm);
+            semaphore.release(vm.key.threads);
 
-                // Remaining tasks from the fork need to get back on queue
-                doSchedule(vm.key, server.removePendingTasks(vm.token));
+            // Remaining tasks from the fork need to get back on queue
+            List<TestConfig> pending = vm.getPendingTasks();
+            if (!pending.isEmpty()) {
+                doSchedule(vm.key, pending);
             }
         }
     }
@@ -177,13 +179,20 @@ public class TestExecutor {
         private final String token;
         private final File stdout;
         private final File stderr;
+        private final TestConfig firstTask;
         private Process process;
+        private final List<TestConfig> pendingTasks;
+        private TestConfig currentTask;
+        private TestConfig lastTask;
+        private IOException pendingException;
 
-        public VM(String host, int port, BatchKey key, String token) {
+        public VM(String host, int port, BatchKey key, String token, Collection<TestConfig> configs) {
             this.host = host;
             this.port = port;
             this.key = key;
             this.token = token;
+            this.pendingTasks = new ArrayList<>(configs);
+            this.firstTask = pendingTasks.get(0);
             try {
                 this.stdout = File.createTempFile("jcstress", "stdout");
                 this.stderr = File.createTempFile("jcstress", "stderr");
@@ -192,7 +201,7 @@ public class TestExecutor {
             }
         }
 
-        void start() throws ForkFailedException {
+        void start() {
             try {
                 List<String> command = new ArrayList<>();
 
@@ -215,11 +224,15 @@ public class TestExecutor {
                 pb.redirectError(stderr);
                 process = pb.start();
             } catch (IOException ex) {
-                throw new ForkFailedException(ex.getMessage());
+                pendingException = ex;
             }
         }
 
         boolean checkTermination() {
+            if (pendingException != null) {
+                throw new ForkFailedException(pendingException.getMessage());
+            }
+
             if (process.isAlive()) {
                 return false;
             } else {
@@ -238,6 +251,14 @@ public class TestExecutor {
                         } catch (IOException e) {
                             output.add("Failed to read stderr: " + e.getMessage());
                         }
+
+                        if (stdout.delete()) {
+                            output.add("Failed to delete stdout log: " + stdout);
+                        }
+                        if (stderr.delete()) {
+                            output.add("Failed to delete stderr log: " + stderr);
+                        }
+
                         throw new ForkFailedException(output);
                     }
                 } catch (InterruptedException ex) {
@@ -245,6 +266,40 @@ public class TestExecutor {
                 }
                 return true;
             }
+        }
+
+        public synchronized TestConfig jobRequest() {
+            if (pendingTasks.isEmpty()) {
+                return null;
+            } else {
+                TestConfig task = pendingTasks.remove(0);
+                currentTask = task;
+                return task;
+            }
+        }
+
+        public synchronized void processResult(TestResult result) {
+            lastTask = currentTask;
+            currentTask = null;
+        }
+
+        public synchronized TestConfig getVictimTask() {
+            if (currentTask != null) {
+                // Current task had failed
+                return currentTask;
+            }
+
+            if (lastTask != null) {
+                // Already replied the results for last task, blame it too
+                return lastTask;
+            }
+
+            // We have not executed anything yet, blame the first task
+            return firstTask;
+        }
+
+        public List<TestConfig> getPendingTasks() {
+            return new ArrayList<>(pendingTasks);
         }
     }
 

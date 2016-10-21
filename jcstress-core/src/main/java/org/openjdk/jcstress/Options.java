@@ -198,7 +198,7 @@ public class Options {
             this.time = 300;
             this.iters = 5;
             this.forks = 1;
-            this.batchSize = 20;
+            this.batchSize = orDefault(set.valueOf(batchSize), 20);
         } else
         if (this.mode.equalsIgnoreCase("default")) {
             this.time = orDefault(set.valueOf(time), 1000);

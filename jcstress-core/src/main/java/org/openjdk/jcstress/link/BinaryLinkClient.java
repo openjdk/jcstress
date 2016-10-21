@@ -26,103 +26,66 @@ package org.openjdk.jcstress.link;
 
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.TestConfig;
-import org.openjdk.jcstress.util.FileUtils;
 
 import java.io.*;
 import java.net.Socket;
 
 public final class BinaryLinkClient {
 
-    private static final int RESET_EACH = Integer.getInteger("jcstress.link.resetEach", 100);
-    private static final int BUFFER_SIZE = Integer.getInteger("jcstress.link.bufferSize", 64*1024);
-    private static final int LINK_TIMEOUT_MS = Integer.getInteger("jcstress.link.timeoutMs", 30*1000);
+    private static final int LINK_TIMEOUT_MS = Integer.getInteger("jcstress.link.timeoutMs", 30 * 1000);
 
     private final Object lock;
-
-    private final Socket clientSocket;
-    private final ObjectOutputStream oos;
-    private final ObjectInputStream ois;
-    private volatile boolean failed;
-    private int resetToGo;
+    private final String hostName;
+    private final int hostPort;
 
     public BinaryLinkClient(String hostName, int hostPort) throws IOException {
+        this.hostName = hostName;
+        this.hostPort = hostPort;
         this.lock = new Object();
-        this.clientSocket = new Socket(hostName, hostPort);
-        clientSocket.setSoTimeout(LINK_TIMEOUT_MS);
-
-        // Initialize the OOS first, and flush, letting the other party read the stream header.
-        this.oos = new ObjectOutputStream(new BufferedOutputStream(clientSocket.getOutputStream(), BUFFER_SIZE));
-        this.oos.flush();
-
-        this.ois = new ObjectInputStream(new BufferedInputStream(clientSocket.getInputStream(), BUFFER_SIZE));
     }
 
-    private void pushFrame(Serializable frame) throws IOException {
-        if (failed) {
-            throw new IOException("Link had failed already");
-        }
-
-        // It is important to reset the OOS to avoid garbage buildup in internal identity
-        // tables. However, we cannot do that after each frame since the huge referenced
-        // objects like benchmark and iteration parameters will be duplicated on the receiver
-        // side. This is why we reset only each RESET_EACH frames.
-        //
-        // It is as much as important to flush the stream to let the other party know we
-        // pushed something out.
-
+    private Object requestResponse(Object frame) throws IOException {
         synchronized (lock) {
+            Socket socket = null;
             try {
-                if (resetToGo-- < 0) {
-                    oos.reset();
-                    resetToGo = RESET_EACH;
-                }
+                socket = new Socket(hostName, hostPort);
+                socket.setKeepAlive(true);
+                socket.setSoTimeout(LINK_TIMEOUT_MS);
 
+                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
                 oos.writeObject(frame);
                 oos.flush();
+
+                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                Object o = ois.readObject();
+
+                oos.close();
+                ois.close();
+                return o;
             } catch (IOException e) {
-                failed = true;
                 throw e;
+            } catch (ClassNotFoundException e) {
+                throw new IOException(e);
+            } finally {
+                if (socket != null) {
+                    socket.close();
+                }
             }
-        }
-    }
-
-    private Object readFrame() throws IOException, ClassNotFoundException {
-        try {
-            return ois.readObject();
-        } catch (ClassNotFoundException ex) {
-            failed = true;
-            throw ex;
-        } catch (IOException ex) {
-            failed = true;
-            throw ex;
-        }
-    }
-
-    public void close() throws IOException {
-        synchronized (lock) {
-            oos.writeObject(new FinishingFrame());
-            FileUtils.safelyClose(ois);
-            FileUtils.safelyClose(oos);
-            clientSocket.close();
         }
     }
 
     public TestConfig nextJob(String token) throws IOException, ClassNotFoundException {
-        synchronized (lock) {
-            pushFrame(new JobRequestFrame(token));
-
-            Object reply = readFrame();
-            if (reply instanceof JobResponseFrame) {
-                return ((JobResponseFrame) reply).getConfig();
-            } else {
-                throw new IllegalStateException("Got the erroneous reply: " + reply);
-            }
+        Object reply = requestResponse(new JobRequestFrame(token));
+        if (reply instanceof JobResponseFrame) {
+            return ((JobResponseFrame) reply).getConfig();
+        } else {
+            throw new IllegalStateException("Got the erroneous reply: " + reply);
         }
     }
 
     public void addResult(String token, TestResult result) {
         try {
-            pushFrame(new ResultsFrame(token, result));
+            requestResponse(new ResultsFrame(token, result));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
