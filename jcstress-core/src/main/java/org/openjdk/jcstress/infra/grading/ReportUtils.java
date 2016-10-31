@@ -160,10 +160,18 @@ public class ReportUtils {
         if (!r.getAuxData().isEmpty()) {
             pw.println("    Messages: ");
             for (String data : r.getAuxData()) {
+                if (skipMessage(data)) continue;
                 pw.println("        " + data);
             }
             pw.println();
         }
+    }
+
+    private static boolean skipMessage(String data) {
+        if (data.startsWith("Warning: 'NoSuchMethodError' on register of sun.hotspot.WhiteBox"))
+            return true;
+
+        return false;
     }
 
     public static String statusToLabel(TestResult result) {
