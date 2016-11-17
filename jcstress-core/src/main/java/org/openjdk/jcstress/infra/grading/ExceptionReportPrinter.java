@@ -25,14 +25,8 @@
 package org.openjdk.jcstress.infra.grading;
 
 
-import org.openjdk.jcstress.Options;
-import org.openjdk.jcstress.infra.Status;
-import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.InProcessCollector;
 import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.infra.runners.TestConfig;
-import org.openjdk.jcstress.infra.runners.TestList;
-import org.openjdk.jcstress.util.*;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;

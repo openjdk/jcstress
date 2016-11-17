@@ -33,7 +33,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +46,7 @@ public class TestList {
 
     private static Map<String, TestInfo> getTests() {
         if (tests == null) {
-            Map<String, TestInfo> m = new HashMap<String, TestInfo>();
+            Map<String, TestInfo> m = new HashMap<>();
             InputStream stream = null;
             try {
                 stream = TestList.class.getResourceAsStream(LIST);

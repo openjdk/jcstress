@@ -25,7 +25,6 @@
 package org.openjdk.jcstress.vm;
 
 import org.openjdk.jcstress.annotations.Result;
-import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.runners.StateHolder;
 import org.openjdk.jcstress.util.Reflections;
 import org.openjdk.jcstress.util.UnsafeHolder;

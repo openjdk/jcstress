@@ -51,9 +51,9 @@ public class TestInfo {
     private String description;
 
     public TestInfo() {
-        actors = new ArrayList<ExecutableElement>();
-        outcomes = new ArrayList<Outcome>();
-        refs = new ArrayList<String>();
+        actors = new ArrayList<>();
+        outcomes = new ArrayList<>();
+        refs = new ArrayList<>();
         actors = new ArrayList<>();
     }
 

@@ -28,8 +28,6 @@ import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.link.BinaryLinkClient;
 import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
-import java.io.IOException;
-
 /**
  * Entry point for the forked VM run.
  *

@@ -211,14 +211,12 @@ public class VMSupport {
     }
 
     private static String getDefaultJvm() {
-        StringBuilder javaExecutable = new StringBuilder();
-        javaExecutable.append(System.getProperty("java.home"));
-        javaExecutable.append(File.separator);
-        javaExecutable.append("bin");
-        javaExecutable.append(File.separator);
-        javaExecutable.append("java");
-        javaExecutable.append(isWindows() ? ".exe" : "");
-        return javaExecutable.toString();
+        return System.getProperty("java.home") +
+                File.separator +
+                "bin" +
+                File.separator +
+                "java" +
+                (isWindows() ? ".exe" : "");
     }
 
     private static boolean isWindows() {

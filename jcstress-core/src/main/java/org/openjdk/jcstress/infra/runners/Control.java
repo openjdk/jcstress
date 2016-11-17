@@ -24,8 +24,6 @@
  */
 package org.openjdk.jcstress.infra.runners;
 
-import org.openjdk.jcstress.Options;
-
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */

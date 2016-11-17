@@ -77,7 +77,7 @@ public class TreesetMultimap<K, V> implements Multimap<K, V>, Serializable {
     @Override
     public Collection<V> get(K key) {
         Collection<V> vs = map.get(key);
-        return (vs == null) ? Collections.<V>emptyList() : Collections.unmodifiableCollection(vs);
+        return (vs == null) ? Collections.emptyList() : Collections.unmodifiableCollection(vs);
     }
 
     @Override

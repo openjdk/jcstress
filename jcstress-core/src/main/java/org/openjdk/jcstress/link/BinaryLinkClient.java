@@ -62,8 +62,6 @@ public final class BinaryLinkClient {
                 oos.close();
                 ois.close();
                 return o;
-            } catch (IOException e) {
-                throw e;
             } catch (ClassNotFoundException e) {
                 throw new IOException(e);
             } finally {

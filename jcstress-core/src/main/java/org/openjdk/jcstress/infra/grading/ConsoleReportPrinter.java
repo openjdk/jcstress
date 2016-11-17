@@ -25,13 +25,9 @@
 package org.openjdk.jcstress.infra.grading;
 
 import org.openjdk.jcstress.Options;
-import org.openjdk.jcstress.annotations.Expect;
-import org.openjdk.jcstress.infra.StateCase;
-import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.TestConfig;
-import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.StringUtils;
 
 import java.io.FileNotFoundException;
@@ -47,7 +43,6 @@ import java.util.concurrent.TimeUnit;
 public class ConsoleReportPrinter implements TestResultCollector {
 
     private final boolean verbose;
-    private final Options opts;
     private final PrintWriter output;
     private final long expectedTests;
     private final long expectedIterations;
@@ -68,7 +63,6 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private long hardErrors;
 
     public ConsoleReportPrinter(Options opts, PrintWriter pw, int expectedTests, int expectedForks) throws FileNotFoundException {
-        this.opts = opts;
         this.output = pw;
         this.expectedTests = expectedTests;
         this.expectedForks = expectedForks;

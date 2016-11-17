@@ -34,7 +34,6 @@ import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
 import javax.lang.model.util.ElementFilter;
@@ -46,7 +45,6 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 public class JCStressTestProcessor extends AbstractProcessor {
 
