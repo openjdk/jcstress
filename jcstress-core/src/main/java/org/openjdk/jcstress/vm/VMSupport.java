@@ -46,7 +46,7 @@ public class VMSupport {
         return THREAD_SPIN_WAIT_AVAILABLE;
     }
 
-    public static void initSupport() {
+    public static void initFlags() {
         System.out.println("Initializing and probing the target VM: ");
         System.out.println(" (all failures are non-fatal, but may affect testing accuracy)");
         System.out.println();
@@ -148,9 +148,11 @@ public class VMSupport {
                 line.add(SimpleTestMain.class.getName());
                 tryWith(line.toArray(new String[0]));
                 AVAIL_JVM_MODES.add(mode);
-                System.out.printf("   [OK] %s%n", mode);
+                System.out.printf("----- [OK] %s%n", mode);
             } catch (VMSupportException e) {
-                System.out.printf("  [N/A] %s%n", mode);
+                System.out.printf("----- [N/A] %s%n", mode);
+                System.out.println(e.getMessage());
+                System.out.println();
             }
         }
         System.out.println();
