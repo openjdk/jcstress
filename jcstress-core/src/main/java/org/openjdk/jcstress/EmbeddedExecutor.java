@@ -78,17 +78,18 @@ public class EmbeddedExecutor {
                 Constructor<?> cnstr = aClass.getConstructor(TestConfig.class, TestResultCollector.class, ExecutorService.class);
                 Runner<?> o = (Runner<?>) cnstr.newInstance(config, sink, pool);
                 o.run();
-            } catch (ClassFormatError e) {
+            } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
                 TestResult result = new TestResult(config, Status.API_MISMATCH, 0);
                 result.addAuxData(e.getMessage());
                 sink.add(result);
-            } catch (Exception ex) {
+            } catch (Throwable ex) {
                 TestResult result = new TestResult(config, Status.TEST_ERROR, 0);
                 result.addAuxData(ex.getMessage());
                 sink.add(result);
-            }
-            if (onFinish != null) {
-                onFinish.accept(config);
+            } finally {
+                if (onFinish != null) {
+                    onFinish.accept(config);
+                }
             }
         };
     }
