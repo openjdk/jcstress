@@ -86,7 +86,7 @@ public class TestExecutor {
                 sink.add(result);
             }
         }) : null;
-        embeddedExecutor = new EmbeddedExecutor(sink, (cfg) -> semaphore.release(cfg.threads));
+        embeddedExecutor = new EmbeddedExecutor(sink, (cfg) -> release(cfg.threads));
     }
 
     public void runAll(List<TestConfig> configs) throws InterruptedException {
@@ -126,9 +126,7 @@ public class TestExecutor {
     }
 
     private void doSchedule(BatchKey batchKey, Collection<TestConfig> configs) {
-        // Make fat tasks bypass in exclusive mode:
-        final int threads = Math.min(batchKey.threads, maxThreads);
-        waitForMoreThreads(threads);
+        waitForMoreThreads(batchKey.threads);
 
         String token = "fork-token-" + ID.incrementAndGet();
         VM vm = new VM(server.getHost(), server.getPort(), batchKey, token, configs);
@@ -137,7 +135,7 @@ public class TestExecutor {
     }
 
     private void waitForMoreThreads(int threads) {
-        while (!semaphore.tryAcquire(threads)) {
+        while (!tryAcquire(threads)) {
             processReadyVMs();
             try {
                 Thread.sleep(SPIN_WAIT_DELAY_MS);
@@ -145,6 +143,18 @@ public class TestExecutor {
                 // do nothing
             }
         }
+    }
+
+    private boolean tryAcquire(int requested) {
+        // Make fat tasks bypass in exclusive mode:
+        final int threads = Math.min(requested, maxThreads);
+        return semaphore.tryAcquire(threads);
+    }
+
+    private void release(int requested) {
+        // If task was fat and bypassed, release only maxThreads:
+        final int threads = Math.min(requested, maxThreads);
+        semaphore.release(threads);
     }
 
     private void processReadyVMs() {
@@ -162,7 +172,7 @@ public class TestExecutor {
             }
 
             vmByToken.remove(vm.token, vm);
-            semaphore.release(vm.key.threads);
+            release(vm.key.threads);
 
             // Remaining tasks from the fork need to get back on queue
             List<TestConfig> pending = vm.getPendingTasks();
