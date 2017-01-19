@@ -30,20 +30,22 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Actors actively mutate the states and may produce results.
- * <p/>
- * Actor-annotated methods can have only the {@link State} or {@link Result}-annotated
- * classes as the parameters.
- * <p/>
- * Actor methods may declare to throw the exceptions, but the behavior
- * after actually throwing an exception is undefined.
- * <p/>
- * A few important invariants are maintained:
- *   - the method is called only by single actor thread, once per {@link State} instance;
- *   - for any given {@link State}, the order vs another actors is deliberately unspecified;
- *   - any given {@link State} instance will be eventually visited by all actors;
+ * {@link Actor} is the central test annotation. It marks the methods that hold the
+ * actions done by the threads. The invariants that are maintained by the infrastructure
+ * are as follows:
  *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
+ * <ol>
+ *     <li>Each method is called only by one particular thread.</li>
+ *     <li>Each method is called exactly once per {@link State} instance.</li>
+ * </ol>
+ *
+ * <p>Note that the invocation order against other {@link Actor} methods is deliberately
+ * not specified. Therefore, two or more {@link Actor} methods may be used to model
+ * the concurrent execution on data held by {@link State} instance.
+ *
+ * <p>Actor-annotated methods can have only the {@link State} or {@link Result}-annotated
+ * classes as the parameters. Actor methods may declare to throw the exceptions, but
+ * actually throwing the exception would fail the test.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

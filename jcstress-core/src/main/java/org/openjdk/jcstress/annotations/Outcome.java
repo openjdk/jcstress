@@ -32,9 +32,24 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Describes the test outcome.
+ * {@link Outcome} describes the test outcome, and how to deal with it.
+ * It is usually the case that a {@link JCStressTest} has multiple outcomes,
+ * each with its distinct {@link #id()}.
  *
- * <p>Multiple outcomes with distinct IDs can be provided.</p>
+ * <p>{@link #id()} is cross-matched with {@link Result}-class' {@link #toString()}
+ * value. {@link #id()} allows regular expressions. For example, this outcome
+ * captures all results where there is a trailing "1":
+ *
+ * <pre>{@code
+ *     \@Outcome(id = ".*, 1", ...)
+ * }</pre>
+ *
+ * <p>When there is no ambiguity in what outcome should match the result, the
+ * annotation order is irrelevant. When there is an ambiguity, the first outcome
+ * in the declaration order is matched.
+ *
+ * <p>There can be a default outcome, which captures any non-captured result.
+ * It is the one with the default {@link #id()}.
  */
 @Inherited
 @Target(ElementType.TYPE)
@@ -43,19 +58,19 @@ import java.lang.annotation.Target;
 public @interface Outcome {
 
     /**
-     * @return observed outcome; empty string or no parameter if the case is default.
-     * ID support regular expressions.
+     * @return Observed result. Empty string or no parameter if the case is default.
+     * Supports regular expressions.
      */
     String[] id() default { "" };
 
     /**
-     * @return expect type for the observed outcome
+     * @return Expectation for the observed result.
      * @see Expect
      */
     Expect expect();
 
     /**
-     * @return human-readable description for a given outcome
+     * @return Human-readable description for a given result.
      */
     String desc() default "";
 

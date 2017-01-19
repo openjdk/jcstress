@@ -30,14 +30,26 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotates the class that is treated as the result object.
- * <p/>
- * Important invariants:
- *   - Result classes usually mimic value types: they do not have identity, and harness
- *     may reuse the objects, and also auto-magically clear the fields;
- *   - All fields in Result classes should be public;
- *   - All fields in Result classes should be primitive, or String;
- *   - Result classes should be serializable;
+ * {@link Result} annotation marks the result object. This annotation is seldom
+ * useful for user code, because jcstress ships lots of pre-canned result classes,
+ * see {@link org.openjdk.jcstress.infra.results} package.
+ *
+ * <p/>Important invariants and properties:
+ * <ol>
+ *     <li>All fields in {@link Result} classes should be public.</li>
+ *     <li>All fields in {@link Result} classes shoudl be either primitive, or String.</li>
+ *     <li>{@link Result} classes should be serializable.</li>
+ *     <li>{@link Result} classes should have proper {@link #equals(Object)} and {@link #hashCode()}
+ *     methods to disambiguate one result from another.</li>
+ *     <li>{@link Result} classes should have unique {@link #toString()} representation,
+ *     because it is being matched with {@link Outcome#id()}, and also serves
+ *     as key to separate one result from another in the output log.
+ *     (This might be revisited in future releases of jcstress).</li>
+ *     <li>{@link Result} classes mimic value types. They do not have identity,
+ *     and jcstress may reuse the objects, auto-magically clear the result fields,
+ *     etc. It is not advisable to have auxiliary fields and methods in {@link Result}
+ *     class, because its state is managed by jcstress.</li>
+ * </ol>
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

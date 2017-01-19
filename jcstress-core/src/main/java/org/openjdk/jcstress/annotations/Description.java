@@ -31,7 +31,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Test description.
+ * {@link Description} defines a human-readable test description.
  */
 @Inherited
 @Target(ElementType.TYPE)

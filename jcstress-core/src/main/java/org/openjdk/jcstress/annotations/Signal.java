@@ -29,6 +29,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * {@link Signal} is useful for delivering a termination signal to {@link Actor}
+ * in {@link Mode#Termination} tests. It will run after {@link Actor} in question
+ * started executing.
+ */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Signal {

@@ -25,32 +25,33 @@
 package org.openjdk.jcstress.annotations;
 
 /**
- * Provides the grading for the {@link Outcome}.
+ * {@link Expect} provides the grading for the {@link Outcome}.
  */
 public enum Expect {
 
     /**
-     * May be present as the valid result; may be absent if tests haven't been able to reach to that outcome.
+     * Acceptable result. Acceptable results are not required to be present.
      */
     ACCEPTABLE,
 
     /**
-     * Same as ACCEPTABLE, but this outcome will be highlighted in reports.
+     * Same as {@link #ACCEPTABLE}, but this result will be highlighted in reports.
      */
     ACCEPTABLE_INTERESTING,
 
     /**
-     * Same as ACCEPTABLE, but only for outcomes which are formally acceptable, but may be surprising to end users.
+     * Same as {@link #ACCEPTABLE}, but this result is only formally acceptable, and may be surprising to end users.
+     * TODO: Fold this with ACCEPTABLE_INTERESTING
      */
     ACCEPTABLE_SPEC,
 
     /**
-     * Should always be absent.
+     * Forbidden result. Should never be present.
      */
     FORBIDDEN,
 
     /**
-     * Internal: no grading.
+     * Internal expectation: no grading. Do not use.
      */
     UNKNOWN,
 }

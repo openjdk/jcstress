@@ -30,17 +30,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Arbiters are similar {@link Actor}, but with a few important differences:
- *  - arbiter visits the {@link State} instance after all the actors have already visited that instance;
- *  - all memory effects from actors are visible in arbiter;
- * <p/>
- * Arbiter methods may declare to throw the exceptions, but the behavior
- * after actually throwing an exception is undefined.
- * <p/>
- * Arbiter-annotated methods can have only the {@link State} or {@link Result}-annotated
- * classes as the parameters.
- * <p/>
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
+ * {@link Arbiter} is similar to {@link Actor}, but there is one critical difference:
+ * Arbiter visits the {@link State} instance after all the {@link Actor}s
+ * have already visited that instance. All memory effects from {@link Actor}s are
+ * visible in Arbiter. This makes arbiter useful for reading the final state into
+ * results.
+ *
+ * <p>Arbiter-annotated methods can have only the {@link State} or {@link Result}-annotated
+ * classes as the parameters. Arbiter methods may declare to throw the exceptions, but
+ * actually throwing the exception would fail the test.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

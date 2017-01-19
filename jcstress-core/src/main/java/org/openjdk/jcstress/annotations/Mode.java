@@ -24,9 +24,21 @@
  */
 package org.openjdk.jcstress.annotations;
 
+/**
+ * JCStress test mode.
+ */
 public enum Mode {
 
+    /**
+     * Continuous mode: run several {@link Actor}, {@link Arbiter} threads, and
+     * collect the histogram of {@link Result}s.
+     */
     Continuous,
+
+    /**
+     * Termination mode: run a single {@link Actor} with a blocking/looping operation,
+     * and see if it responds to a {@link Signal}.
+     */
     Termination,
 
 }

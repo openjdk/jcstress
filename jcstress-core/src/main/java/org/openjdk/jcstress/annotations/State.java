@@ -30,12 +30,20 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotates the class treated as test state.
- * <p/>
- * Important invariants:
- *   - State classes should have a default constructor;
- *   - All initializations in constructors and instance initializers are
- *     visible to all actors;
+ * {@link State} is the central annotation for handling test state.
+ * It annotates the class that holds the data mutated/read by the tests.
+ *
+ * <p>Important properties for the class are:
+ * <ol>
+ *     <li>State class should be public, non-inner class.</li>
+ *     <li>State class should have a default constructor.</li>
+ * </ol>
+ *
+ * <p>During the run, many {@link State} instances are created, and therefore
+ * the tests should try to minimize state instance footprint.
+ *
+ * <p>All actions in constructors and instance initializers are visible
+ * to all {@link Actor} and {@link Arbiter} threads.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

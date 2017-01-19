@@ -30,7 +30,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Points to another class with test meta-information.
+ * {@link JCStressMeta} points to another class with test meta-information.
  *
  * <p>When placed over {@link JCStressTest} class, the {@link Description}, {@link Outcome},
  * {@link Ref}, and other annotations will be inherited from the pointed class. This allows
