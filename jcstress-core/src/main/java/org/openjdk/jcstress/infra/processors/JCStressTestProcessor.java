@@ -163,18 +163,22 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 info.setSignal(method);
             }
 
-            for (VariableElement var : method.getParameters()) {
-                TypeElement paramClass = (TypeElement) processingEnv.getTypeUtils().asElement(var.asType());
-                if (paramClass.getAnnotation(State.class) != null) {
-                    info.setState(paramClass);
-                } else if (paramClass.getAnnotation(Result.class) != null) {
-                    info.setResult(paramClass);
-                } else {
-                    if (e.getAnnotation(JCStressTest.class).value() != Mode.Termination ||
-                            !paramClass.getQualifiedName().toString().equals("java.lang.Thread")) {
-                        throw new GenerationException("The parameter for @" + Actor.class.getSimpleName() +
-                                " methods requires either @" + State.class.getSimpleName() + " or @" + Result.class.getSimpleName() +
-                                " annotated class", var);
+            if (method.getAnnotation(Actor.class) != null ||
+                    method.getAnnotation(Arbiter.class) != null ||
+                    method.getAnnotation(Signal.class) != null) {
+                for (VariableElement var : method.getParameters()) {
+                    TypeElement paramClass = (TypeElement) processingEnv.getTypeUtils().asElement(var.asType());
+                    if (paramClass.getAnnotation(State.class) != null) {
+                        info.setState(paramClass);
+                    } else if (paramClass.getAnnotation(Result.class) != null) {
+                        info.setResult(paramClass);
+                    } else {
+                        if (e.getAnnotation(JCStressTest.class).value() != Mode.Termination ||
+                                !paramClass.getQualifiedName().toString().equals("java.lang.Thread")) {
+                            throw new GenerationException("The parameter for @" + Actor.class.getSimpleName() +
+                                    " methods requires either @" + State.class.getSimpleName() + " or @" + Result.class.getSimpleName() +
+                                    " annotated class", var);
+                        }
                     }
                 }
             }
