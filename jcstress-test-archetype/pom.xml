@@ -63,6 +63,13 @@ questions.
                     <escapeString>\</escapeString>
                   </configuration>
             </plugin>
+            <plugin> <!-- deploy this artifact -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>false</skip>
+                </configuration>
+            </plugin>
         </plugins>
 
         <resources>

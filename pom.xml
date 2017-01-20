@@ -156,6 +156,14 @@ questions.
                         </execution>
                     </executions>
                 </plugin>
+                <plugin> <!-- skip deploying artifacts by default -->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.1</version>
+                    <configuration>
+                        <skip>true</skip>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
