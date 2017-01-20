@@ -22,54 +22,44 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests;
+package org.openjdk.jcstress.samples;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.IntResult2;
 
 /*
-    This is our first concurrency test. It is deliberately simplistic to show
-    testing approaches, introduce JCStress APIs, etc.
+    JCStress also allows to put the descriptions and references right at the test.
+    This helps to identify the goal for the test, as well as the discussions about
+    the behavior in question.
 
-    Suppose we want to see if the field increment is atomic. We can make test
-    with two actors, both actors incrementing the field and recording what
-    value they observed into the result object. As JCStress runs, it will
-    invoke these methods on the objects holding the field once per each actor
-    and instance, and record what results are coming from there.
-
-    Done enough times, we will get the history of observed results, and that
-    would tell us something about the concurrent behavior. For example, running
-    this test would yield:
-
-          [OK] o.o.j.t.JCStressSample_01_IncrementAtomicity
-        (JVM args: [-server])
-      Observed state   Occurrences   Expectation  Interpretation
-                1, 1    54,734,140    ACCEPTABLE  Both threads came up with the same value: atomicity failure.
-                1, 2    47,037,891    ACCEPTABLE  actor1 incremented, then actor2.
-                2, 1    53,204,629    ACCEPTABLE  actor2 incremented, then actor1.
+   How to run this test:
+      $ java -jar jcstress-samples/target/jcstress.jar -t JCStress_APISample_06_Descriptions
  */
 
 @JCStressTest
 
-// These are the test outcomes.
-@Outcome(id = "1, 1", expect = Expect.ACCEPTABLE, desc = "Both actors came up with the same value: atomicity failure.")
+// Optional test description
+@Description("Sample Hello World test")
+
+// Optional references. @Ref is repeatable.
+@Ref("http://openjdk.java.net/projects/code-tools/jcstress/")
+
+@Outcome(id = "1, 1", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: atomicity failure.")
 @Outcome(id = "1, 2", expect = Expect.ACCEPTABLE, desc = "actor1 incremented, then actor2.")
 @Outcome(id = "2, 1", expect = Expect.ACCEPTABLE, desc = "actor2 incremented, then actor1.")
-
-// This is a state object
 @State
-public class JCStressSample_01_IncrementAtomicity {
+public class JCStress_APISample_06_Descriptions {
 
     int v;
 
     @Actor
     public void actor1(IntResult2 r) {
-        r.r1 = ++v; // record result from actor1 to field r1
+        r.r1 = ++v;
     }
 
     @Actor
     public void actor2(IntResult2 r) {
-        r.r2 = ++v; // record result from actor2 to field r2
+        r.r2 = ++v;
     }
 
 }
