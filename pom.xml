@@ -64,6 +64,8 @@ questions.
                             </goals>
                             <configuration>
                                 <finalName>jcstress</finalName>
+                                <shadedArtifactAttached>true</shadedArtifactAttached>
+                                <shadedClassifierName>full</shadedClassifierName>
                                 <transformers>
                                     <transformer
                                             implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
