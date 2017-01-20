@@ -28,8 +28,6 @@ package org.openjdk.jcstress.infra.grading;
 import org.openjdk.jcstress.infra.collectors.InProcessCollector;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 
-import javax.xml.bind.JAXBException;
-import java.io.FileNotFoundException;
 import java.util.*;
 
 /**
@@ -44,12 +42,12 @@ public class ExceptionReportPrinter {
     private final List<String> failures;
     private final InProcessCollector collector;
 
-    public ExceptionReportPrinter(InProcessCollector collector) throws JAXBException, FileNotFoundException {
+    public ExceptionReportPrinter(InProcessCollector collector) {
         this.collector = collector;
         this.failures = new ArrayList<>();
     }
 
-    public void work() throws FileNotFoundException, JAXBException {
+    public void work() {
         List<TestResult> results = ReportUtils.mergedByConfig(collector.getTestResults());
 
         for (TestResult k : results) {
@@ -65,7 +63,7 @@ public class ExceptionReportPrinter {
         }
     }
 
-    public void emitTest(TestResult result) throws FileNotFoundException, JAXBException {
+    public void emitTest(TestResult result) {
         String label = result.getName() + " " + result.getConfig().jvmArgs;
         switch (result.status()) {
             case CHECK_TEST_ERROR:

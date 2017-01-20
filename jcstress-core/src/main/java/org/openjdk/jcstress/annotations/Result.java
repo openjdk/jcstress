@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * useful for user code, because jcstress ships lots of pre-canned result classes,
  * see {@link org.openjdk.jcstress.infra.results} package.
  *
- * <p/>Important invariants and properties:
+ * <p>Important invariants and properties:
  * <ol>
  *     <li>All fields in {@link Result} classes should be public.</li>
  *     <li>All fields in {@link Result} classes shoudl be either primitive, or String.</li>
