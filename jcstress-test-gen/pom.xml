@@ -36,7 +36,7 @@ questions.
     <artifactId>jcstress-test-gen</artifactId>
     <packaging>jar</packaging>
 
-    <name>Tests Generator</name>
+    <name>JCStress Synthetic Tests Generator</name>
     <url>http://maven.apache.org</url>
 
     <properties>

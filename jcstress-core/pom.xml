@@ -36,7 +36,7 @@ questions.
     <artifactId>jcstress-core</artifactId>
     <packaging>jar</packaging>
 
-    <name>Harness Core</name>
+    <name>JCStress Harness Core</name>
     <url>http://maven.apache.org</url>
 
     <scm>
