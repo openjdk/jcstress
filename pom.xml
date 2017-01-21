@@ -206,7 +206,7 @@ questions.
         <module>jcstress-test-gen</module>
         <module>jcstress-core</module>
         <module>jcstress-samples</module>
-        <module>jcstress-test-archetype</module>
+        <module>jcstress-java-test-archetype</module>
         <module>tests-custom</module>
         <module>tests-chapter-0a</module>
         <module>tests-chapter-0b</module>

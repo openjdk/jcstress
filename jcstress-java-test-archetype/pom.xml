@@ -33,7 +33,7 @@ questions.
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jcstress-test-archetype</artifactId>
+    <artifactId>jcstress-java-test-archetype</artifactId>
     <packaging>maven-archetype</packaging>
 
     <name>JCStress Test Archetype: Java</name>
@@ -41,6 +41,14 @@ questions.
     <description>
         Generates JCStress test project.
     </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.openjdk.jcstress</groupId>
+            <artifactId>jcstress-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <extensions>
@@ -55,10 +63,15 @@ questions.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-archetype-plugin</artifactId>
+                <version>2.2</version>
+                <goals>
+                    <goal>integration-test</goal>
+                </goals>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
+                <version>2.6</version>
                 <configuration>
                     <escapeString>\</escapeString>
                   </configuration>
