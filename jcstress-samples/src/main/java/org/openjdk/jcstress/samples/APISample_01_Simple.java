@@ -62,7 +62,7 @@ import org.openjdk.jcstress.infra.results.IntResult2;
 
 // This is a state object
 @State
-public class JCStress_APISample_01_Simple {
+public class APISample_01_Simple {
 
     int v;
 

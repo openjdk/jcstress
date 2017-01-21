@@ -25,48 +25,41 @@
 package org.openjdk.jcstress.samples;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult1;
+import org.openjdk.jcstress.infra.results.IntResult2;
 
 /*
-    Another flavor of the same test as JCStress_APISample_01_Simple is using
-    arbiters. Arbiters run after both actors, and therefore can observe the
-    final result.
+    JCStress also allows to put the descriptions and references right at the test.
+    This helps to identify the goal for the test, as well as the discussions about
+    the behavior in question.
 
-    This allows to directly observe the atomicity failure:
-
-          [OK] org.openjdk.jcstress.samples.JCStress_APISample_02_Arbiters
-        (JVM args: [-server])
-      Observed state   Occurrences              Expectation  Interpretation
-                   1       940,359   ACCEPTABLE_INTERESTING  One update lost: atomicity failure.
-                   2   168,950,601               ACCEPTABLE  Actors updated independently.
-
-    How to run this test:
-       $ java -jar jcstress-samples/target/jcstress.jar -t JCStress_APISample_02_Arbiters
+   How to run this test:
+      $ java -jar jcstress-samples/target/jcstress.jar -t JCStress_APISample_06_Descriptions
  */
 
 @JCStressTest
 
-// These are the test outcomes.
-@Outcome(id = "1", expect = Expect.ACCEPTABLE_INTERESTING, desc = "One update lost: atomicity failure.")
-@Outcome(id = "2", expect = Expect.ACCEPTABLE, desc = "Actors updated independently.")
+// Optional test description
+@Description("Sample Hello World test")
+
+// Optional references. @Ref is repeatable.
+@Ref("http://openjdk.java.net/projects/code-tools/jcstress/")
+
+@Outcome(id = "1, 1", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: atomicity failure.")
+@Outcome(id = "1, 2", expect = Expect.ACCEPTABLE, desc = "actor1 incremented, then actor2.")
+@Outcome(id = "2, 1", expect = Expect.ACCEPTABLE, desc = "actor2 incremented, then actor1.")
 @State
-public class JCStress_APISample_02_Arbiters {
+public class APISample_06_Descriptions {
 
     int v;
 
     @Actor
-    public void actor1() {
-        v++;
+    public void actor1(IntResult2 r) {
+        r.r1 = ++v;
     }
 
     @Actor
-    public void actor2() {
-        v++;
-    }
-
-    @Arbiter
-    public void arbiter(IntResult1 r) {
-        r.r1 = v;
+    public void actor2(IntResult2 r) {
+        r.r2 = ++v;
     }
 
 }

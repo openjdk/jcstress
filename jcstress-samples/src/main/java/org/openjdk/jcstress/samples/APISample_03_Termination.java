@@ -44,7 +44,7 @@ import org.openjdk.jcstress.annotations.*;
 @Outcome(id = "TERMINATED", expect = Expect.ACCEPTABLE, desc = "Gracefully finished.")
 @Outcome(id = "STALE", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Test hung up.")
 @State
-public class JCStress_APISample_03_Termination {
+public class APISample_03_Termination {
 
     int v;
 

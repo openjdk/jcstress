@@ -39,10 +39,10 @@ import org.openjdk.jcstress.infra.results.IntResult2;
 @Outcome(id = "1, 1", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: atomicity failure.")
 @Outcome(id = "1, 2", expect = Expect.ACCEPTABLE, desc = "actor1 incremented, then actor2.")
 @Outcome(id = "2, 1", expect = Expect.ACCEPTABLE, desc = "actor2 incremented, then actor1.")
-public class JCStress_APISample_05_SharedMetadata {
+public class APISample_05_SharedMetadata {
 
     @JCStressTest
-    @JCStressMeta(JCStress_APISample_05_SharedMetadata.class)
+    @JCStressMeta(APISample_05_SharedMetadata.class)
     @State
     public static class PlainTest {
         int v;
@@ -59,7 +59,7 @@ public class JCStress_APISample_05_SharedMetadata {
     }
 
     @JCStressTest
-    @JCStressMeta(JCStress_APISample_05_SharedMetadata.class)
+    @JCStressMeta(APISample_05_SharedMetadata.class)
     @State
     public static class VolatileTest {
         volatile int v;

@@ -35,7 +35,7 @@ import org.openjdk.jcstress.infra.results.IntResult2;
        $ java -jar jcstress-samples/target/jcstress.jar -t JCStress_APISample_04_Nesting
  */
 
-public class JCStress_APISample_04_Nesting {
+public class APISample_04_Nesting {
 
     @JCStressTest
     @Outcome(id = "1, 1", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: atomicity failure.")
