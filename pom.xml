@@ -33,7 +33,36 @@ questions.
     <packaging>pom</packaging>
 
     <name>JCStress Parent</name>
-    <url>http://maven.apache.org</url>
+
+    <description>
+        The Java Concurrency Stress tests (JCStress) is an experimental harness and a suite of tests
+        to aid the research in the correctness of concurrency support in the JVM, class libraries,
+        and hardware.
+    </description>
+
+    <url>
+        http://openjdk.java.net/projects/code-tools/jcstress/
+    </url>
+
+    <scm>
+        <url>http://hg.openjdk.java.net/code-tools/jcstress/</url>
+        <connection>scm:hg:http://hg.openjdk.java.net/code-tools/jcstress/</connection>
+    </scm>
+
+    <licenses>
+        <license>
+            <name>GNU General Public License (GPL), version 2, with the Classpath exception</name>
+            <url>http://openjdk.java.net/legal/gplv2+ce.html</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>shade</id>
+            <name>Aleksey Shipilev</name>
+            <email>shade@redhat.com</email>
+        </developer>
+    </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
