@@ -61,7 +61,7 @@ public class Reflections {
             try {
                 if (name.contains("sun.misc")) continue;
                 if (name.contains("jdk.internal")) continue;
-                newClasses.add(Class.forName(name));
+                newClasses.add(Class.forName(name, false, Reflections.class.getClassLoader()));
             } catch (ClassNotFoundException e) {
                 throw new IllegalStateException(e.getMessage(), e);
             } catch (NoClassDefFoundError e) {
