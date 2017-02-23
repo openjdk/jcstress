@@ -118,6 +118,20 @@ public class Chapter0aTestGenerator {
                 "tearing.arrays.large",
                 new String[]{ "", "volatile" }
         );
+
+        makeTests(
+                dest,
+                GeneratorUtils.readFromResource("/coherence/X-FieldCoherenceTest.java.template"),
+                "coherence.fields",
+                new String[]{ "", "volatile" }
+        );
+
+        makeTests(
+                dest,
+                GeneratorUtils.readFromResource("/coherence/X-ArrayCoherenceTest.java.template"),
+                "coherence.arrays",
+                new String[]{ "", "volatile" }
+        );
     }
 
     private static void makeTests(String dest, String template, String label, String[] modifiers) throws IOException {
@@ -156,6 +170,9 @@ public class Chapter0aTestGenerator {
         if (alwaysAtomic(modifier, type, label)) {
             set.add("alwaysAtomic");
         }
+        if (coherent(modifier, type, label)) {
+            set.add("coherent");
+        }
         set.add(modifier);
         return set;
     }
@@ -163,6 +180,10 @@ public class Chapter0aTestGenerator {
     private static boolean alwaysAtomic(String modifier, String type, String label) {
         return (modifier.equals("volatile") && !label.contains("array")) ||
                 !(type.equals("double") || type.equals("long"));
+    }
+
+    private static boolean coherent(String modifier, String type, String label) {
+        return (modifier.equals("volatile") && !label.contains("array"));
     }
 
     private static String testName(String type) {

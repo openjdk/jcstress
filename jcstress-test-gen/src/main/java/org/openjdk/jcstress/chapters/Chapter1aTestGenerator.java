@@ -73,6 +73,36 @@ public class Chapter1aTestGenerator {
                 GeneratorUtils.readFromResource("/accessAtomic/X-VarHandleDirectByteBufferViewAtomicityTest.java.template"),
                 "accessAtomic.varHandles.byteBuffer.direct"
         );
+
+        makeTests(
+                dest,
+                GeneratorUtils.readFromResource("/coherence/X-VarHandleFieldCoherenceTest.java.template"),
+                "coherence.varHandles.fields"
+        );
+
+        makeTests(
+                dest,
+                GeneratorUtils.readFromResource("/coherence/X-VarHandleArrayCoherenceTest.java.template"),
+                "coherence.varHandles.arrays"
+        );
+
+        makeBufferTests(
+                dest,
+                GeneratorUtils.readFromResource("/coherence/X-VarHandleByteArrayViewCoherenceTest.java.template"),
+                "coherence.varHandles.byteArray"
+        );
+
+        makeBufferTests(
+                dest,
+                GeneratorUtils.readFromResource("/coherence/X-VarHandleHeapByteBufferViewCoherenceTest.java.template"),
+                "coherence.varHandles.byteBuffer.heap"
+        );
+
+        makeBufferTests(
+                dest,
+                GeneratorUtils.readFromResource("/coherence/X-VarHandleDirectByteBufferViewCoherenceTest.java.template"),
+                "coherence.varHandles.byteBuffer.direct"
+        );
     }
 
     private enum VarHandleMode {
@@ -170,6 +200,9 @@ public class Chapter1aTestGenerator {
         if (alwaysAtomic(type, mode)) {
             set.add("alwaysAtomic");
         }
+        if (coherent(type, mode)) {
+            set.add("coherent");
+        }
         return set;
     }
 
@@ -179,6 +212,19 @@ public class Chapter1aTestGenerator {
                 return !(type.equals("double") || type.equals("long"));
             case ACQ_REL:
             case OPAQUE:
+            case VOLATILE:
+                return true;
+            default:
+                throw new IllegalStateException(mode.toString());
+        }
+    }
+
+    private static boolean coherent(String type, VarHandleMode mode) {
+        switch (mode) {
+            case NAKED:
+                return false;
+            case OPAQUE:
+            case ACQ_REL:
             case VOLATILE:
                 return true;
             default:
