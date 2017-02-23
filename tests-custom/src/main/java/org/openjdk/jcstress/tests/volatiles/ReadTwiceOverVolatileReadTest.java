@@ -41,6 +41,7 @@ import org.openjdk.jcstress.infra.results.IntResult3;
 @Outcome(id = "0, 0, 0", expect = Expect.ACCEPTABLE, desc = "Default value for the fields. Observers are allowed to see the default value for the field, because there is the data race between reader and writer.")
 @Outcome(id = "0, 1, 0", expect = Expect.FORBIDDEN,  desc = "Volatile write to $y had happened, and update to $x had been lost.")
 @Outcome(id = "1, 1, 0", expect = Expect.FORBIDDEN,  desc = "Volatile write to $y had happened, and update to $x had been lost.")
+@Outcome(id = "1, 0, 0", expect = Expect.ACCEPTABLE, desc = "Write to $y is still in flight, can see inconsistent $x.")
 @Outcome(id = "0, 0, 1", expect = Expect.ACCEPTABLE, desc = "Write to $y is still in flight, $x is arriving late.")
 @Outcome(id = "1, 0, 1", expect = Expect.ACCEPTABLE, desc = "Write to $y is still in flight, $x has arrived.")
 @Outcome(id = "0, 1, 1", expect = Expect.ACCEPTABLE, desc = "The writes appear the the writers' order.")
