@@ -35,7 +35,7 @@ questions.
     <artifactId>jcstress-tests-chapter-0b</artifactId>
     <packaging>jar</packaging>
 
-    <name>Chapter 0.b: Language Foundations: Sequential Consistency, Volatiles</name>
+    <name>Chapter 0.b: Java: Sequential Consistency, Volatiles</name>
     <url>http://maven.apache.org</url>
 
     <scm>

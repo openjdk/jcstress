@@ -35,7 +35,7 @@ questions.
     <artifactId>jcstress-tests-chapter-1b</artifactId>
     <packaging>jar</packaging>
 
-    <name>Chapter 1.b: Library Foundations: VarHandles, Atomicity</name>
+    <name>Chapter 1.b: VarHandles: Operation Atomicity</name>
     <url>http://maven.apache.org</url>
 
     <scm>

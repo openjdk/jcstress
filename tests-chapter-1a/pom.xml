@@ -35,7 +35,7 @@ questions.
     <artifactId>jcstress-tests-chapter-1a</artifactId>
     <packaging>jar</packaging>
 
-    <name>Chapter 1.a: Library Foundations: VarHandles, Basic Properties</name>
+    <name>Chapter 1.a: VarHandles: Access Atomicity, Word Tearing, Coherence</name>
     <url>http://maven.apache.org</url>
 
     <scm>

@@ -35,7 +35,7 @@ questions.
     <artifactId>jcstress-tests-chapter-0a</artifactId>
     <packaging>jar</packaging>
 
-    <name>Chapter 0.a: Language Foundations: Basic Properties</name>
+    <name>Chapter 0.a: Java: Initial Values, Access Atomicity, Word Tearing, Coherence</name>
     <url>http://maven.apache.org</url>
 
     <scm>

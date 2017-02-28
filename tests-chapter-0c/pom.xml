@@ -35,7 +35,7 @@ questions.
     <artifactId>jcstress-tests-chapter-0c</artifactId>
     <packaging>jar</packaging>
 
-    <name>Chapter 0.c: Language Foundations: Sequential Consistency, Synchronized</name>
+    <name>Chapter 0.c: Java: Sequential Consistency, Synchronized</name>
     <url>http://maven.apache.org</url>
 
     <scm>
