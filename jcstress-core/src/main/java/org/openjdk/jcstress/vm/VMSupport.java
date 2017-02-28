@@ -126,17 +126,13 @@ public class VMSupport {
                     // Tiered C1
                     Arrays.asList("-XX:TieredStopAtLevel=1"),
 
-                    // Non-tiered C1
-                    Arrays.asList("-client"),
-                    Arrays.asList("-client", "-XX:-TieredCompilation"),
+                    // Tiered C1+C2 (default)
+                    Collections.emptyList(),
+                    Arrays.asList("-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM"),
 
-                    // Tiered C2
-                    Arrays.asList("-server"),
-                    Arrays.asList("-server", "-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM"),
-
-                    // Non-tiered C2
-                    Arrays.asList("-server", "-XX:-TieredCompilation"),
-                    Arrays.asList("-server", "-XX:-TieredCompilation", "-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM"));
+                    // Pure, non-tiered C2
+                    Arrays.asList("-XX:-TieredCompilation"),
+                    Arrays.asList("-XX:-TieredCompilation", "-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM"));
         }
 
         System.out.println("Probing what VM modes are available:");
