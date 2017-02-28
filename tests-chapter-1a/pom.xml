@@ -77,7 +77,7 @@ questions.
                             <arguments>
                                 <argument>-jar</argument>
                                 <argument>../jcstress-test-gen/target/chapter1a-generator.jar</argument>
-                                <argument>${project.build.sourceDirectory}/</argument>
+                                <argument>${project.build.directory}/generated-sources/tests/</argument>
                             </arguments>
                         </configuration>
                     </execution>

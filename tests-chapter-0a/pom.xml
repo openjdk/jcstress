@@ -70,8 +70,27 @@ questions.
                             <arguments>
                                 <argument>-jar</argument>
                                 <argument>../jcstress-test-gen/target/chapter0a-generator.jar</argument>
-                                <argument>${project.build.sourceDirectory}/</argument>
+                                <argument>${project.build.directory}/generated-sources/tests/</argument>
                             </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/tests/</source>
+                            </sources>
                         </configuration>
                     </execution>
                 </executions>
