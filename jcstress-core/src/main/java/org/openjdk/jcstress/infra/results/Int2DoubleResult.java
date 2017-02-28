@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, Red Hat Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,39 +29,40 @@ import org.openjdk.jcstress.annotations.Result;
 import java.io.Serializable;
 
 @Result
-public class Bool2ByteResult implements Serializable {
+public class Int2DoubleResult implements Serializable {
 
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
-    public boolean r1;
+    public int r1;
 
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
-    public boolean r2;
+    public int r2;
 
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
-    public byte r3;
+    public double r3;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Bool2ByteResult that = (Bool2ByteResult) o;
+        Int2DoubleResult that = (Int2DoubleResult) o;
 
         if (r1 != that.r1) return false;
         if (r2 != that.r2) return false;
-        if (r3 != that.r3) return false;
-
-        return true;
+        return Double.compare(that.r3, r3) == 0;
     }
 
     @Override
     public int hashCode() {
-        int result = (r1 ? 1 : 0);
-        result = 31 * result + (r2 ? 1 : 0);
-        result = 31 * result + (int) r3;
+        int result;
+        long temp;
+        result = r1;
+        result = 31 * result + r2;
+        temp = Double.doubleToLongBits(r3);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
     }
 

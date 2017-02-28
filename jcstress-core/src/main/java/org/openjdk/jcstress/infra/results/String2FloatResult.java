@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, Red Hat Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,39 +29,37 @@ import org.openjdk.jcstress.annotations.Result;
 import java.io.Serializable;
 
 @Result
-public class Bool2LongResult implements Serializable {
+public class String2FloatResult implements Serializable {
 
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
-    public boolean r1;
+    public String r1;
 
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
-    public boolean r2;
-    
+    public String r2;
+
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
-    public long r3;
+    public float r3;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Bool2LongResult that = (Bool2LongResult) o;
+        String2FloatResult that = (String2FloatResult) o;
 
-        if (r1 != that.r1) return false;
-        if (r2 != that.r2) return false;
-        if (r3 != that.r3) return false;
-
-        return true;
+        if (Float.compare(that.r3, r3) != 0) return false;
+        if (r1 != null ? !r1.equals(that.r1) : that.r1 != null) return false;
+        return r2 != null ? r2.equals(that.r2) : that.r2 == null;
     }
 
     @Override
     public int hashCode() {
-        int result = (r1 ? 1 : 0);
-        result = 31 * result + (r2 ? 1 : 0);
-        result = 31 * result + (int) (r3 ^ (r3 >>> 32));
+        int result = r1 != null ? r1.hashCode() : 0;
+        result = 31 * result + (r2 != null ? r2.hashCode() : 0);
+        result = 31 * result + (r3 != +0.0f ? Float.floatToIntBits(r3) : 0);
         return result;
     }
 

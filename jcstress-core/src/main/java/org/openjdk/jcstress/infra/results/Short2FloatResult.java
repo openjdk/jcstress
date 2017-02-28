@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, Red Hat Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,16 +29,16 @@ import org.openjdk.jcstress.annotations.Result;
 import java.io.Serializable;
 
 @Result
-public class Bool2FloatResult implements Serializable {
+public class Short2FloatResult implements Serializable {
 
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
-    public boolean r1;
+    public short r1;
 
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
-    public boolean r2;
-    
+    public short r2;
+
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
     public float r3;
@@ -48,19 +48,17 @@ public class Bool2FloatResult implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Bool2FloatResult that = (Bool2FloatResult) o;
+        Short2FloatResult that = (Short2FloatResult) o;
 
         if (r1 != that.r1) return false;
         if (r2 != that.r2) return false;
-        if (Float.compare(that.r3, r3) != 0) return false;
-
-        return true;
+        return Float.compare(that.r3, r3) == 0;
     }
 
     @Override
     public int hashCode() {
-        int result = (r1 ? 1 : 0);
-        result = 31 * result + (r2 ? 1 : 0);
+        int result = (int) r1;
+        result = 31 * result + (int) r2;
         result = 31 * result + (r3 != +0.0f ? Float.floatToIntBits(r3) : 0);
         return result;
     }

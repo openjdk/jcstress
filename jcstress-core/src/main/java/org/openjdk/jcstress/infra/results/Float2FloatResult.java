@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, Red Hat Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,40 +29,37 @@ import org.openjdk.jcstress.annotations.Result;
 import java.io.Serializable;
 
 @Result
-public class Bool2DoubleResult implements Serializable {
+public class Float2FloatResult implements Serializable {
 
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
-    public boolean r1;
+    public float r1;
 
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
-    public boolean r2;
-    
+    public float r2;
+
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
-    public double r3;
+    public float r3;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Bool2DoubleResult that = (Bool2DoubleResult) o;
+        Float2FloatResult that = (Float2FloatResult) o;
 
-        if (r1 != that.r1) return false;
-        if (r2 != that.r2) return false;
-        if (Double.compare(that.r3, r3) != 0) return false;
-
-        return true;
+        if (Float.compare(that.r1, r1) != 0) return false;
+        if (Float.compare(that.r2, r2) != 0) return false;
+        return Float.compare(that.r3, r3) == 0;
     }
 
     @Override
     public int hashCode() {
-        int result = (r1 ? 1 : 0);
-        result = 31 * result + (r2 ? 1 : 0);
-        long temp = r3 != +0.0d ? Double.doubleToLongBits(r3) : 0L;
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        int result = (r1 != +0.0f ? Float.floatToIntBits(r1) : 0);
+        result = 31 * result + (r2 != +0.0f ? Float.floatToIntBits(r2) : 0);
+        result = 31 * result + (r3 != +0.0f ? Float.floatToIntBits(r3) : 0);
         return result;
     }
 

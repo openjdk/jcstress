@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, Red Hat Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,16 +29,16 @@ import org.openjdk.jcstress.annotations.Result;
 import java.io.Serializable;
 
 @Result
-public class Bool2IntResult implements Serializable {
+public class Short2IntResult implements Serializable {
 
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
-    public boolean r1;
+    public short r1;
 
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
-    public boolean r2;
-    
+    public short r2;
+
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
     public int r3;
@@ -48,19 +48,17 @@ public class Bool2IntResult implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Bool2IntResult that = (Bool2IntResult) o;
+        Short2IntResult that = (Short2IntResult) o;
 
         if (r1 != that.r1) return false;
         if (r2 != that.r2) return false;
-        if (r3 != that.r3) return false;
-
-        return true;
+        return r3 == that.r3;
     }
 
     @Override
     public int hashCode() {
-        int result = (r1 ? 1 : 0);
-        result = 31 * result + (r2 ? 1 : 0);
+        int result = (int) r1;
+        result = 31 * result + (int) r2;
         result = 31 * result + r3;
         return result;
     }

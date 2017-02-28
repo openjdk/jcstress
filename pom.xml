@@ -251,9 +251,11 @@ questions.
         <module>tests-chapter-0b</module>
         <module>tests-chapter-0c</module>
         <module>tests-chapter-0d</module>
+        <module>tests-chapter-0e</module>
         <module>tests-chapter-1a</module>
         <module>tests-chapter-1b</module>
         <module>tests-chapter-1c</module>
+        <module>tests-chapter-1d</module>
         <module>tests-chapter-2b</module>
         <module>tests-all</module>
     </modules>

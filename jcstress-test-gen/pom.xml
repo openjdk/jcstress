@@ -123,6 +123,22 @@ questions.
                         </configuration>
                     </execution>
                     <execution>
+                        <id>chapter0e-generator</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>chapter0e-generator</finalName>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.openjdk.jcstress.chapters.Chapter0eTestGenerator</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>chapter1a-generator</id>
                         <phase>package</phase>
                         <goals>
@@ -166,6 +182,22 @@ questions.
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.openjdk.jcstress.chapters.Chapter1cTestGenerator</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>chapter1d-generator</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>chapter1d-generator</finalName>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.openjdk.jcstress.chapters.Chapter1dTestGenerator</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

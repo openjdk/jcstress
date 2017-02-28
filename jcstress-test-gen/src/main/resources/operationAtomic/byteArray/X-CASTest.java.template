@@ -37,7 +37,7 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.annotations.Description;
-import org.openjdk.jcstress.infra.results.Bool2$Type$Result;
+import org.openjdk.jcstress.infra.results.*;
 
 
 @JCStressTest
@@ -65,17 +65,17 @@ public class $TestClassName$ {
     byte[] byteArray = new byte[OFF + 8];
 
     @Actor
-    public void actor1(Bool2$Type$Result r) {
+    public void actor1(Boolean2$Type$Result r) {
         r.r1 = %CAS<$valueLiteral0$, $valueLiteral1$>%
     }
 
     @Actor
-    public void actor2(Bool2$Type$Result r) {
+    public void actor2(Boolean2$Type$Result r) {
         r.r2 = %CAS<$valueLiteral0$, $valueLiteral2$>%
     }
 
     @Arbiter
-    public void arbiter1(Bool2$Type$Result r) {
+    public void arbiter1(Boolean2$Type$Result r) {
         r.r3 = ($type$) vh.get(byteArray, OFF);
     }
 

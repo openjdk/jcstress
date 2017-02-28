@@ -29,7 +29,7 @@ import org.openjdk.jcstress.annotations.Result;
 import java.io.Serializable;
 
 @Result
-public class Bool2ShortResult implements Serializable {
+public class Boolean2FloatResult implements Serializable {
 
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
@@ -41,18 +41,18 @@ public class Bool2ShortResult implements Serializable {
 
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
-    public short r3;
+    public float r3;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Bool2ShortResult that = (Bool2ShortResult) o;
+        Boolean2FloatResult that = (Boolean2FloatResult) o;
 
         if (r1 != that.r1) return false;
         if (r2 != that.r2) return false;
-        if (r3 != that.r3) return false;
+        if (Float.compare(that.r3, r3) != 0) return false;
 
         return true;
     }
@@ -61,7 +61,7 @@ public class Bool2ShortResult implements Serializable {
     public int hashCode() {
         int result = (r1 ? 1 : 0);
         result = 31 * result + (r2 ? 1 : 0);
-        result = 31 * result + (int) r3;
+        result = 31 * result + (r3 != +0.0f ? Float.floatToIntBits(r3) : 0);
         return result;
     }
 
