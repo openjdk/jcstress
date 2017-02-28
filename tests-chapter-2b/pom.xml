@@ -32,7 +32,7 @@ questions.
         <artifactId>jcstress-parent</artifactId>
         <version>0.2-SNAPSHOT</version>
     </parent>
-    <artifactId>jcstress-tests-chapter-2a</artifactId>
+    <artifactId>jcstress-tests-chapter-2b</artifactId>
     <packaging>jar</packaging>
 
     <name>Chapter 2.b: Library Foundations: Atomics, Memory Effects</name>

@@ -95,6 +95,11 @@ questions.
         </dependency>
         <dependency>
             <groupId>org.openjdk.jcstress</groupId>
+            <artifactId>jcstress-tests-chapter-0d</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jcstress</groupId>
             <artifactId>jcstress-tests-chapter-1a</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -108,6 +113,10 @@ questions.
             <artifactId>jcstress-tests-chapter-1c</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.openjdk.jcstress</groupId>
+            <artifactId>jcstress-tests-chapter-2b</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>
