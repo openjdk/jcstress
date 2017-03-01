@@ -325,7 +325,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
 
         for (ExecutableElement a : info.getActors()) {
-            pw.println("    OpenAddressHashCounter<" + r + "> counter_" + a.getSimpleName() + ";");
+            pw.println("    Counter<" + r + "> counter_" + a.getSimpleName() + ";");
         }
 
         if (!isStateItself) {
@@ -402,7 +402,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        version = new StateHolder<>(new Pair[0], " + actorsCount + ", config.spinLoopStyle);");
 
         for (ExecutableElement a : info.getActors()) {
-            pw.println("        counter_" + a.getSimpleName() + " = new OpenAddressHashCounter<>();");
+            pw.println("        counter_" + a.getSimpleName() + " = new Counter<>();");
         }
 
 
@@ -424,7 +424,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
         pw.println("        waitFor(tasks);");
         pw.println();
-        pw.println("        Counter<" + r + "> counter = new OpenAddressHashCounter<>();");
+        pw.println("        Counter<" + r + "> counter = new Counter<>();");
         for (ExecutableElement a : info.getActors()) {
             pw.println("        counter.merge(counter_" + a.getSimpleName() + ");");
         }
@@ -432,7 +432,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    }");
         pw.println();
 
-        pw.println("    public final void jcstress_consume(StateHolder<Pair> holder, OpenAddressHashCounter<" + r + "> cnt, int a, int actors) {");
+        pw.println("    public final void jcstress_consume(StateHolder<Pair> holder, Counter<" + r + "> cnt, int a, int actors) {");
         pw.println("        Pair[] pairs = holder.pairs;");
         pw.println("        int len = pairs.length;");
         pw.println("        int left = a * len / actors;");
@@ -507,7 +507,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 pw.println("        " + t + " lt = test;");
             }
 
-            pw.println("        OpenAddressHashCounter<" + r + "> counter = counter_" + a.getSimpleName() + ";");
+            pw.println("        Counter<" + r + "> counter = counter_" + a.getSimpleName() + ";");
 
             pw.println("        while (true) {");
             pw.println("            StateHolder<Pair> holder = version;");
@@ -716,7 +716,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         pw.println("    @Override");
         pw.println("    public void run() {");
-        pw.println("        Counter<Outcome> results = new OpenAddressHashCounter<>();");
+        pw.println("        Counter<Outcome> results = new Counter<>();");
         pw.println();
         pw.println("        for (int c = 0; c < config.iters; c++) {");
         pw.println("            try {");
@@ -897,7 +897,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 ExecutorService.class, Future.class, TimeUnit.class,
                 TestConfig.class, TestResultCollector.class,
                 Runner.class, StateHolder.class, Counter.class,
-                WhiteBoxSupport.class, OpenAddressHashCounter.class, ExecutionException.class
+                WhiteBoxSupport.class, ExecutionException.class
         };
 
         for (Class<?> c : imports) {

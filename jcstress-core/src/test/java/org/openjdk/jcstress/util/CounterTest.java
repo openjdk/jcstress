@@ -3,11 +3,11 @@ package org.openjdk.jcstress.util;
 import junit.framework.Assert;
 import org.junit.Test;
 
-public class OpenAddressHashCounterTest {
+public class CounterTest {
 
     @Test
     public void test1() {
-        Counter<String> cnt = new OpenAddressHashCounter<>();
+        Counter<String> cnt = new Counter<>();
         cnt.record("Foo");
 
         Assert.assertEquals(1, cnt.count("Foo"));
@@ -17,7 +17,7 @@ public class OpenAddressHashCounterTest {
 
     @Test
     public void test2() {
-        Counter<String> cnt = new OpenAddressHashCounter<>();
+        Counter<String> cnt = new Counter<>();
         cnt.record("Foo", 2);
 
         Assert.assertEquals(2, cnt.count("Foo"));
@@ -27,7 +27,7 @@ public class OpenAddressHashCounterTest {
 
     @Test
     public void test3() {
-        Counter<String> cnt = new OpenAddressHashCounter<>();
+        Counter<String> cnt = new Counter<>();
         cnt.record("Foo", 1);
         cnt.record("Bar", 1);
 
@@ -38,7 +38,7 @@ public class OpenAddressHashCounterTest {
 
     @Test
     public void test4() {
-        Counter<String> cnt = new OpenAddressHashCounter<>();
+        Counter<String> cnt = new Counter<>();
         for (int c = 0; c < 1000; c++) {
             cnt.record("Foo" + c, c);
         }
