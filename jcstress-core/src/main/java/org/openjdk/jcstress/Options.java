@@ -162,7 +162,6 @@ public class Options {
         this.maxStride = orDefault(set.valueOf(maxStride), 10000);
         this.maxFootprint = orDefault(set.valueOf(maxFootprint), 100);
         this.testFilter = orDefault(set.valueOf(testFilter), ".*");
-        this.deoptRatio = orDefault(set.valueOf(deoptRatio), 5);
 
         this.parse = orDefault(set.has(parse), false);
         if (this.parse) {
@@ -229,6 +228,7 @@ public class Options {
         this.iters = orDefault(set.valueOf(iters), this.iters);
         this.forks = orDefault(set.valueOf(forks), this.forks);
         this.batchSize = orDefault(set.valueOf(batchSize), this.batchSize);
+        this.deoptRatio = orDefault(set.valueOf(deoptRatio), this.iters * 3);
 
         if (set.hasArgument(optJvmArgs)) {
             try {
