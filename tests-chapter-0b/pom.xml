@@ -55,7 +55,6 @@ questions.
                     <source>1.8</source>
                     <target>1.8</target>
                     <debug>false</debug>
-                    <meminitial>4096</meminitial>
                     <fork>true</fork>
                 </configuration>
             </plugin>
