@@ -69,11 +69,13 @@ public class JCStress {
 
         ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), tests.size(), configs.size());
         DiskWriteCollector diskCollector = new DiskWriteCollector(opts.getResultFile());
-        TestResultCollector sink = MuxCollector.of(printer, diskCollector);
+        TestResultCollector mux = MuxCollector.of(printer, diskCollector);
+        SerializedBufferCollector sink = new SerializedBufferCollector(mux);
 
         TestExecutor executor = new TestExecutor(opts.getUserCPUs(), opts.getBatchSize(), sink, true);
         executor.runAll(configs);
 
+        sink.close();
         diskCollector.close();
 
         out.println();
