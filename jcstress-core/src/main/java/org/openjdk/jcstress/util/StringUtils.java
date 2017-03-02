@@ -25,6 +25,7 @@
 package org.openjdk.jcstress.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -83,4 +84,7 @@ public class StringUtils {
         return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
+    private static boolean hasText(String s) {
+        return (s != null) && !s.isEmpty();
+    }
 }

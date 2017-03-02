@@ -24,8 +24,10 @@
  */
 package org.openjdk.jcstress.vm;
 
-import org.openjdk.jcstress.Main;
+import org.openjdk.jcstress.util.ArrayUtils;
+import org.openjdk.jcstress.util.FileUtils;
 import org.openjdk.jcstress.util.InputStreamDrainer;
+import org.openjdk.jcstress.util.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -34,6 +36,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class VMSupport {
@@ -51,59 +54,63 @@ public class VMSupport {
         System.out.println(" (all failures are non-fatal, but may affect testing accuracy)");
         System.out.println();
 
-        String jarName = new File(Main.class.getProtectionDomain()
-                .getCodeSource().getLocation().getPath()).getPath();
-
-        detect("Adding ourselves to bootclasspath: " + jarName,
-                "-Xbootclasspath/a:" + jarName,
-                PrivilegedTestMain.class);
-
         detect("Unlocking diagnostic VM options",
-                "-XX:+UnlockDiagnosticVMOptions",
-                SimpleTestMain.class);
+                SimpleTestMain.class,
+                "-XX:+UnlockDiagnosticVMOptions"
+        );
 
         detect("Trimming down the number of compiler threads",
-                "-XX:CICompilerCount=4",
-                SimpleTestMain.class);
+                SimpleTestMain.class,
+                "-XX:CICompilerCount=4"
+        );
 
         detect("Trimming down the number of parallel GC threads",
-                "-XX:ParallelGCThreads=4",
-                SimpleTestMain.class);
+                SimpleTestMain.class,
+                "-XX:ParallelGCThreads=4"
+        );
 
         detect("Trimming down the number of concurrent GC threads",
-                "-XX:ConcGCThreads=4",
-                SimpleTestMain.class);
+                SimpleTestMain.class,
+                "-XX:ConcGCThreads=4"
+        );
 
         detect("Trimming down the number of G1 concurrent refinement GC threads",
-                "-XX:G1ConcRefinementThreads=4",
-                SimpleTestMain.class);
+                SimpleTestMain.class,
+                "-XX:G1ConcRefinementThreads=4"
+        );
 
         detect("Testing @Contended works on all results and infra objects",
-                "-XX:-RestrictContended",
-                ContendedTestMain.class);
+                ContendedTestMain.class,
+                "-XX:-RestrictContended"
+        );
 
-        detect("Unlocking Whitebox API for online de-optimization",
-                "-XX:+WhiteBoxAPI",
-                DeoptTestMain.class);
+        try {
+            String whiteBoxJarName = FileUtils.copyFileToTemp("/whitebox-api.jar", "whitebox", ".jar");
+            detect("Unlocking Whitebox API for online de-optimization",
+                    DeoptTestMain.class,
+                    "-XX:+WhiteBoxAPI", "-Xbootclasspath/a:" + whiteBoxJarName
+            );
+        } catch (IOException e) {
+            throw new IllegalStateException("Fatal error: WhiteBoxAPI JAR problems.", e);
+        }
 
         detect("Testing allocation profiling",
-                "",
-                AllocProfileMain.class);
+                AllocProfileMain.class
+        );
 
         THREAD_SPIN_WAIT_AVAILABLE =
                 detect("Trying Thread.onSpinWait",
-                "",
-                ThreadSpinWaitTestMain.class);
+                        ThreadSpinWaitTestMain.class
+                );
 
         System.out.println();
     }
 
-    private static boolean detect(String label, String opt, Class<?> mainClass) {
+    private static boolean detect(String label, Class<?> mainClass, String... opts) {
         try {
-            tryWith(opt, mainClass.getName());
-            if (!opt.isEmpty()) {
-                ADD_JVM_FLAGS.add(opt);
-            }
+            String[] arguments = ArrayUtils.concat(opts, mainClass.getName());
+            tryWith(arguments);
+            ADD_JVM_FLAGS.addAll(Arrays.asList(opts));
             System.out.printf("----- %s %s%n", "[OK]", label);
             return true;
         } catch (VMSupportException ex) {
@@ -271,7 +278,7 @@ public class VMSupport {
 
         @Override
         public void run() {
-            while (!Thread.interrupted()); // burn;
+            while (!Thread.interrupted()) ; // burn;
         }
     }
 

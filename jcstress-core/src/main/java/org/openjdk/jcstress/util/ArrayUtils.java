@@ -24,6 +24,7 @@
  */
 package org.openjdk.jcstress.util;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class ArrayUtils {
@@ -47,6 +48,12 @@ public class ArrayUtils {
             res[i2] = t;
         }
         return res;
+    }
+
+    public static String[] concat(String[] arr, String value) {
+        String[] newS = Arrays.copyOf(arr, arr.length + 1);
+        newS[arr.length] = value;
+        return newS;
     }
 
 }
