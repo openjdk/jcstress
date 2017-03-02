@@ -127,7 +127,7 @@ public abstract class Runner<R> {
 
     public abstract Counter<R> internalRun();
 
-    protected void waitFor(Collection<Future<?>> tasks) {
+    protected <T> void waitFor(Collection<Future<T>> tasks) {
         long startTime = System.nanoTime();
         boolean allStopped = false;
         while (!allStopped) {

@@ -324,10 +324,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("public class " + className + " extends Runner<" + r + "> {");
         pw.println();
 
-        for (ExecutableElement a : info.getActors()) {
-            pw.println("    Counter<" + r + "> counter_" + a.getSimpleName() + ";");
-        }
-
         if (!isStateItself) {
             pw.println("    " + t + " test;");
         }
@@ -401,14 +397,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
         }
         pw.println("        version = new StateHolder<>(new Pair[0], " + actorsCount + ", config.spinLoopStyle);");
 
-        for (ExecutableElement a : info.getActors()) {
-            pw.println("        counter_" + a.getSimpleName() + " = new Counter<>();");
-        }
-
-
         pw.println();
         pw.println("        control.isStopped = false;");
-        pw.println("        Collection<Future<?>> tasks = new ArrayList<>();");
+        pw.println("        Collection<Future<Counter<" + r + ">>> tasks = new ArrayList<>();");
 
         for (ExecutableElement a : info.getActors()) {
             pw.println("        tasks.add(pool.submit(this::" + a.getSimpleName() + "));");
@@ -425,9 +416,13 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        waitFor(tasks);");
         pw.println();
         pw.println("        Counter<" + r + "> counter = new Counter<>();");
-        for (ExecutableElement a : info.getActors()) {
-            pw.println("        counter.merge(counter_" + a.getSimpleName() + ");");
-        }
+        pw.println("        for (Future<Counter<" + r + ">> f : tasks) {");
+        pw.println("            try {");
+        pw.println("                counter.merge(f.get());");
+        pw.println("            } catch (Throwable e) {");
+        pw.println("                throw new IllegalStateException(e);");
+        pw.println("            }");
+        pw.println("        }");
         pw.println("        return counter;");
         pw.println("    }");
         pw.println();
@@ -501,18 +496,18 @@ public class JCStressTestProcessor extends AbstractProcessor {
         int n = 0;
         for (ExecutableElement a : info.getActors()) {
             pw.println();
-            pw.println("    public final Void " + a.getSimpleName() + "() {");
+            pw.println("    public final Counter<" + r + "> " + a.getSimpleName() + "() {");
             pw.println();
             if (!isStateItself) {
                 pw.println("        " + t + " lt = test;");
             }
 
-            pw.println("        Counter<" + r + "> counter = counter_" + a.getSimpleName() + ";");
+            pw.println("        Counter<" + r + "> counter = new Counter<>();");
 
             pw.println("        while (true) {");
             pw.println("            StateHolder<Pair> holder = version;");
             pw.println("            if (holder.stopped) {");
-            pw.println("                return null;");
+            pw.println("                return counter;");
             pw.println("            }");
             pw.println();
             pw.println("            Pair[] pairs = holder.pairs;");
