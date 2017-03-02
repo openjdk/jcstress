@@ -25,7 +25,6 @@
 package org.openjdk.jcstress.vm;
 
 import org.openjdk.jcstress.annotations.Result;
-import org.openjdk.jcstress.infra.runners.StateHolder;
 import org.openjdk.jcstress.util.Reflections;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
@@ -46,7 +45,7 @@ public class ContendedTestMain {
             throw new IllegalStateException("Classes not found");
         }
 
-        Set<Class> infraClasses = Collections.singleton(StateHolder.class);
+        Set<Class> infraClasses = Collections.emptySet();
 
         for (Class<?> cl : classes) {
             if (!infraClasses.contains(cl) && cl.getAnnotation(Result.class) == null) continue;
