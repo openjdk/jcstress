@@ -31,21 +31,51 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class StateHolder<P> {
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
+
+    // ------------------ Final, read-only fields ---------------------
+
+    @sun.misc.Contended("finals")
+    @jdk.internal.vm.annotation.Contended("finals")
     public final boolean stopped;
 
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
+    @sun.misc.Contended("finals")
+    @jdk.internal.vm.annotation.Contended("finals")
     public final P[] pairs;
 
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
+    @sun.misc.Contended("finals")
+    @jdk.internal.vm.annotation.Contended("finals")
     public final int countWorkers;
 
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
+    @sun.misc.Contended("finals")
+    @jdk.internal.vm.annotation.Contended("finals")
     public final SpinLoopStyle spinStyle;
+
+    // --------------------- Write-once fields ------------------------
+    // Threads are busy-waiting on these, let them do it undisturbed.
+
+    @sun.misc.Contended("flags")
+    @jdk.internal.vm.annotation.Contended("flags")
+    private volatile boolean notAllStarted;
+
+    @sun.misc.Contended("flags")
+    @jdk.internal.vm.annotation.Contended("flags")
+    private volatile boolean notAllReady;
+
+    @sun.misc.Contended("flags")
+    @jdk.internal.vm.annotation.Contended("flags")
+    private volatile boolean notAllFinished;
+
+    @sun.misc.Contended("flags")
+    @jdk.internal.vm.annotation.Contended("flags")
+    private volatile boolean notUpdated;
+
+    @sun.misc.Contended("flags")
+    @jdk.internal.vm.annotation.Contended("flags")
+    public volatile boolean updateStride;
+
+    // --------------------- Write-frequent fields ------------------------
+    // Threads are updating them frequently, and they need them completely
+    // separate. Otherwise there are warmup/warmdown lags.
 
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
@@ -62,26 +92,6 @@ public class StateHolder<P> {
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
     private volatile int consumed;
-
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
-    private volatile boolean notAllStarted;
-
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
-    private volatile boolean notAllReady;
-
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
-    private volatile boolean notAllFinished;
-
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
-    private volatile boolean notUpdated;
-
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
-    public volatile boolean updateStride;
 
     static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_STARTED  = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "started");
     static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_READY    = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "ready");
