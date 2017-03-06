@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class StateHolder<P> {
+public class StateHolder<S, R> {
 
     // ------------------ Final, read-only fields ---------------------
 
@@ -40,7 +40,11 @@ public class StateHolder<P> {
 
     @sun.misc.Contended("finals")
     @jdk.internal.vm.annotation.Contended("finals")
-    public final P[] pairs;
+    public final S[] ss;
+
+    @sun.misc.Contended("finals")
+    @jdk.internal.vm.annotation.Contended("finals")
+    public final R[] rs;
 
     @sun.misc.Contended("finals")
     @jdk.internal.vm.annotation.Contended("finals")
@@ -101,17 +105,18 @@ public class StateHolder<P> {
     /**
      * Initial version
      */
-    public StateHolder(P[] pairs, int expectedWorkers, SpinLoopStyle spinStyle) {
-        this(false, pairs, expectedWorkers, spinStyle);
+    public StateHolder(S[] states, R[] results, int expectedWorkers, SpinLoopStyle spinStyle) {
+        this(false, states, results, expectedWorkers, spinStyle);
         updateStride = true;
     }
 
     /**
      * Updated version
      */
-    public StateHolder(boolean stopped, P[] pairs, int expectedWorkers, SpinLoopStyle spinStyle) {
+    public StateHolder(boolean stopped, S[] states, R[] results, int expectedWorkers, SpinLoopStyle spinStyle) {
         this.stopped = stopped;
-        this.pairs = pairs;
+        this.ss = states;
+        this.rs = results;
         this.countWorkers = expectedWorkers;
         this.spinStyle = spinStyle;
         UPDATER_STARTED.set(this, expectedWorkers);
