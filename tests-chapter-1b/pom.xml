@@ -30,7 +30,7 @@ questions.
     <parent>
         <groupId>org.openjdk.jcstress</groupId>
         <artifactId>jcstress-parent</artifactId>
-        <version>0.2-SNAPSHOT</version>
+        <version>0.2</version>
     </parent>
     <artifactId>jcstress-tests-chapter-1b</artifactId>
     <packaging>jar</packaging>
