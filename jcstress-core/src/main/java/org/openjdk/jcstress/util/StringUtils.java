@@ -87,4 +87,18 @@ public class StringUtils {
     private static boolean hasText(String s) {
         return (s != null) && !s.isEmpty();
     }
+
+    public static String join(List<String> list, String delim) {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (String s : list) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append(delim);
+            }
+            sb.append(s);
+        }
+        return sb.toString();
+    }
 }

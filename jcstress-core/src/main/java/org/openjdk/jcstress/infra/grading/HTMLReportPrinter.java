@@ -122,29 +122,7 @@ public class HTMLReportPrinter {
         output.println("<td width=100>");
 
         {
-            SortedMap<String, String> env = new TreeMap<>();
-            for (TestResult result : byName) {
-                if (result != null) {
-                    for (Map.Entry<String, String> kv : result.getEnv().entries().entrySet()) {
-                        String key = kv.getKey();
-                        String value = kv.getValue();
-                        String lastV = env.get(key);
-                        if (lastV == null) {
-                            env.put(key, value);
-                        } else {
-                            // Some VMs have these keys pre-populated with the command line,
-                            // which can have port definitions, PIDs, etc, and naturally
-                            // clash from launch to launch.
-                            if (key.equals("cmdLine")) continue;
-                            if (key.equals("launcher")) continue;
-
-                            if (!lastV.equalsIgnoreCase(value)) {
-                                System.err.println("Mismatched environment for key = " + key + ", was = " + lastV + ", now = " + value);
-                            }
-                        }
-                    }
-                }
-            }
+            SortedMap<String, String> env = getEnv(byName);
 
             output.println("<table>");
             for (Map.Entry<String, String> entry : env.entrySet()) {
@@ -190,6 +168,33 @@ public class HTMLReportPrinter {
         output.close();
 
         emitTestReports(ReportUtils.byName(collector.getTestResults()));
+    }
+
+    private SortedMap<String, String> getEnv(List<TestResult> ts) {
+        SortedMap<String, String> env = new TreeMap<>();
+        for (TestResult result : ts) {
+            if (result != null) {
+                for (Map.Entry<String, String> kv : result.getEnv().entries().entrySet()) {
+                    String key = kv.getKey();
+                    String value = kv.getValue();
+                    String lastV = env.get(key);
+                    if (lastV == null) {
+                        env.put(key, value);
+                    } else {
+                        // Some VMs have these keys pre-populated with the command line,
+                        // which can have port definitions, PIDs, etc, and naturally
+                        // clash from launch to launch.
+                        if (key.equals("cmdLine")) continue;
+                        if (key.equals("launcher")) continue;
+
+                        if (!lastV.equalsIgnoreCase(value)) {
+                            System.err.println("Mismatched environment for key = " + key + ", was = " + lastV + ", now = " + value);
+                        }
+                    }
+                }
+            }
+        }
+        return env;
     }
 
     private void printFooter(PrintWriter output) {
@@ -339,53 +344,100 @@ public class HTMLReportPrinter {
         });
     }
 
-    public void emitTestReport(PrintWriter output, Collection<TestResult> results, TestInfo test) {
-        printHeader(output);
+    public void emitTestReport(PrintWriter o, Collection<TestResult> results, TestInfo test) {
+        printHeader(o);
 
-        output.println("<h1>" + test.name() + "</h1>");
+        o.println("<h1>" + test.name() + "</h1>");
 
-        output.println("<p>" + test.description() + "</p>");
+        o.println("<h3>Description and references</h3>");
+        o.println("<p>" + test.description() + "</p>");
 
-        int rIdx = 1;
         for (String ref : test.refs()) {
-            output.println("<a href=\"" + ref + "\">[" + rIdx + "]</a>");
-            rIdx++;
+            o.println("<p><a href=\"" + ref + "\">" + ref + "</a></p>");
         }
 
-        for (TestResult r : results) {
-            output.println("<p>" + r.getConfig() + "</p>");
+        List<TestResult> sorted = new ArrayList<>(results);
+        sorted.sort(Comparator.comparing((TestResult t) -> StringUtils.join(t.getConfig().jvmArgs, ",")));
 
-            output.println("<table width=100%>");
-            output.println("<tr>");
-            output.println("<th width=250>Observed state</th>");
-            output.println("<th width=50>Occurrence</th>");
-            output.println("<th width=50>Expectation</th>");
-            output.println("<th>Interpretation</th>");
-            output.println("</tr>");
+        o.println("<h3>Environment</h3>");
+        o.println("<table>");
+        for (Map.Entry<String, String> entry : getEnv(sorted).entrySet()) {
+            o.println("<tr>");
+            o.println("<td nowrap>" + entry.getKey() + "</td>");
+            o.println("<td nowrap>" + entry.getValue() + "</td>");
+            o.println("</tr>");
+        }
+        o.println("</table>");
 
-            for (GradingResult c : r.grading().gradingResults) {
-                output.println("<tr bgColor=" + selectHTMLColor(c.expect, c.count == 0) + ">");
-                output.println("<td>" + c.id + "</td>");
-                output.println("<td align=center>" + c.count + "</td>");
-                output.println("<td align=center>" + c.expect + "</td>");
-                output.println("<td>" + c.description + "</td>");
-                output.println("</tr>");
-            }
+        o.println("<h3>Test configurations</h3>");
 
-            output.println("</table>");
+        o.println("<table>");
+        int configs = 0;
+        for (TestResult r : sorted) {
+            o.println("<tr>");
+            o.println("<td nowrap><b>TC " + (configs + 1) + "</b></td>");
+            o.println("<td nowrap>" + r.getConfig() + "</td>");
+            o.println("</tr>");
+            configs++;
+        }
+        o.println("</table>");
 
-            if (!r.getAuxData().isEmpty()) {
-                output.println("<p><b>Auxiliary data</b></p>");
-                output.println("<pre>");
-                for (String data : r.getAuxData()) {
-                    output.println(data);
+        o.println("<h3>Observed states</h3>");
+
+        Set<String> keys = new TreeSet<>();
+        for (TestResult r : sorted) {
+            keys.addAll(r.getStateKeys());
+        }
+
+        o.println("<table width=100% cellpadding=5>");
+        o.println("<tr>");
+        o.println("<th>Observed state</th>");
+        for (int c = 0; c < configs; c++) {
+            o.println("<th nowrap>TC " + (c+1) + "</th>");
+        }
+        o.println("<th>Expectation</th>");
+        o.println("<th>Interpretation</th>");
+        o.println("</tr>");
+
+        for (String key : keys) {
+            o.println("<tr>");
+            o.println("<td align='center'>" + key + "</td>");
+
+            String description = "";
+            Expect expect = null;
+
+            for (TestResult r : sorted) {
+                for (GradingResult c : r.grading().gradingResults) {
+                    if (c.id.equals(key)) {
+                        o.println("<td align='right' width='" + 30D/configs + "%' bgColor=" + selectHTMLColor(c.expect, c.count == 0) + ">" + c.count + "</td>");
+                        description = c.description;
+                        expect = c.expect;
+                    }
                 }
-                output.println("</pre>");
-                output.println();
+            }
+
+            o.println("<td>" + expect + "</td>");
+            o.println("<td>" + description + "</td>");
+            o.println("</tr>");
+        }
+
+        o.println("</table>");
+
+        o.println("<h3>Auxiliary data</h3>");
+
+        for (TestResult r : sorted) {
+            if (!r.getAuxData().isEmpty()) {
+                o.println("<p><b>" + r.getConfig() + "</b></p>");
+                o.println("<pre>");
+                for (String data : r.getAuxData()) {
+                    o.println(data);
+                }
+                o.println("</pre>");
+                o.println();
             }
         }
 
-        printFooter(output);
+        printFooter(o);
     }
 
     public String selectHTMLColor(Expect type, boolean isZero) {
