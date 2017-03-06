@@ -32,7 +32,7 @@ import org.openjdk.jcstress.annotations.Ref;
 @Description("Tests if operations on buffers are atomic.")
 @Outcome(id = "-1082130432",  expect = Expect.ACCEPTABLE,       desc = "Seeing the complete update.")
 @Outcome(id = "0",            expect = Expect.ACCEPTABLE,       desc = "Seeing the default value, this is valid under race.")
-@Outcome(                       expect = Expect.ACCEPTABLE_SPEC,  desc = "All other cases are unexpected, but legal.")
+@Outcome(                     expect = Expect.ACCEPTABLE_INTERESTING,  desc = "All other cases are unexpected, but legal.")
 @Ref("http://cs.oswego.edu/pipermail/concurrency-interest/2012-December/010390.html")
 @Ref("http://mail.openjdk.java.net/pipermail/core-libs-dev/2012-December/013133.html")
 public class GradeFloat {

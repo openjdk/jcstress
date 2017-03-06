@@ -39,8 +39,8 @@ import java.lang.invoke.VarHandle;
 #if[alwaysAtomic]
 @Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
 #else[alwaysAtomic]
-@Outcome(id = "$value0$, .*", expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec, when load var in actor2 before storestore Fence in actor1")
-@Outcome(id = ".*, $value1$", expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec, if r1 is half-value, load var must get a full-value")
+@Outcome(id = "$value0$, .*", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Non-atomic access detected, allowed by spec, when load var in actor2 before storestore Fence in actor1")
+@Outcome(id = ".*, $value1$", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Non-atomic access detected, allowed by spec, if r1 is half-value, load var must get a full-value")
 @Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
 #end[alwaysAtomic]
 @State

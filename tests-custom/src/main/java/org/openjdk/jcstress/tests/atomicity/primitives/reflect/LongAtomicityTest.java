@@ -43,7 +43,7 @@ import java.lang.reflect.Field;
 @JCStressTest
 @Outcome(id = "0",  expect = Expect.ACCEPTABLE, desc = "Default value for the field. Observers are allowed to see the default value for the field, because there is the data race between reader and writer.")
 @Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
-@Outcome(             expect = Expect.ACCEPTABLE_SPEC, desc = "Seeing the torn value. This is specifically allowed by JLS. This is not a surprising behavior on some 32-bit systems which do not have full-width 64-bit instructions.")
+@Outcome(           expect = Expect.ACCEPTABLE_INTERESTING, desc = "Seeing the torn value. This is specifically allowed by JLS. This is not a surprising behavior on some 32-bit systems which do not have full-width 64-bit instructions.")
 @Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
 @State
 public class LongAtomicityTest {

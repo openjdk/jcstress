@@ -75,13 +75,6 @@ public class TextReportPrinter {
         );
 
         printXTests(byConfig,
-                "SPEC tests",
-                "Formally acceptable, but surprising results are observed. Implementations going beyond the minimal requirements should have none.",
-                r -> r.status() == Status.NORMAL && r.grading().hasSpec,
-                true
-        );
-
-        printXTests(byConfig,
                 "FAILED tests",
                 "Strong asserts were violated. Correct implementations should have no assert failures here.",
                 r -> r.status() == Status.NORMAL && !r.grading().isPassed,

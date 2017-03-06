@@ -40,12 +40,6 @@ public enum Expect {
     ACCEPTABLE_INTERESTING,
 
     /**
-     * Same as {@link #ACCEPTABLE}, but this result is only formally acceptable, and may be surprising to end users.
-     * TODO: Fold this with ACCEPTABLE_INTERESTING
-     */
-    ACCEPTABLE_SPEC,
-
-    /**
      * Forbidden result. Should never be present.
      */
     FORBIDDEN,

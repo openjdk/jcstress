@@ -39,7 +39,6 @@ import java.util.*;
 public class TestGrading {
     public boolean isPassed;
     public boolean hasInteresting;
-    public boolean hasSpec;
     public final List<GradingResult> gradingResults;
     public final List<String> failureMessages;
 
@@ -54,7 +53,6 @@ public class TestGrading {
 
         isPassed = true;
         hasInteresting = false;
-        hasSpec = false;
 
         List<StateCase> unmatchedStates = new ArrayList<>();
         unmatchedStates.addAll(test.cases());
@@ -92,7 +90,6 @@ public class TestGrading {
             Expect ex = matched.expect();
             isPassed &= passed(ex, count);
             hasInteresting |= hasInteresting(ex, count);
-            hasSpec |= hasSpec(ex, count);
             failureMessages.add(failureMessage(s, ex, count));
 
             gradingResults.add(new GradingResult(
@@ -108,7 +105,6 @@ public class TestGrading {
             Expect ex = c.expect();
             isPassed &= passed(ex, 0);
             hasInteresting |= hasInteresting(ex, 0);
-            hasSpec |= hasSpec(ex, 0);
             failureMessages.add(failureMessage("N/A", ex, 0));
 
             gradingResults.add(new GradingResult(
@@ -130,7 +126,6 @@ public class TestGrading {
             switch (expect) {
                 case ACCEPTABLE:
                 case ACCEPTABLE_INTERESTING:
-                case ACCEPTABLE_SPEC:
                     return null;
                 case FORBIDDEN:
                     return "Observed forbidden state: " + id;
@@ -146,7 +141,6 @@ public class TestGrading {
         switch (expect) {
             case ACCEPTABLE:
             case ACCEPTABLE_INTERESTING:
-            case ACCEPTABLE_SPEC:
                 return true;
             case FORBIDDEN:
                 return count == 0;
@@ -160,25 +154,9 @@ public class TestGrading {
     private static boolean hasInteresting(Expect expect, long count) {
         switch (expect) {
             case ACCEPTABLE:
-            case ACCEPTABLE_SPEC:
             case FORBIDDEN:
                 return false;
             case ACCEPTABLE_INTERESTING:
-                return count != 0;
-            case UNKNOWN:
-                return false;
-            default:
-                throw new IllegalStateException("No grading for expect type = " + expect);
-        }
-    }
-
-    private static boolean hasSpec(Expect expect, long count) {
-        switch (expect) {
-            case ACCEPTABLE:
-            case ACCEPTABLE_INTERESTING:
-            case FORBIDDEN:
-                return false;
-            case ACCEPTABLE_SPEC:
                 return count != 0;
             case UNKNOWN:
                 return false;

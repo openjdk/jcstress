@@ -30,7 +30,7 @@ import org.openjdk.jcstress.annotations.Ref;
 
 @Outcome(id = "NaN",  expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
 @Outcome(id = "42.0", expect = Expect.ACCEPTABLE, desc = "The observer sees the empty shell. This is a legal JMM behavior, since there is a race between actor and observer.")
-@Outcome(               expect = Expect.ACCEPTABLE_SPEC, desc = "Seeing the torn value. This is specifically allowed by JLS. This is not a surprising behavior on some 32-bit systems which do not have full-width 64-bit instructions.")
+@Outcome(             expect = Expect.ACCEPTABLE_INTERESTING, desc = "Seeing the torn value. This is specifically allowed by JLS. This is not a surprising behavior on some 32-bit systems which do not have full-width 64-bit instructions.")
 @Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
 public class Grading_DoubleShouldSeeFull {
 }

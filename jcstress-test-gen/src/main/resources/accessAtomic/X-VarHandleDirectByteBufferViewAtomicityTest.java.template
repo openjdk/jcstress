@@ -43,7 +43,7 @@ import org.openjdk.jcstress.infra.results.*;
 #if[alwaysAtomic]
 @Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
 #else[alwaysAtomic]
-@Outcome(expect = Expect.ACCEPTABLE_SPEC, desc = "Non-atomic access detected, allowed by spec")
+@Outcome(expect = Expect.ACCEPTABLE_INTERESTING, desc = "Non-atomic access detected, allowed by spec")
 @Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
 #end[alwaysAtomic]
 @State

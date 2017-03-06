@@ -149,11 +149,6 @@ public class HTMLReportPrinter {
                 r -> r.status() != Status.NORMAL && r.status() != Status.API_MISMATCH);
 
         printXTests(byName, output,
-                "SPEC tests",
-                "Formally acceptable, but surprising results are observed. Implementations going beyond the minimal requirements should have none.",
-                r -> r.status() == Status.NORMAL && r.grading().hasSpec);
-
-        printXTests(byName, output,
                 "INTERESTING tests",
                 "Some interesting behaviors observed. This is for the plain curiosity.",
                 r -> r.status() == Status.NORMAL && r.grading().hasInteresting);
@@ -277,11 +272,6 @@ public class HTMLReportPrinter {
             output.println("<td class=\"interesting\">INTERESTING</td>");
         } else {
             output.println("<td class=\"interesting\"></td>");
-        }
-        if (grading.hasSpec) {
-            output.println("<td class=\"spec\">SPEC</td>");
-        } else {
-            output.println("<td class=\"spec\"></td>");
         }
         output.println("<td class=\"passed\"></td>");
         output.println("</tr>");
@@ -453,8 +443,6 @@ public class HTMLReportPrinter {
                 return isZero ? Color.LIGHT_GRAY : Color.RED;
             case ACCEPTABLE_INTERESTING:
                 return isZero ? Color.LIGHT_GRAY : Color.CYAN;
-            case ACCEPTABLE_SPEC:
-                return isZero ? Color.LIGHT_GRAY : Color.YELLOW;
             case UNKNOWN:
                 return Color.RED;
             default:
