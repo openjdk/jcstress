@@ -26,10 +26,8 @@ package org.openjdk.jcstress.infra.collectors;
 
 import org.openjdk.jcstress.util.Environment;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Dumps the test results to the disk.
@@ -39,13 +37,15 @@ import java.io.ObjectOutputStream;
 public class DiskWriteCollector implements TestResultCollector {
 
     private final FileOutputStream fos;
+    private final GZIPOutputStream gos;
     private final ObjectOutputStream oos;
     private int frames;
 
     public DiskWriteCollector(String fileName) throws IOException {
         File file = new File(fileName);
         fos = new FileOutputStream(file);
-        oos = new ObjectOutputStream(fos);
+        gos = new GZIPOutputStream(fos);
+        oos = new ObjectOutputStream(gos);
     }
 
     @Override
@@ -62,6 +62,7 @@ public class DiskWriteCollector implements TestResultCollector {
 
                 oos.writeObject(result);
                 oos.flush();
+                gos.flush();
                 fos.flush();
             } catch (IOException e) {
                 // expect
@@ -71,23 +72,23 @@ public class DiskWriteCollector implements TestResultCollector {
 
     public void close() {
         synchronized (this) {
-            try {
-                oos.flush();
-            } catch (IOException e) {
-                // expect
-            }
+            flushAndClose(oos);
+            flushAndClose(gos);
+            flushAndClose(fos);
+        }
+    }
 
-            try {
-                oos.close();
-            } catch (IOException e) {
-                // expect
-            }
+    private static void flushAndClose(OutputStream stream) {
+        try {
+            stream.flush();
+        } catch (IOException e) {
+            // expect
+        }
 
-            try {
-                fos.flush();
-            } catch (IOException e) {
-                // expect
-            }
+        try {
+            stream.close();
+        } catch (IOException e) {
+            // expect
         }
     }
 }

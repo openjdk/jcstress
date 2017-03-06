@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Reads test state from the file.
@@ -40,12 +41,14 @@ public class DiskReadCollector {
     private final ObjectInputStream ois;
     private final TestResultCollector collector;
     private final FileInputStream fis;
+    private final GZIPInputStream gis;
 
     public DiskReadCollector(String fileName, TestResultCollector collector) throws IOException {
         this.collector = collector;
         File file = new File(fileName);
         fis = new FileInputStream(file);
-        ois = new ObjectInputStream(fis);
+        gis = new GZIPInputStream(fis);
+        ois = new ObjectInputStream(gis);
     }
 
     public void dump() throws IOException, ClassNotFoundException {
@@ -64,6 +67,12 @@ public class DiskReadCollector {
     public void close() {
         try {
             ois.close();
+        } catch (IOException e) {
+            // expected
+        }
+
+        try {
+            gis.close();
         } catch (IOException e) {
             // expected
         }

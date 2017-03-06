@@ -36,8 +36,11 @@ import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Options.
@@ -167,7 +170,8 @@ public class Options {
         if (this.parse) {
             this.resultFile = set.valueOf(parse);
         } else {
-            this.resultFile = "jcstress." + System.currentTimeMillis();
+            String timestamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.ROOT).format(new Date());
+            this.resultFile = "jcstress-results-" + timestamp + ".bin.gz";
         }
         this.list = orDefault(set.has(list), false);
         this.verbose = orDefault(set.has("v"), false);
