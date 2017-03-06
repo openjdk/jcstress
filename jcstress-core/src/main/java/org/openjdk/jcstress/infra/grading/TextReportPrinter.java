@@ -33,9 +33,7 @@ import org.openjdk.jcstress.util.StringUtils;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -61,6 +59,9 @@ public class TextReportPrinter {
         emittedTests.clear();
 
         List<TestResult> byConfig = ReportUtils.mergedByConfig(collector.getTestResults());
+        Collections.sort(byConfig, Comparator
+                .comparing(TestResult::getName)
+                .thenComparing(Comparator.comparing(t -> t.getConfig().jvmArgs.toString())));
 
         pw.println("RUN RESULTS:");
         pw.println("------------------------------------------------------------------------------------------------------------------------");

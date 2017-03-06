@@ -61,6 +61,7 @@ public class HTMLReportPrinter {
 
     public void work() throws FileNotFoundException {
         List<TestResult> byName = ReportUtils.mergedByName(collector.getTestResults());
+        Collections.sort(byName, Comparator.comparing(TestResult::getName));
 
         PrintWriter output = new PrintWriter(resultDir + "/index.html");
 
