@@ -168,7 +168,7 @@ public class ReportUtils {
     }
 
     private static boolean skipMessage(String data) {
-        if (data.startsWith("Warning: 'NoSuchMethodError' on register of sun.hotspot.WhiteBox"))
+        if (data != null && data.startsWith("Warning: 'NoSuchMethodError' on register of sun.hotspot.WhiteBox"))
             return true;
 
         return false;
