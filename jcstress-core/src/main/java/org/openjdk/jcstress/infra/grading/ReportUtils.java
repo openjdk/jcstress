@@ -195,4 +195,19 @@ public class ReportUtils {
                 throw new IllegalStateException("Illegal status: " + result.status());
         }
     }
+
+    public static boolean statusToPassed(TestResult result) {
+        switch (result.status()) {
+            case TIMEOUT_ERROR:
+            case CHECK_TEST_ERROR:
+            case TEST_ERROR:
+            case VM_ERROR:
+            case API_MISMATCH:
+                return false;
+            case NORMAL:
+                return result.grading().isPassed;
+            default:
+                throw new IllegalStateException("Illegal status: " + result.status());
+        }
+    }
 }

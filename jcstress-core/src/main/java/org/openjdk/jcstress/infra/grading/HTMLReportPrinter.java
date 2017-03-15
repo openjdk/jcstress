@@ -411,6 +411,17 @@ public class HTMLReportPrinter {
             o.println("</tr>");
         }
 
+        o.println("<tr>");
+        o.println("<td></td>");
+        for (TestResult r : sorted) {
+            String color = ReportUtils.statusToPassed(r) ? "green" : "red";
+            String label = ReportUtils.statusToLabel(r);
+            o.println("<td align='center' bgColor='" + color + " '>" + label + "</td>");
+        }
+        o.println("<td></td>");
+        o.println("<td></td>");
+        o.println("</tr>");
+
         o.println("</table>");
 
         o.println("<h3>Auxiliary data</h3>");
