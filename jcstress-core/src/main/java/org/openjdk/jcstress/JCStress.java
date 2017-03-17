@@ -54,7 +54,7 @@ public class JCStress {
     }
 
     public void run() throws Exception {
-        VMSupport.detectAvailableVMModes(opts.getJvmArgs());
+        VMSupport.detectAvailableVMModes(opts.getJvmArgs(), opts.getJvmArgsPrepend());
         if (VMSupport.getAvailableVMModes().isEmpty()) {
             out.println("FATAL: No JVM modes to run with.");
             return;

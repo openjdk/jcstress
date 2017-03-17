@@ -120,7 +120,7 @@ public class VMSupport {
         }
     }
 
-    public static void detectAvailableVMModes(Collection<String> jvmArgs) {
+    public static void detectAvailableVMModes(Collection<String> jvmArgs, Collection<String> jvmArgsPrepend) {
         Collection<Collection<String>> modes;
 
         if (jvmArgs != null) {
@@ -140,6 +140,16 @@ public class VMSupport {
                     // Pure, non-tiered C2
                     Arrays.asList("-XX:-TieredCompilation"),
                     Arrays.asList("-XX:-TieredCompilation", "-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM"));
+        }
+
+        // Mix in prepends, if available
+        if (jvmArgsPrepend != null) {
+            modes = modes.stream().map(c -> {
+                Collection<String> l = new ArrayList<>();
+                l.addAll(jvmArgsPrepend);
+                l.addAll(c);
+                return l;
+            }).collect(Collectors.toList());
         }
 
         System.out.println("Probing what VM modes are available:");

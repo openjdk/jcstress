@@ -66,6 +66,7 @@ public class Options {
     private String resultFile;
     private int deoptRatio;
     private Collection<String> jvmArgs;
+    private Collection<String> jvmArgsPrepend;
     private int batchSize;
 
     public Options(String[] args) {
@@ -135,6 +136,11 @@ public class Options {
 
         OptionSpec<String> optJvmArgs = parser.accepts("jvmArgs", "Use given JVM arguments. This disables JVM flags auto-detection, " +
                 "and runs only the single JVM mode. Either a single space-separated option line, or multiple options are accepted. " +
+                "This option only affects forked runs.")
+                .withRequiredArg().ofType(String.class).describedAs("string");
+
+        OptionSpec<String> optJvmArgsPrepend = parser.accepts("jvmArgsPrepend", "Prepend given JVM arguments to auto-detected configurations. " +
+                "Either a single space-separated option line, or multiple options are accepted. " +
                 "This option only affects forked runs.")
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
@@ -234,22 +240,27 @@ public class Options {
         this.batchSize = orDefault(set.valueOf(batchSize), this.batchSize);
         this.deoptRatio = orDefault(set.valueOf(deoptRatio), this.iters * 3);
 
-        if (set.hasArgument(optJvmArgs)) {
-            try {
-                List<String> vals = optJvmArgs.values(set);
-                if (vals.size() != 1) {
-                    jvmArgs = vals;
-                } else {
-                    jvmArgs = StringUtils.splitQuotedEscape(optJvmArgs.value(set));
-                }
-            } catch (OptionException e) {
-                jvmArgs = StringUtils.splitQuotedEscape(optJvmArgs.value(set));
-            }
-        } else {
-            jvmArgs = null;
-        }
+        this.jvmArgs = processArgs(optJvmArgs, set);
+        this.jvmArgsPrepend = processArgs(optJvmArgsPrepend, set);
 
         return true;
+    }
+
+    private Collection<String> processArgs(OptionSpec<String> op, OptionSet set) {
+        if (set.hasArgument(op)) {
+            try {
+                List<String> vals = op.values(set);
+                if (vals.size() != 1) {
+                    return vals;
+                } else {
+                    return StringUtils.splitQuotedEscape(op.value(set));
+                }
+            } catch (OptionException e) {
+                return StringUtils.splitQuotedEscape(op.value(set));
+            }
+        } else {
+            return null;
+        }
     }
 
     private <T> T orDefault(T t, T def) {
@@ -342,6 +353,10 @@ public class Options {
 
     public Collection<String> getJvmArgs() {
         return jvmArgs;
+    }
+
+    public Collection<String> getJvmArgsPrepend() {
+        return jvmArgsPrepend;
     }
 
     public int getMaxFootprintMb() {
