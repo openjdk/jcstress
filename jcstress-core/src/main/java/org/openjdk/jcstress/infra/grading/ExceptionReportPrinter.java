@@ -56,10 +56,11 @@ public class ExceptionReportPrinter {
 
         if (!failures.isEmpty()) {
             StringBuilder sb = new StringBuilder();
+            sb.append(System.lineSeparator());
             for (String f : failures) {
-                sb.append(f).append("\n");
+                sb.append(f).append(System.lineSeparator());
             }
-            throw new AssertionError("TEST FAILURES: \n" + sb.toString());
+            throw new AssertionError("TEST FAILURES: " + sb.toString());
         }
     }
 

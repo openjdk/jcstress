@@ -121,7 +121,7 @@ public class ResultGenerator {
         pw.println("        if (this == o) return true;");
         pw.println("        if (o == null || getClass() != o.getClass()) return false;");
         pw.println();
-        pw.println("        " + name + " that = (" + name + ") o;\n");
+        pw.println("        " + name + " that = (" + name + ") o;");
 
         {
             int n = 1;

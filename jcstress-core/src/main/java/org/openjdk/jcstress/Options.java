@@ -273,12 +273,12 @@ public class Options {
 
     public void printSettingsOn(PrintStream out) {
         out.printf("  Hardware threads in use/available: %d/%d, %s%n", getUserCPUs(), getSystemCPUs(), getSpinStyle());
-        out.printf("  Test preset mode: \"%s\"\n", mode);
-        out.printf("  Writing the test results to \"%s\"\n", resultFile);
-        out.printf("  Parsing results to \"%s\"\n", resultDir);
-        out.printf("  Running each test matching \"%s\" for %d forks, %d iterations, %d ms each\n", getTestFilter(), getForks(), getIterations(), getTime());
-        out.printf("  Each JVM would execute at most %d tests in the row.\n", getBatchSize());
-        out.printf("  Solo stride size will be autobalanced within [%d, %d] elements, but taking no more than %d Mb.\n", getMinStride(), getMaxStride(), getMaxFootprintMb());
+        out.printf("  Test preset mode: \"%s\"%n", mode);
+        out.printf("  Writing the test results to \"%s\"%n", resultFile);
+        out.printf("  Parsing results to \"%s\"%n", resultDir);
+        out.printf("  Running each test matching \"%s\" for %d forks, %d iterations, %d ms each%n", getTestFilter(), getForks(), getIterations(), getTime());
+        out.printf("  Each JVM would execute at most %d tests in the row.%n", getBatchSize());
+        out.printf("  Solo stride size will be autobalanced within [%d, %d] elements, but taking no more than %d Mb.%n", getMinStride(), getMaxStride(), getMaxFootprintMb());
 
         out.println();
     }

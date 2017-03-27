@@ -121,7 +121,7 @@ public class TextReportPrinter {
 
     public void emitTest(TestResult result) {
         emittedTests.add(result);
-        pw.printf("%10s %s\n", "[" + ReportUtils.statusToLabel(result) + "]", StringUtils.chunkName(result.getName()));
+        pw.printf("%10s %s%n", "[" + ReportUtils.statusToLabel(result) + "]", StringUtils.chunkName(result.getName()));
         ReportUtils.printDetails(pw, result, false);
         ReportUtils.printMessages(pw, result);
     }

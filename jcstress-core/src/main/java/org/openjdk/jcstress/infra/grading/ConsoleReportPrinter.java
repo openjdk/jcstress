@@ -123,7 +123,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private void printLine(TestResult r) {
         String label = ReportUtils.statusToLabel(r);
         output.printf("\r%" + progressLen + "s\r", "");
-        output.printf("%10s %s\n", "[" + label + "]", StringUtils.chunkName(r.getName()));
+        output.printf("%10s %s%n", "[" + label + "]", StringUtils.chunkName(r.getName()));
     }
 
     private void printProgress() {

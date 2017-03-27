@@ -36,12 +36,16 @@ public class OptionFormatter implements HelpFormatter {
     public String format(Map<String, ? extends OptionDescriptor> options) {
         StringBuilder sb = new StringBuilder();
         sb.append("Usage: java -jar jcstress.jar [options]");
-        sb.append("\n");
-        sb.append(" [opt] means optional argument.\n");
-        sb.append(" <opt> means required argument.\n");
-        sb.append(" \"+\" means comma-separated list of values.\n");
-        sb.append(" \"time\" arguments accept time suffixes, like \"100ms\".\n");
-        sb.append("\n");
+        sb.append(System.lineSeparator());
+        sb.append(" [opt] means optional argument.");
+        sb.append(System.lineSeparator());
+        sb.append(" <opt> means required argument.");
+        sb.append(System.lineSeparator());
+        sb.append(" \"+\" means comma-separated list of values.");
+        sb.append(System.lineSeparator());
+        sb.append(" \"time\" arguments accept time suffixes, like \"100ms\".");
+        sb.append(System.lineSeparator());
+        sb.append(System.lineSeparator());
         for (OptionDescriptor each : options.values()) {
             if (each.options().contains("hostName")) continue;
             if (each.options().contains("hostPort")) continue;
@@ -53,7 +57,7 @@ public class OptionFormatter implements HelpFormatter {
 
     private Collection<String> rewrap(String lines) {
         Collection<String> result = new ArrayList<>();
-        String[] words = lines.split("[ \n]");
+        String[] words = lines.split("[ \n\r]");
         String line = "";
         int cols = 0;
         for (String w : words) {
@@ -102,7 +106,7 @@ public class OptionFormatter implements HelpFormatter {
             if (first) {
                 first = false;
             } else {
-                line.append("\n");
+                line.append(System.lineSeparator());
                 line.append(String.format("%-30s", ""));
             }
             if (!l.trim().isEmpty()) {
@@ -110,8 +114,8 @@ public class OptionFormatter implements HelpFormatter {
             }
         }
 
-        line.append(System.getProperty("line.separator"));
-        line.append(System.getProperty("line.separator"));
+        line.append(System.lineSeparator());
+        line.append(System.lineSeparator());
         return line.toString();
     }
 
