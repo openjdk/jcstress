@@ -60,7 +60,7 @@ public class $name$ {
     }
 
     @Actor
-    public void actor2($Type$Result1 r) {
+    public void actor2($T$_Result r) {
         r.r1 = ($type$)VH.$getOp$(buf, off);
     }
 

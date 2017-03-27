@@ -45,6 +45,8 @@ public class ResultGenMain {
                 rg.generateResult(c, c, c, c);
                 rg.generateResult(c, c, c, c, c);
                 rg.generateResult(c, c, c, c, c, c);
+                rg.generateResult(c, c, c, c, c, c, c);
+                rg.generateResult(c, c, c, c, c, c, c, c);
             }
 
             for (Class<?> c1 : CLASSES) {

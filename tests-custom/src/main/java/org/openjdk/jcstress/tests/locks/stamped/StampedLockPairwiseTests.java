@@ -31,7 +31,7 @@ import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -54,7 +54,7 @@ public class StampedLockPairwiseTests {
 
         /* ----------------- READ PATTERNS ----------------- */
 
-        public void aRL_U(IntResult2 r) {
+        public void aRL_U(II_Result r) {
             Lock lock = this.lock.asReadLock();
             lock.lock();
             r.r1 = x;
@@ -62,7 +62,7 @@ public class StampedLockPairwiseTests {
             lock.unlock();
         }
 
-        public void aRWLr_U(IntResult2 r) {
+        public void aRWLr_U(II_Result r) {
             Lock lock = this.lock.asReadWriteLock().readLock();
             lock.lock();
             r.r1 = x;
@@ -70,7 +70,7 @@ public class StampedLockPairwiseTests {
             lock.unlock();
         }
 
-        public void RL_tUR(IntResult2 r) {
+        public void RL_tUR(II_Result r) {
             StampedLock lock = this.lock;
             lock.readLock();
             r.r1 = x;
@@ -78,7 +78,7 @@ public class StampedLockPairwiseTests {
             lock.tryUnlockRead();
         }
 
-        public void RL_Us(IntResult2 r) {
+        public void RL_Us(II_Result r) {
             StampedLock lock = this.lock;
             long stamp = lock.readLock();
             r.r1 = x;
@@ -86,7 +86,7 @@ public class StampedLockPairwiseTests {
             lock.unlock(stamp);
         }
 
-        public void RL_URs(IntResult2 r) {
+        public void RL_URs(II_Result r) {
             StampedLock lock = this.lock;
             long stamp = lock.readLock();
             r.r1 = x;
@@ -94,7 +94,7 @@ public class StampedLockPairwiseTests {
             lock.unlockRead(stamp);
         }
 
-        public void RLI_tUR(IntResult2 r) {
+        public void RLI_tUR(II_Result r) {
             try {
             StampedLock lock = this.lock;
             lock.readLockInterruptibly();
@@ -106,7 +106,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void RLI_Us(IntResult2 r) {
+        public void RLI_Us(II_Result r) {
             try {
                 StampedLock lock = this.lock;
                 long stamp = lock.readLockInterruptibly();
@@ -118,7 +118,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void RLI_URs(IntResult2 r) {
+        public void RLI_URs(II_Result r) {
             try {
                 StampedLock lock = this.lock;
                 long stamp = lock.readLockInterruptibly();
@@ -130,7 +130,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void tOR_V(IntResult2 r) {
+        public void tOR_V(II_Result r) {
             StampedLock lock = this.lock;
             int x = 0, y = 0;
             long stamp = lock.tryOptimisticRead();
@@ -146,7 +146,7 @@ public class StampedLockPairwiseTests {
             r.r2 = y;
         }
 
-        public void tRL_tUR(IntResult2 r) {
+        public void tRL_tUR(II_Result r) {
             StampedLock lock = this.lock;
             long stamp = lock.tryReadLock();
             if (stamp != 0) {
@@ -156,7 +156,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void tRL_Us(IntResult2 r) {
+        public void tRL_Us(II_Result r) {
             StampedLock lock = this.lock;
             long stamp = lock.tryReadLock();
             if (stamp != 0) {
@@ -166,7 +166,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void tRL_URs(IntResult2 r) {
+        public void tRL_URs(II_Result r) {
             StampedLock lock = this.lock;
             long stamp = lock.tryReadLock();
             if (stamp != 0) {
@@ -176,7 +176,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void tRLt_tUR(IntResult2 r) {
+        public void tRLt_tUR(II_Result r) {
             try {
                 StampedLock lock = this.lock;
                 long stamp = lock.tryReadLock(1, TimeUnit.SECONDS);
@@ -190,7 +190,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void tRLt_Us(IntResult2 r) {
+        public void tRLt_Us(II_Result r) {
             try {
                 StampedLock lock = this.lock;
                 long stamp = lock.tryReadLock(1, TimeUnit.SECONDS);
@@ -204,7 +204,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void tRLt_URs(IntResult2 r) {
+        public void tRLt_URs(II_Result r) {
             try {
                 StampedLock lock = this.lock;
                 long stamp = lock.tryReadLock(1, TimeUnit.SECONDS);
@@ -220,7 +220,7 @@ public class StampedLockPairwiseTests {
 
         /* ----------------- WRITE PATTERNS ----------------- */
 
-        public void aWL_U(IntResult2 r) {
+        public void aWL_U(II_Result r) {
             Lock lock = this.lock.asWriteLock();
             lock.lock();
             x = 1;
@@ -228,7 +228,7 @@ public class StampedLockPairwiseTests {
             lock.unlock();
         }
 
-        public void aRWLw_U(IntResult2 r) {
+        public void aRWLw_U(II_Result r) {
             Lock lock = this.lock.asReadWriteLock().writeLock();
             lock.lock();
             x = 1;
@@ -236,7 +236,7 @@ public class StampedLockPairwiseTests {
             lock.unlock();
         }
 
-        public void WL_tUW(IntResult2 r) {
+        public void WL_tUW(II_Result r) {
             StampedLock lock = this.lock;
             lock.writeLock();
             x = 1;
@@ -244,7 +244,7 @@ public class StampedLockPairwiseTests {
             lock.tryUnlockWrite();
         }
 
-        public void orWL_V(IntResult2 r) {
+        public void orWL_V(II_Result r) {
             StampedLock lock = this.lock;
             long stamp = lock.readLock();
             try {
@@ -265,7 +265,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void WL_Us(IntResult2 r) {
+        public void WL_Us(II_Result r) {
             StampedLock lock = this.lock;
             long stamp = lock.writeLock();
             x = 1;
@@ -273,7 +273,7 @@ public class StampedLockPairwiseTests {
             lock.unlock(stamp);
         }
 
-        public void WL_UWs(IntResult2 r) {
+        public void WL_UWs(II_Result r) {
             StampedLock lock = this.lock;
             long stamp = lock.writeLock();
             x = 1;
@@ -281,7 +281,7 @@ public class StampedLockPairwiseTests {
             lock.unlockWrite(stamp);
         }
 
-        public void WLI_tUW(IntResult2 r) {
+        public void WLI_tUW(II_Result r) {
             try {
                 StampedLock lock = this.lock;
                 lock.writeLockInterruptibly();
@@ -293,7 +293,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void WLI_Us(IntResult2 r) {
+        public void WLI_Us(II_Result r) {
             try {
                 StampedLock lock = this.lock;
                 long stamp = lock.writeLockInterruptibly();
@@ -305,7 +305,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void WLI_UWs(IntResult2 r) {
+        public void WLI_UWs(II_Result r) {
             try {
                 StampedLock lock = this.lock;
                 long stamp = lock.writeLockInterruptibly();
@@ -317,7 +317,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void tWL_tUW(IntResult2 r) {
+        public void tWL_tUW(II_Result r) {
             StampedLock lock = this.lock;
             long stamp = lock.tryWriteLock();
             if (stamp != 0) {
@@ -327,7 +327,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void tWL_Us(IntResult2 r) {
+        public void tWL_Us(II_Result r) {
             StampedLock lock = this.lock;
             long stamp = lock.tryWriteLock();
             if (stamp != 0) {
@@ -337,7 +337,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void tWL_UWs(IntResult2 r) {
+        public void tWL_UWs(II_Result r) {
             StampedLock lock = this.lock;
             long stamp = lock.tryWriteLock();
             if (stamp != 0) {
@@ -347,7 +347,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void tWLt_tUW(IntResult2 r) {
+        public void tWLt_tUW(II_Result r) {
             try {
                 StampedLock lock = this.lock;
                 long stamp = lock.tryWriteLock(1, TimeUnit.SECONDS);
@@ -361,7 +361,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void tWLt_Us(IntResult2 r) {
+        public void tWLt_Us(II_Result r) {
             try {
                 StampedLock lock = this.lock;
                 long stamp = lock.tryWriteLock(1, TimeUnit.SECONDS);
@@ -375,7 +375,7 @@ public class StampedLockPairwiseTests {
             }
         }
 
-        public void tWLt_UWs(IntResult2 r) {
+        public void tWLt_UWs(II_Result r) {
             try {
                 StampedLock lock = this.lock;
                 long stamp = lock.tryWriteLock(1, TimeUnit.SECONDS);
@@ -398,106 +398,106 @@ public class StampedLockPairwiseTests {
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aWL_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aWL_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aRWLw_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aRWLw_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class orWL_V {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRL_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRL_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.orWL_V(r); }
         }
     }
 
@@ -506,106 +506,106 @@ public class StampedLockPairwiseTests {
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aWL_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aWL_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aRWLw_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aRWLw_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class orWL_V {
-            @Actor public void actor1(S s, IntResult2 r) { s.aRWLr_U(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
+            @Actor public void actor1(S s, II_Result r) { s.aRWLr_U(r); }
+            @Actor public void actor2(S s, II_Result r) { s.orWL_V(r); }
         }
     }
 
@@ -614,106 +614,106 @@ public class StampedLockPairwiseTests {
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aWL_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aWL_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aRWLw_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aRWLw_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class orWL_V {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.orWL_V(r); }
         }
     }
 
@@ -722,106 +722,106 @@ public class StampedLockPairwiseTests {
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aWL_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aWL_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aRWLw_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aRWLw_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class orWL_V {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.orWL_V(r); }
         }
     }
 
@@ -830,106 +830,106 @@ public class StampedLockPairwiseTests {
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aWL_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aWL_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aRWLw_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aRWLw_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class orWL_V {
-            @Actor public void actor1(S s, IntResult2 r) { s.RL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.orWL_V(r); }
         }
     }
 
@@ -938,106 +938,106 @@ public class StampedLockPairwiseTests {
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aWL_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aWL_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aRWLw_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aRWLw_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class orWL_V {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.orWL_V(r); }
         }
     }
 
@@ -1046,106 +1046,106 @@ public class StampedLockPairwiseTests {
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aWL_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aWL_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aRWLw_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aRWLw_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class orWL_V {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.orWL_V(r); }
         }
     }
 
@@ -1154,106 +1154,106 @@ public class StampedLockPairwiseTests {
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aWL_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aWL_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aRWLw_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aRWLw_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class orWL_V {
-            @Actor public void actor1(S s, IntResult2 r) { s.RLI_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
+            @Actor public void actor1(S s, II_Result r) { s.RLI_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.orWL_V(r); }
         }
     }
 
@@ -1262,106 +1262,106 @@ public class StampedLockPairwiseTests {
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aWL_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aWL_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aRWLw_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aRWLw_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class orWL_V {
-            @Actor public void actor1(S s, IntResult2 r) { s.tOR_V(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tOR_V(r); }
+            @Actor public void actor2(S s, II_Result r) { s.orWL_V(r); }
         }
     }
 
@@ -1370,106 +1370,106 @@ public class StampedLockPairwiseTests {
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aWL_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aWL_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aRWLw_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aRWLw_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class orWL_V {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.orWL_V(r); }
         }
     }
 
@@ -1478,106 +1478,106 @@ public class StampedLockPairwiseTests {
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aWL_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aWL_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aRWLw_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aRWLw_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class orWL_V {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.orWL_V(r); }
         }
     }
 
@@ -1586,106 +1586,106 @@ public class StampedLockPairwiseTests {
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aWL_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aWL_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aRWLw_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aRWLw_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class orWL_V {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRL_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRL_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.orWL_V(r); }
         }
     }
 
@@ -1694,106 +1694,106 @@ public class StampedLockPairwiseTests {
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aWL_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aWL_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aRWLw_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aRWLw_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class orWL_V {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_tUR(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_tUR(r); }
+            @Actor public void actor2(S s, II_Result r) { s.orWL_V(r); }
         }
     }
 
@@ -1802,106 +1802,106 @@ public class StampedLockPairwiseTests {
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aWL_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aWL_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aRWLw_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aRWLw_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class orWL_V {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_Us(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_Us(r); }
+            @Actor public void actor2(S s, II_Result r) { s.orWL_V(r); }
         }
     }
 
@@ -1910,106 +1910,106 @@ public class StampedLockPairwiseTests {
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aWL_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aWL_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aWL_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class aRWLw_U {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.aRWLw_U(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.aRWLw_U(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class WLI_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WLI_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WLI_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWL_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.WL_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.WL_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_tUW {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_tUW(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_tUW(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_Us {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_Us(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_Us(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class tWLt_UWs {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.tWLt_UWs(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.tWLt_UWs(r); }
         }
 
         @JCStressTest
         @JCStressMeta(G.class)
         public static class orWL_V {
-            @Actor public void actor1(S s, IntResult2 r) { s.tRLt_URs(r); }
-            @Actor public void actor2(S s, IntResult2 r) { s.orWL_V(r); }
+            @Actor public void actor1(S s, II_Result r) { s.tRLt_URs(r); }
+            @Actor public void actor2(S s, II_Result r) { s.orWL_V(r); }
         }
     }
 

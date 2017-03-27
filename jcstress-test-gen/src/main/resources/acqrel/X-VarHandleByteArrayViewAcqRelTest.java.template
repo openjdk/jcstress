@@ -76,7 +76,7 @@ public class $name$ {
     }
 
     @Actor
-    public void actor2($TypeV$2$TypeG$Result r) {
+    public void actor2($TV$$TV$$TG$_Result r) {
         $typeV$ v1 = v;
         $typeG$ g1 = ($typeG$)VH.$getOp$(g, OFF);
         $typeV$ v2 = v;

@@ -63,17 +63,17 @@ public class $TestClassName$ {
     }
 
     @Actor
-    public void actor1(Boolean2$Type$Result r) {
+    public void actor1(ZZ$T$_Result r) {
         r.r1 = %WeakCAS<$valueLiteral0$, $valueLiteral1$>%
     }
 
     @Actor
-    public void actor2(Boolean2$Type$Result r) {
+    public void actor2(ZZ$T$_Result r) {
         r.r2 = %WeakCAS<$valueLiteral0$, $valueLiteral2$>%
     }
 
     @Arbiter
-    public void arbiter1(Boolean2$Type$Result r) {
+    public void arbiter1(ZZ$T$_Result r) {
         r.r3 = array[0];
     }
 

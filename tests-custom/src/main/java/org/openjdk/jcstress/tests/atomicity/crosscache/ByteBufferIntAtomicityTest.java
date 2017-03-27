@@ -31,7 +31,7 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.Ref;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.ByteResult4;
+import org.openjdk.jcstress.infra.results.BBBB_Result;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -71,12 +71,12 @@ public class ByteBufferIntAtomicityTest {
     }
 
     @Actor
-    public void actor1(ByteResult4 r) {
+    public void actor1(BBBB_Result r) {
         bytes.putInt(offset, 0xFFFFFFFF);
     }
 
     @Actor
-    public void actor2(ByteResult4 r) {
+    public void actor2(BBBB_Result r) {
         int t = bytes.getInt(offset);
         r.r1 = (byte) ((t >> 0) & 0xFF);
         r.r2 = (byte) ((t >> 8) & 0xFF);

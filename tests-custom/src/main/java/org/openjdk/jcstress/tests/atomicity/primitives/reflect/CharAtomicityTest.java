@@ -29,7 +29,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.CharResult1;
+import org.openjdk.jcstress.infra.results.C_Result;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
 
 import java.lang.reflect.Field;
@@ -69,7 +69,7 @@ public class CharAtomicityTest {
     }
 
     @Actor
-    public void actor2(CharResult1 r) {
+    public void actor2(C_Result r) {
         try {
             r.r1 = FIELD.getChar(this) == 0 ? 'N' : 'A';
         } catch (IllegalAccessException e) {

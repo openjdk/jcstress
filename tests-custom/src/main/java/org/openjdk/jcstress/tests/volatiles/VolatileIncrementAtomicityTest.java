@@ -29,7 +29,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 
 /**
  * Tests the atomicity of volatile increment.
@@ -46,12 +46,12 @@ public class VolatileIncrementAtomicityTest {
     volatile int x;
 
     @Actor
-    public void actor1(IntResult2 r) {
+    public void actor1(II_Result r) {
         r.r1 = ++x;
     }
 
     @Actor
-    public void actor2(IntResult2 r) {
+    public void actor2(II_Result r) {
         r.r2 = ++x;
     }
 

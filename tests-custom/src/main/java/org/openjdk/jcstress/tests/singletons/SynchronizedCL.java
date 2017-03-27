@@ -28,7 +28,7 @@ import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult1;
+import org.openjdk.jcstress.infra.results.I_Result;
 
 import java.util.function.Supplier;
 
@@ -48,7 +48,7 @@ public class SynchronizedCL {
         }
 
         @Actor
-        public final void actor2(SynchronizedCLFactory s, IntResult1 r) {
+        public final void actor2(SynchronizedCLFactory s, I_Result r) {
             r.r1 = Singleton.map(s.getInstance(SingletonUnsafe::new));
         }
     }
@@ -62,7 +62,7 @@ public class SynchronizedCL {
         }
 
         @Actor
-        public final void actor2(SynchronizedCLFactory s, IntResult1 r) {
+        public final void actor2(SynchronizedCLFactory s, I_Result r) {
             r.r1 = Singleton.map(s.getInstance(SingletonSafe::new));
         }
     }

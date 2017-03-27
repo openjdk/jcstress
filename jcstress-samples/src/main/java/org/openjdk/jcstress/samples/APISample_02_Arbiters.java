@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.samples;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult1;
+import org.openjdk.jcstress.infra.results.I_Result;
 
 /*
     Another flavor of the same test as JCStress_APISample_01_Simple is using
@@ -65,7 +65,7 @@ public class APISample_02_Arbiters {
     }
 
     @Arbiter
-    public void arbiter(IntResult1 r) {
+    public void arbiter(I_Result r) {
         r.r1 = v;
     }
 

@@ -30,7 +30,7 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.Ref;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult3;
+import org.openjdk.jcstress.infra.results.III_Result;
 
 /**
  * Test if volatile write-read induces happens-before if in between two non-volatile reads.
@@ -60,7 +60,7 @@ public class ReadTwiceOverVolatileReadTest {
     }
 
     @Actor
-    public void actor2(IntResult3 r) {
+    public void actor2(III_Result r) {
         r.r1 = x;
         r.r2 = y;
         r.r3 = x;

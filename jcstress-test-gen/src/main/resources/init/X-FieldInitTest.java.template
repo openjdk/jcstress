@@ -58,7 +58,7 @@ public class $name$ {
     }
 
     @Actor
-    public void actor2($Type$Result1 r) {
+    public void actor2($T$_Result r) {
         Data d = this.data;
         if (d == null) {
             // Pretend we have seen the set value

@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.unsafe;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult3;
+import org.openjdk.jcstress.infra.results.III_Result;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
 /**
@@ -66,7 +66,7 @@ public class UnsafeReadTwiceOverVolatileReadTest {
     }
 
     @Actor
-    public void actor2(IntResult3 r) {
+    public void actor2(III_Result r) {
         r.r1 = x;
         r.r2 = UnsafeHolder.U.getIntVolatile(this, OFFSET);
         r.r3 = x;

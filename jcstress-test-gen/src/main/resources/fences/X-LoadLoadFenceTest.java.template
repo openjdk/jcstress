@@ -25,7 +25,7 @@
 package $package$;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.$Type$Result2;
+import org.openjdk.jcstress.infra.results.$T$$T$_Result;
 
 import java.lang.invoke.VarHandle;
 
@@ -57,7 +57,7 @@ public class $TestClassName$ {
     }
 
     @Actor
-    public void actor2($Type$Result2 r) {
+    public void actor2($T$$T$_Result r) {
         r.r1 = %GetLoadLoadFence%
         r.r2 = x;
     }

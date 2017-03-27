@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.sample;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult4;
+import org.openjdk.jcstress.infra.results.IIII_Result;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 
@@ -39,17 +39,17 @@ public class SampleTest {
     int b;
 
     @Actor
-    public void actor1(IntResult4 r) {
+    public void actor1(IIII_Result r) {
         r.r1 = b;
     }
 
     @Actor
-    public void actor2(IntResult4 r) {
+    public void actor2(IIII_Result r) {
         r.r2 = a;
     }
 
     @Arbiter
-    public void arbiter(IntResult4 r) {
+    public void arbiter(IIII_Result r) {
         r.r3 = a;
         r.r4 = b;
     }

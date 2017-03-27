@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.countdownlatch.effects;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -46,7 +46,7 @@ public class IntBoundedTest {
     }
 
     @Actor
-    public void actor2(IntResult2 r) {
+    public void actor2(II_Result r) {
         try {
             latch.await(1, TimeUnit.DAYS);
             r.r1 = x;

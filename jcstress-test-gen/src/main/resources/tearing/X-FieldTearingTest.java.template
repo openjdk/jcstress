@@ -56,7 +56,7 @@ public class $name$ {
     }
 
     @Arbiter
-    public void arbiter($Type$Result2 r) {
+    public void arbiter($T$$T$_Result r) {
         r.r1 = data.x1;
         r.r2 = data.x2;
     }

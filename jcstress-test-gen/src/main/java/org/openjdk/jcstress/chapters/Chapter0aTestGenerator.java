@@ -154,6 +154,7 @@ public class Chapter0aTestGenerator {
         map.put("type", type);
         map.put("TYPE", type.toUpperCase());
         map.put("Type", StringUtils.upcaseFirst(type));
+        map.put("T", GeneratorUtils.toDescriptor(type));
         map.put("name", name);
         map.put("default", Values.DEFAULTS.get(type));
         map.put("defaultLiteral", Values.DEFAULTS_LITERAL.get(type));

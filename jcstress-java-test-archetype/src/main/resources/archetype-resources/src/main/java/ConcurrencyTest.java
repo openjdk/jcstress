@@ -31,7 +31,7 @@
 package ${groupId};
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 
 // See jcstress-samples or existing tests for API introduction and testing guidelines
 
@@ -42,12 +42,12 @@ import org.openjdk.jcstress.infra.results.IntResult2;
 public class ConcurrencyTest {
 
     @Actor
-    public void actor1(IntResult2 r) {
+    public void actor1(II_Result r) {
         // Put the code for first thread here
     }
 
     @Actor
-    public void actor2(IntResult2 r) {
+    public void actor2(II_Result r) {
         // Put the code for second thread here
     }
 

@@ -30,7 +30,7 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.Ref;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.ByteResult2;
+import org.openjdk.jcstress.infra.results.BB_Result;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
 
 /**
@@ -54,7 +54,7 @@ public class VolatileByteAtomicityTest {
     }
 
     @Actor
-    public void actor2(ByteResult2 r) {
+    public void actor2(BB_Result r) {
         byte b = x;
         r.r1 = (byte)((b >> 0) & 0xF);
         r.r2 = (byte)((b >> 4) & 0xF);

@@ -117,10 +117,10 @@ public class TestGenerator {
         pw.println("import org.openjdk.jcstress.annotations.Expect;");
         pw.println();
         pw.println("@JCStressTest");
-        pw.println("@Outcome(id = \"" + getDefaultValue(types.type(0)) +", " + getDefaultValue(types.type(1)) + "\", expect = Expect.ACCEPTABLE, desc = \"Seeing default guard, can see any value\")");
-        pw.println("@Outcome(id = \"" + getDefaultValue(types.type(0)) +", " + getSetValue(types.type(1)) + "\", expect = Expect.ACCEPTABLE, desc = \"Seeing default guard, can see any value\")");
+        pw.println("@Outcome(id = \"" + getDefaultToString(types.type(0)) +", " + getDefaultToString(types.type(1)) + "\", expect = Expect.ACCEPTABLE, desc = \"Seeing default guard, can see any value\")");
+        pw.println("@Outcome(id = \"" + getDefaultToString(types.type(0)) +", " + getSetValue(types.type(1)) + "\", expect = Expect.ACCEPTABLE, desc = \"Seeing default guard, can see any value\")");
         pw.println("@Outcome(id = \"" + getSetValue(types.type(0)) +", " + getSetValue(types.type(1)) + "\", expect = Expect.ACCEPTABLE, desc = \"Seeing set guard, seeing the updated value\")");
-        pw.println("@Outcome(id = \"" + getSetValue(types.type(0)) +", " + getDefaultValue(types.type(1)) + "\", expect = Expect.FORBIDDEN, desc = \"Seeing set guard, not seeing the updated value\")");
+        pw.println("@Outcome(id = \"" + getSetValue(types.type(0)) +", " + getDefaultToString(types.type(1)) + "\", expect = Expect.FORBIDDEN, desc = \"Seeing set guard, not seeing the updated value\")");
         pw.println("@State");
         pw.println("public class " + klass + " {");
         pw.println();
@@ -154,11 +154,23 @@ public class TestGenerator {
         return null;
     }
 
+    public static String getDefaultToString(Class<?> k) {
+        if (k == boolean.class) return "false";
+        if (k == byte.class)    return "0";
+        if (k == short.class)   return "0";
+        if (k == char.class)    return "\u0000";
+        if (k == int.class)     return "0";
+        if (k == long.class)    return "0";
+        if (k == float.class)   return "0.0";
+        if (k == double.class)  return "0.0";
+        return null;
+    }
+
     public static String getSetValue(Class<?> k) {
         if (k == boolean.class) return "true";
         if (k == byte.class)    return "1";
         if (k == short.class)   return "42";
-        if (k == char.class)    return "65";
+        if (k == char.class)    return "A";
         if (k == int.class)     return "42";
         if (k == long.class)    return "42";
         if (k == float.class)   return "42.0";

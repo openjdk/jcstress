@@ -31,7 +31,7 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.Ref;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult4;
+import org.openjdk.jcstress.infra.results.IIII_Result;
 
 @JCStressTest
 @Description("Tests the IRIW sequential consistency.")
@@ -56,13 +56,13 @@ public class IRIWTest {
     }
 
     @Actor
-    public void actor3(IntResult4 r) {
+    public void actor3(IIII_Result r) {
         r.r1 = x;
         r.r2 = y;
     }
 
     @Actor
-    public void actor4(IntResult4 r) {
+    public void actor4(IIII_Result r) {
         r.r4 = y;
         r.r3 = x;
     }

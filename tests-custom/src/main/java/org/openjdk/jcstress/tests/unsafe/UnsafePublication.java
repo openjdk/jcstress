@@ -30,7 +30,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult1;
+import org.openjdk.jcstress.infra.results.I_Result;
 
 @JCStressTest
 @Description("Tests if unsafe publication is unsafe.")
@@ -63,7 +63,7 @@ public class UnsafePublication {
     }
 
     @Actor
-    public void consume(IntResult1 res) {
+    public void consume(I_Result res) {
         MyObject lo = o;
         if (lo != null) {
             res.r1 = lo.x00 + lo.x01 + lo.x02 + lo.x03;

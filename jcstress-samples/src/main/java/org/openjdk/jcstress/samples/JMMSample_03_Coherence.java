@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.samples;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 
 
 import java.lang.invoke.MethodHandles;
@@ -76,7 +76,7 @@ public class JMMSample_03_Coherence {
         }
 
         @Actor
-        public void actor2(IntResult2 r) {
+        public void actor2(II_Result r) {
             Holder h1 = this.h1;
             Holder h2 = this.h2;
 
@@ -133,7 +133,7 @@ public class JMMSample_03_Coherence {
         }
 
         @Actor
-        public void actor2(IntResult2 r) {
+        public void actor2(II_Result r) {
             Holder h1 = this.h1;
             Holder h2 = this.h2;
 
@@ -191,7 +191,7 @@ public class JMMSample_03_Coherence {
         }
 
         @Actor
-        public void actor2(IntResult2 r) {
+        public void actor2(II_Result r) {
             Holder h1 = this.h1;
             Holder h2 = this.h2;
 

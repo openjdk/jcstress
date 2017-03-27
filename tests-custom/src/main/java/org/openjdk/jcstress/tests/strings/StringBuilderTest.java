@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.strings;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.StringResult1;
+import org.openjdk.jcstress.infra.results.L_Result;
 
 @JCStressTest
 @Description("Tests the StringBuilders are working good under concurrent updates.")
@@ -59,7 +59,7 @@ public class StringBuilderTest {
     }
 
     @Arbiter
-    public void tester(StringResult1 r) {
+    public void tester(L_Result r) {
         try {
             r.r1 = sb.toString();
         } catch (Exception e) {

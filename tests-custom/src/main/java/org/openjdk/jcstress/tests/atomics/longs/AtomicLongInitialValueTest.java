@@ -30,7 +30,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.LongResult1;
+import org.openjdk.jcstress.infra.results.J_Result;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -45,12 +45,12 @@ public class AtomicLongInitialValueTest {
     public AtomicLong ai;
 
     @Actor
-    public void actor1(LongResult1 r) {
+    public void actor1(J_Result r) {
         ai = new AtomicLong(1);
     }
 
     @Actor
-    public void actor2(LongResult1 r) {
+    public void actor2(J_Result r) {
         AtomicLong ai = this.ai;
         r.r1 = (ai == null) ? -1 : ai.get();
     }

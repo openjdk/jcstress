@@ -25,8 +25,8 @@
 package org.openjdk.jcstress.samples;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult1;
-import org.openjdk.jcstress.infra.results.LongResult1;
+import org.openjdk.jcstress.infra.results.I_Result;
+import org.openjdk.jcstress.infra.results.J_Result;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
 import java.lang.invoke.MethodHandles;
@@ -65,7 +65,7 @@ public class JMMSample_01_AccessAtomicity {
         }
 
         @Actor
-        public void reader(IntResult1 r) {
+        public void reader(I_Result r) {
             r.r1 = v;
         }
     }
@@ -103,7 +103,7 @@ public class JMMSample_01_AccessAtomicity {
         }
 
         @Actor
-        public void reader(LongResult1 r) {
+        public void reader(J_Result r) {
             r.r1 = v;
         }
     }
@@ -134,7 +134,7 @@ public class JMMSample_01_AccessAtomicity {
         }
 
         @Actor
-        public void reader(LongResult1 r) {
+        public void reader(J_Result r) {
             r.r1 = v;
         }
     }
@@ -177,7 +177,7 @@ public class JMMSample_01_AccessAtomicity {
         }
 
         @Actor
-        public void reader(LongResult1 r) {
+        public void reader(J_Result r) {
             r.r1 = (long) VH.getOpaque(this);
         }
     }
@@ -228,7 +228,7 @@ public class JMMSample_01_AccessAtomicity {
         }
 
         @Actor
-        public void reader(IntResult1 r) {
+        public void reader(I_Result r) {
             r.r1 = bb.getInt(idx);
         }
     }
@@ -273,7 +273,7 @@ public class JMMSample_01_AccessAtomicity {
         }
 
         @Actor
-        public void reader(IntResult1 r) {
+        public void reader(I_Result r) {
             r.r1 = UnsafeHolder.U.getInt(ss, off);
         }
     }

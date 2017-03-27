@@ -65,17 +65,17 @@ public class $TestClassName$ {
     ByteBuffer byteBuffer = $buffer_allocate$(OFF + 8);
 
     @Actor
-    public void actor1(Boolean2$Type$Result r) {
+    public void actor1(ZZ$T$_Result r) {
         r.r1 = %CAS<$valueLiteral0$, $valueLiteral1$>%
     }
 
     @Actor
-    public void actor2(Boolean2$Type$Result r) {
+    public void actor2(ZZ$T$_Result r) {
         r.r2 = %CAS<$valueLiteral0$, $valueLiteral2$>%
     }
 
     @Arbiter
-    public void arbiter1(Boolean2$Type$Result r) {
+    public void arbiter1(ZZ$T$_Result r) {
         r.r3 = ($type$) vh.get(byteBuffer, OFF);
     }
 

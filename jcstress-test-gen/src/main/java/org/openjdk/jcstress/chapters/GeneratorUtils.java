@@ -74,4 +74,18 @@ public class GeneratorUtils {
     static String upcaseFirst(String s) {
         return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
+
+    public static String toDescriptor(String type) {
+        switch (type) {
+            case "boolean": return "Z";
+            case "byte":    return "B";
+            case "short":   return "S";
+            case "char":    return "C";
+            case "int":     return "I";
+            case "float":   return "F";
+            case "long":    return "J";
+            case "double":  return "D";
+            default:        return "L";
+        }
+    }
 }

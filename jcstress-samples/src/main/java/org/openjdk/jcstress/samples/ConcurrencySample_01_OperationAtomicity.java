@@ -25,8 +25,8 @@
 package org.openjdk.jcstress.samples;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult1;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.I_Result;
+import org.openjdk.jcstress.infra.results.II_Result;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -66,7 +66,7 @@ public class ConcurrencySample_01_OperationAtomicity {
         }
 
         @Arbiter
-        public void arbiter(IntResult1 r) {
+        public void arbiter(I_Result r) {
             r.r1 = v;
         }
     }
@@ -103,7 +103,7 @@ public class ConcurrencySample_01_OperationAtomicity {
         }
 
         @Arbiter
-        public void arbiter(IntResult1 r) {
+        public void arbiter(I_Result r) {
             r.r1 = v;
         }
     }
@@ -138,7 +138,7 @@ public class ConcurrencySample_01_OperationAtomicity {
         }
 
         @Arbiter
-        public void arbiter(IntResult1 r) {
+        public void arbiter(I_Result r) {
             r.r1 = ai.get();
         }
     }

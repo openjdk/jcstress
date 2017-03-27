@@ -85,6 +85,8 @@ public class Chapter0eTestGenerator {
         map.put("TYPEV", typeV.toUpperCase());
         map.put("TypeG", StringUtils.upcaseFirst(typeG));
         map.put("TypeV", StringUtils.upcaseFirst(typeV));
+        map.put("TG", GeneratorUtils.toDescriptor(typeG));
+        map.put("TV", GeneratorUtils.toDescriptor(typeV));
         map.put("name", name);
         map.put("defaultG", Values.DEFAULTS.get(typeG));
         map.put("defaultV", Values.DEFAULTS.get(typeV));

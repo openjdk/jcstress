@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.atomicity.primitives.varhandles;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.LongResult1;
+import org.openjdk.jcstress.infra.results.J_Result;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
 
 import java.lang.invoke.MethodHandles;
@@ -61,7 +61,7 @@ public class LongAtomicityTest {
     }
 
     @Actor
-    public void actor2(LongResult1 r) {
+    public void actor2(J_Result r) {
         r.r1 = (long) VH.getOpaque(this);
     }
 

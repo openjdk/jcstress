@@ -28,7 +28,7 @@ import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult1;
+import org.openjdk.jcstress.infra.results.I_Result;
 import org.openjdk.jcstress.tests.init.Grading_IntShouldSeeFull;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
@@ -54,7 +54,7 @@ public class BooleanFencedTest {
     }
 
     @Actor
-    public void actor2(IntResult1 r) {
+    public void actor2(I_Result r) {
         Shell sh = shell;
         r.r1 = (sh == null) ? 42 : (sh.x ? -1 : 0);
     }

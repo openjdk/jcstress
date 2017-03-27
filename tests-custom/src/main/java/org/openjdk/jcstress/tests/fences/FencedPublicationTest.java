@@ -29,7 +29,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
 /**
@@ -60,7 +60,7 @@ public class FencedPublicationTest {
     }
 
     @Actor
-    public void actor2(IntResult2 r) {
+    public void actor2(II_Result r) {
         int sy, sx;
         Data d = data;
         if (d == null) {

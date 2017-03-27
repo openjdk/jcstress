@@ -48,7 +48,7 @@ public class $name$ {
     }
 
     @Actor
-    public void actor2(IntResult1 r) {
+    public void actor2(I_Result r) {
         $type$[] a = arr;
         if (a == null) {
             r.r1 = -1;

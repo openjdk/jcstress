@@ -50,7 +50,7 @@ public class $name$ {
     }
 
     @Actor
-    public void actor2($Type$Result4 r) {
+    public void actor2($T$$T$$T$$T$_Result r) {
         Data d = this.data;
         if (d == null) {
             // Pretend we have seen the default values

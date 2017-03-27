@@ -30,7 +30,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.ByteResult4;
+import org.openjdk.jcstress.infra.results.BBBB_Result;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
 import java.util.Random;
@@ -73,7 +73,7 @@ public class UnsafeIntAtomicityTest {
     }
 
     @Actor
-    public void actor2(ByteResult4 r) {
+    public void actor2(BBBB_Result r) {
         int t = UnsafeHolder.U.getInt(bytes, offset);
         r.r1 = (byte) ((t >> 0) & 0xFF);
         r.r2 = (byte) ((t >> 8) & 0xFF);

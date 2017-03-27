@@ -52,7 +52,7 @@ import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 
 @JCStressTest
 @JCStressMeta(G.class)
@@ -69,7 +69,7 @@ public class SyncBarrier0Test {
     }
 
     @Actor
-    public void actor2(IntResult2 r) {
+    public void actor2(II_Result r) {
         r.r1 = b;
         r.r2 = a;
     }

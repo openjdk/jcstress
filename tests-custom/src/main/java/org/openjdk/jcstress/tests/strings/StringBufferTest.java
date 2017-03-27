@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.strings;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.StringResult1;
+import org.openjdk.jcstress.infra.results.L_Result;
 
 @JCStressTest
 @Description("Tests the StringBuffers are working good under concurrent updates.")
@@ -50,7 +50,7 @@ public class StringBufferTest {
     }
 
     @Arbiter
-    public void tester(StringResult1 r) {
+    public void tester(L_Result r) {
         r.r1 = sb.toString();
     }
 

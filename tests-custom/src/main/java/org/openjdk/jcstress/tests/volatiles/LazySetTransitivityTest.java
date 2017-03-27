@@ -30,7 +30,7 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.Ref;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult3;
+import org.openjdk.jcstress.infra.results.III_Result;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -54,14 +54,14 @@ public class LazySetTransitivityTest {
     }
 
     @Actor
-    public void actor2(IntResult3 r) {
+    public void actor2(III_Result r) {
         int aValue = a.get();
         b.set(aValue);
         r.r1 = aValue;
     }
 
     @Actor
-    public void actor3(IntResult3 r) {
+    public void actor3(III_Result r) {
         r.r2 = b.get();
         r.r3 = a.get();
     }

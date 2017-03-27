@@ -46,7 +46,7 @@ public class $name$ {
     }
 
     @Actor
-    public void actor2($Type$Result4 r) {
+    public void actor2($T$$T$$T$$T$_Result r) {
         $type$[] a = arr;
         if (a == null) {
             // Pretend we have seen the default values

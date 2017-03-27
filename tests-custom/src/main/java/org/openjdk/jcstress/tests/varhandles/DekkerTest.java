@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.varhandles;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -55,13 +55,13 @@ public class DekkerTest {
     volatile int b;
 
     @Actor
-    public void actor1(IntResult2 r) {
+    public void actor1(II_Result r) {
         VH_A.setVolatile(this, 1);
         r.r1 = (int) VH_B.getVolatile(this);
     }
 
     @Actor
-    public void actor2(IntResult2 r) {
+    public void actor2(II_Result r) {
         VH_B.setVolatile(this, 1);
         r.r2 = (int) VH_A.getVolatile(this);
     }

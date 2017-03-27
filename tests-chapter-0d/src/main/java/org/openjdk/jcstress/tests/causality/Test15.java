@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.causality;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult4;
+import org.openjdk.jcstress.infra.results.IIII_Result;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
@@ -44,7 +44,7 @@ public class Test15 {
     volatile int x, y;
 
     @Actor
-    public void thread1(IntResult4 r) {
+    public void thread1(IIII_Result r) {
         int r1 = x;
         int r2;
         if (r1 == 1) {
@@ -63,7 +63,7 @@ public class Test15 {
     }
 
     @Actor
-    public void thread2(IntResult4 r) {
+    public void thread2(IIII_Result r) {
         int r3, r4;
         do {
             r3 = y;

@@ -29,7 +29,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult3;
+import org.openjdk.jcstress.infra.results.III_Result;
 
 @JCStressTest
 @Outcome(id = "0, 0, 0", expect = Expect.ACCEPTABLE, desc = "Legal: No updates had occured.")
@@ -54,7 +54,7 @@ public class DoubleVolatileTest {
     }
 
     @Actor
-    public void actor2(IntResult3 r) {
+    public void actor2(III_Result r) {
         r.r1 = guard1;
         r.r2 = data;
         r.r3 = guard2;

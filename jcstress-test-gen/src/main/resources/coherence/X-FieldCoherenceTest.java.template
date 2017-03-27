@@ -52,7 +52,7 @@ public class $name$ {
     }
 
     @Actor
-    public void actor2($Type$Result2 r) {
+    public void actor2($T$$T$_Result r) {
         r.r1 = x;
         r.r2 = x;
     }

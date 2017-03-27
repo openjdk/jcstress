@@ -88,6 +88,7 @@ public class Chapter1cTestGenerator {
         Map<String, String> map = new HashMap<>();
         map.put("type", type);
         map.put("Type", upcaseFirst(type));
+        map.put("T", GeneratorUtils.toDescriptor(type));
         map.put("TestClassName", testName);
         map.put("package", pkg);
         map.put("object", object);

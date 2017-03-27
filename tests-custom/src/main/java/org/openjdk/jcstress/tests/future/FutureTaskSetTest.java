@@ -31,7 +31,7 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.Ref;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult1;
+import org.openjdk.jcstress.infra.results.I_Result;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -52,7 +52,7 @@ public class FutureTaskSetTest {
     }
 
     @Actor
-    public void actor2(MyFutureTask s, IntResult1 r) {
+    public void actor2(MyFutureTask s, I_Result r) {
         try {
             Integer key = s.get(1, TimeUnit.HOURS);
             r.r1 = (key == null) ? -1 : key;

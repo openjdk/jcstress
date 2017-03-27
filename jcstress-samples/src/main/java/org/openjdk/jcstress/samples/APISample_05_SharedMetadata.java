@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.samples;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 
 /*
    In many cases, tests share the outcomes and other metadata. To common them,
@@ -48,12 +48,12 @@ public class APISample_05_SharedMetadata {
         int v;
 
         @Actor
-        public void actor1(IntResult2 r) {
+        public void actor1(II_Result r) {
             r.r1 = ++v;
         }
 
         @Actor
-        public void actor2(IntResult2 r) {
+        public void actor2(II_Result r) {
             r.r2 = ++v;
         }
     }
@@ -65,12 +65,12 @@ public class APISample_05_SharedMetadata {
         volatile int v;
 
         @Actor
-        public void actor1(IntResult2 r) {
+        public void actor1(II_Result r) {
             r.r1 = ++v;
         }
 
         @Actor
-        public void actor2(IntResult2 r) {
+        public void actor2(II_Result r) {
             r.r2 = ++v;
         }
     }

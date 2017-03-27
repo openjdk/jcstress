@@ -28,7 +28,7 @@ import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.CharResult1;
+import org.openjdk.jcstress.infra.results.C_Result;
 import org.openjdk.jcstress.tests.init.Grading_CharShouldSeeFull;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
@@ -54,7 +54,7 @@ public class CharFencedTest {
     }
 
     @Actor
-    public void actor2(CharResult1 r) {
+    public void actor2(C_Result r) {
         Shell sh = shell;
         r.r1 = (sh == null) ? 'N' : (char) ('A' + sh.x);
     }

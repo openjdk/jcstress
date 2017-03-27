@@ -28,7 +28,7 @@ import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.LongResult1;
+import org.openjdk.jcstress.infra.results.J_Result;
 import org.openjdk.jcstress.tests.init.Grading_LongShouldSeeFull;
 import org.openjdk.jcstress.util.UnsafeHolder;
 
@@ -54,7 +54,7 @@ public class LongFencedTest {
     }
 
     @Actor
-    public void actor2(LongResult1 r) {
+    public void actor2(J_Result r) {
         Shell sh = shell;
         r.r1 = (sh == null) ? 42 : sh.x;
     }

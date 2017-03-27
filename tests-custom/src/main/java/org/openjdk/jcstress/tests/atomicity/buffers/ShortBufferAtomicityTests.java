@@ -28,7 +28,7 @@ import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.LongResult1;
+import org.openjdk.jcstress.infra.results.J_Result;
 
 import java.nio.ShortBuffer;
 
@@ -47,7 +47,7 @@ public class ShortBufferAtomicityTests {
     @JCStressMeta(GradeInt.class)
     public static class ShortTest {
         @Actor public void actor1(MyState s)                { s.b.put(0, (short)-1);                              }
-        @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = s.b.get();                                   }
+        @Actor public void actor2(MyState s, J_Result r) { r.r1 = s.b.get();                                   }
     }
 
 }

@@ -30,7 +30,7 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.Ref;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
@@ -48,13 +48,13 @@ public class DekkerTest {
     volatile int b;
 
     @Actor
-    public void actor1(IntResult2 r) {
+    public void actor1(II_Result r) {
         a = 1;
         r.r1 = b;
     }
 
     @Actor
-    public void actor2(IntResult2 r) {
+    public void actor2(II_Result r) {
         b = 1;
         r.r2 = a;
     }

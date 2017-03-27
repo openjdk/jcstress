@@ -29,7 +29,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult3;
+import org.openjdk.jcstress.infra.results.III_Result;
 import sun.misc.Contended;
 
 /**
@@ -62,7 +62,7 @@ public class UnfencedReadTwiceTest {
     }
 
     @Actor
-    public void actor2(IntResult3 r) {
+    public void actor2(III_Result r) {
         r.r1 = x;
         r.r2 = y;
         r.r3 = x;

@@ -28,12 +28,7 @@ import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult1;
-import org.openjdk.jcstress.infra.results.IntResult2;
-import org.openjdk.jcstress.infra.results.IntResult4;
-
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
+import org.openjdk.jcstress.infra.results.I_Result;
 
 import static org.openjdk.jcstress.annotations.Expect.*;
 
@@ -77,7 +72,7 @@ public class JMMSample_06_Finals {
         }
 
         @Actor
-        public void actor2(IntResult1 r) {
+        public void actor2(I_Result r) {
             MyObject o = this.o;
             if (o != null) {
                 r.r1 = o.x8 + o.x7 + o.x6 + o.x5 + o.x4 + o.x3 + o.x2 + o.x1;
@@ -130,7 +125,7 @@ public class JMMSample_06_Finals {
         }
 
         @Actor
-        public void actor2(IntResult1 r) {
+        public void actor2(I_Result r) {
             MyObject o = this.o;
             if (o != null) {
                 r.r1 = o.x8 + o.x7 + o.x6 + o.x5 + o.x4 + o.x3 + o.x2 + o.x1;

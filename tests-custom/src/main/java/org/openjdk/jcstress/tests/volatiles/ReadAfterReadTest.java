@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.volatiles;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
@@ -52,7 +52,7 @@ public class ReadAfterReadTest {
     }
 
     @Actor
-    public void actor2(IntResult2 r) {
+    public void actor2(II_Result r) {
         Holder h1 = this.h1;
         Holder h2 = this.h2;
 

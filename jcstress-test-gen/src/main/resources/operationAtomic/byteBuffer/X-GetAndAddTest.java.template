@@ -37,7 +37,7 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.annotations.Description;
-import org.openjdk.jcstress.infra.results.$Type$Result3;
+import org.openjdk.jcstress.infra.results.$T$$T$$T$_Result;
 
 
 @JCStressTest
@@ -63,17 +63,17 @@ public class $TestClassName$ {
     ByteBuffer byteBuffer = $buffer_allocate$(OFF + 8);
 
     @Actor
-    public void actor1($Type$Result3 r) {
+    public void actor1($T$$T$$T$_Result r) {
         r.r1 = ($type$) %GetAndAdd<$valueLiteral1$>%
     }
 
     @Actor
-    public void actor2($Type$Result3 r) {
+    public void actor2($T$$T$$T$_Result r) {
         r.r2 = ($type$) %GetAndAdd<$valueLiteral1$>%
     }
 
     @Arbiter
-    public void arbiter1($Type$Result3 r) {
+    public void arbiter1($T$$T$$T$_Result r) {
         r.r3 = ($type$) vh.get(byteBuffer, OFF);
     }
 

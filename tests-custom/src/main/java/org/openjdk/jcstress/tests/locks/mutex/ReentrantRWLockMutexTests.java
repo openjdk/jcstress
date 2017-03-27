@@ -28,7 +28,7 @@ import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 import org.openjdk.jcstress.tests.locks.BothSucceed;
 import org.openjdk.jcstress.tests.locks.NoOneSucceeds;
 import org.openjdk.jcstress.tests.locks.OneSucceeds;
@@ -145,71 +145,71 @@ public class ReentrantRWLockMutexTests {
         @JCStressTest
         @JCStressMeta(BothSucceed.class)
         public static class LI_LI {
-            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.LI(); }
-            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.LI(); }
+            @Actor public void actor1(I_F_State s, II_Result r) { r.r1 = s.LI(); }
+            @Actor public void actor2(I_F_State s, II_Result r) { r.r2 = s.LI(); }
         }
 
         @JCStressTest
         @JCStressMeta(BothSucceed.class)
         public static class LI_L {
-            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.LI(); }
-            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.L(); }
+            @Actor public void actor1(I_F_State s, II_Result r) { r.r1 = s.LI(); }
+            @Actor public void actor2(I_F_State s, II_Result r) { r.r2 = s.L(); }
         }
 
         @JCStressTest
         @JCStressMeta(OneSucceeds.class)
         public static class LI_TL {
-            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.LI(); }
-            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TL(); }
+            @Actor public void actor1(I_F_State s, II_Result r) { r.r1 = s.LI(); }
+            @Actor public void actor2(I_F_State s, II_Result r) { r.r2 = s.TL(); }
         }
 
         @JCStressTest
         @JCStressMeta(OneSucceeds.class)
         public static class LI_TLt {
-            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.LI(); }
-            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
+            @Actor public void actor1(I_F_State s, II_Result r) { r.r1 = s.LI(); }
+            @Actor public void actor2(I_F_State s, II_Result r) { r.r2 = s.TLt(); }
         }
 
         @JCStressTest
         @JCStressMeta(BothSucceed.class)
         public static class L_L {
-            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.L(); }
-            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.L(); }
+            @Actor public void actor1(I_F_State s, II_Result r) { r.r1 = s.L(); }
+            @Actor public void actor2(I_F_State s, II_Result r) { r.r2 = s.L(); }
         }
 
         @JCStressTest
         @JCStressMeta(OneSucceeds.class)
         public static class L_TL {
-            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.L(); }
-            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TL(); }
+            @Actor public void actor1(I_F_State s, II_Result r) { r.r1 = s.L(); }
+            @Actor public void actor2(I_F_State s, II_Result r) { r.r2 = s.TL(); }
         }
 
         @JCStressTest
         @JCStressMeta(OneSucceeds.class)
         public static class L_TLt {
-            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.L(); }
-            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
+            @Actor public void actor1(I_F_State s, II_Result r) { r.r1 = s.L(); }
+            @Actor public void actor2(I_F_State s, II_Result r) { r.r2 = s.TLt(); }
         }
 
         @JCStressTest
         @JCStressMeta(NoOneSucceeds.class)
         public static class TL_TL {
-            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.TL(); }
-            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TL(); }
+            @Actor public void actor1(I_F_State s, II_Result r) { r.r1 = s.TL(); }
+            @Actor public void actor2(I_F_State s, II_Result r) { r.r2 = s.TL(); }
         }
 
         @JCStressTest
         @JCStressMeta(NoOneSucceeds.class)
         public static class TL_TLt {
-            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.TL(); }
-            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
+            @Actor public void actor1(I_F_State s, II_Result r) { r.r1 = s.TL(); }
+            @Actor public void actor2(I_F_State s, II_Result r) { r.r2 = s.TLt(); }
         }
 
         @JCStressTest
         @JCStressMeta(NoOneSucceeds.class)
         public static class TLt_TLt {
-            @Actor public void actor1(I_F_State s, IntResult2 r) { r.r1 = s.TLt(); }
-            @Actor public void actor2(I_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
+            @Actor public void actor1(I_F_State s, II_Result r) { r.r1 = s.TLt(); }
+            @Actor public void actor2(I_F_State s, II_Result r) { r.r2 = s.TLt(); }
         }
     }
 
@@ -218,71 +218,71 @@ public class ReentrantRWLockMutexTests {
         @JCStressTest
         @JCStressMeta(BothSucceed.class)
         public static class LI_LI {
-            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.LI(); }
-            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.LI(); }
+            @Actor public void actor1(I_N_State s, II_Result r) { r.r1 = s.LI(); }
+            @Actor public void actor2(I_N_State s, II_Result r) { r.r2 = s.LI(); }
         }
 
         @JCStressTest
         @JCStressMeta(BothSucceed.class)
         public static class LI_L {
-            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.LI(); }
-            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.L(); }
+            @Actor public void actor1(I_N_State s, II_Result r) { r.r1 = s.LI(); }
+            @Actor public void actor2(I_N_State s, II_Result r) { r.r2 = s.L(); }
         }
 
         @JCStressTest
         @JCStressMeta(OneSucceeds.class)
         public static class LI_TL {
-            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.LI(); }
-            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TL(); }
+            @Actor public void actor1(I_N_State s, II_Result r) { r.r1 = s.LI(); }
+            @Actor public void actor2(I_N_State s, II_Result r) { r.r2 = s.TL(); }
         }
 
         @JCStressTest
         @JCStressMeta(OneSucceeds.class)
         public static class LI_TLt {
-            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.LI(); }
-            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
+            @Actor public void actor1(I_N_State s, II_Result r) { r.r1 = s.LI(); }
+            @Actor public void actor2(I_N_State s, II_Result r) { r.r2 = s.TLt(); }
         }
 
         @JCStressTest
         @JCStressMeta(BothSucceed.class)
         public static class L_L {
-            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.L(); }
-            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.L(); }
+            @Actor public void actor1(I_N_State s, II_Result r) { r.r1 = s.L(); }
+            @Actor public void actor2(I_N_State s, II_Result r) { r.r2 = s.L(); }
         }
 
         @JCStressTest
         @JCStressMeta(OneSucceeds.class)
         public static class L_TL {
-            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.L(); }
-            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TL(); }
+            @Actor public void actor1(I_N_State s, II_Result r) { r.r1 = s.L(); }
+            @Actor public void actor2(I_N_State s, II_Result r) { r.r2 = s.TL(); }
         }
 
         @JCStressTest
         @JCStressMeta(OneSucceeds.class)
         public static class L_TLt {
-            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.L(); }
-            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
+            @Actor public void actor1(I_N_State s, II_Result r) { r.r1 = s.L(); }
+            @Actor public void actor2(I_N_State s, II_Result r) { r.r2 = s.TLt(); }
         }
 
         @JCStressTest
         @JCStressMeta(NoOneSucceeds.class)
         public static class TL_TL {
-            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.TL(); }
-            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TL(); }
+            @Actor public void actor1(I_N_State s, II_Result r) { r.r1 = s.TL(); }
+            @Actor public void actor2(I_N_State s, II_Result r) { r.r2 = s.TL(); }
         }
 
         @JCStressTest
         @JCStressMeta(NoOneSucceeds.class)
         public static class TL_TLt {
-            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.TL(); }
-            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
+            @Actor public void actor1(I_N_State s, II_Result r) { r.r1 = s.TL(); }
+            @Actor public void actor2(I_N_State s, II_Result r) { r.r2 = s.TLt(); }
         }
 
         @JCStressTest
         @JCStressMeta(NoOneSucceeds.class)
         public static class TLt_TLt {
-            @Actor public void actor1(I_N_State s, IntResult2 r) { r.r1 = s.TLt(); }
-            @Actor public void actor2(I_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
+            @Actor public void actor1(I_N_State s, II_Result r) { r.r1 = s.TLt(); }
+            @Actor public void actor2(I_N_State s, II_Result r) { r.r2 = s.TLt(); }
         }
     }
 
@@ -291,71 +291,71 @@ public class ReentrantRWLockMutexTests {
         @JCStressTest
         @JCStressMeta(BothSucceed.class)
         public static class LI_LI {
-            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.LI(); }
-            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.LI(); }
+            @Actor public void actor1(S_N_State s, II_Result r) { r.r1 = s.LI(); }
+            @Actor public void actor2(S_N_State s, II_Result r) { r.r2 = s.LI(); }
         }
 
         @JCStressTest
         @JCStressMeta(BothSucceed.class)
         public static class LI_L {
-            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.LI(); }
-            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.L(); }
+            @Actor public void actor1(S_N_State s, II_Result r) { r.r1 = s.LI(); }
+            @Actor public void actor2(S_N_State s, II_Result r) { r.r2 = s.L(); }
         }
 
         @JCStressTest
         @JCStressMeta(OneSucceeds.class)
         public static class LI_TL {
-            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.LI(); }
-            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TL(); }
+            @Actor public void actor1(S_N_State s, II_Result r) { r.r1 = s.LI(); }
+            @Actor public void actor2(S_N_State s, II_Result r) { r.r2 = s.TL(); }
         }
 
         @JCStressTest
         @JCStressMeta(OneSucceeds.class)
         public static class LI_TLt {
-            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.LI(); }
-            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
+            @Actor public void actor1(S_N_State s, II_Result r) { r.r1 = s.LI(); }
+            @Actor public void actor2(S_N_State s, II_Result r) { r.r2 = s.TLt(); }
         }
 
         @JCStressTest
         @JCStressMeta(BothSucceed.class)
         public static class L_L {
-            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.L(); }
-            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.L(); }
+            @Actor public void actor1(S_N_State s, II_Result r) { r.r1 = s.L(); }
+            @Actor public void actor2(S_N_State s, II_Result r) { r.r2 = s.L(); }
         }
 
         @JCStressTest
         @JCStressMeta(OneSucceeds.class)
         public static class L_TL {
-            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.L(); }
-            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TL(); }
+            @Actor public void actor1(S_N_State s, II_Result r) { r.r1 = s.L(); }
+            @Actor public void actor2(S_N_State s, II_Result r) { r.r2 = s.TL(); }
         }
 
         @JCStressTest
         @JCStressMeta(OneSucceeds.class)
         public static class L_TLt {
-            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.L(); }
-            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
+            @Actor public void actor1(S_N_State s, II_Result r) { r.r1 = s.L(); }
+            @Actor public void actor2(S_N_State s, II_Result r) { r.r2 = s.TLt(); }
         }
 
         @JCStressTest
         @JCStressMeta(NoOneSucceeds.class)
         public static class TL_TL {
-            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.TL(); }
-            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TL(); }
+            @Actor public void actor1(S_N_State s, II_Result r) { r.r1 = s.TL(); }
+            @Actor public void actor2(S_N_State s, II_Result r) { r.r2 = s.TL(); }
         }
 
         @JCStressTest
         @JCStressMeta(NoOneSucceeds.class)
         public static class TL_TLt {
-            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.TL(); }
-            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
+            @Actor public void actor1(S_N_State s, II_Result r) { r.r1 = s.TL(); }
+            @Actor public void actor2(S_N_State s, II_Result r) { r.r2 = s.TLt(); }
         }
 
         @JCStressTest
         @JCStressMeta(NoOneSucceeds.class)
         public static class TLt_TLt {
-            @Actor public void actor1(S_N_State s, IntResult2 r) { r.r1 = s.TLt(); }
-            @Actor public void actor2(S_N_State s, IntResult2 r) { r.r2 = s.TLt(); }
+            @Actor public void actor1(S_N_State s, II_Result r) { r.r1 = s.TLt(); }
+            @Actor public void actor2(S_N_State s, II_Result r) { r.r2 = s.TLt(); }
         }
     }
 
@@ -364,71 +364,71 @@ public class ReentrantRWLockMutexTests {
         @JCStressTest
         @JCStressMeta(BothSucceed.class)
         public static class LI_LI {
-            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.LI(); }
-            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.LI(); }
+            @Actor public void actor1(S_F_State s, II_Result r) { r.r1 = s.LI(); }
+            @Actor public void actor2(S_F_State s, II_Result r) { r.r2 = s.LI(); }
         }
 
         @JCStressTest
         @JCStressMeta(BothSucceed.class)
         public static class LI_L {
-            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.LI(); }
-            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.L(); }
+            @Actor public void actor1(S_F_State s, II_Result r) { r.r1 = s.LI(); }
+            @Actor public void actor2(S_F_State s, II_Result r) { r.r2 = s.L(); }
         }
 
         @JCStressTest
         @JCStressMeta(OneSucceeds.class)
         public static class LI_TL {
-            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.LI(); }
-            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TL(); }
+            @Actor public void actor1(S_F_State s, II_Result r) { r.r1 = s.LI(); }
+            @Actor public void actor2(S_F_State s, II_Result r) { r.r2 = s.TL(); }
         }
 
         @JCStressTest
         @JCStressMeta(OneSucceeds.class)
         public static class LI_TLt {
-            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.LI(); }
-            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
+            @Actor public void actor1(S_F_State s, II_Result r) { r.r1 = s.LI(); }
+            @Actor public void actor2(S_F_State s, II_Result r) { r.r2 = s.TLt(); }
         }
 
         @JCStressTest
         @JCStressMeta(BothSucceed.class)
         public static class L_L {
-            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.L(); }
-            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.L(); }
+            @Actor public void actor1(S_F_State s, II_Result r) { r.r1 = s.L(); }
+            @Actor public void actor2(S_F_State s, II_Result r) { r.r2 = s.L(); }
         }
 
         @JCStressTest
         @JCStressMeta(OneSucceeds.class)
         public static class L_TL {
-            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.L(); }
-            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TL(); }
+            @Actor public void actor1(S_F_State s, II_Result r) { r.r1 = s.L(); }
+            @Actor public void actor2(S_F_State s, II_Result r) { r.r2 = s.TL(); }
         }
 
         @JCStressTest
         @JCStressMeta(OneSucceeds.class)
         public static class L_TLt {
-            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.L(); }
-            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
+            @Actor public void actor1(S_F_State s, II_Result r) { r.r1 = s.L(); }
+            @Actor public void actor2(S_F_State s, II_Result r) { r.r2 = s.TLt(); }
         }
 
         @JCStressTest
         @JCStressMeta(NoOneSucceeds.class)
         public static class TL_TL {
-            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.TL(); }
-            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TL(); }
+            @Actor public void actor1(S_F_State s, II_Result r) { r.r1 = s.TL(); }
+            @Actor public void actor2(S_F_State s, II_Result r) { r.r2 = s.TL(); }
         }
 
         @JCStressTest
         @JCStressMeta(NoOneSucceeds.class)
         public static class TL_TLt {
-            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.TL(); }
-            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
+            @Actor public void actor1(S_F_State s, II_Result r) { r.r1 = s.TL(); }
+            @Actor public void actor2(S_F_State s, II_Result r) { r.r2 = s.TLt(); }
         }
 
         @JCStressTest
         @JCStressMeta(NoOneSucceeds.class)
         public static class TLt_TLt {
-            @Actor public void actor1(S_F_State s, IntResult2 r) { r.r1 = s.TLt(); }
-            @Actor public void actor2(S_F_State s, IntResult2 r) { r.r2 = s.TLt(); }
+            @Actor public void actor1(S_F_State s, II_Result r) { r.r1 = s.TLt(); }
+            @Actor public void actor2(S_F_State s, II_Result r) { r.r2 = s.TLt(); }
         }
     }
 

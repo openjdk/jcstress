@@ -29,7 +29,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult1;
+import org.openjdk.jcstress.infra.results.I_Result;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
 
 import java.lang.reflect.Field;
@@ -69,7 +69,7 @@ public class IntAtomicityTest {
     }
 
     @Actor
-    public void actor2(IntResult1 r) {
+    public void actor2(I_Result r) {
         try {
             r.r1 = FIELD.getInt(this);
         } catch (IllegalAccessException e) {

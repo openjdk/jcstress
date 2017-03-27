@@ -31,7 +31,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.LongResult2;
+import org.openjdk.jcstress.infra.results.JJ_Result;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -63,7 +63,7 @@ public class ThreadPoolExecutorKeepAliveTest {
     }
 
     @Arbiter
-    public void actor3(LongResult2 r) {
+    public void actor3(JJ_Result r) {
         r.r1 = pool.allowsCoreThreadTimeOut() ? 1 : 0;
         r.r2 = pool.getKeepAliveTime(TimeUnit.MILLISECONDS);
     }

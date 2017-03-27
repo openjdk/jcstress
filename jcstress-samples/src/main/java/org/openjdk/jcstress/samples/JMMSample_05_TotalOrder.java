@@ -28,7 +28,7 @@ import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -66,13 +66,13 @@ public class JMMSample_05_TotalOrder {
         int y;
 
         @Actor
-        public void actor1(IntResult2 r) {
+        public void actor1(II_Result r) {
             x = 1;
             r.r1 = y;
         }
 
         @Actor
-        public void actor2(IntResult2 r) {
+        public void actor2(II_Result r) {
             y = 1;
             r.r2 = x;
         }
@@ -103,13 +103,13 @@ public class JMMSample_05_TotalOrder {
         volatile int y;
 
         @Actor
-        public void actor1(IntResult2 r) {
+        public void actor1(II_Result r) {
             x = 1;
             r.r1 = y;
         }
 
         @Actor
-        public void actor2(IntResult2 r) {
+        public void actor2(II_Result r) {
             y = 1;
             r.r2 = x;
         }
@@ -151,13 +151,13 @@ public class JMMSample_05_TotalOrder {
         int y;
 
         @Actor
-        public void actor1(IntResult2 r) {
+        public void actor1(II_Result r) {
             VH_X.setRelease(this, 1);
             r.r1 = (int) VH_Y.getAcquire(this);
         }
 
         @Actor
-        public void actor2(IntResult2 r) {
+        public void actor2(II_Result r) {
             VH_Y.setRelease(this, 1);
             r.r2 = (int) VH_X.getAcquire(this);
         }

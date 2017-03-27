@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.samples;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.StringResult2;
+import org.openjdk.jcstress.infra.results.LL_Result;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -119,7 +119,7 @@ public class ConcurrencySample_02_ConcurrentHashMap {
         }
 
         @Arbiter
-        public void arbiter(StringResult2 s) {
+        public void arbiter(LL_Result s) {
             s.r1 = poll("Foo", 0);
             s.r2 = poll("Foo", 1);
         }
@@ -156,7 +156,7 @@ public class ConcurrencySample_02_ConcurrentHashMap {
         }
 
         @Arbiter
-        public void arbiter(StringResult2 s) {
+        public void arbiter(LL_Result s) {
             s.r1 = poll("Foo", 0);
             s.r2 = poll("Foo", 1);
         }
@@ -195,7 +195,7 @@ public class ConcurrencySample_02_ConcurrentHashMap {
         }
 
         @Arbiter
-        public void arbiter(StringResult2 s) {
+        public void arbiter(LL_Result s) {
             s.r1 = poll("Foo", 0);
             s.r2 = poll("Foo", 1);
         }

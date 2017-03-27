@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.atomicity.primitives.varhandles;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.DoubleResult1;
+import org.openjdk.jcstress.infra.results.D_Result;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
 
 import java.lang.invoke.MethodHandles;
@@ -61,7 +61,7 @@ public class DoubleAtomicityTest {
     }
 
     @Actor
-    public void actor2(DoubleResult1 r) {
+    public void actor2(D_Result r) {
         r.r1 = (double) VH.getOpaque(this);
     }
 

@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.unsafe;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 import org.openjdk.jcstress.util.UnsafeHolder;
 import sun.misc.Contended;
 
@@ -61,7 +61,7 @@ public class UnsafePutOrderedTwice {
     }
 
     @Actor
-    public void actor2(IntResult2 r) {
+    public void actor2(II_Result r) {
         r.r1 = lock;
         r.r2 = top;
     }

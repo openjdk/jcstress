@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.samples;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 
 /*
     This is our first concurrency test. It is deliberately simplistic to show
@@ -67,12 +67,12 @@ public class APISample_01_Simple {
     int v;
 
     @Actor
-    public void actor1(IntResult2 r) {
+    public void actor1(II_Result r) {
         r.r1 = ++v; // record result from actor1 to field r1
     }
 
     @Actor
-    public void actor2(IntResult2 r) {
+    public void actor2(II_Result r) {
         r.r2 = ++v; // record result from actor2 to field r2
     }
 

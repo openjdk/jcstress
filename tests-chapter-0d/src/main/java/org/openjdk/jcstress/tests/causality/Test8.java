@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.causality;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult3;
+import org.openjdk.jcstress.infra.results.III_Result;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
@@ -44,7 +44,7 @@ public class Test8 {
     int x, y;
 
     @Actor
-    public void thread1(IntResult3 r) {
+    public void thread1(III_Result r) {
         int r1 = x;
         int r2 = 1 + r1*r1 - r1;
         y = r2;
@@ -53,7 +53,7 @@ public class Test8 {
     }
 
     @Actor
-    public void thread2(IntResult3 r) {
+    public void thread2(III_Result r) {
         int r3 = y;
         x = r3;
         r.r3 = r3;

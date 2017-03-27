@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.countdownlatch.racy;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult1;
+import org.openjdk.jcstress.infra.results.I_Result;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -61,7 +61,7 @@ public class BoundedSingleTest {
     }
 
     @Actor
-    public void actor2(IntResult1 r) {
+    public void actor2(I_Result r) {
         try {
             CountDownLatch latch = getLatch();
             latch.await(1, TimeUnit.DAYS);

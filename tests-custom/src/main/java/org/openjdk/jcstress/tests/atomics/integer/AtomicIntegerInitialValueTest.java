@@ -30,7 +30,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult1;
+import org.openjdk.jcstress.infra.results.I_Result;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -50,7 +50,7 @@ public class AtomicIntegerInitialValueTest {
     }
 
     @Actor
-    public void actor2(IntResult1 r) {
+    public void actor2(I_Result r) {
         AtomicInteger ai = this.ai;
         r.r1 = (ai == null) ? -1 : ai.get();
     }

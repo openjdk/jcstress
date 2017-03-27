@@ -29,7 +29,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.ByteResult1;
+import org.openjdk.jcstress.infra.results.B_Result;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
 
 import java.lang.reflect.Field;
@@ -69,7 +69,7 @@ public class VolatileByteAtomicityTest {
     }
 
     @Actor
-    public void actor2(ByteResult1 r) {
+    public void actor2(B_Result r) {
         try {
             r.r1 = FIELD.getByte(this);
         } catch (IllegalAccessException e) {

@@ -31,7 +31,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult3;
+import org.openjdk.jcstress.infra.results.III_Result;
 
 @JCStressTest
 @Description("Tests the word-tearing guarantees for byte[].")
@@ -59,7 +59,7 @@ public class ArrayInterleaveTest {
     }
 
     @Arbiter
-    public void arbiter1(IntResult3 r) {
+    public void arbiter1(III_Result r) {
         r.r1 = r.r2 = r.r3 = 0;
         for (byte s : ss) {
             switch (s) {

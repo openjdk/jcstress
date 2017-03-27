@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.samples;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.BooleanResult2;
+import org.openjdk.jcstress.infra.results.ZZ_Result;
 
 import java.util.BitSet;
 
@@ -62,7 +62,7 @@ public class JMMSample_02_WordTearing {
         }
 
         @Arbiter
-        public void arbiter(BooleanResult2 r) {
+        public void arbiter(ZZ_Result r) {
             r.r1 = bs[0];
             r.r2 = bs[1];
         }
@@ -103,7 +103,7 @@ public class JMMSample_02_WordTearing {
         }
 
         @Arbiter
-        public void arbiter(BooleanResult2 r) {
+        public void arbiter(ZZ_Result r) {
             r.r1 = bs.get(0);
             r.r2 = bs.get(1);
         }

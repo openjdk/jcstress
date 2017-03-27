@@ -30,7 +30,7 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.Ref;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.LongResult1;
+import org.openjdk.jcstress.infra.results.J_Result;
 import org.openjdk.jcstress.tests.atomicity.primitives.Constants;
 
 import java.lang.reflect.Field;
@@ -72,7 +72,7 @@ public class LongAtomicityTest {
     }
 
     @Actor
-    public void actor2(LongResult1 r) {
+    public void actor2(J_Result r) {
         try {
             r.r1 = FIELD.getLong(this);
         } catch (IllegalAccessException e) {

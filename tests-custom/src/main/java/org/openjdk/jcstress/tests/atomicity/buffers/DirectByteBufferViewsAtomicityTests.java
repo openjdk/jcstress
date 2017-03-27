@@ -28,7 +28,7 @@ import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.LongResult1;
+import org.openjdk.jcstress.infra.results.J_Result;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -67,42 +67,42 @@ public class DirectByteBufferViewsAtomicityTests {
     @JCStressMeta(GradeInt.class)
     public static class IntViewTest {
         @Actor public void actor1(MyState s)                { s.ib.put(0, -1);                                  }
-        @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = s.ib.get(0);                               }
+        @Actor public void actor2(MyState s, J_Result r) { r.r1 = s.ib.get(0);                               }
     }
 
     @JCStressTest
     @JCStressMeta(GradeChar.class)
     public static class CharViewTest {
         @Actor public void actor1(MyState s)                { s.cb.put(0, 'a');                                 }
-        @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = s.cb.get(0);                               }
+        @Actor public void actor2(MyState s, J_Result r) { r.r1 = s.cb.get(0);                               }
     }
 
     @JCStressTest
     @JCStressMeta(GradeDouble.class)
     public static class DoubleViewTest {
         @Actor public void actor1(MyState s)                { s.db.put(0, -1D);                                 }
-        @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = Double.doubleToRawLongBits(s.db.get(0));   }
+        @Actor public void actor2(MyState s, J_Result r) { r.r1 = Double.doubleToRawLongBits(s.db.get(0));   }
     }
 
     @JCStressTest
     @JCStressMeta(GradeFloat.class)
     public static class FloatViewTest {
         @Actor public void actor1(MyState s)                { s.fb.put(0, -1F);                                 }
-        @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = Float.floatToRawIntBits(s.fb.get(0));      }
+        @Actor public void actor2(MyState s, J_Result r) { r.r1 = Float.floatToRawIntBits(s.fb.get(0));      }
     }
 
     @JCStressTest
     @JCStressMeta(GradeInt.class)
     public static class LongViewTest {
         @Actor public void actor1(MyState s)                { s.lb.put(0, -1);                                  }
-        @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = s.lb.get(0);                               }
+        @Actor public void actor2(MyState s, J_Result r) { r.r1 = s.lb.get(0);                               }
     }
 
     @JCStressTest
     @JCStressMeta(GradeInt.class)
     public static class ShortViewTest {
         @Actor public void actor1(MyState s)                { s.sb.put(0, (short) -1);                          }
-        @Actor public void actor2(MyState s, LongResult1 r) { r.r1 = s.sb.get(0);                               }
+        @Actor public void actor2(MyState s, J_Result r) { r.r1 = s.sb.get(0);                               }
     }
 
 }

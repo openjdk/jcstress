@@ -30,7 +30,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.LongResult2;
+import org.openjdk.jcstress.infra.results.JJ_Result;
 import org.openjdk.jcstress.util.UnsafeHolder;
 import sun.misc.Contended;
 
@@ -64,7 +64,7 @@ public class UnsafeAddLong1 {
     }
 
     @Actor
-    public void actor2(LongResult2 r) {
+    public void actor2(JJ_Result r) {
         r.r1 = written;
         r.r2 = x;
     }

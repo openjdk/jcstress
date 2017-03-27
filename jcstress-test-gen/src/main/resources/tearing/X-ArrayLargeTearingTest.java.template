@@ -54,7 +54,7 @@ public class $name$ {
     }
 
     @Arbiter
-    public void arbiter($Type$Result2 r) {
+    public void arbiter($T$$T$_Result r) {
         r.r1 = arr[idx1];
         r.r2 = arr[idx2];
     }

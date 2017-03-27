@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.tests.countdownlatch.waits;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.IntResult3;
+import org.openjdk.jcstress.infra.results.III_Result;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -37,19 +37,19 @@ public class UnboundedDoubleTest {
     CountDownLatch latch = new CountDownLatch(2);
 
     @Actor
-    public void actor1(IntResult3 r) {
+    public void actor1(III_Result r) {
         r.r1 = 1;
         latch.countDown();
     }
 
     @Actor
-    public void actor2(IntResult3 r) {
+    public void actor2(III_Result r) {
         r.r2 = 1;
         latch.countDown();
     }
 
     @Actor
-    public void actor3(IntResult3 r) {
+    public void actor3(III_Result r) {
         try {
             latch.await();
             r.r3 = 1;

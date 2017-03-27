@@ -151,11 +151,7 @@ public class ResultGenerator {
             for (Class k : args) {
                 if (n != 1)
                     pw.print(" + \", \" + ");
-                if (k == char.class) {
-                    pw.print("(r" + n + " + 0)");
-                } else {
-                    pw.print("r" + n);
-                }
+                pw.print("r" + n);
                 n++;
             }
             pw.println(";");

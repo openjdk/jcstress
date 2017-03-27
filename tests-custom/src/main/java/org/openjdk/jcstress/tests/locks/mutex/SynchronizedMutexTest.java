@@ -29,7 +29,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 
 @JCStressTest
 @Outcome(id = "1, 0", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution.")
@@ -41,7 +41,7 @@ public class SynchronizedMutexTest {
     int value;
 
     @Actor
-    public void actor1(IntResult2 r) {
+    public void actor1(II_Result r) {
         synchronized (LOCK) {
             r.r1 = (value == 0) ? 1 : 0;
             value = 1;
@@ -49,7 +49,7 @@ public class SynchronizedMutexTest {
     }
 
     @Actor
-    public void actor2(IntResult2 r) {
+    public void actor2(II_Result r) {
         synchronized (LOCK) {
             r.r2 = (value == 0) ? 2 : 0;
             value = 1;

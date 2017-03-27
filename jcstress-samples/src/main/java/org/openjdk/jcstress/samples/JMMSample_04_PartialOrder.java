@@ -28,7 +28,7 @@ import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.IntResult2;
+import org.openjdk.jcstress.infra.results.II_Result;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -74,7 +74,7 @@ public class JMMSample_04_PartialOrder {
         }
 
         @Actor
-        public void actor2(IntResult2 r) {
+        public void actor2(II_Result r) {
             r.r1 = y;
             r.r2 = x;
         }
@@ -118,7 +118,7 @@ public class JMMSample_04_PartialOrder {
         }
 
         @Actor
-        public void actor2(IntResult2 r) {
+        public void actor2(II_Result r) {
             r.r1 = y;
             r.r2 = x;
         }
@@ -166,7 +166,7 @@ public class JMMSample_04_PartialOrder {
         }
 
         @Actor
-        public void actor2(IntResult2 r) {
+        public void actor2(II_Result r) {
             r.r1 = (int) VH.getAcquire(this);
             r.r2 = x;
         }
@@ -206,7 +206,7 @@ public class JMMSample_04_PartialOrder {
         }
 
         @Actor
-        public void actor2(IntResult2 r) {
+        public void actor2(II_Result r) {
             synchronized (this) {
                 r.r1 = y;
                 r.r2 = x;
