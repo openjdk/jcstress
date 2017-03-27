@@ -29,6 +29,7 @@ import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.Runner;
 import org.openjdk.jcstress.infra.runners.TestConfig;
+import org.openjdk.jcstress.util.StringUtils;
 
 import java.lang.reflect.Constructor;
 import java.util.concurrent.ExecutorService;
@@ -80,11 +81,11 @@ public class EmbeddedExecutor {
                 o.run();
             } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
                 TestResult result = new TestResult(config, Status.API_MISMATCH, 0);
-                result.addAuxData(e.getMessage());
+                result.addAuxData(StringUtils.getStacktrace(e));
                 sink.add(result);
             } catch (Throwable ex) {
                 TestResult result = new TestResult(config, Status.TEST_ERROR, 0);
-                result.addAuxData(ex.getMessage());
+                result.addAuxData(StringUtils.getStacktrace(ex));
                 sink.add(result);
             } finally {
                 if (onFinish != null) {

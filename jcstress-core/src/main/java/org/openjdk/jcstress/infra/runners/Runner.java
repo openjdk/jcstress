@@ -28,10 +28,9 @@ import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.util.Counter;
+import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -107,11 +106,7 @@ public abstract class Runner<R> {
     protected void dumpFailure(int iteration, Status status, String message, Throwable aux) {
         messages.add(message);
         TestResult result = prepareResult(iteration, status);
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        aux.printStackTrace(pw);
-        pw.close();
-        result.addAuxData(sw.toString());
+        result.addAuxData(StringUtils.getStacktrace(aux));
         collector.add(result);
     }
 
