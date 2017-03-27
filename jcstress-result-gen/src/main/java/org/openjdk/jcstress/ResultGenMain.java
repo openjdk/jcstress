@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,18 +24,44 @@
  */
 package org.openjdk.jcstress;
 
-import org.openjdk.jcstress.generator.TestGenerator;
-
 import java.io.IOException;
 
-public class TestGenMain {
+public class ResultGenMain {
+
+    public static final Class<?>[] CLASSES = new Class<?>[] {
+                boolean.class, byte.class, short.class, char.class,
+                int.class, long.class, float.class, double.class,
+                Object.class,
+    };
 
     public static void main(String[] args) throws IOException {
-        if (args.length >= 2) {
-            new TestGenerator(args[0]).run();
+        if (args.length >= 1) {
+            ResultGenerator rg = new ResultGenerator(args[0]);
+
+            for (Class<?> c : CLASSES) {
+                rg.generateResult(c);
+                rg.generateResult(c, c);
+                rg.generateResult(c, c, c);
+                rg.generateResult(c, c, c, c);
+                rg.generateResult(c, c, c, c, c);
+                rg.generateResult(c, c, c, c, c, c);
+            }
+
+            for (Class<?> c1 : CLASSES) {
+                for (Class<?> c2 : CLASSES) {
+                    rg.generateResult(c1, c2);
+                }
+            }
+
+            for (Class<?> c1 : CLASSES) {
+                for (Class<?> c2 : CLASSES) {
+                    for (Class<?> c3 : CLASSES) {
+                        rg.generateResult(c1, c2, c3);
+                    }
+                }
+            }
         } else {
             throw new IllegalStateException("Please provide the destination dir");
         }
     }
-
 }

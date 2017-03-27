@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, Red Hat Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,20 +22,28 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress;
+package org.openjdk.jcstress.util;
 
-import org.openjdk.jcstress.generator.TestGenerator;
+public class ResultUtils {
 
-import java.io.IOException;
-
-public class TestGenMain {
-
-    public static void main(String[] args) throws IOException {
-        if (args.length >= 2) {
-            new TestGenerator(args[0]).run();
-        } else {
-            throw new IllegalStateException("Please provide the destination dir");
+    public static String resultName(Class<?>... args) {
+        String name = "";
+        for (Class k : args) {
+            if (k.isPrimitive()) {
+                if (k == boolean.class) name += "Z";
+                if (k == byte.class)    name += "B";
+                if (k == short.class)   name += "S";
+                if (k == char.class)    name += "C";
+                if (k == int.class)     name += "I";
+                if (k == long.class)    name += "J";
+                if (k == float.class)   name += "F";
+                if (k == double.class)  name += "D";
+            } else {
+                name += "L";
+            }
         }
+        name += "_Result";
+        return name;
     }
 
 }

@@ -243,6 +243,7 @@ questions.
 
     <modules>
         <module>jcstress-test-gen</module>
+        <module>jcstress-result-gen</module>
         <module>jcstress-core</module>
         <module>jcstress-samples</module>
         <module>jcstress-java-test-archetype</module>

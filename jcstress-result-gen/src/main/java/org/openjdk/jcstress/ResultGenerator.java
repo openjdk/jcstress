@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.generator;
+package org.openjdk.jcstress;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -40,17 +40,21 @@ public class ResultGenerator {
         this.srcRoot = srcRoot;
     }
 
-    public String generateResult(TestGenerator.Types types) {
+    public String generateResult(Class<?>... args) {
         String name = "";
-        for (Class k : types.all()) {
-            if (k == boolean.class) name += "X";
-            if (k == byte.class) name += "B";
-            if (k == short.class) name += "S";
-            if (k == char.class) name += "C";
-            if (k == int.class) name += "I";
-            if (k == long.class) name += "L";
-            if (k == float.class) name += "F";
-            if (k == double.class) name += "D";
+        for (Class k : args) {
+            if (k.isPrimitive()) {
+                if (k == boolean.class) name += "Z";
+                if (k == byte.class)    name += "B";
+                if (k == short.class)   name += "S";
+                if (k == char.class)    name += "C";
+                if (k == int.class)     name += "I";
+                if (k == long.class)    name += "J";
+                if (k == float.class)   name += "F";
+                if (k == double.class)  name += "D";
+            } else {
+                name += "L";
+            }
         }
         name += "_Result";
 
@@ -78,7 +82,7 @@ public class ResultGenerator {
 
         {
             int n = 1;
-            for (Class k : types.all()) {
+            for (Class k : args) {
                 pw.println("    @sun.misc.Contended");
                 pw.println("    @jdk.internal.vm.annotation.Contended");
                 pw.println("    public " + k.getSimpleName() + " r" + n + ";");
@@ -91,7 +95,7 @@ public class ResultGenerator {
         pw.println("        int result = 0;");
         {
             int n = 1;
-            for (Class k : types.all()) {
+            for (Class k : args) {
                 if (k == boolean.class) {
                     pw.println("        result = 31*result + (r" + n + " ? 1 : 0);");
                 }
@@ -121,7 +125,7 @@ public class ResultGenerator {
 
         {
             int n = 1;
-            for (Class k : types.all()) {
+            for (Class k : args) {
                 if (k == boolean.class || k == byte.class || k == short.class || k == char.class
                         || k == int.class || k == long.class) {
                     pw.println("        if (r" + n + " != that.r" + n + ") return false;");
@@ -144,7 +148,7 @@ public class ResultGenerator {
 
         {
             int n = 1;
-            for (Class k : types.all()) {
+            for (Class k : args) {
                 if (n != 1)
                     pw.print(" + \", \" + ");
                 if (k == char.class) {

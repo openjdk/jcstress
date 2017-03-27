@@ -24,6 +24,8 @@
  */
 package org.openjdk.jcstress.generator;
 
+import org.openjdk.jcstress.util.ResultUtils;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -41,14 +43,9 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 public class TestGenerator {
 
     private final String srcRoot;
-    private final String resRoot;
 
-    private final ResultGenerator resultGenerator;
-
-    public TestGenerator(String srcRoot, String resRoot) {
+    public TestGenerator(String srcRoot) {
         this.srcRoot = srcRoot;
-        this.resRoot = resRoot;
-        this.resultGenerator = new ResultGenerator(srcRoot);
     }
 
     public void run() throws IOException {
@@ -100,7 +97,7 @@ public class TestGenerator {
     }
 
    public void generate(Types types, Primitive prim, String klass, String pkg) throws IOException {
-        String resultName = resultGenerator.generateResult(types);
+        String resultName = ResultUtils.resultName(types.all());
 
         Path dir = Paths.get(srcRoot, pkg.split("\\."));
         Path file = dir.resolve(klass + ".java");

@@ -24,8 +24,7 @@
  */
 package org.openjdk.jcstress.generator.seqcst;
 
-import org.openjdk.jcstress.generator.ResultGenerator;
-import org.openjdk.jcstress.generator.TestGenerator;
+import org.openjdk.jcstress.util.ResultUtils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -40,7 +39,6 @@ public class SeqCstTraceGenerator {
     private final String srcDir;
     private final String pkg;
     private final Target target;
-    private final ResultGenerator resultGenerator;
 
     public static void generate(String dst, String pkg, Target target) {
         new SeqCstTraceGenerator(dst, pkg, target).generate();
@@ -50,7 +48,6 @@ public class SeqCstTraceGenerator {
         this.srcDir = dst;
         this.pkg = pkg;
         this.target = target;
-        this.resultGenerator = new ResultGenerator(dst);
     }
 
     public void generate() {
@@ -177,7 +174,7 @@ public class SeqCstTraceGenerator {
             klasses[c] = int.class;
         }
 
-        String resultName = resultGenerator.generateResult(new TestGenerator.Types(klasses));
+        String resultName = ResultUtils.resultName(klasses);
 
         PrintWriter pw;
         try {
