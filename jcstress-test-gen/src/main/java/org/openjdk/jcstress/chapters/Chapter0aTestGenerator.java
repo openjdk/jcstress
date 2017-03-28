@@ -63,6 +63,14 @@ public class Chapter0aTestGenerator {
                 new String[]{ "", "volatile", "final" }
         );
 
+
+        makeTests(
+                dest,
+                GeneratorUtils.readFromResource("/init/X-FieldInitClassTest.java.template"),
+                "initClass.fields",
+                new String[]{ "", "volatile" }
+        );
+
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/tearing/X-FieldTearingTest.java.template"),
@@ -95,6 +103,34 @@ public class Chapter0aTestGenerator {
                 dest,
                 GeneratorUtils.readFromResource("/init/X-ArrayLargeInitTest.java.template"),
                 "init.arrays.large",
+                new String[]{ "", "volatile" }
+        );
+
+        makeTests(
+                dest,
+                GeneratorUtils.readFromResource("/init/X-ArrayInitClassTest.java.template"),
+                "initClass.arrays.small",
+                new String[]{ "", "volatile" }
+        );
+
+        makeTests(
+                dest,
+                GeneratorUtils.readFromResource("/init/X-ArrayLargeInitClassTest.java.template"),
+                "initClass.arrays.large",
+                new String[]{ "", "volatile" }
+        );
+
+        makeTests(
+                dest,
+                GeneratorUtils.readFromResource("/init/X-ArrayInitLengthTest.java.template"),
+                "initLen.arrays.small",
+                new String[]{ "", "volatile" }
+        );
+
+        makeTests(
+                dest,
+                GeneratorUtils.readFromResource("/init/X-ArrayLargeInitLengthTest.java.template"),
+                "initLen.arrays.large",
                 new String[]{ "", "volatile" }
         );
 
