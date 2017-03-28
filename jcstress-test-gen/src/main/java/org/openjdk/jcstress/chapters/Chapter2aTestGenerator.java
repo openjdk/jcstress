@@ -47,43 +47,71 @@ public class Chapter2aTestGenerator {
 
         makeTests(
                 dest,
-                GeneratorUtils.readFromResource("/copy/X-ObjectCloneCopyingTest.java.template"),
+                GeneratorUtils.readFromResource("/copy/objects/X-Clone.java.template"),
                 "copy.clone.objects",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                GeneratorUtils.readFromResource("/copy/X-ObjectManualCopyingTest.java.template"),
+                GeneratorUtils.readFromResource("/copy/objects/X-Manual.java.template"),
                 "copy.manual.objects",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                GeneratorUtils.readFromResource("/copy/X-ArraysCopyOfCopyingTest.java.template"),
-                "copy.copyof.arrays",
+                GeneratorUtils.readFromResource("/copy/arrays/X-ArraysCopyOf.java.template"),
+                "copy.copyof.arrays.small",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                GeneratorUtils.readFromResource("/copy/X-ArraycopyCopyingTest.java.template"),
-                "copy.arraycopy.arrays",
+                GeneratorUtils.readFromResource("/copy/arrays/X-LargeArraysCopyOf.java.template"),
+                "copy.copyof.arrays.large",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                GeneratorUtils.readFromResource("/copy/X-ArrayCloneCopyingTest.java.template"),
-                "copy.clone.arrays",
+                GeneratorUtils.readFromResource("/copy/arrays/X-Arraycopy.java.template"),
+                "copy.arraycopy.arrays.small",
                 new String[]{ "", "volatile" }
         );
 
         makeTests(
                 dest,
-                GeneratorUtils.readFromResource("/copy/X-ArrayManualCopyingTest.java.template"),
-                "copy.manual.arrays",
+                GeneratorUtils.readFromResource("/copy/arrays/X-LargeArraycopy.java.template"),
+                "copy.arraycopy.arrays.large",
+                new String[]{ "", "volatile" }
+        );
+
+        makeTests(
+                dest,
+                GeneratorUtils.readFromResource("/copy/arrays/X-Clone.java.template"),
+                "copy.clone.arrays.small",
+                new String[]{ "", "volatile" }
+        );
+
+        makeTests(
+                dest,
+                GeneratorUtils.readFromResource("/copy/arrays/X-LargeClone.java.template"),
+                "copy.clone.arrays.large",
+                new String[]{ "", "volatile" }
+        );
+
+        makeTests(
+                dest,
+                GeneratorUtils.readFromResource("/copy/arrays/X-Manual.java.template"),
+                "copy.manual.arrays.small",
+                new String[]{ "", "volatile" }
+        );
+
+        makeTests(
+                dest,
+                GeneratorUtils.readFromResource("/copy/arrays/X-LargeManual.java.template"),
+                "copy.manual.arrays.large",
                 new String[]{ "", "volatile" }
         );
     }
