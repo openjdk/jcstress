@@ -173,7 +173,7 @@ questions.
             <groupId>${project.groupId}</groupId>
             <artifactId>jcstress-result-gen</artifactId>
             <version>${project.version}</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
