@@ -68,16 +68,16 @@ public abstract class Runner<R> {
      */
     public void run() {
         try {
-            sanityCheck();
+            dump(0, sanityCheck());
         } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
-            dumpFailure(-1, Status.API_MISMATCH, "Test sanity check failed, skipping", e);
+            dumpFailure(0, Status.API_MISMATCH, "Test sanity check failed, skipping", e);
             return;
         } catch (Throwable e) {
-            dumpFailure(-1, Status.CHECK_TEST_ERROR, "Check test failed", e);
+            dumpFailure(0, Status.CHECK_TEST_ERROR, "Check test failed", e);
             return;
         }
 
-        for (int c = 0; c < config.iters; c++) {
+        for (int c = 1; c <= config.iters; c++) {
             try {
                 WhiteBoxSupport.tryDeopt(config.deoptRatio);
             } catch (NoClassDefFoundError err) {
@@ -118,7 +118,7 @@ public abstract class Runner<R> {
         collector.add(result);
     }
 
-    public abstract void sanityCheck() throws Throwable;
+    public abstract Counter<R> sanityCheck() throws Throwable;
 
     public abstract Counter<R> internalRun();
 

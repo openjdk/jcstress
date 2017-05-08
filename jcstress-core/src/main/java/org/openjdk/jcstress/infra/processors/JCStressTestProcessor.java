@@ -336,20 +336,25 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
 
         pw.println("    @Override");
-        pw.println("    public void sanityCheck() throws Throwable {");
-        pw.println("        sanityCheck_API();");
-        pw.println("        sanityCheck_Footprints();");
+        pw.println("    public Counter<" + r + "> sanityCheck() throws Throwable {");
+        pw.println("        Counter<" + r + "> counter = new Counter<>();");
+        pw.println("        sanityCheck_API(counter);");
+        pw.println("        sanityCheck_Footprints(counter);");
+        pw.println("        return counter;");
         pw.println("    }");
         pw.println();
-        pw.println("    private void sanityCheck_API() throws Throwable {");
-        pw.println("        final " + t + " t = new " + t + "();");
+        pw.println("    private void sanityCheck_API(Counter<" + r + "> counter) throws Throwable {");
+
         pw.println("        final " + s + " s = new " + s + "();");
         pw.println("        final " + r + " r = new " + r + "();");
+        if (!isStateItself) {
+            pw.println("        final " + t + " t = new " + t + "();");
+        }
 
         pw.println("        Collection<Future<?>> res = new ArrayList<>();");
         for (ExecutableElement el : info.getActors()) {
             pw.print("        res.add(pool.submit(() -> ");
-            emitMethod(pw, el, "t." + el.getSimpleName(), "s", "r", false);
+            emitMethod(pw, el, (isStateItself ? "s." : "t.") + el.getSimpleName(), "s", "r", false);
             pw.println("));");
         }
 
@@ -362,15 +367,20 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        }");
 
         if (info.getArbiter() != null) {
-            emitMethod(pw, info.getArbiter(), "        t." + info.getArbiter().getSimpleName(), "s", "r", true);
+            pw.print("        ");
+            emitMethod(pw, info.getArbiter(), (isStateItself ? "s." : "t.") + info.getArbiter().getSimpleName(), "s", "r", true);
         }
+        pw.println("        counter.record(r);");
         pw.println("    }");
         pw.println();
 
-        pw.println("    private void sanityCheck_Footprints() throws Throwable {");
+        pw.println("    private void sanityCheck_Footprints(Counter<" + r + "> counter) throws Throwable {");
         pw.println("        config.adjustStrides(size -> {");
         pw.println("            version = new StateHolder<>(new " + s + "[size], new " + r + "[size], " + actorsCount + ", config.spinLoopStyle);");
-        pw.println("            final " + t + " t = new " + t + "();");
+
+        if (!isStateItself) {
+            pw.println("            final " + t + " t = new " + t + "();");
+        }
 
         pw.println("            for (int c = 0; c < size; c++) {");
         pw.println("                " + r + " r = new " + r + "();");
@@ -386,6 +396,11 @@ public class JCStressTestProcessor extends AbstractProcessor {
             }
             pw.println(";");
         }
+        if (info.getArbiter() != null) {
+            pw.print("                ");
+            emitMethod(pw, info.getArbiter(), (isStateItself ? "s." : "t.") + info.getArbiter().getSimpleName(), "s", "r", true);
+        }
+        pw.println("                counter.record(r);");
         pw.println("            }");
         pw.println("        });");
         pw.println("    }");
@@ -733,7 +748,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    }");
         pw.println();
         pw.println("    @Override");
-        pw.println("    public void sanityCheck() throws Throwable {");
+        pw.println("    public Counter<Outcome> sanityCheck() throws Throwable {");
         pw.println("        throw new UnsupportedOperationException();");
         pw.println("    }");
         pw.println();

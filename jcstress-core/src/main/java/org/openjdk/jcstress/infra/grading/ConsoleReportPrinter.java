@@ -66,7 +66,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
         this.output = pw;
         this.expectedTests = expectedTests;
         this.expectedForks = expectedForks;
-        this.expectedIterations = expectedForks * opts.getIterations();
+        this.expectedIterations = expectedForks * (opts.getIterations() + 1); // +1 sanity check iteration #0
         verbose = opts.isVerbose();
         progressLen = 1;
     }

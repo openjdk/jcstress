@@ -112,7 +112,7 @@ public class ReportUtils {
         if (inProgress) {
             pw.format("    (fork: #%d, iteration #%d, JVM args: %s)%n",
                     r.getConfig().forkId + 1,
-                    r.getIteration() + 1,
+                    r.getIteration(),
                     r.getConfig().jvmArgs
             );
         } else {
