@@ -367,8 +367,14 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        }");
 
         if (info.getArbiter() != null) {
-            pw.print("        ");
-            emitMethod(pw, info.getArbiter(), (isStateItself ? "s." : "t.") + info.getArbiter().getSimpleName(), "s", "r", true);
+            pw.println("        try {");
+            pw.print("            pool.submit(() ->");
+            emitMethod(pw, info.getArbiter(), (isStateItself ? "s." : "t.") + info.getArbiter().getSimpleName(), "s", "r", false);
+            pw.println(").get();");
+            pw.println("        } catch (ExecutionException e) {");
+            pw.println("            throw e.getCause();");
+            pw.println("        }");
+
         }
         pw.println("        counter.record(r);");
         pw.println("    }");
@@ -415,12 +421,18 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         pw.println();
         pw.println("        control.isStopped = false;");
-        pw.println("        Collection<Future<Counter<" + r + ">>> tasks = new ArrayList<>();");
+        pw.println();
+        pw.println("        List<Callable<Counter<" + r + ">>> tasks = new ArrayList<>();");
 
         for (ExecutableElement a : info.getActors()) {
-            pw.println("        tasks.add(pool.submit(this::" + a.getSimpleName() + "));");
+            pw.println("        tasks.add(this::" + a.getSimpleName() + ");");
         }
-
+        pw.println("        Collections.shuffle(tasks);");
+        pw.println();
+        pw.println("        Collection<Future<Counter<" + r + ">>> results = new ArrayList<>();");
+        pw.println("        for (Callable<Counter<" + r + ">> task : tasks) {");
+        pw.println("            results.add(pool.submit(task));");
+        pw.println("        }");
         pw.println();
         pw.println("        try {");
         pw.println("            TimeUnit.MILLISECONDS.sleep(config.time);");
@@ -429,10 +441,10 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
         pw.println("        control.isStopped = true;");
         pw.println();
-        pw.println("        waitFor(tasks);");
+        pw.println("        waitFor(results);");
         pw.println();
         pw.println("        Counter<" + r + "> counter = new Counter<>();");
-        pw.println("        for (Future<Counter<" + r + ">> f : tasks) {");
+        pw.println("        for (Future<Counter<" + r + ">> f : results) {");
         pw.println("            try {");
         pw.println("                counter.merge(f.get());");
         pw.println("            } catch (Throwable e) {");
@@ -907,7 +919,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 ExecutorService.class, Future.class, TimeUnit.class,
                 TestConfig.class, TestResultCollector.class,
                 Runner.class, StateHolder.class, Counter.class,
-                WhiteBoxSupport.class, ExecutionException.class
+                WhiteBoxSupport.class, ExecutionException.class,
+                Callable.class, Collections.class, List.class,
         };
 
         for (Class<?> c : imports) {
