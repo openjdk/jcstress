@@ -24,10 +24,10 @@
  */
 package org.openjdk.jcstress.vm;
 
+import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.util.ArrayUtils;
 import org.openjdk.jcstress.util.FileUtils;
 import org.openjdk.jcstress.util.InputStreamDrainer;
-import org.openjdk.jcstress.util.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -36,7 +36,6 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class VMSupport {
@@ -49,7 +48,7 @@ public class VMSupport {
         return THREAD_SPIN_WAIT_AVAILABLE;
     }
 
-    public static void initFlags() {
+    public static void initFlags(Options opts) {
         System.out.println("Initializing and probing the target VM: ");
         System.out.println(" (all failures are non-fatal, but may affect testing accuracy)");
         System.out.println();
@@ -58,6 +57,15 @@ public class VMSupport {
                 SimpleTestMain.class,
                 "-XX:+UnlockDiagnosticVMOptions"
         );
+
+        // Rationale: every test VM uses at least 2 threads. Which means there are at max $CPU/2 VMs.
+        // Reserving half of the RSS of each VM to Java heap leaves enough space for others.
+        // This means multiplying the factor by 2. These two adjustments cancel each other.
+        // Setting -Xms/-Xmx explicitly is supposed to override these defaults.
+        int c = opts.getUserCPUs();
+        detect("Trimming down the default VM heap size to 1/" + c + "-th of max RAM",
+                SimpleTestMain.class,
+                "-XX:MaxRAMFraction=" + c, "-XX:MinRAMFraction=" + c);
 
         detect("Trimming down the number of compiler threads",
                 SimpleTestMain.class,

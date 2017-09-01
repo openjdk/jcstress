@@ -60,7 +60,7 @@ public class JCStress {
             return;
         }
 
-        VMSupport.initFlags();
+        VMSupport.initFlags(opts);
 
         opts.printSettingsOn(out);
 
