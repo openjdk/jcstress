@@ -198,10 +198,10 @@ public class Options {
 
         mode = orDefault(modeStr.value(set), "default");
         if (this.mode.equalsIgnoreCase("sanity")) {
-            this.time = 50;
+            this.time = 10;
             this.iters = 1;
-            this.forks = 0;
-            this.batchSize = 20;
+            this.forks = 1;
+            this.batchSize = 100;
         } else
         if (this.mode.equalsIgnoreCase("quick")) {
             this.time = 200;
