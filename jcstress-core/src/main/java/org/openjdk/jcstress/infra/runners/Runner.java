@@ -46,6 +46,8 @@ import java.util.concurrent.TimeoutException;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public abstract class Runner<R> {
+    protected static final int MIN_TIMEOUT_MS = 30*1000;
+
     protected final Control control;
     protected final TestResultCollector collector;
     protected final ExecutorService pool;
@@ -140,8 +142,9 @@ public abstract class Runner<R> {
                 }
             }
 
-            if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) > Math.max(config.time, 60*1000)) {
-                dumpFailure(-1, Status.TIMEOUT_ERROR, "Timeout out waiting for tasks to complete");
+            long timeSpent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
+            if (timeSpent > Math.max(2*config.time, MIN_TIMEOUT_MS)) {
+                dumpFailure(-1, Status.TIMEOUT_ERROR, "Timeout waiting for tasks to complete: " + timeSpent + " ms");
                 return;
             }
         }
