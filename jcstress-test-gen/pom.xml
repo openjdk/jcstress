@@ -56,7 +56,6 @@ questions.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>1.7.1</version>
                 <executions>
                     <execution>
                         <id>testgen</id>

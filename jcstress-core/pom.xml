@@ -96,20 +96,7 @@ questions.
                 <artifactId>maven-jar-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>whitebox</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <includes>
-                                <include>sun/hotspot/WhiteBox.class</include>
-                            </includes>
-                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
-                            <finalName>whitebox-api</finalName>
-                        </configuration>
-                    </execution>
-                    <execution>
+                        <id>default-jar</id>
                         <phase>package</phase>
                         <goals>
                             <goal>jar</goal>
@@ -118,6 +105,28 @@ questions.
                             <excludes>
                                 <exclude>sun/hotspot/WhiteBox.class</exclude>
                             </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>whitebox</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                            <finalName>whitebox-api</finalName>
+                            <attach>false</attach>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/assembly/whitebox.xml</descriptor>
+                            </descriptors>
                         </configuration>
                     </execution>
                 </executions>
@@ -167,7 +176,6 @@ questions.
         <dependency>
             <groupId>net.sf.jopt-simple</groupId>
             <artifactId>jopt-simple</artifactId>
-            <version>4.6</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -178,7 +186,6 @@ questions.
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.10</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
