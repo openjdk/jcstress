@@ -90,7 +90,7 @@ public class TestGrading {
             Expect ex = matched.expect();
             isPassed &= passed(ex, count);
             hasInteresting |= hasInteresting(ex, count);
-            failureMessages.add(failureMessage(s, ex, count));
+            failureMessages.add(failureMessage(s, ex, count, matched.description()));
 
             gradingResults.add(new GradingResult(
                     s,
@@ -105,7 +105,7 @@ public class TestGrading {
             Expect ex = c.expect();
             isPassed &= passed(ex, 0);
             hasInteresting |= hasInteresting(ex, 0);
-            failureMessages.add(failureMessage("N/A", ex, 0));
+            failureMessages.add(failureMessage("N/A", ex, 0, c.description()));
 
             gradingResults.add(new GradingResult(
                     c.matchPattern(),
@@ -119,7 +119,7 @@ public class TestGrading {
                 Comparator.comparing(c -> c.id));
     }
 
-    public static String failureMessage(String id, Expect expect, long count) {
+    public static String failureMessage(String id, Expect expect, long count, String description) {
         if (passed(expect, count)) {
             return null;
         } else {
@@ -128,7 +128,7 @@ public class TestGrading {
                 case ACCEPTABLE_INTERESTING:
                     return null;
                 case FORBIDDEN:
-                    return "Observed forbidden state: " + id;
+                    return "Observed forbidden state: " + id + (description == null ? "" : " (" + description + ")");
                 case UNKNOWN:
                     return "Missing description";
                 default:
