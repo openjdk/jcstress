@@ -30,6 +30,7 @@ import org.openjdk.jcstress.vm.AllocProfileSupport;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class TestConfig implements Serializable {
@@ -48,10 +49,17 @@ public class TestConfig implements Serializable {
     public final int maxFootprintMB;
     public int minStride;
     public int maxStride;
+    public StrideCap strideCap;
 
     public enum RunMode {
         EMBEDDED,
         FORKED,
+    }
+
+    public enum StrideCap {
+        NONE,
+        FOOTPRINT,
+        TIME,
     }
 
     public TestConfig(Options opts, TestInfo info, RunMode runMode, int forkId, List<String> jvmArgs) {
@@ -69,23 +77,16 @@ public class TestConfig implements Serializable {
         threads = info.threads();
         name = info.name();
         generatedRunnerName = info.generatedRunner();
+        strideCap = StrideCap.NONE;
     }
 
     public void adjustStrides(Consumer<Integer> tryAllocate) {
         int count = 1;
         int succCount = count;
         while (true) {
-            long start = AllocProfileSupport.getAllocatedBytes();
-            try {
-                tryAllocate.accept(count);
-                long footprint = AllocProfileSupport.getAllocatedBytes() - start;
-
-                if (footprint > maxFootprintMB * 1024 * 1024) {
-                    // blown the footprint estimate
-                    break;
-                }
-            } catch (OutOfMemoryError err) {
-                // blown the heap size
+            StrideCap cap = tryWith(tryAllocate, count);
+            if (cap != StrideCap.NONE) {
+                strideCap = cap;
                 break;
             }
 
@@ -103,6 +104,34 @@ public class TestConfig implements Serializable {
 
         maxStride = Math.min(maxStride, succCount);
         minStride = Math.min(minStride, succCount);
+    }
+
+    private StrideCap tryWith(Consumer<Integer> tryAllocate, int count) {
+        final int TRIES = 10;
+        for (int tries = 0; tries < TRIES; tries++) {
+            long startFoot = AllocProfileSupport.getAllocatedBytes();
+            long startTime = System.nanoTime();
+            try {
+                tryAllocate.accept(count);
+                long usedTime = System.nanoTime() - startTime;
+                long footprint = AllocProfileSupport.getAllocatedBytes() - startFoot;
+
+                if (footprint > maxFootprintMB * 1024 * 1024) {
+                    // blown the footprint estimate
+                    return StrideCap.FOOTPRINT;
+                }
+
+                if (TimeUnit.NANOSECONDS.toMillis(usedTime) > time) {
+                    // blown the time estimate
+                    return StrideCap.TIME;
+                }
+
+            } catch (OutOfMemoryError err) {
+                // blown the heap size
+                return StrideCap.FOOTPRINT;
+            }
+        }
+        return StrideCap.NONE;
     }
 
     @Override
@@ -144,6 +173,7 @@ public class TestConfig implements Serializable {
     public String toString() {
         return "JVM options: " + jvmArgs + "\n" +
                 "Iterations: " + iters + "\n" +
-                "Time: " + time;
+                "Time: " + time + "\n" +
+                "Stride: [" + minStride + ", " + maxStride + "] (capped by " + strideCap + ")";
     }
 }
