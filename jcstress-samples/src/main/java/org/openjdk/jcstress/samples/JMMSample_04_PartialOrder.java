@@ -175,13 +175,14 @@ public class JMMSample_04_PartialOrder {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        Of course, the same thing is achievable with locks.
+        Of course, the same thing is achievable with locks, except that (0, 1) is forbidden due to atomicity
+        of the entire locked section.
 
               [OK] org.openjdk.jcstress.samples.JMMSample_04_PartialOrder.LockGuard
             (JVM args: [-server])
           Observed state   Occurrences   Expectation  Interpretation
                     0, 0    29,017,795    ACCEPTABLE  Doing both reads early.
-                    0, 1             0    ACCEPTABLE  Caught in the middle: $x is visible, $y is not.
+                    0, 1             0     FORBIDDEN  Caught in the middle: $x is visible, $y is not.
                     1, 0             0     FORBIDDEN  Seeing $y, but not $x!
                     1, 1    31,223,995    ACCEPTABLE  Doing both reads late.
 
@@ -189,7 +190,7 @@ public class JMMSample_04_PartialOrder {
     @JCStressTest
     @Outcome(id = "0, 0", expect = ACCEPTABLE, desc = "Doing both reads early.")
     @Outcome(id = "1, 1", expect = ACCEPTABLE, desc = "Doing both reads late.")
-    @Outcome(id = "0, 1", expect = ACCEPTABLE, desc = "Caught in the middle: $x is visible, $y is not.")
+    @Outcome(id = "0, 1", expect = FORBIDDEN, desc = "Caught in the middle: $x is visible, $y is not.")
     @Outcome(id = "1, 0", expect = FORBIDDEN, desc = "Seeing $y, but not $x!")
     @State
     public static class LockGuard {
