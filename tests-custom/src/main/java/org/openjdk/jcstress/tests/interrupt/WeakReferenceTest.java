@@ -57,11 +57,24 @@ public class WeakReferenceTest {
         ref = new WeakReference<>(referent, refQueue);
     }
 
-
     @Actor
     public void actor1() {
         while (ref.get() != null) {
-            // burn!
+            work();
+        }
+    }
+
+    static long sink;
+
+    void work() {
+        // Need to have something to work on before GC has any chance to react.
+        // This is especially important for SATB-style GCs like G1 and Shenandoah.
+        long t = sink;
+        for (long i = 1_000_000; i > 0; i--) {
+            t += (t * 0x5DEECE66DL + 0xBL + i) & (0xFFFFFFFFFFFFL);
+        }
+        if (t == 42) {
+            sink += t;
         }
     }
 
