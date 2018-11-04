@@ -70,7 +70,7 @@ public class WeakReferenceTest {
         // Need to have something to work on before GC has any chance to react.
         // This is especially important for SATB-style GCs like G1 and Shenandoah.
         long t = sink;
-        for (long i = 1_000_000; i > 0; i--) {
+        for (long i = 100_000_000; i > 0; i--) {
             t += (t * 0x5DEECE66DL + 0xBL + i) & (0xFFFFFFFFFFFFL);
         }
         if (t == 42) {
@@ -85,7 +85,7 @@ public class WeakReferenceTest {
         // should eventually complete, not testing here
         while (refQueue.poll() != ref) {
             System.gc();
-            TimeUnit.MILLISECONDS.sleep(10);
+            TimeUnit.MILLISECONDS.sleep(100);
         }
     }
 
