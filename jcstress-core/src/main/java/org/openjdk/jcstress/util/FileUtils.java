@@ -65,6 +65,7 @@ public class FileUtils {
                 throw new IOException("Resource not found: " + cpLocation);
             }
             File file = File.createTempFile(prefix, suffix);
+            file.deleteOnExit();
             os = new FileOutputStream(file);
             transferTo(is, os);
             return file.getAbsolutePath();

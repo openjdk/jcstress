@@ -206,6 +206,10 @@ public class TestExecutor {
             try {
                 this.stdout = File.createTempFile("jcstress", "stdout");
                 this.stderr = File.createTempFile("jcstress", "stderr");
+
+                // Register these files for removal in case we terminate through the uncommon path
+                this.stdout.deleteOnExit();
+                this.stderr.deleteOnExit();
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
@@ -261,18 +265,14 @@ public class TestExecutor {
                         } catch (IOException e) {
                             output.add("Failed to read stderr: " + e.getMessage());
                         }
-
-                        if (stdout.delete()) {
-                            output.add("Failed to delete stdout log: " + stdout);
-                        }
-                        if (stderr.delete()) {
-                            output.add("Failed to delete stderr log: " + stderr);
-                        }
-
                         throw new ForkFailedException(output);
                     }
                 } catch (InterruptedException ex) {
                     throw new ForkFailedException(ex.getMessage());
+                } finally {
+                    // The process is definitely dead, remove the temporary files.
+                    stdout.delete();
+                    stderr.delete();
                 }
                 return true;
             }
