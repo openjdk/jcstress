@@ -37,10 +37,6 @@ questions.
 
     <name>JCStress Benchmarks</name>
 
-    <prerequisites>
-        <maven>3.0</maven>
-    </prerequisites>
-
     <dependencies>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
@@ -66,7 +62,7 @@ questions.
         <!--
             JMH version to use with this project.
           -->
-        <jmh.version>1.17.5</jmh.version>
+        <jmh.version>1.21</jmh.version>
 
         <!--
             Java source/target to use for compilation.
