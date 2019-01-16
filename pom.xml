@@ -229,6 +229,7 @@ questions.
                                 <goal>jar</goal>
                             </goals>
                             <configuration>
+                                <source>8</source>
                                 <excludePackageNames>
                                     sun,
                                     jdk,
