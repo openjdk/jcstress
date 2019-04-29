@@ -37,7 +37,8 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.TimeUnit;
 
-@JCStressTest(Mode.Termination)
+// This test is disabled, because it is heavily problematic with some GCs and platforms
+// @JCStressTest(Mode.Termination)
 @Outcome(id = "TERMINATED", expect = Expect.ACCEPTABLE, desc = "The thread had sucessfully terminated.")
 @Outcome(id = "STALE",      expect = Expect.FORBIDDEN,  desc = "Thread had failed to respond.")
 @Ref("http://altair.cs.oswego.edu/pipermail/concurrency-interest/2012-August/009654.html")
