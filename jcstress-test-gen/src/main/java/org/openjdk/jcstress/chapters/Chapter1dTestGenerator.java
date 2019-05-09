@@ -38,7 +38,12 @@ import java.util.Set;
 public class Chapter1dTestGenerator {
 
     public static final String PREFIX = "org.openjdk.jcstress.tests";
-    public static final String[] TYPES_ALL = new String[]{"byte", "boolean", "char", "short", "int", "float", "long", "double", "String"};
+
+    public static final String[] TYPES_G = new String[]{"byte", "boolean", "char", "short", "int", "float", "long", "double", "String"};
+
+    // Test makes little sense with non-access-atomic types. Access atomicity is verified elsewhere.
+    public static final String[] TYPES_V = new String[]{"byte", "boolean", "char", "short", "int", "float", "String"};
+
     public static final String[] TYPES_VIEWS = new String[]{"char", "short", "int", "float", "long", "double"};
 
     public static void main(String... args) throws IOException {
@@ -98,10 +103,11 @@ public class Chapter1dTestGenerator {
     }
 
     private static void makeTests(String dest, String template, String label) throws IOException {
-        for (VarHandleMode gs : VarHandleMode.values()) {
+        // Only care about the access-atomic guards
+        for (VarHandleMode gs : new VarHandleMode[] { VarHandleMode.OPAQUE, VarHandleMode.ACQ_REL, VarHandleMode.VOLATILE } ) {
             String pack = PREFIX + "." + label + "." + gs;
-            for (String typeG : TYPES_ALL) {
-                for (String typeV : TYPES_ALL) {
+            for (String typeG : TYPES_G) {
+                for (String typeV : TYPES_V) {
                     String name = testName(typeG, typeV);
                     String res = Spp.spp(template,
                             keys(typeG, typeV, gs),
@@ -114,11 +120,12 @@ public class Chapter1dTestGenerator {
     }
 
     private static void makeBufferTests(String dest, String template, String label) throws IOException {
-        for (VarHandleMode gs : VarHandleMode.values()) {
+        // Only care about the access-atomic guards
+        for (VarHandleMode gs : new VarHandleMode[] { VarHandleMode.OPAQUE, VarHandleMode.ACQ_REL, VarHandleMode.VOLATILE } ) {
             for (ByteOrder bo : new ByteOrder[] { ByteOrder.BIG_ENDIAN, ByteOrder.LITTLE_ENDIAN }) {
                 String pack = PREFIX + "." + label + "." + bo.toString().toLowerCase().replace("_endian", "") + "." + gs;
                 for (String typeG : TYPES_VIEWS) {
-                    for (String typeV : TYPES_ALL) {
+                    for (String typeV : TYPES_V) {
                         String name = testName(typeG, typeV);
                         String res = Spp.spp(template,
                                 keys(typeG, typeV, gs),

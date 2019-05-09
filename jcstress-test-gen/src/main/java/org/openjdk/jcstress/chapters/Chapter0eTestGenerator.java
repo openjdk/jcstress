@@ -37,8 +37,11 @@ import java.util.Set;
 public class Chapter0eTestGenerator {
 
     public static final String PREFIX = "org.openjdk.jcstress.tests";
-    public static final String[] TYPES = new String[]{"byte", "boolean", "char", "short", "int", "float", "long", "double", "String"};
-    public static final String[] MODIFIERS = new String[]{ "", "volatile" };
+
+    public static final String[] TYPES_G = new String[]{"byte", "boolean", "char", "short", "int", "float", "long", "double", "String"};
+
+    // Test makes little sense with non-access-atomic values. Access atomicity is verified elsewhere.
+    public static final String[] TYPES_V = new String[]{"byte", "boolean", "char", "short", "int", "float", "String"};
 
     public static void main(String... args) throws IOException {
         if (args.length < 1) {
@@ -51,31 +54,21 @@ public class Chapter0eTestGenerator {
                 GeneratorUtils.readFromResource("/acqrel/X-FieldAcqRelTest.java.template"),
                 "acqrel.fields"
         );
-
-        makeTests(
-                dest,
-                GeneratorUtils.readFromResource("/acqrel/X-ArrayAcqRelTest.java.template"),
-                "acqrel.arrays"
-        );
-
     }
 
     private static void makeTests(String dest, String template, String label) throws IOException {
-        for (String modifier : MODIFIERS) {
-            String pack = PREFIX + "." + label + "." + (modifier.equals("") ? "plain" : modifier + "s");
-            for (String typeV : TYPES) {
-                for (String typeG : TYPES) {
-                    String name = testName(typeG, typeV);
-                    String res = Spp.spp(template,
-                            keys(modifier, typeG, label),
-                            vars(modifier, typeG, typeV, pack, name));
+        String pack = PREFIX + "." + label + ".volatiles";
+        for (String typeV : TYPES_V) {
+            for (String typeG : TYPES_G) {
+                String name = testName(typeG, typeV);
+                String res = Spp.spp(template,
+                        keys("volatile", typeG, label),
+                        vars("volatile", typeG, typeV, pack, name));
 
-                    GeneratorUtils.writeOut(dest, pack, name, res);
-                }
+                GeneratorUtils.writeOut(dest, pack, name, res);
             }
         }
     }
-
 
     private static Map<String, String> vars(String modifier, String typeG, String typeV, String pack, String name) {
         Map<String, String> map = new HashMap<>();
@@ -104,15 +97,8 @@ public class Chapter0eTestGenerator {
     private static Set<String> keys(String modifier, String type, String label) {
         Set<String> set = new HashSet<>();
         set.add(type);
-        if (racy(modifier, type, label)) {
-            set.add("racy");
-        }
         set.add(modifier);
         return set;
-    }
-
-    private static boolean racy(String modifier, String type, String label) {
-        return (!modifier.equals("volatile") || label.contains("array"));
     }
 
     private static String testName(String typeG, String typeV) {
