@@ -138,14 +138,10 @@ public class VMSupport {
                     // Intepreted
                     Arrays.asList("-Xint"),
 
-                    // Tiered C1
+                    // C1
                     Arrays.asList("-XX:TieredStopAtLevel=1"),
 
-                    // Tiered C1+C2 (default)
-                    Collections.emptyList(),
-                    Arrays.asList("-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM"),
-
-                    // Pure, non-tiered C2
+                    // C2
                     Arrays.asList("-XX:-TieredCompilation"),
                     Arrays.asList("-XX:-TieredCompilation", "-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM"));
         }
