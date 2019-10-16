@@ -52,7 +52,7 @@ public class DirectByteBufferViewsAtomicityTests {
         private final ShortBuffer sb;
 
         public MyState() {
-            b = ByteBuffer.allocate(16);
+            b = ByteBuffer.allocateDirect(16);
             b.order(ByteOrder.nativeOrder());
             ib = b.asIntBuffer();
             cb = b.asCharBuffer();
