@@ -37,12 +37,12 @@ import org.openjdk.jcstress.infra.results.II_Result;
 @State
 public class SynchronizedMutexTest {
 
-    static final Object LOCK = new Object();
+    final Object lock = new Object();
     int value;
 
     @Actor
     public void actor1(II_Result r) {
-        synchronized (LOCK) {
+        synchronized (lock) {
             r.r1 = (value == 0) ? 1 : 0;
             value = 1;
         }
@@ -50,7 +50,7 @@ public class SynchronizedMutexTest {
 
     @Actor
     public void actor2(II_Result r) {
-        synchronized (LOCK) {
+        synchronized (lock) {
             r.r2 = (value == 0) ? 2 : 0;
             value = 1;
         }
