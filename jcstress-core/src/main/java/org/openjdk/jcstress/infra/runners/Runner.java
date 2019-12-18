@@ -143,7 +143,7 @@ public abstract class Runner<R> {
             }
 
             long timeSpent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
-            if (timeSpent > Math.max(2*config.time, MIN_TIMEOUT_MS)) {
+            if (timeSpent > Math.max(10*config.time, MIN_TIMEOUT_MS)) {
                 dumpFailure(-1, Status.TIMEOUT_ERROR, "Timeout waiting for tasks to complete: " + timeSpent + " ms");
                 return;
             }
