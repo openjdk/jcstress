@@ -24,6 +24,7 @@
  */
 package org.openjdk.jcstress.util;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -125,19 +126,15 @@ public class Reflections {
     }
 
     private static void enumerateJAR(File jar, ResultCallback callback) throws Throwable {
-        FileInputStream jarFileStream = new FileInputStream(jar);
-        JarInputStream jarFile = new JarInputStream(jarFileStream);
-
-        JarEntry jarEntry;
-        while ((jarEntry = jarFile.getNextJarEntry()) != null) {
-            callback.accept(jarEntry.getName());
+        try (FileInputStream fis = new FileInputStream(jar);
+             BufferedInputStream bis = new BufferedInputStream(fis);
+             JarInputStream jis = new JarInputStream(bis)) {
+            JarEntry jarEntry;
+            while ((jarEntry = jis.getNextJarEntry()) != null) {
+                callback.accept(jarEntry.getName());
+            }
         }
-
-        jarFileStream.close();
-        jarFile.close();
-
     }
-
 
     public interface ResultCallback {
         void accept(String name);

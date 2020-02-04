@@ -37,6 +37,7 @@ import java.util.zip.GZIPOutputStream;
 public class DiskWriteCollector implements TestResultCollector {
 
     private final FileOutputStream fos;
+    private final BufferedOutputStream bos;
     private final GZIPOutputStream gos;
     private final ObjectOutputStream oos;
     private int frames;
@@ -44,7 +45,8 @@ public class DiskWriteCollector implements TestResultCollector {
     public DiskWriteCollector(String fileName) throws IOException {
         File file = new File(fileName);
         fos = new FileOutputStream(file);
-        gos = new GZIPOutputStream(fos);
+        bos = new BufferedOutputStream(fos);
+        gos = new GZIPOutputStream(bos);
         oos = new ObjectOutputStream(gos);
     }
 
@@ -63,6 +65,7 @@ public class DiskWriteCollector implements TestResultCollector {
                 oos.writeObject(result);
                 oos.flush();
                 gos.flush();
+                bos.flush();
                 fos.flush();
             } catch (IOException e) {
                 // expect
@@ -74,6 +77,7 @@ public class DiskWriteCollector implements TestResultCollector {
         synchronized (this) {
             flushAndClose(oos);
             flushAndClose(gos);
+            flushAndClose(bos);
             flushAndClose(fos);
         }
     }

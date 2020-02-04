@@ -24,11 +24,7 @@
  */
 package org.openjdk.jcstress.infra.collectors;
 
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -38,16 +34,18 @@ import java.util.zip.GZIPInputStream;
  */
 public class DiskReadCollector {
 
-    private final ObjectInputStream ois;
     private final TestResultCollector collector;
     private final FileInputStream fis;
+    private final BufferedInputStream bis;
     private final GZIPInputStream gis;
+    private final ObjectInputStream ois;
 
     public DiskReadCollector(String fileName, TestResultCollector collector) throws IOException {
         this.collector = collector;
         File file = new File(fileName);
         fis = new FileInputStream(file);
-        gis = new GZIPInputStream(fis);
+        bis = new BufferedInputStream(fis);
+        gis = new GZIPInputStream(bis);
         ois = new ObjectInputStream(gis);
     }
 
@@ -73,6 +71,12 @@ public class DiskReadCollector {
 
         try {
             gis.close();
+        } catch (IOException e) {
+            // expected
+        }
+
+        try {
+            bis.close();
         } catch (IOException e) {
             // expected
         }
