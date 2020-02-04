@@ -24,10 +24,14 @@
  */
 package org.openjdk.jcstress.vm;
 
-public class DeoptTestMain {
+public class DeoptAllTestMain {
 
     public static void main(String... args) throws Throwable {
         WhiteBoxSupport.init();
+        Throwable t = WhiteBoxSupport.errorAll();
+        if (t != null) {
+            throw t;
+        }
     }
 
 }

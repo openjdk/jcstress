@@ -32,6 +32,7 @@ import org.openjdk.jcstress.infra.runners.SpinLoopStyle;
 import org.openjdk.jcstress.util.OptionFormatter;
 import org.openjdk.jcstress.util.Promise;
 import org.openjdk.jcstress.util.StringUtils;
+import org.openjdk.jcstress.vm.DeoptMode;
 import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.IOException;
@@ -64,7 +65,7 @@ public class Options {
     private String mode;
     private boolean userYield;
     private String resultFile;
-    private int deoptRatio;
+    private DeoptMode deoptMode;
     private Collection<String> jvmArgs;
     private Collection<String> jvmArgsPrepend;
     private int batchSize;
@@ -130,9 +131,9 @@ public class Options {
         OptionSpec<String> modeStr = parser.accepts("m", "Test mode preset: sanity, quick, default, tough, stress.")
                 .withRequiredArg().ofType(String.class).describedAs("mode");
 
-        OptionSpec<Integer> deoptRatio = parser.accepts("deoptRatio", "De-optimize (roughly) every N-th iteration. Larger " +
-                "value improves test performance, but decreases the chance we hit unlucky compilation.")
-                .withRequiredArg().ofType(Integer.class).describedAs("N");
+        OptionSpec<DeoptMode> deoptMode = parser.accepts("deoptMode", "De-optimization mode, happens before each test. " +
+                "NONE = No deoptimization. METHOD = Deoptimize org.openjdk.jcstress.*. ALL = Deoptimize everything.")
+                .withRequiredArg().ofType(DeoptMode.class).describedAs("mode");
 
         OptionSpec<String> optJvmArgs = parser.accepts("jvmArgs", "Use given JVM arguments. This disables JVM flags auto-detection, " +
                 "and runs only the single JVM mode. Either a single space-separated option line, or multiple options are accepted. " +
@@ -202,6 +203,7 @@ public class Options {
             this.iters = 1;
             this.forks = 1;
             this.batchSize = 100;
+            this.deoptMode = DeoptMode.NONE;
         } else
         if (this.mode.equalsIgnoreCase("quick")) {
             this.time = 200;
@@ -238,7 +240,7 @@ public class Options {
         this.iters = orDefault(set.valueOf(iters), this.iters);
         this.forks = orDefault(set.valueOf(forks), this.forks);
         this.batchSize = orDefault(set.valueOf(batchSize), this.batchSize);
-        this.deoptRatio = orDefault(set.valueOf(deoptRatio), this.iters * 3);
+        this.deoptMode = orDefault(set.valueOf(deoptMode), DeoptMode.ALL);
 
         this.jvmArgs = processArgs(optJvmArgs, set);
         this.jvmArgsPrepend = processArgs(optJvmArgsPrepend, set);
@@ -283,8 +285,8 @@ public class Options {
         out.println();
     }
 
-    public int deoptRatio() {
-        return deoptRatio;
+    public DeoptMode deoptMode() {
+        return deoptMode;
     }
 
     public int getMinStride() {

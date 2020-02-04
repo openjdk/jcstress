@@ -32,21 +32,29 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.List;
 
 public class WhiteBoxSupport {
 
     private static WhiteBox whiteBox;
     private static volatile boolean tried;
-    private static volatile Mode mode;
-    private static volatile Collection<Method> infraMethods;
+    private static volatile Collection<String> methods;
 
-    enum Mode {
-        DEOPT_ALL,
-        DEOPT_METHOD,
+    private static volatile boolean AVAILABLE_ALL;
+    private static volatile boolean AVAILABLE_METHOD;
+
+    private static volatile Throwable EXCEPTION_ALL;
+    private static volatile Throwable EXCEPTION_METHOD;
+
+    public static Throwable errorAll() {
+        return EXCEPTION_ALL;
     }
 
-    public static void init() throws Throwable {
+    public static Throwable errorMethod() {
+        return EXCEPTION_METHOD;
+    }
+
+    public static void init() {
         if (tried) return;
         try {
             initAndTest();
@@ -59,31 +67,23 @@ public class WhiteBoxSupport {
         WhiteBox.registerNatives();
         WhiteBox w = new WhiteBox();
 
-        Throwable deoptMethod = null;
         try {
             w.deoptimizeMethod(WhiteBoxSupport.class.getMethod("initSafely"));
             w.isClassAlive(WhiteBoxSupport.class.getName());
+            AVAILABLE_METHOD = true;
         } catch (Throwable ex) {
-            deoptMethod = ex;
+            EXCEPTION_METHOD = ex;
+            AVAILABLE_METHOD = false;
         }
 
-        Throwable deoptAll = null;
         try {
             w.deoptimizeAll();
+            AVAILABLE_ALL = true;
         } catch (Throwable ex) {
-            deoptAll = ex;
+            EXCEPTION_ALL = ex;
+            AVAILABLE_ALL = false;
         }
 
-        if (deoptMethod == null) {
-            mode = Mode.DEOPT_METHOD;
-        } else if (deoptAll == null) {
-            mode = Mode.DEOPT_ALL;
-        } else {
-            IllegalStateException whiteBoxFailed = new IllegalStateException();
-            whiteBoxFailed.addSuppressed(deoptAll);
-            whiteBoxFailed.addSuppressed(deoptMethod);
-            throw whiteBoxFailed;
-        }
         whiteBox = w;
     }
 
@@ -98,24 +98,27 @@ public class WhiteBoxSupport {
         }
     }
 
-    public static void tryDeopt(int actionProbRatio) {
+    public static void tryDeopt(DeoptMode mode) {
         WhiteBox w = whiteBox;
         if (w != null) {
-            if (ThreadLocalRandom.current().nextInt(actionProbRatio) != 0)
-                return;
-
             switch (mode) {
-                case DEOPT_ALL:
-                    w.deoptimizeAll();
-                    break;
-                case DEOPT_METHOD:
-                    try {
-                        for (Method m : getJCStressMethods()) {
-                            w.deoptimizeMethod(m);
-                        }
-                    } catch (IOException e) {
-                        throw new IllegalStateException();
+                case ALL:
+                    if (AVAILABLE_ALL) {
+                        w.deoptimizeAll();
                     }
+                    break;
+                case METHOD:
+                    if (AVAILABLE_METHOD) {
+                        try {
+                            for (Method m : getJCStressMethods()) {
+                                w.deoptimizeMethod(m);
+                            }
+                        } catch (IOException e) {
+                            throw new IllegalStateException();
+                        }
+                    }
+                    break;
+                case NONE:
                     break;
                 default:
                     throw new IllegalStateException("Unknown deopt mode: " + mode);
@@ -124,23 +127,23 @@ public class WhiteBoxSupport {
     }
 
     private static Collection<Method> getJCStressMethods() throws IOException {
-        Collection<Method> im = infraMethods;
-        if (im == null) {
-            im = new ArrayList<>();
-            Collection<String> names = new ArrayList<>();
-            names.addAll(Reflections.getClassNames("org.openjdk.jcstress"));
-            for (String name : names) {
-                // Avoid loading classes
-                if (!whiteBox.isClassAlive(name)) continue;
-                try {
-                    Class<?> aClass = Class.forName(name);
-                    Collections.addAll(im, aClass.getDeclaredMethods());
-                } catch (ClassNotFoundException e) {
-                    throw new IllegalStateException();
-                }
+        Collection<String> ms = methods;
+        if (ms == null) {
+            ms = Reflections.getClassNames("org.openjdk.jcstress");
+            methods = ms;
+        }
+
+        List<Method> im = new ArrayList<>();
+        for (String name : ms) {
+            // Avoid loading classes for tests that were not yet executed.
+            if (!whiteBox.isClassAlive(name)) continue;
+            try {
+                Collections.addAll(im, Class.forName(name).getDeclaredMethods());
+            } catch (ClassNotFoundException e) {
+                throw new IllegalStateException();
             }
-            infraMethods = im;
-        } return im;
+        }
+        return im;
     }
 
 }

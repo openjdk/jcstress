@@ -27,6 +27,7 @@ package org.openjdk.jcstress.infra.runners;
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.vm.AllocProfileSupport;
+import org.openjdk.jcstress.vm.DeoptMode;
 
 import java.io.Serializable;
 import java.util.List;
@@ -39,7 +40,7 @@ public class TestConfig implements Serializable {
     public final boolean verbose;
     public final int time;
     public final int iters;
-    public final int deoptRatio;
+    public final DeoptMode deoptMode;
     public final int threads;
     public final String name;
     public final String generatedRunnerName;
@@ -72,7 +73,7 @@ public class TestConfig implements Serializable {
         iters = opts.getIterations();
         spinLoopStyle = opts.getSpinStyle();
         verbose = opts.isVerbose();
-        deoptRatio = opts.deoptRatio();
+        deoptMode = opts.deoptMode();
         maxFootprintMB = opts.getMaxFootprintMb();
         threads = info.threads();
         name = info.name();
@@ -146,7 +147,7 @@ public class TestConfig implements Serializable {
         if (maxStride != that.maxStride) return false;
         if (time != that.time) return false;
         if (iters != that.iters) return false;
-        if (deoptRatio != that.deoptRatio) return false;
+        if (deoptMode != that.deoptMode) return false;
         if (threads != that.threads) return false;
         if (!name.equals(that.name)) return false;
         if (!jvmArgs.equals(that.jvmArgs)) return false;
@@ -161,7 +162,7 @@ public class TestConfig implements Serializable {
         result = 31 * result + maxStride;
         result = 31 * result + time;
         result = 31 * result + iters;
-        result = 31 * result + deoptRatio;
+        result = 31 * result + deoptMode.hashCode();
         result = 31 * result + threads;
         result = 31 * result + name.hashCode();
         result = 31 * result + jvmArgs.hashCode();

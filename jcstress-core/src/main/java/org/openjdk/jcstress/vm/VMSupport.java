@@ -94,8 +94,12 @@ public class VMSupport {
 
         try {
             String whiteBoxJarName = FileUtils.copyFileToTemp("/whitebox-api.jar", "whitebox", ".jar");
-            detect("Unlocking Whitebox API for online de-optimization",
-                    DeoptTestMain.class,
+            detect("Unlocking Whitebox API for online de-optimization: all methods",
+                    DeoptAllTestMain.class,
+                    "-XX:+WhiteBoxAPI", "-Xbootclasspath/a:" + whiteBoxJarName
+            );
+            detect("Unlocking Whitebox API for online de-optimization: selected methods",
+                    DeoptMethodTestMain.class,
                     "-XX:+WhiteBoxAPI", "-Xbootclasspath/a:" + whiteBoxJarName
             );
         } catch (IOException e) {

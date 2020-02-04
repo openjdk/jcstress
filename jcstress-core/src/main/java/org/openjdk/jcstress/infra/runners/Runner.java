@@ -79,13 +79,13 @@ public abstract class Runner<R> {
             return;
         }
 
-        for (int c = 1; c <= config.iters; c++) {
-            try {
-                WhiteBoxSupport.tryDeopt(config.deoptRatio);
-            } catch (NoClassDefFoundError err) {
-                // gracefully "handle"
-            }
+        try {
+            WhiteBoxSupport.tryDeopt(config.deoptMode);
+        } catch (NoClassDefFoundError err) {
+            // gracefully "handle"
+        }
 
+        for (int c = 1; c <= config.iters; c++) {
             dump(c, internalRun());
         }
     }
