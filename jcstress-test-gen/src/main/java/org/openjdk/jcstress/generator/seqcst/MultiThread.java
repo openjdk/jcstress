@@ -82,17 +82,22 @@ public class MultiThread {
     }
 
     public String canonicalId() {
-        // Renumber the variable IDs.
+        // Try to canonicalize the test case.
 
-        List<Trace> lsTrace = new ArrayList<>();
-        lsTrace.addAll(threads);
-        Collections.sort(lsTrace,
-                Comparator.comparing(Trace::loadStoreSeq)
-                          .thenComparing(Trace::id));
+        List<Trace> sorted = new ArrayList<>(threads);
 
+        // Step 1. Sort by trace length, descending, then by internal structure.
+        // This prepares us for more stable renumbering.
+
+        Collections.sort(sorted, Comparator
+                .comparing((Trace t) -> -t.loadStoreSeq().length())
+                .thenComparing(Trace::loadStoreSeq));
+
+        // Step 2. Renumber the variables.
+        // This removes the structurally similar test cases.
         int varId = 0;
         Map<Integer, Integer> varMap = new HashMap<>();
-        for (Trace trace : lsTrace) {
+        for (Trace trace : sorted) {
             for (Op op : trace.ops()) {
                 Integer id = varMap.get(op.getVarId());
                 if (id == null) {
@@ -102,8 +107,28 @@ public class MultiThread {
             }
         }
 
+        List<Trace> renumbered = new ArrayList<>();
+        for (Trace trace : sorted) {
+            List<Op> newOps = new ArrayList<>();
+            for (Op op : trace.ops()) {
+                newOps.add(op.renumber(varMap.get(op.getVarId())));
+            }
+            renumbered.add(new Trace(newOps));
+        }
+
+        // Step 3. Sort again after renumbering.
+        // Once renumbering happened, some traces might have changed,
+        // we need to canonicalize their placement as well.
+
+        Collections.sort(renumbered, Comparator.comparing(Trace::id));
+
+        // Final step. Print out the ID
+        return new MultiThread(renumbered).id();
+    }
+
+    public String id() {
         StringBuilder sb = new StringBuilder();
-        for (Trace trace : lsTrace) {
+        for (Trace trace : threads) {
             for (Op op : trace.ops()) {
                 switch (op.getType()) {
                     case LOAD:
@@ -115,7 +140,7 @@ public class MultiThread {
                     default:
                         throw new IllegalStateException();
                 }
-                sb.append(varMap.get(op.getVarId()) + 1);
+                sb.append(op.getVarId() + 1);
                 sb.append("_");
             }
             sb.append("_");

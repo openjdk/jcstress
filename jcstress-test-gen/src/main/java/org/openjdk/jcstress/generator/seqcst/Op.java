@@ -54,6 +54,7 @@ public abstract class Op {
 
     public abstract Result getResult();
     public abstract Value getValue();
+    public abstract Op renumber(int newVarId);
 
     public static class LoadOp extends Op {
         private final Result res;
@@ -71,6 +72,11 @@ public abstract class Op {
         @Override
         public Value getValue() {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Op renumber(int newVarId) {
+            return new LoadOp(newVarId, res);
         }
 
         @Override
@@ -99,6 +105,11 @@ public abstract class Op {
                 throw new IllegalStateException("valueId unset");
             }
             return value;
+        }
+
+        @Override
+        public Op renumber(int newVarId) {
+            return new StoreOp(newVarId, value);
         }
 
         @Override
