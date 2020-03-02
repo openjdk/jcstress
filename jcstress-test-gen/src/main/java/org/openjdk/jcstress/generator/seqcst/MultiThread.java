@@ -95,7 +95,7 @@ public class MultiThread {
 
         // Step 2. Renumber the variables.
         // This removes the structurally similar test cases.
-        int varId = 0;
+        int varId = 1;
         Map<Integer, Integer> varMap = new HashMap<>();
         for (Trace trace : sorted) {
             for (Op op : trace.ops()) {
@@ -140,7 +140,7 @@ public class MultiThread {
                     default:
                         throw new IllegalStateException();
                 }
-                sb.append(op.getVarId() + 1);
+                sb.append(op.getVarId());
                 sb.append("_");
             }
             sb.append("_");

@@ -67,7 +67,10 @@ class Phase {
                 })
                 .filter(MultiThread::hasNoSingleLoadThreads)        // single load threads blow up the test case count
                 .filter(MultiThread::hasNoIntraThreadPairs)         // no load-stores within a single thread
-                .filter(mt -> canonicalIds.add(mt.canonicalId()))   // pass only a canonical order of arguments
+                .filter(mt -> {                                     // pass only a canonical order of arguments
+                    String cid = mt.canonicalId();
+                    return mt.id().equals(cid) && canonicalIds.add(cid);
+                })
                 .collect(Collectors.toList());
 
         System.out.printf("%5d interesting testcases%n", list.size());
@@ -94,11 +97,11 @@ class Phase {
             switch (type) {
                 case 0:
                     Result res = new Result(resId++);
-                    op = new Op.LoadOp(varId, res);
+                    op = new Op.LoadOp(varId + 1, res);
                     break;
                 case 1:
                     Value value = Value.newOne(valId++);
-                    op = new Op.StoreOp(varId, value);
+                    op = new Op.StoreOp(varId + 1, value);
                     break;
                 default:
                     throw new IllegalStateException();

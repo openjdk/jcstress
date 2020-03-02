@@ -139,7 +139,7 @@ public class Trace {
                 default:
                     throw new IllegalStateException();
             }
-            sb.append(op.getVarId() + 1);
+            sb.append(op.getVarId());
             sb.append("_");
         }
         return sb.toString();
