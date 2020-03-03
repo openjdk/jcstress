@@ -55,6 +55,8 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private final Set<ConfigFork> observedForks = Collections.newSetFromMap(new HashMap<>());
 
     private long firstTest;
+
+    private boolean progressInteractive;
     private int progressLen;
 
     private long passed;
@@ -68,6 +70,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
         this.expectedForks = expectedForks;
         this.expectedIterations = expectedForks * (opts.getIterations() + 1); // +1 sanity check iteration #0
         verbose = opts.isVerbose();
+        progressInteractive = (System.console() != null);
         progressLen = 1;
     }
 
@@ -109,7 +112,11 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 throw new IllegalStateException("Illegal status: " + r.status());
         }
 
-        printLine(r);
+        if (progressInteractive) {
+            output.printf("\r%" + progressLen + "s\r", "");
+        }
+
+        output.printf("%10s %s%n", "[" + ReportUtils.statusToLabel(r) + "]", StringUtils.chunkName(r.getName()));
 
         if (!grading.isPassed || grading.hasInteresting || verbose) {
             ReportUtils.printDetails(output, r, true);
@@ -117,26 +124,21 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
         ReportUtils.printMessages(output, r);
 
-        printProgress();
-    }
-
-    private void printLine(TestResult r) {
-        String label = ReportUtils.statusToLabel(r);
-        output.printf("\r%" + progressLen + "s\r", "");
-        output.printf("%10s %s%n", "[" + label + "]", StringUtils.chunkName(r.getName()));
-    }
-
-    private void printProgress() {
-        String line = String.format("(ETA: %10s) (Rate: %s samples/sec) (Tests: %d of %d) (Forks: %2d of %d) (Iterations: %2d of %d; %d passed, %d failed, %d soft errs, %d hard errs) ",
-                computeETA(),
-                computeSpeed(),
-                observedTests.size(), expectedTests,
-                observedForks.size(), expectedForks,
-                observedIterations, expectedIterations, passed, failed, softErrors, hardErrors
-        );
-        progressLen = line.length();
-        output.print(line);
-        output.flush();
+        if (progressInteractive || (observedIterations & 127) == 0) {
+            String line = String.format("(ETA: %10s) (Rate: %s samples/sec) (Tests: %d of %d) (Forks: %2d of %d) (Iterations: %2d of %d; %d passed, %d failed, %d soft errs, %d hard errs) ",
+                    computeETA(),
+                    computeSpeed(),
+                    observedTests.size(), expectedTests,
+                    observedForks.size(), expectedForks,
+                    observedIterations, expectedIterations, passed, failed, softErrors, hardErrors
+            );
+            progressLen = line.length();
+            output.print(line);
+            if (!progressInteractive) {
+                output.println();
+            }
+            output.flush();
+        }
     }
 
     private String computeSpeed() {
