@@ -37,18 +37,16 @@ public class ContendedTestMain {
 
     private static final int PADDING_WIDTH = 64;
 
-    public static void main(String... args) throws NoSuchFieldException, IOException {
-        List<String> msgs = new ArrayList<>();
+    public static void main(String... args) throws IOException {
+        List<String> msgs = Collections.synchronizedList(new ArrayList<>());
 
-        Collection<Class> classes = Reflections.getClasses("class");
+        Collection<Class<?>> classes = Reflections.getClasses("Result");
         if (classes.isEmpty()) {
             throw new IllegalStateException("Classes not found");
         }
 
-        Set<Class> infraClasses = Collections.emptySet();
-
         for (Class<?> cl : classes) {
-            if (!infraClasses.contains(cl) && cl.getAnnotation(Result.class) == null) continue;
+            if (cl.getAnnotation(Result.class) == null) continue;
 
             List<FieldDef> fdefs = new ArrayList<>();
             for (Field f : cl.getDeclaredFields()) {

@@ -56,8 +56,8 @@ public class Reflections {
         }
     }
 
-    public static Collection<Class> getClasses(final String filter) throws IOException {
-        final List<Class> newClasses = new ArrayList<>();
+    public static Collection<Class<?>> getClasses(final String filter) throws IOException {
+        final List<Class<?>> newClasses = new ArrayList<>();
         for (String name : getClassNames(filter)) {
             try {
                 if (name.contains("sun.misc")) continue;
