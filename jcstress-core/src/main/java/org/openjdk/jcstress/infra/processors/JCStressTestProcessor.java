@@ -500,7 +500,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
 
         pw.println("    public final void jcstress_updateHolder(StateHolder<" + s + ", " + r + "> holder) {");
-        pw.println("        if (!holder.tryStartUpdate()) return;");
         pw.println("        " + s + "[] ss = holder.ss;");
         pw.println("        " + r + "[] rs = holder.rs;");
         pw.println("        int len = ss.length;");
@@ -572,7 +571,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("            holder.postRun();");
             pw.println();
             pw.println("            jcstress_consume(holder, counter, " + n + ");");
-            pw.println("            jcstress_updateHolder(holder);");
+            pw.println("            if (holder.tryStartUpdate()) {");
+            pw.println("                jcstress_updateHolder(holder);");
+            pw.println("            }");
             pw.println();
             pw.println("            holder.postUpdate();");
             pw.println("        }");
