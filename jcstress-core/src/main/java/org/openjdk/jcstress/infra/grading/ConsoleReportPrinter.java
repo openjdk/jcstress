@@ -125,7 +125,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
         ReportUtils.printMessages(output, r);
 
         if (progressInteractive || (observedIterations & 127) == 0) {
-            String line = String.format("(ETA: %10s) (Rate: %s samples/sec) (Tests: %d of %d) (Forks: %2d of %d) (Iterations: %2d of %d; %d passed, %d failed, %d soft errs, %d hard errs) ",
+            String line = String.format("(ETA: %10s) (Sample Rate: %s) (Tests: %d of %d) (Forks: %2d of %d) (Iterations: %2d of %d; %d passed, %d failed, %d soft errs, %d hard errs) ",
                     computeETA(),
                     computeSpeed(),
                     observedTests.size(), expectedTests,
@@ -143,7 +143,30 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
     private String computeSpeed() {
         long timeSpent = System.nanoTime() - firstTest;
-        return String.format("%3.2E", 1.0 * TimeUnit.SECONDS.toNanos(1) * observedCount / timeSpent);
+        double v = 1.0 * TimeUnit.SECONDS.toNanos(1) * observedCount / timeSpent;
+
+        final long K = 1000;
+        final long M = 1000*K;
+        final long G = 1000*M;
+        final long T = 1000*G;
+
+        if (v > 10*T) {
+            return String.format("%3.2f T/sec", v / T);
+        }
+
+        if (v > 10*G) {
+            return String.format("%3.2f G/sec", v / G);
+        }
+
+        if (v > 10*M) {
+            return String.format("%3.2f M/sec", v / M);
+        }
+
+        if (v > 10*K) {
+            return String.format("%3.2f K/sec", v / K);
+        }
+
+        return String.format("%3.2f #/sec", v);
     }
 
     private String computeETA() {
