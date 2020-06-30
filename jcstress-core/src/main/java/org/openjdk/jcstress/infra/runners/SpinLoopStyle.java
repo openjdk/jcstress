@@ -25,9 +25,10 @@
 package org.openjdk.jcstress.infra.runners;
 
 public enum SpinLoopStyle {
-    PLAIN("no yielding."),
+    HARD("using plain hard busywait."),
     THREAD_YIELD("using Thread.yield()."),
     THREAD_SPIN_WAIT("using Thread.onSpinWait()"),
+    LOCKSUPPORT_PARK_NANOS("using LockSupport.parkNanos()."),
     ;
 
     private String desc;

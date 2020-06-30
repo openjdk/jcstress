@@ -33,6 +33,7 @@ import org.openjdk.jcstress.infra.collectors.InProcessCollector;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 
+import java.io.IOException;
 import java.util.Collections;
 
 import static org.openjdk.jcstress.util.StringUtils.getFirstLine;
@@ -44,7 +45,7 @@ public class EmbeddedExecutorTest {
     private EmbeddedExecutor embeddedExecutor = new EmbeddedExecutor(sink);
 
     @Test
-    public void testReportTestError() {
+    public void testReportTestError() throws IOException {
         TestConfig config = createSimpleConfigFor("my.missing.ClassName");
         embeddedExecutor.run(config);
 
@@ -58,8 +59,9 @@ public class EmbeddedExecutorTest {
                 getFirstLine(errorMessage));
     }
 
-    private TestConfig createSimpleConfigFor(String runnerClassName) {
+    private TestConfig createSimpleConfigFor(String runnerClassName) throws IOException {
         Options opts = new Options(new String[]{});
+        opts.parse();
         TestInfo info = new TestInfo("", runnerClassName, "", 4, false);
         return new TestConfig(opts, info, TestConfig.RunMode.FORKED, 1, Collections.emptyList());
     }

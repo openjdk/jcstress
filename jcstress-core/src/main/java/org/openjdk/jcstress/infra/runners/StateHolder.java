@@ -26,6 +26,7 @@ package org.openjdk.jcstress.infra.runners;
 
 
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
@@ -120,14 +121,20 @@ public class StateHolder<S, R> {
         UPDATER_NOT_FINISHED.decrementAndGet(this);
 
         switch (spinStyle) {
+            case HARD:
+                while (notFinished > 0);
+                break;
             case THREAD_YIELD:
                 while (notFinished > 0) Thread.yield();
                 break;
             case THREAD_SPIN_WAIT:
                 while (notFinished > 0) Thread.onSpinWait();
                 break;
+            case LOCKSUPPORT_PARK_NANOS:
+                while (notFinished > 0) LockSupport.parkNanos(1);
+                break;
             default:
-                while (notFinished > 0);
+                throw new IllegalStateException("Unhandled style: " + spinStyle);
         }
     }
 
@@ -139,14 +146,20 @@ public class StateHolder<S, R> {
         UPDATER_NOT_UPDATED.decrementAndGet(this);
 
         switch (spinStyle) {
+            case HARD:
+                while (notUpdated > 0);
+                break;
             case THREAD_YIELD:
                 while (notUpdated > 0) Thread.yield();
                 break;
             case THREAD_SPIN_WAIT:
                 while (notUpdated > 0) Thread.onSpinWait();
                 break;
+            case LOCKSUPPORT_PARK_NANOS:
+                while (notUpdated > 0) LockSupport.parkNanos(1);
+                break;
             default:
-                while (notUpdated > 0);
+                throw new IllegalStateException("Unhandled style: " + spinStyle);
         }
     }
 

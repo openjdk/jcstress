@@ -63,7 +63,7 @@ public class Options {
     private Promise<Integer> userCPUs;
     private int forks;
     private String mode;
-    private boolean userYield;
+    private SpinLoopStyle spinStyle;
     private String resultFile;
     private DeoptMode deoptMode;
     private Collection<String> jvmArgs;
@@ -121,8 +121,9 @@ public class Options {
                 "values will improve test performance, at expense of testing accuracy")
                 .withRequiredArg().ofType(Integer.class).describedAs("#");
 
-        OptionSpec<Boolean> shouldYield = parser.accepts("yield", "Call Thread.yield() in busy loops.")
-                .withOptionalArg().ofType(Boolean.class).describedAs("bool");
+        OptionSpec<SpinLoopStyle> spinStyle = parser.accepts("spinStyle", "Busy loop wait style. " +
+                "HARD = hard busy loop; THREAD_YIELD = use Thread.yield(); THREAD_SPIN_WAIT = use Thread.onSpinWait(); LOCKSUPPORT_PARK_NANOS = use LockSupport.parkNanos().")
+                .withRequiredArg().ofType(SpinLoopStyle.class).describedAs("style");
 
         OptionSpec<Integer> forks = parser.accepts("f", "Should fork each test N times. \"0\" to run in the embedded mode " +
                 "with occasional forking.")
@@ -195,7 +196,7 @@ public class Options {
             this.userCPUs = Promise.of(set.valueOf(cpus));
         }
 
-        this.userYield = set.has(shouldYield);
+        this.spinStyle = orDefault(set.valueOf(spinStyle), SpinLoopStyle.THREAD_SPIN_WAIT);
 
         mode = orDefault(modeStr.value(set), "default");
         if (this.mode.equalsIgnoreCase("sanity")) {
@@ -306,14 +307,19 @@ public class Options {
     }
 
     public SpinLoopStyle getSpinStyle() {
-        if (VMSupport.spinWaitHintAvailable()) {
-            return SpinLoopStyle.THREAD_SPIN_WAIT;
-        } else {
-            if (userYield) {
-                return SpinLoopStyle.THREAD_YIELD;
-            } else {
-                return SpinLoopStyle.PLAIN;
-            }
+        switch (spinStyle) {
+            case HARD:
+            case THREAD_YIELD:
+            case LOCKSUPPORT_PARK_NANOS:
+                return spinStyle;
+            case THREAD_SPIN_WAIT:
+                if (VMSupport.spinWaitHintAvailable()) {
+                    return spinStyle;
+                } else {
+                    return SpinLoopStyle.HARD;
+                }
+            default:
+                throw new IllegalStateException("Unhandled spin style: " + spinStyle);
         }
     }
 
