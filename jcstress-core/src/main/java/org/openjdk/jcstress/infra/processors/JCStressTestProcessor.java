@@ -519,7 +519,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("         }");
         pw.println();
         pw.println("        version = new StateHolder<>(control.isStopped, newS, newR, " + actorsCount + ", config.spinLoopStyle);");
-        pw.println("        holder.finishUpdate();");
         pw.println("   }");
 
         int n = 0;

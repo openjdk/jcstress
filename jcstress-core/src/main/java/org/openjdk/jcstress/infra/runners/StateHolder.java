@@ -48,59 +48,36 @@ public class StateHolder<S, R> {
 
     @sun.misc.Contended("finals")
     @jdk.internal.vm.annotation.Contended("finals")
-    public final int countWorkers;
-
-    @sun.misc.Contended("finals")
-    @jdk.internal.vm.annotation.Contended("finals")
     public final SpinLoopStyle spinStyle;
-
-    // --------------------- Write-once fields ------------------------
-    // Threads are busy-waiting on these, let them do it undisturbed.
-
-    @sun.misc.Contended("flags")
-    @jdk.internal.vm.annotation.Contended("flags")
-    private volatile boolean notAllStarted;
-
-    @sun.misc.Contended("flags")
-    @jdk.internal.vm.annotation.Contended("flags")
-    private volatile boolean notAllReady;
-
-    @sun.misc.Contended("flags")
-    @jdk.internal.vm.annotation.Contended("flags")
-    private volatile boolean notAllFinished;
-
-    @sun.misc.Contended("flags")
-    @jdk.internal.vm.annotation.Contended("flags")
-    private volatile boolean notUpdated;
-
-    @sun.misc.Contended("flags")
-    @jdk.internal.vm.annotation.Contended("flags")
-    public volatile boolean updateStride;
 
     // --------------------- Write-frequent fields ------------------------
     // Threads are updating them frequently, and they need them completely
     // separate. Otherwise there are warmup/warmdown lags.
 
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
-    private volatile int started;
+    @sun.misc.Contended("flags")
+    @jdk.internal.vm.annotation.Contended("flags")
+    public volatile boolean updateStride;
 
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
-    private volatile int ready;
+    @sun.misc.Contended("flags")
+    @jdk.internal.vm.annotation.Contended("flags")
+    private volatile int notStarted;
 
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
-    private volatile int finished;
+    @sun.misc.Contended("flags")
+    @jdk.internal.vm.annotation.Contended("flags")
+    private volatile int notFinished;
 
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
-    private volatile int consumed;
+    @sun.misc.Contended("flags")
+    @jdk.internal.vm.annotation.Contended("flags")
+    private volatile int notConsumed;
 
-    static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_STARTED  = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "started");
-    static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_READY    = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "ready");
-    static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_FINISHED = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "finished");
-    static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_CONSUMED = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "consumed");
+    @sun.misc.Contended("flags")
+    @jdk.internal.vm.annotation.Contended("flags")
+    private volatile int notUpdated;
+
+    static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_NOT_STARTED = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "notStarted");
+    static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_NOT_FINISHED = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "notFinished");
+    static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_NOT_CONSUMED = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "notConsumed");
+    static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_NOT_UPDATED = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "notUpdated");
 
     /**
      * Initial version
@@ -117,76 +94,59 @@ public class StateHolder<S, R> {
         this.stopped = stopped;
         this.ss = states;
         this.rs = results;
-        this.countWorkers = expectedWorkers;
         this.spinStyle = spinStyle;
-        UPDATER_STARTED.set(this, expectedWorkers);
-        UPDATER_READY.set(this, expectedWorkers);
-        UPDATER_FINISHED.set(this, expectedWorkers);
-        UPDATER_CONSUMED.set(this, expectedWorkers);
-        this.notAllReady = true;
-        this.notAllFinished = true;
-        this.notAllStarted = true;
-        this.notUpdated = true;
+        this.notStarted = expectedWorkers;
+        this.notFinished = expectedWorkers;
+        this.notConsumed = expectedWorkers;
+        this.notUpdated = expectedWorkers;
     }
 
     public void preRun() {
-        int v = UPDATER_READY.decrementAndGet(this);
-        if (v == 0) {
-            notAllReady = false;
-        }
+        // Do not need to rendezvous the workers: first iteration would
+        // probably lack any rendezvous, but all subsequent ones would
+        // rendezvous during postUpdate().
 
-        switch (spinStyle) {
-            case THREAD_YIELD:
-                while (notAllReady) Thread.yield();
-                break;
-            case THREAD_SPIN_WAIT:
-                while (notAllReady) Thread.onSpinWait();
-                break;
-            default:
-                while (notAllReady);
-        }
-
-        if (UPDATER_STARTED.decrementAndGet(this) == 0) {
-            notAllStarted = false;
-        }
+        // Notify that we have started
+        UPDATER_NOT_STARTED.decrementAndGet(this);
     }
 
     public void postRun() {
-        if (UPDATER_FINISHED.decrementAndGet(this) == 0) {
-            notAllFinished = false;
+        // If any thread lags behind, then we need to update our stride
+        if (!updateStride && notStarted > 0) {
+            updateStride = true;
         }
-        updateStride |= notAllStarted;
+
+        // Notify that we are finished
+        UPDATER_NOT_FINISHED.decrementAndGet(this);
 
         switch (spinStyle) {
             case THREAD_YIELD:
-                while (notAllFinished) Thread.yield();
+                while (notFinished > 0) Thread.yield();
                 break;
             case THREAD_SPIN_WAIT:
-                while (notAllFinished) Thread.onSpinWait();
+                while (notFinished > 0) Thread.onSpinWait();
                 break;
             default:
-                while (notAllFinished);
+                while (notFinished > 0);
         }
     }
 
     public boolean tryStartUpdate()  {
-        return (UPDATER_CONSUMED.decrementAndGet(this) == 0);
-    }
-
-    public void finishUpdate() {
-        notUpdated = false;
+        return (UPDATER_NOT_CONSUMED.decrementAndGet(this) == 0);
     }
 
     public void postUpdate() {
+        UPDATER_NOT_UPDATED.decrementAndGet(this);
+
         switch (spinStyle) {
             case THREAD_YIELD:
-                while (notUpdated) Thread.yield();
+                while (notUpdated > 0) Thread.yield();
                 break;
             case THREAD_SPIN_WAIT:
-                while (notUpdated) Thread.onSpinWait();
+                while (notUpdated > 0) Thread.onSpinWait();
                 break;
             default:
-                while (notUpdated);
+                while (notUpdated > 0);
         }
     }
 
