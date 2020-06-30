@@ -455,12 +455,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    }");
         pw.println();
 
-        pw.println("    public final void jcstress_consume(StateHolder<" + s + ", " + r + "> holder, Counter<" + r + "> cnt, int a, int actors) {");
+        pw.println("    public final void jcstress_consume(StateHolder<" + s + ", " + r + "> holder, Counter<" + r + "> cnt, int a) {");
         pw.println("        " + s + "[] ss = holder.ss;");
         pw.println("        " + r + "[] rs = holder.rs;");
         pw.println("        int len = ss.length;");
-        pw.println("        int left = a * len / actors;");
-        pw.println("        int right = (a + 1) * len / actors;");
+        pw.println("        int left = a * len / " + actorsCount + ";");
+        pw.println("        int right = (a + 1) * len / " + actorsCount + ";");
         pw.println("        for (int c = left; c < right; c++) {");
         pw.println("            " + r + " r = rs[c];");
         pw.println("            " + s + " s = ss[c];");
@@ -571,7 +571,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println();
             pw.println("            holder.postRun();");
             pw.println();
-            pw.println("            jcstress_consume(holder, counter, " + n + ", " + actorsCount + ");");
+            pw.println("            jcstress_consume(holder, counter, " + n + ");");
             pw.println("            jcstress_updateHolder(holder);");
             pw.println();
             pw.println("            holder.postUpdate();");
