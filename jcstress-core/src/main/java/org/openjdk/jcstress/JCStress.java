@@ -75,7 +75,7 @@ public class JCStress {
         TestResultCollector mux = MuxCollector.of(printer, diskCollector);
         SerializedBufferCollector sink = new SerializedBufferCollector(mux);
 
-        TestExecutor executor = new TestExecutor(opts.getUserCPUs(), opts.getBatchSize(), sink, true);
+        TestExecutor executor = new TestExecutor(opts.getCPUCount(), opts.getBatchSize(), sink, true);
         executor.runAll(configs);
 
         sink.close();

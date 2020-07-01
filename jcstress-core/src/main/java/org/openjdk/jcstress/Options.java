@@ -30,7 +30,6 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.openjdk.jcstress.infra.runners.SpinLoopStyle;
 import org.openjdk.jcstress.util.OptionFormatter;
-import org.openjdk.jcstress.util.Promise;
 import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.vm.DeoptMode;
 import org.openjdk.jcstress.vm.VMSupport;
@@ -59,8 +58,7 @@ public class Options {
     private boolean parse;
     private boolean list;
     private boolean verbose;
-    private Promise<Integer> systemCPUs;
-    private Promise<Integer> userCPUs;
+    private int cpuCount;
     private int forks;
     private String mode;
     private SpinLoopStyle spinStyle;
@@ -103,10 +101,6 @@ public class Options {
                 .withRequiredArg().ofType(Integer.class).describedAs("ms");
 
         OptionSpec<Integer> iters = parser.accepts("iters", "Iterations per test.")
-                .withRequiredArg().ofType(Integer.class).describedAs("N");
-
-        OptionSpec<Integer> cpus = parser.accepts("c", "Concurrency level for tests. This value can be greater " +
-                "than number of CPUs available.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
         OptionSpec<Integer> sysCpus = parser.accepts("sc", "Number of CPUs in the system. Setting this value overrides " +
@@ -184,16 +178,14 @@ public class Options {
         this.list = orDefault(set.has(list), false);
         this.verbose = orDefault(set.has("v"), false);
 
-        if (!set.hasArgument(sysCpus)) {
-            this.systemCPUs = Promise.of(VMSupport::figureOutHotCPUs);
-        } else {
-            this.systemCPUs = Promise.of(set.valueOf(sysCpus));
-        }
+        int totalCPUs = VMSupport.figureOutHotCPUs();
+        cpuCount = orDefault(set.valueOf(sysCpus), totalCPUs);
 
-        if (!set.hasArgument(cpus)) {
-            this.userCPUs = this.systemCPUs;
-        } else {
-            this.userCPUs = Promise.of(set.valueOf(cpus));
+        if (cpuCount > totalCPUs) {
+            System.err.println("Requested to use " + cpuCount + " CPUs, but system has only " + totalCPUs + " CPUs.");
+            System.err.println();
+            parser.printHelpOn(System.err);
+            return false;
         }
 
         this.spinStyle = orDefault(set.valueOf(spinStyle), SpinLoopStyle.THREAD_SPIN_WAIT);
@@ -275,7 +267,7 @@ public class Options {
     }
 
     public void printSettingsOn(PrintStream out) {
-        out.printf("  Hardware threads in use/available: %d/%d, %s%n", getUserCPUs(), getSystemCPUs(), getSpinStyle());
+        out.printf("  Hardware CPUs in use: %d, %s%n", getCPUCount(), getSpinStyle());
         out.printf("  Test preset mode: \"%s\"%n", mode);
         out.printf("  Writing the test results to \"%s\"%n", resultFile);
         out.printf("  Parsing results to \"%s\"%n", resultDir);
@@ -347,12 +339,8 @@ public class Options {
         return verbose;
     }
 
-    public int getUserCPUs() {
-        return userCPUs.get();
-    }
-
-    public int getSystemCPUs() {
-        return systemCPUs.get();
+    public int getCPUCount() {
+        return cpuCount;
     }
 
     public String getResultFile() {
