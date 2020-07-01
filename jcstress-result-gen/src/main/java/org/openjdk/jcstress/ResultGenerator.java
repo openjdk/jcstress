@@ -91,30 +91,41 @@ public class ResultGenerator {
             }
         }
 
+        // Hashcode generator optimized for the most frequent case of field values in {0,1}.
+
         pw.println("    public int hashCode() {");
-        pw.println("        int result = 0;");
+        pw.println("        return ");
         {
             int n = 1;
             for (Class k : args) {
+                pw.print("        ");
+                if (n != 1) {
+                    pw.print(" + ");
+                } else {
+                    pw.print("   ");
+                }
                 if (k == boolean.class) {
-                    pw.println("        result = 31*result + (r" + n + " ? 1 : 0);");
-                }
+                    pw.print("(r" + n + " ? 1 : 0)");
+                } else
                 if (k == byte.class || k == short.class || k == char.class || k == int.class) {
-                    pw.println("        result = 31*result + r" + n + ";");
+                    pw.print("r" + n);
+                } else
+                if (k == long.class || k == double.class || k == float.class) {
+                    pw.print("(int) (r" + n + ")");
+                } else
+                {
+                    pw.print("0");
                 }
-                if (k == long.class) {
-                    pw.println("        result = 31*result + (int) (r" + n + " ^ (r" + n + " >>> 32));");
-                }
-                if (k == double.class) {
-                    pw.println("        result = 31*result + (int) (Double.doubleToLongBits(r" + n + ") ^ (Double.doubleToLongBits(r" + n + ") >>> 32));");
-                }
-                if (k == float.class) {
-                    pw.println("        result = 31*result + (int) (Float.floatToIntBits(r" + n + ") ^ (Float.floatToIntBits(r" + n + ") >>> 32));");
+
+                if (n > 1) {
+                    pw.println(" << " + (n - 1) + "");
+                } else {
+                    pw.println();
                 }
                 n++;
             }
         }
-        pw.println("        return result;");
+        pw.println("        ;");
         pw.println("    }");
         pw.println();
         pw.println("    public boolean equals(Object o) {");
