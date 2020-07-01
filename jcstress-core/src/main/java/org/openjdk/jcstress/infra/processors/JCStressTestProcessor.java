@@ -271,11 +271,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
                     info.getState());
         }
 
-        if (info.getResult().getModifiers().contains(Modifier.FINAL)) {
-            throw new GenerationException("@" + Result.class.getSimpleName() + " should not be final.",
-                    info.getResult());
-        }
-
         if (!info.getState().getModifiers().contains(Modifier.PUBLIC)) {
             throw new GenerationException("@" + State.class.getSimpleName() + " should be public.",
                     info.getState());
@@ -305,15 +300,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
         boolean isStateItself = info.getState().equals(info.getTest());
 
         String t = info.getTest().getSimpleName().toString();
-        String s = isStateItself ?
-                        info.getState().getSimpleName().toString() :
-                        getGeneratedName(info.getState());
-        String r = getGeneratedName(info.getResult());
+        String s = info.getState().getSimpleName().toString();
+        String r = info.getResult().getSimpleName().toString();
 
-        generateTrapSubclass(info.getResult());
-        if (!isStateItself) {
-            generateTrapSubclass(info.getState());
-        }
 
         int actorsCount = info.getActors().size();
 
@@ -501,6 +490,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("            cnt.record(r);");
 
         for (VariableElement var : ElementFilter.fieldsIn(info.getResult().getEnclosedElements())) {
+            if (var.getSimpleName().toString().equals("jcstress_trap")) continue;
             pw.print("            r." + var.getSimpleName().toString() + " = ");
             pw.print(getDefaultVal(var));
             pw.println(";");
@@ -531,6 +521,11 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        workerSync = new WorkerSync(control.isStopped, " + actorsCount + ", config.spinLoopStyle);");
         pw.println("   }");
 
+
+        for (String type : new String[] { "int", "short", "byte", "char", "long", "float", "double", "Object" }) {
+            pw.println("    private void sink(" + type + " v) {};");
+        }
+
         int n = 0;
         for (ExecutableElement a : info.getActors()) {
             pw.println();
@@ -559,20 +554,27 @@ public class JCStressTestProcessor extends AbstractProcessor {
             // compiler to avoid null-pointer checks in the workload, which will
             // free it to choose alternative load/store orders.
             //
-            // For results, we can touch the synthetic "trap" field.
+            // For results, we access the most convenient result field, and make sure
+            // its null-checking effects stays behind by calling the empty method.
+            // That method would be normally inlined and eliminated, but the NP-check
+            // would persist.
+            //
             // For states that are passed as arguments we can do the same.
             // For states that are receivers themselves, we already have the NP-check.
 
             pw.println("                " + s + " s = ls[c];");
             if (hasResultArgs(a)) {
                 pw.println("                " + r + " r = lr[c];");
-                pw.println("                r.trap = 0;");
+                pw.println("                sink(r.jcstress_trap);");
             }
 
             if (isStateItself) {
                 emitMethod(pw, a, "                s." + a.getSimpleName(), "s", "r", true);
             } else {
-                pw.println("                s.trap = 0;");
+                String sf = selectSinkField(info.getState());
+                if (sf != null) {
+                    pw.println("                sink(s." + sf + ");");
+                }
                 emitMethod(pw, a, "                lt." + a.getSimpleName(), "s", "r", true);
             }
 
@@ -595,6 +597,33 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("}");
 
         pw.close();
+    }
+
+    private String selectSinkField(TypeElement cl) {
+        String[] typePref = { "int", "short", "byte", "char", "long", "float", "double" };
+
+        // Select first field of preferential type
+        for (String typeP : typePref) {
+            for (VariableElement var : ElementFilter.fieldsIn(cl.getEnclosedElements())) {
+                Set<Modifier> mods = var.getModifiers();
+                if (mods.contains(Modifier.STATIC)) continue;
+                if (mods.contains(Modifier.PRIVATE)) continue;
+
+                String t = var.asType().toString();
+                if (t.equals(typeP)) return var.getSimpleName().toString();
+            }
+        }
+
+        // Return first non-preferenced, e.g. Object subclass
+        for (VariableElement var : ElementFilter.fieldsIn(cl.getEnclosedElements())) {
+            Set<Modifier> mods = var.getModifiers();
+            if (mods.contains(Modifier.STATIC)) continue;
+            if (mods.contains(Modifier.PRIVATE)) continue;
+
+            return var.getSimpleName().toString();
+        }
+
+        return null;
     }
 
     /**
@@ -650,36 +679,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
             }
         }
         return true;
-    }
-
-    private void generateTrapSubclass(TypeElement el) {
-        String name = getGeneratedName(el);
-
-        PrintWriter pw;
-        try {
-            Writer writer = processingEnv.getFiler().createSourceFile(getPackageName(el) + "." + name).openWriter();
-            pw = new PrintWriter(writer);
-        } catch (IOException e) {
-            // may happen when file is already generated
-            return;
-        }
-
-        // We have to use the hierarchy trick here, and not @Contended, because Jigsaw prevents us
-        // from accessing sun.misc packages.
-        pw.println("package " + getPackageName(el) + ";");
-        pw.println("class " + name + "_c2 extends " + el.getQualifiedName() + " {");
-        Paddings.padding(pw);
-        pw.println("}");
-
-        pw.println("class " + name + "_c1 extends " + name + "_c2 {");
-        pw.println("    public int trap;");
-        pw.println("}");
-
-        pw.println("public class " + name + " extends " + name + "_c1 {");
-        Paddings.padding(pw);
-        pw.println("}");
-
-        pw.close();
     }
 
     private String getDefaultVal(VariableElement var) {
@@ -938,11 +937,11 @@ public class JCStressTestProcessor extends AbstractProcessor {
         }
         pw.println("import " + info.getTest().getQualifiedName() + ";");
         if (info.getResult() != null) {
-            pw.println("import " + info.getResult().getQualifiedName() + "_jcstress;");
+            pw.println("import " + info.getResult().getQualifiedName() + ";");
         }
         if (!info.getTest().equals(info.getState())) {
             if (info.getState() != null) {
-                pw.println("import " + getPackageName(info.getState()) + "." + getGeneratedName(info.getState()) + ";");
+                pw.println("import " + info.getState().getQualifiedName() + ";");
             }
         }
 

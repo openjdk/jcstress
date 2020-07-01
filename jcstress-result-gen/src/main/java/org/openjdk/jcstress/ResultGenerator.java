@@ -78,7 +78,7 @@ public class ResultGenerator {
         pw.println("import org.openjdk.jcstress.annotations.Result;");
         pw.println("");
         pw.println("@Result");
-        pw.println("public class " + name + " implements Serializable {");
+        pw.println("public final class " + name + " implements Serializable {");
 
         {
             int n = 1;
@@ -89,6 +89,11 @@ public class ResultGenerator {
                 pw.println();
                 n++;
             }
+
+            pw.println("    @sun.misc.Contended");
+            pw.println("    @jdk.internal.vm.annotation.Contended");
+            pw.println("    public int jcstress_trap; // reserved for infrastructure use");
+            pw.println();
         }
 
         // Hashcode generator optimized for the most frequent case of field values in {0,1}.
