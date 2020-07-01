@@ -89,10 +89,10 @@ public class StringUtils {
         return (s != null) && !s.isEmpty();
     }
 
-    public static String join(List<String> list, String delim) {
+    public static <T> String join(List<T> list, String delim) {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
-        for (String s : list) {
+        for (T s : list) {
             if (first) {
                 first = false;
             } else {

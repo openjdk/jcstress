@@ -30,8 +30,10 @@ import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.Runner;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.util.StringUtils;
+import org.openjdk.jcstress.vm.CPULayout;
 
 import java.lang.reflect.Constructor;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -42,15 +44,15 @@ public class EmbeddedExecutor {
 
     private final ExecutorService pool;
     private final TestResultCollector sink;
-    private Consumer<TestConfig> onFinish;
+    private final CPULayout cpuLayout;
 
     public EmbeddedExecutor(TestResultCollector sink) {
         this(sink, null);
     }
 
-    public EmbeddedExecutor(TestResultCollector sink, Consumer<TestConfig> onFinish) {
+    public EmbeddedExecutor(TestResultCollector sink, CPULayout cpuLayout) {
         this.sink = sink;
-        this.onFinish = onFinish;
+        this.cpuLayout = cpuLayout;
         pool = Executors.newCachedThreadPool(new ThreadFactory() {
             private final AtomicInteger id = new AtomicInteger();
 
@@ -64,15 +66,15 @@ public class EmbeddedExecutor {
         });
     }
 
-    public void submit(TestConfig config) {
-        pool.submit(task(config));
+    public void submit(TestConfig config, List<Integer> acquiredCPUs) {
+        pool.submit(task(config, acquiredCPUs));
     }
 
     public void run(TestConfig config) {
-        task(config).run();
+        task(config, null).run();
     }
 
-    private Runnable task(TestConfig config) {
+    private Runnable task(TestConfig config, List<Integer> acquiredCPUs) {
         return () -> {
             try {
                 Class<?> aClass = Class.forName(config.generatedRunnerName);
@@ -88,8 +90,8 @@ public class EmbeddedExecutor {
                 result.addAuxData(StringUtils.getStacktrace(ex));
                 sink.add(result);
             } finally {
-                if (onFinish != null) {
-                    onFinish.accept(config);
+                if (acquiredCPUs != null) {
+                    cpuLayout.release(acquiredCPUs);
                 }
             }
         };

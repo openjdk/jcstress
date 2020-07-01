@@ -32,6 +32,7 @@ import org.openjdk.jcstress.infra.grading.TextReportPrinter;
 import org.openjdk.jcstress.infra.grading.HTMLReportPrinter;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.TestList;
+import org.openjdk.jcstress.vm.OSSupport;
 import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.*;
@@ -54,6 +55,8 @@ public class JCStress {
     }
 
     public void run() throws Exception {
+        OSSupport.init();
+
         VMSupport.detectAvailableVMModes(opts.getJvmArgs(), opts.getJvmArgsPrepend());
         if (VMSupport.getAvailableVMModes().isEmpty()) {
             out.println("FATAL: No JVM modes to run with.");

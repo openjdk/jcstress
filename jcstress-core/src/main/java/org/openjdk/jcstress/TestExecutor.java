@@ -30,8 +30,11 @@ import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.link.BinaryLinkServer;
 import org.openjdk.jcstress.link.ServerListener;
+import org.openjdk.jcstress.vm.CPULayout;
+import org.openjdk.jcstress.vm.OSSupport;
 import org.openjdk.jcstress.util.HashMultimap;
 import org.openjdk.jcstress.util.Multimap;
+import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.File;
@@ -55,13 +58,13 @@ public class TestExecutor {
 
     static final AtomicInteger ID = new AtomicInteger();
 
-    private final Semaphore semaphore;
     private final BinaryLinkServer server;
     private final int maxThreads;
     private final int batchSize;
     private final TestResultCollector sink;
     private final Multimap<BatchKey, TestConfig> tasks;
     private final EmbeddedExecutor embeddedExecutor;
+    private final CPULayout cpuLayout;
 
     private final Map<String, VM> vmByToken;
 
@@ -73,7 +76,8 @@ public class TestExecutor {
         this.tasks = new HashMultimap<>();
         this.vmByToken = new ConcurrentHashMap<>();
 
-        semaphore = new Semaphore(maxThreads);
+        cpuLayout = new CPULayout(maxThreads);
+
         server = possiblyForked ? new BinaryLinkServer(new ServerListener() {
             @Override
             public TestConfig onJobRequest(String token) {
@@ -86,15 +90,15 @@ public class TestExecutor {
                 sink.add(result);
             }
         }) : null;
-        embeddedExecutor = new EmbeddedExecutor(sink, (cfg) -> release(cfg.threads));
+        embeddedExecutor = new EmbeddedExecutor(sink, cpuLayout);
     }
 
     public void runAll(List<TestConfig> configs) throws InterruptedException {
         for (TestConfig cfg : configs) {
             switch (cfg.runMode) {
                 case EMBEDDED:
-                    waitForMoreThreads(cfg.threads);
-                    embeddedExecutor.submit(cfg);
+                    List<Integer> acquiredCPUs = acquireCPUs(cfg.threads);
+                    embeddedExecutor.submit(cfg, acquiredCPUs);
                     break;
                 case FORKED:
                     BatchKey batchKey = BatchKey.getFrom(cfg);
@@ -120,22 +124,26 @@ public class TestExecutor {
         }
 
         // Wait until all threads are done, which means everything got processed
-        waitForMoreThreads(maxThreads);
+        acquireCPUs(maxThreads);
 
         server.terminate();
     }
 
     private void doSchedule(BatchKey batchKey, Collection<TestConfig> configs) {
-        waitForMoreThreads(batchKey.threads);
+        List<Integer> claimedCPUs = acquireCPUs(batchKey.threads);
+        if (claimedCPUs.size() != batchKey.threads) {
+            throw new IllegalStateException("Cannot acquire enough threads");
+        }
 
         String token = "fork-token-" + ID.incrementAndGet();
-        VM vm = new VM(server.getHost(), server.getPort(), batchKey, token, configs);
+        VM vm = new VM(server.getHost(), server.getPort(), batchKey, token, configs, claimedCPUs);
         vmByToken.put(token, vm);
         vm.start();
     }
 
-    private void waitForMoreThreads(int threads) {
-        while (!tryAcquire(threads)) {
+    private List<Integer> acquireCPUs(int cpus) {
+        List<Integer> acquired;
+        while ((acquired = cpuLayout.tryAcquire(cpus)) == null) {
             processReadyVMs();
             try {
                 Thread.sleep(SPIN_WAIT_DELAY_MS);
@@ -143,18 +151,8 @@ public class TestExecutor {
                 // do nothing
             }
         }
-    }
 
-    private boolean tryAcquire(int requested) {
-        // Make fat tasks bypass in exclusive mode:
-        final int threads = Math.min(requested, maxThreads);
-        return semaphore.tryAcquire(threads);
-    }
-
-    private void release(int requested) {
-        // If task was fat and bypassed, release only maxThreads:
-        final int threads = Math.min(requested, maxThreads);
-        semaphore.release(threads);
+        return acquired;
     }
 
     private void processReadyVMs() {
@@ -172,7 +170,7 @@ public class TestExecutor {
             }
 
             vmByToken.remove(vm.token, vm);
-            release(vm.key.threads);
+            cpuLayout.release(vm.claimedCPUs);
 
             // Remaining tasks from the fork need to get back on queue
             List<TestConfig> pending = vm.getPendingTasks();
@@ -192,16 +190,18 @@ public class TestExecutor {
         private final TestConfig firstTask;
         private Process process;
         private final List<TestConfig> pendingTasks;
+        private final List<Integer> claimedCPUs;
         private TestConfig currentTask;
         private TestConfig lastTask;
         private IOException pendingException;
 
-        public VM(String host, int port, BatchKey key, String token, Collection<TestConfig> configs) {
+        public VM(String host, int port, BatchKey key, String token, Collection<TestConfig> configs, List<Integer> claimedCPUs) {
             this.host = host;
             this.port = port;
             this.key = key;
             this.token = token;
             this.pendingTasks = new ArrayList<>(configs);
+            this.claimedCPUs = claimedCPUs;
             this.firstTask = pendingTasks.get(0);
             try {
                 this.stdout = File.createTempFile("jcstress", "stdout");
@@ -218,6 +218,12 @@ public class TestExecutor {
         void start() {
             try {
                 List<String> command = new ArrayList<>();
+
+                if (OSSupport.taskSetAvailable()) {
+                    command.add("taskset");
+                    command.add("-c");
+                    command.add(StringUtils.join(claimedCPUs, ","));
+                }
 
                 // basic Java line
                 command.addAll(VMSupport.getJavaInvokeLine());

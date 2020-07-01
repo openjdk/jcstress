@@ -49,6 +49,8 @@ public class VMSupport {
     }
 
     public static void initFlags(Options opts) {
+        int c = opts.getUserCPUs();
+
         System.out.println("Initializing and probing the target VM: ");
         System.out.println(" (all failures are non-fatal, but may affect testing accuracy)");
         System.out.println();
@@ -62,7 +64,6 @@ public class VMSupport {
         // Reserving half of the RSS of each VM to Java heap leaves enough space for others.
         // This means multiplying the factor by 2. These two adjustments cancel each other.
         // Setting -Xms/-Xmx explicitly is supposed to override these defaults.
-        int c = opts.getUserCPUs();
         detect("Trimming down the default VM heap size to 1/" + c + "-th of max RAM",
                 SimpleTestMain.class,
                 "-XX:MaxRAMFraction=" + c, "-XX:MinRAMFraction=" + c);
