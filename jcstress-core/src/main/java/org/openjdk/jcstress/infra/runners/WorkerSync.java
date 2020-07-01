@@ -49,17 +49,6 @@ public class WorkerSync {
     static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_CONSUMED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notConsumed");
     static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_UPDATED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notUpdated");
 
-    /**
-     * Initial version
-     */
-    public WorkerSync(int expectedWorkers, SpinLoopStyle spinStyle) {
-        this(false, expectedWorkers, spinStyle);
-        updateStride = true;
-    }
-
-    /**
-     * Updated version
-     */
     public WorkerSync(boolean stopped, int expectedWorkers, SpinLoopStyle spinStyle) {
         this.stopped = stopped;
         this.spinStyle = spinStyle;

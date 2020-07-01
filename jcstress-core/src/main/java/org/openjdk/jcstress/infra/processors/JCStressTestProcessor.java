@@ -386,7 +386,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        config.adjustStrides(size -> {");
         pw.println("            " + s + "[] ls = new " + s + "[size];");
         pw.println("            " + r + "[] lr = new " + r + "[size];");
-        pw.println("            workerSync = new WorkerSync(" + actorsCount + ", config.spinLoopStyle);");
+        pw.println("            workerSync = new WorkerSync(false, " + actorsCount + ", config.spinLoopStyle);");
 
         if (!isStateItself) {
             pw.println("            final " + t + " t = new " + t + "();");
@@ -421,9 +421,14 @@ public class JCStressTestProcessor extends AbstractProcessor {
         if (!isStateItself) {
             pw.println("        test = new " + t + "();");
         }
-        pw.println("        gs = new " + s + "[0];");
-        pw.println("        gr = new " + r + "[0];");
-        pw.println("        workerSync = new WorkerSync(" + actorsCount + ", config.spinLoopStyle);");
+        pw.println("        gs = new " + s + "[config.minStride];");
+        pw.println("        gr = new " + r + "[config.minStride];");
+        pw.println("        for (int c = 0; c < config.minStride; c++) {");
+        pw.println("            gs[c] = new " + s + "();");
+        pw.println("            gr[c] = new " + r + "();");
+        pw.println("        }");
+
+        pw.println("        workerSync = new WorkerSync(false, " + actorsCount + ", config.spinLoopStyle);");
 
         pw.println();
         pw.println("        control.isStopped = false;");
