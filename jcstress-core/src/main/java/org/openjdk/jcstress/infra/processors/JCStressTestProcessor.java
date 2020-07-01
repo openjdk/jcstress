@@ -310,7 +310,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         printImports(pw, info);
 
-        pw.println("public class " + className + " extends Runner<" + r + "> {");
+        pw.println("public final class " + className + " extends Runner<" + r + "> {");
         pw.println();
 
         if (!isStateItself) {
@@ -455,7 +455,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    }");
         pw.println();
 
-        pw.println("    public final void jcstress_consume(Counter<" + r + "> cnt, int a) {");
+        pw.println("    private void jcstress_consume(Counter<" + r + "> cnt, int a) {");
         pw.println("        " + s + "[] ls = gs;");
         pw.println("        " + r + "[] lr = gr;");
         pw.println("        int len = ls.length;");
@@ -500,7 +500,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    }");
         pw.println();
 
-        pw.println("    public final void jcstress_update(WorkerSync sync) {");
+        pw.println("    private void jcstress_update(WorkerSync sync) {");
         pw.println("        " + s + "[] ls = gs;");
         pw.println("        " + r + "[] lr = gr;");
         pw.println("        int len = ls.length;");
@@ -529,7 +529,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         int n = 0;
         for (ExecutableElement a : info.getActors()) {
             pw.println();
-            pw.println("    public final Counter<" + r + "> " + a.getSimpleName() + "() {");
+            pw.println("    private Counter<" + r + "> " + a.getSimpleName() + "() {");
             if (!isStateItself) {
                 pw.println("        " + t + " lt = test;");
             }
