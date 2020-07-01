@@ -31,70 +31,37 @@ import java.util.concurrent.locks.LockSupport;
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class StateHolder<S, R> {
+@sun.misc.Contended
+@jdk.internal.vm.annotation.Contended
+public class WorkerSync {
 
-    // ------------------ Final, read-only fields ---------------------
-
-    @sun.misc.Contended("finals")
-    @jdk.internal.vm.annotation.Contended("finals")
     public final boolean stopped;
-
-    @sun.misc.Contended("finals")
-    @jdk.internal.vm.annotation.Contended("finals")
-    public final S[] ss;
-
-    @sun.misc.Contended("finals")
-    @jdk.internal.vm.annotation.Contended("finals")
-    public final R[] rs;
-
-    @sun.misc.Contended("finals")
-    @jdk.internal.vm.annotation.Contended("finals")
     public final SpinLoopStyle spinStyle;
 
-    // --------------------- Write-frequent fields ------------------------
-    // Threads are updating them frequently, and they need them completely
-    // separate. Otherwise there are warmup/warmdown lags.
-
-    @sun.misc.Contended("flags")
-    @jdk.internal.vm.annotation.Contended("flags")
     public volatile boolean updateStride;
-
-    @sun.misc.Contended("flags")
-    @jdk.internal.vm.annotation.Contended("flags")
     private volatile int notStarted;
-
-    @sun.misc.Contended("flags")
-    @jdk.internal.vm.annotation.Contended("flags")
     private volatile int notFinished;
-
-    @sun.misc.Contended("flags")
-    @jdk.internal.vm.annotation.Contended("flags")
     private volatile int notConsumed;
-
-    @sun.misc.Contended("flags")
-    @jdk.internal.vm.annotation.Contended("flags")
     private volatile int notUpdated;
 
-    static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_NOT_STARTED = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "notStarted");
-    static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_NOT_FINISHED = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "notFinished");
-    static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_NOT_CONSUMED = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "notConsumed");
-    static final AtomicIntegerFieldUpdater<StateHolder> UPDATER_NOT_UPDATED = AtomicIntegerFieldUpdater.newUpdater(StateHolder.class, "notUpdated");
+    static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_STARTED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notStarted");
+    static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_FINISHED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notFinished");
+    static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_CONSUMED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notConsumed");
+    static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_UPDATED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notUpdated");
 
     /**
      * Initial version
      */
-    public StateHolder(S[] states, R[] results, int expectedWorkers, SpinLoopStyle spinStyle) {
-        this(false, states, results, expectedWorkers, spinStyle);
+    public WorkerSync(int expectedWorkers, SpinLoopStyle spinStyle) {
+        this(false, expectedWorkers, spinStyle);
         updateStride = true;
     }
 
     /**
      * Updated version
      */
-    public StateHolder(boolean stopped, S[] states, R[] results, int expectedWorkers, SpinLoopStyle spinStyle) {
+    public WorkerSync(boolean stopped, int expectedWorkers, SpinLoopStyle spinStyle) {
         this.stopped = stopped;
-        this.ss = states;
-        this.rs = results;
         this.spinStyle = spinStyle;
         this.notStarted = expectedWorkers;
         this.notFinished = expectedWorkers;
