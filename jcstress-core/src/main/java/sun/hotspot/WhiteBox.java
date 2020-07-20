@@ -43,9 +43,21 @@ public class WhiteBox {
     return deoptimizeMethod0(method, isOsr);
   }
 
-  public boolean isClassAlive(String name) {
-    return isClassAlive0(name.replace('.', '/'));
-  }
-  private native boolean isClassAlive0(String name);
+    private static boolean AVAILABLE_isClassAlive0 = true;
+
+    public boolean isClassAlive(String name) {
+        String className = name.replace('.', '/');
+        if (AVAILABLE_isClassAlive0) {
+            try {
+                return isClassAlive0(className);
+            } catch (Error e) {
+                AVAILABLE_isClassAlive0 = false;
+            }
+        }
+        return countAliveClasses0(className) > 0;
+    }
+
+    private native boolean isClassAlive0(String name);
+    private native int countAliveClasses0(String name);
 
 }
