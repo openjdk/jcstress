@@ -25,23 +25,31 @@
 package sun.hotspot;
 
 import java.lang.reflect.Executable;
-import java.util.Objects;
 
 public class WhiteBox {
 
-  public WhiteBox() {}
-  public static native void registerNatives();
+    public WhiteBox() {
+    }
 
-  public native void    deoptimizeAll();
+    public static native void registerNatives();
 
-  public        int     deoptimizeMethod(Executable method) {
-    return deoptimizeMethod(method, false /*not osr*/);
-  }
-  private native int     deoptimizeMethod0(Executable method, boolean isOsr);
-  public         int     deoptimizeMethod(Executable method, boolean isOsr) {
-    Objects.requireNonNull(method);
-    return deoptimizeMethod0(method, isOsr);
-  }
+    public native void deoptimizeAll();
+
+    private static boolean AVAILABLE_deoptimizeMethod0 = true;
+
+    public int deoptimizeMethod(Executable method) {
+        if (AVAILABLE_deoptimizeMethod0) {
+            try {
+                return deoptimizeMethod0(method, false);
+            } catch (Error e) {
+                AVAILABLE_deoptimizeMethod0 = false;
+            }
+        }
+        return deoptimizeMethod(method, false);
+    }
+
+    private native int deoptimizeMethod(Executable method, boolean isOsr);
+    private native int deoptimizeMethod0(Executable method, boolean isOsr);
 
     private static boolean AVAILABLE_isClassAlive0 = true;
 
