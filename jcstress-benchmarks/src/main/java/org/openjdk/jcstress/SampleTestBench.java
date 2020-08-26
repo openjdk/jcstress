@@ -47,7 +47,7 @@ public class SampleTestBench {
 
     @Setup
     public void setup() throws Throwable {
-        Options opts = new Options(new String[]{"-v", "-iters", "1", "-time", "5000", "-deoptRatio", "1000"});
+        Options opts = new Options(new String[]{"-v", "-iters", "1", "-time", "5000", "-deoptMode", "NONE"});
         opts.parse();
         PrintWriter pw = new PrintWriter(System.out, true);
         ConsoleReportPrinter sink = new ConsoleReportPrinter(opts, pw, 1, 1);
