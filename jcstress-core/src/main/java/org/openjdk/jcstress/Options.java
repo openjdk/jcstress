@@ -58,6 +58,7 @@ public class Options {
     private boolean parse;
     private boolean list;
     private boolean verbose;
+    private int totalCpuCount;
     private int cpuCount;
     private int forks;
     private String mode;
@@ -103,8 +104,8 @@ public class Options {
         OptionSpec<Integer> iters = parser.accepts("iters", "Iterations per test.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
-        OptionSpec<Integer> sysCpus = parser.accepts("sc", "Number of CPUs in the system. Setting this value overrides " +
-                "the autodetection.")
+        OptionSpec<Integer> cpus = parser.accepts("c", "Number of CPUs to use. Defaults to all CPUs in the system. " +
+                "Reducing the number of CPUs limits the amount of resources (including memory) the run is using.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
         OptionSpec<Integer> maxFootprint = parser.accepts("mf", "Maximum footprint for each test, in megabytes. This " +
@@ -178,11 +179,11 @@ public class Options {
         this.list = orDefault(set.has(list), false);
         this.verbose = orDefault(set.has("v"), false);
 
-        int totalCPUs = VMSupport.figureOutHotCPUs();
-        cpuCount = orDefault(set.valueOf(sysCpus), totalCPUs);
+        totalCpuCount = VMSupport.figureOutHotCPUs();
+        cpuCount = orDefault(set.valueOf(cpus), totalCpuCount);
 
-        if (cpuCount > totalCPUs) {
-            System.err.println("Requested to use " + cpuCount + " CPUs, but system has only " + totalCPUs + " CPUs.");
+        if (cpuCount > totalCpuCount) {
+            System.err.println("Requested to use " + cpuCount + " CPUs, but system has only " + totalCpuCount + " CPUs.");
             System.err.println();
             parser.printHelpOn(System.err);
             return false;
@@ -341,6 +342,10 @@ public class Options {
 
     public int getCPUCount() {
         return cpuCount;
+    }
+
+    public int getTotalCPUCount() {
+        return totalCpuCount;
     }
 
     public String getResultFile() {

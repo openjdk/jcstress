@@ -59,14 +59,21 @@ public class VMSupport {
         );
 
         // Rationale: every test VM uses at least 2 threads. Which means there are at max $CPU/2 VMs.
-        // Reserving half of the RSS of each VM to Java heap leaves enough space for others.
-        // This means multiplying the factor by 2. These two adjustments cancel each other.
+        // Reserving half of the RSS of each VM to Java heap leaves enough space for native RSS and
+        // other processes. This means multiplying the factor by 2. These two adjustments cancel each
+        // other.
+        //
+        // It does not matter if user requested lower number of VMs, we still want to follow
+        // the global per-VM fraction. This would trim down the memory requirements along with
+        // CPU requirements.
+        //
         // Setting -Xms/-Xmx explicitly is supposed to override these defaults.
-        int c = opts.getCPUCount();
+        //
+        int part = opts.getTotalCPUCount();
 
-        detect("Trimming down the default VM heap size to 1/" + c + "-th of max RAM",
+        detect("Trimming down the default VM heap size to 1/" + part + "-th of max RAM",
                 SimpleTestMain.class,
-                "-XX:MaxRAMFraction=" + c, "-XX:MinRAMFraction=" + c);
+                "-XX:MaxRAMFraction=" + part, "-XX:MinRAMFraction=" + part);
 
         detect("Trimming down the number of compiler threads",
                 SimpleTestMain.class,
