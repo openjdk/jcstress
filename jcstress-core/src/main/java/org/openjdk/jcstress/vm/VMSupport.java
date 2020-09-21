@@ -40,7 +40,9 @@ import java.util.stream.Collectors;
 
 public class VMSupport {
 
-    private static final List<String> ADD_JVM_FLAGS = new ArrayList<>();
+    private static final List<String> GLOBAL_JVM_FLAGS = new ArrayList<>();
+    private static final List<String> STRESS_C2_JVM_FLAGS = new ArrayList<>();
+
     private static final Collection<Collection<String>> AVAIL_JVM_MODES = new ArrayList<>();
     private static volatile boolean THREAD_SPIN_WAIT_AVAILABLE;
 
@@ -55,6 +57,7 @@ public class VMSupport {
 
         detect("Unlocking diagnostic VM options",
                 SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
                 "-XX:+UnlockDiagnosticVMOptions"
         );
 
@@ -73,30 +76,36 @@ public class VMSupport {
 
         detect("Trimming down the default VM heap size to 1/" + part + "-th of max RAM",
                 SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
                 "-XX:MaxRAMFraction=" + part, "-XX:MinRAMFraction=" + part);
 
         detect("Trimming down the number of compiler threads",
                 SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
                 "-XX:CICompilerCount=4"
         );
 
         detect("Trimming down the number of parallel GC threads",
                 SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
                 "-XX:ParallelGCThreads=4"
         );
 
         detect("Trimming down the number of concurrent GC threads",
                 SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
                 "-XX:ConcGCThreads=4"
         );
 
         detect("Trimming down the number of G1 concurrent refinement GC threads",
                 SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
                 "-XX:G1ConcRefinementThreads=4"
         );
 
         detect("Testing @Contended works on all results and infra objects",
                 ContendedTestMain.class,
+                GLOBAL_JVM_FLAGS,
                 "-XX:-RestrictContended"
         );
 
@@ -104,33 +113,59 @@ public class VMSupport {
             String whiteBoxJarName = FileUtils.copyFileToTemp("/whitebox-api.jar", "whitebox", ".jar");
             detect("Unlocking Whitebox API for online de-optimization: all methods",
                     DeoptAllTestMain.class,
+                    GLOBAL_JVM_FLAGS,
                     "-XX:+WhiteBoxAPI", "-Xbootclasspath/a:" + whiteBoxJarName
             );
             detect("Unlocking Whitebox API for online de-optimization: selected methods",
                     DeoptMethodTestMain.class,
+                    GLOBAL_JVM_FLAGS,
                     "-XX:+WhiteBoxAPI", "-Xbootclasspath/a:" + whiteBoxJarName
             );
         } catch (IOException e) {
             throw new IllegalStateException("Fatal error: WhiteBoxAPI JAR problems.", e);
         }
 
+        STRESS_C2_JVM_FLAGS.add("-XX:-TieredCompilation");
+
+        detect("Unlocking C2 local code motion randomizer",
+                SimpleTestMain.class,
+                STRESS_C2_JVM_FLAGS,
+                "-XX:+StressLCM"
+        );
+
+        detect("Unlocking C2 global code motion randomizer",
+                SimpleTestMain.class,
+                STRESS_C2_JVM_FLAGS,
+                "-XX:+StressGCM"
+        );
+
+        detect("Unlocking C2 iterative global value numbering randomizer",
+                SimpleTestMain.class,
+                STRESS_C2_JVM_FLAGS,
+                "-XX:+StressIGVN"
+        );
+
         detect("Testing allocation profiling",
-                AllocProfileMain.class
+                AllocProfileMain.class,
+                null
         );
 
         THREAD_SPIN_WAIT_AVAILABLE =
                 detect("Trying Thread.onSpinWait",
-                        ThreadSpinWaitTestMain.class
+                        ThreadSpinWaitTestMain.class,
+                        null
                 );
 
         System.out.println();
     }
 
-    private static boolean detect(String label, Class<?> mainClass, String... opts) {
+    private static boolean detect(String label, Class<?> mainClass, List<String> list, String... opts) {
         try {
             String[] arguments = ArrayUtils.concat(opts, mainClass.getName());
             tryWith(arguments);
-            ADD_JVM_FLAGS.addAll(Arrays.asList(opts));
+            if (list != null) {
+                list.addAll(Arrays.asList(opts));
+            }
             System.out.printf("----- %s %s%n", "[OK]", label);
             return true;
         } catch (VMSupportException ex) {
@@ -155,7 +190,10 @@ public class VMSupport {
 
                     // C2
                     Arrays.asList("-XX:-TieredCompilation"),
-                    Arrays.asList("-XX:-TieredCompilation", "-XX:+UnlockDiagnosticVMOptions", "-XX:+StressLCM", "-XX:+StressGCM"));
+
+                    // C2 + stress
+                    STRESS_C2_JVM_FLAGS
+            );
         }
 
         // Mix in prepends, if available
@@ -234,7 +272,7 @@ public class VMSupport {
             command.add(System.getProperty("java.class.path"));
         }
 
-        command.addAll(ADD_JVM_FLAGS);
+        command.addAll(GLOBAL_JVM_FLAGS);
 
         return command;
     }
