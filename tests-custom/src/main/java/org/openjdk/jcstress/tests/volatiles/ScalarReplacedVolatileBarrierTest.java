@@ -28,7 +28,7 @@ import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.II_Result;
 
 /**
- * @author Aleksey Shipilev (shade@redhat.com)
+ *  @author Aleksey Shipilev (shade@redhat.com)
  */
 @JCStressTest
 @Outcome(id = "0, 0", expect = Expect.ACCEPTABLE, desc = "T2 -> T1 sequential execution")
@@ -36,24 +36,27 @@ import org.openjdk.jcstress.infra.results.II_Result;
 @Outcome(id = "0, 1", expect = Expect.ACCEPTABLE, desc = "Sequential consistency")
 @Outcome(id = "1, 0", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Seeing through the race over unobserved volatile")
 @State
-public class UnobservedVolatileBarrierTest {
+public class ScalarReplacedVolatileBarrierTest {
 
     int x;
-    volatile int fakeBarrier;
     int y;
 
     @Actor
     public void actor1() {
         x = 1;
-        fakeBarrier = 1;
+        new Holder().fakeBarrier = 1;
         y = 1;
     }
 
     @Actor
     public void actor2(II_Result r) {
         r.r1 = y;
-        int t = fakeBarrier;
+        int t = new Holder().fakeBarrier;
         r.r2 = x;
+    }
+
+    static class Holder {
+        volatile int fakeBarrier;
     }
 
 }

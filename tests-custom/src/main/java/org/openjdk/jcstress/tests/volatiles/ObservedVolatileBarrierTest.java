@@ -25,35 +25,37 @@
 package org.openjdk.jcstress.tests.volatiles;
 
 import org.openjdk.jcstress.annotations.*;
+import org.openjdk.jcstress.infra.results.III_Result;
 import org.openjdk.jcstress.infra.results.II_Result;
 
 /**
  * @author Aleksey Shipilev (shade@redhat.com)
  */
 @JCStressTest
-@Outcome(id = "0, 0", expect = Expect.ACCEPTABLE, desc = "T2 -> T1 sequential execution")
-@Outcome(id = "1, 1", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 sequential execution")
-@Outcome(id = "0, 1", expect = Expect.ACCEPTABLE, desc = "Sequential consistency")
-@Outcome(id = "1, 0", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Seeing through the race over unobserved volatile")
+@Outcome(id = "0, .*, 0", expect = Expect.ACCEPTABLE, desc = "T2 -> T1 sequential execution")
+@Outcome(id = "1, .*, 1", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 sequential execution")
+@Outcome(id = "0, .*, 1", expect = Expect.ACCEPTABLE, desc = "Sequential consistency")
+@Outcome(id = "1, 0, 0", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Seeing through the race over unobserved volatile")
+@Outcome(id = "1, 1, 0", expect = Expect.FORBIDDEN, desc = "Cannot see old x over the observed volatile")
 @State
-public class UnobservedVolatileBarrierTest {
+public class ObservedVolatileBarrierTest {
 
     int x;
-    volatile int fakeBarrier;
+    volatile int v;
     int y;
 
     @Actor
     public void actor1() {
         x = 1;
-        fakeBarrier = 1;
+        v = 1;
         y = 1;
     }
 
     @Actor
-    public void actor2(II_Result r) {
+    public void actor2(III_Result r) {
         r.r1 = y;
-        int t = fakeBarrier;
-        r.r2 = x;
+        r.r2 = v;
+        r.r3 = x;
     }
 
 }
