@@ -41,12 +41,12 @@ questions.
     </description>
 
     <url>
-        http://openjdk.java.net/projects/code-tools/jcstress/
+        https://github.com/openjdk/jcstress/
     </url>
 
     <scm>
-        <url>http://hg.openjdk.java.net/code-tools/jcstress/</url>
-        <connection>scm:hg:http://hg.openjdk.java.net/code-tools/jcstress/</connection>
+        <url>https://github.com/openjdk/jcstress.git</url>
+        <connection>scm:git:https://github.com/openjdk/jcstress.git</connection>
     </scm>
 
     <licenses>
