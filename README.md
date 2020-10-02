@@ -14,8 +14,9 @@ to work through the [jcstress-samples](https://github.com/openjdk/jcstress/tree/
  * **JMMSample** target to explain the basics of Java Memory Model;
  * **ConcurrencySample** show the interesting concurrent behaviors of standard library.
 
-See the test comments for run instructions. Most test are runnable with just:
+See the test comments for run instructions. Most tests can be run like this:
 
+     $ mvn clean verify -pl jcstress-samples -am
      $ java -jar jcstress-samples/target/jcstress.jar -t <test-name>
 
 ### Running The Existing Tests
