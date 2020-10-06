@@ -11,8 +11,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build-java: [11, 16-ea]
-        run-java: [8, 11, 16-ea]
+        build-java: [16-ea]
+        run-java: [16-ea]
         os: [ubuntu-18.04, windows-2019, macos-10.15]
       fail-fast: false
     name: Build JDK ${{ matrix.build-java }}, run JDK ${{ matrix.run-java }}, ${{ matrix.os }}
@@ -37,7 +37,7 @@ jobs:
         java-version: ${{ matrix.run-java }}
     - name: Run all tests with "sanity" profile
       run: java -jar tests-all/target/jcstress.jar -m sanity --jvmArgs "-XX:+UseParallelGC"
-      if: ${{ matrix.os }} != 'windows-2019'
+      if: ${{ matrix.os != 'windows-2019' }}
     - name: Run custom tests with "sanity" profile
       run: java -jar tests-custom/target/jcstress.jar -m sanity --jvmArgs "-XX:+UseParallelGC"
-      if: ${{ matrix.os }} == 'windows-2019'
+      if: ${{ matrix.os == 'windows-2019' }}
