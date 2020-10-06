@@ -35,5 +35,5 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: ${{ matrix.run-java }}
-    - name: Run sanity profile
+    - name: Run all tests with "sanity" profile
       run: java -jar tests-all/target/jcstress.jar -m sanity --jvmArgs "-XX:+UseParallelGC"
