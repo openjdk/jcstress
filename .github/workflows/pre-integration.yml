@@ -16,11 +16,11 @@ jobs:
         os: [ubuntu-18.04, windows-2019, macos-10.15]
       fail-fast: true
       max-parallel: 4
-    name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
+    name: Test build JDK ${{ matrix.build-java }}, run JDK ${{ matrix.run-java }}, ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK ${{ matrix.build-java }}
+    - name: Set up build JDK ${{ matrix.build-java }}
       uses: actions/setup-java@v1
       with:
         java-version: ${{ matrix.build-java }}
@@ -34,7 +34,7 @@ jobs:
       run: mvn clean install -DskipTests -B --file pom.xml
     - name: Run unit tests
       run: mvn test -B --file pom.xml
-    - name: Set up JDK ${{ matrix.run-java }}
+    - name: Set up run JDK ${{ matrix.run-java }}
       uses: actions/setup-java@v1
       with:
         java-version: ${{ matrix.run-java }}
