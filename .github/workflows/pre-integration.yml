@@ -39,4 +39,4 @@ jobs:
       with:
         java-version: ${{ matrix.run-java }}
     - name: Run sanity profile
-      run: java -jar tests-all/target/jcstress.jar -m sanity
+      run: java -jar tests-all/target/jcstress.jar -m sanity --jvmArgs ""
