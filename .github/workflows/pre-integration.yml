@@ -37,7 +37,7 @@ jobs:
         java-version: ${{ matrix.run-java }}
     - name: Run all tests with "sanity" profile
       run: java -jar tests-all/target/jcstress.jar -m sanity --jvmArgs "-XX:+UseParallelGC"
-      if: ${{ matrix.os != 'windows-2019' }}
+      if: ${{ runner.os }} != 'Windows'
     - name: Run custom tests with "sanity" profile
       run: java -jar tests-custom/target/jcstress.jar -m sanity --jvmArgs "-XX:+UseParallelGC"
-      if: ${{ matrix.os == 'windows-2019' }}
+      if: ${{ runner.os }} == 'Windows'
