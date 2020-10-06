@@ -164,9 +164,6 @@ public class Options {
             resultDir += "/";
         }
 
-        this.minStride = orDefault(set.valueOf(minStride), 10);
-        this.maxStride = orDefault(set.valueOf(maxStride), 10000);
-        this.maxFootprint = orDefault(set.valueOf(maxFootprint), 100);
         this.testFilter = orDefault(set.valueOf(testFilter), ".*");
 
         this.parse = orDefault(set.has(parse), false);
@@ -193,10 +190,12 @@ public class Options {
 
         mode = orDefault(modeStr.value(set), "default");
         if (this.mode.equalsIgnoreCase("sanity")) {
-            this.time = 10;
+            this.time = 0;
             this.iters = 1;
             this.forks = 1;
-            this.batchSize = 100;
+            this.batchSize = 500;
+            this.minStride = 10;
+            this.maxStride = 10;
             this.deoptMode = DeoptMode.NONE;
         } else
         if (this.mode.equalsIgnoreCase("quick")) {
@@ -235,6 +234,10 @@ public class Options {
         this.forks = orDefault(set.valueOf(forks), this.forks);
         this.batchSize = orDefault(set.valueOf(batchSize), this.batchSize);
         this.deoptMode = orDefault(set.valueOf(deoptMode), DeoptMode.ALL);
+
+        this.minStride = orDefault(set.valueOf(minStride), 10);
+        this.maxStride = orDefault(set.valueOf(maxStride), 10000);
+        this.maxFootprint = orDefault(set.valueOf(maxFootprint), 100);
 
         this.jvmArgs = processArgs(optJvmArgs, set);
         this.jvmArgsPrepend = processArgs(optJvmArgsPrepend, set);
