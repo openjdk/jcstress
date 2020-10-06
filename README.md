@@ -131,8 +131,11 @@ If you do want to have a wider discussion about jcstress, please refer to [jcstr
 
 Compile and run internal tests:
 
-    $ mvn clean verify
+    $ mvn clean install
 
 Run the quick tests:
 
     $ java -jar tests-all/target/jcstress.jar -m quick
+
+GitHub workflow "JCStress Pre-Integration Tests" should pass on the changes. It would be triggered
+for PRs. You can also trigger it manually for your branch.
