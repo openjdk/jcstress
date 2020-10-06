@@ -131,9 +131,6 @@ public class TestExecutor {
 
     private void doSchedule(BatchKey batchKey, Collection<TestConfig> configs) {
         List<Integer> claimedCPUs = acquireCPUs(batchKey.threads);
-        if (claimedCPUs.size() != batchKey.threads) {
-            throw new IllegalStateException("Cannot acquire enough threads");
-        }
 
         String token = "fork-token-" + ID.incrementAndGet();
         VM vm = new VM(server.getHost(), server.getPort(), batchKey, token, configs, claimedCPUs);
