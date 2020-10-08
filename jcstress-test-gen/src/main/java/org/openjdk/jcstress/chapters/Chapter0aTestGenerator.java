@@ -51,6 +51,13 @@ public class Chapter0aTestGenerator {
 
         makeTests(
                 dest,
+                GeneratorUtils.readFromResource("/accessAtomic/X-FieldConflictAtomicityTest.java.template"),
+                "accessAtomic.fields.conflict",
+                new String[]{ "", "volatile" }
+        );
+
+        makeTests(
+                dest,
                 GeneratorUtils.readFromResource("/defaultValues/X-FieldDefaultValuesTest.java.template"),
                 "defaultValues.fields",
                 new String[]{ "", "volatile" }
