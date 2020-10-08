@@ -33,8 +33,8 @@ import org.openjdk.jcstress.infra.results.*;
  * Tests if fields experience non-atomic reads/writes.
  */
 @JCStressTest
-@Outcome(id = "$default$", expect = Expect.ACCEPTABLE, desc = "Full store from T1.")
-@Outcome(id = "$set$", expect = Expect.ACCEPTABLE, desc = "Full store from T2.")
+@Outcome(id = "$set$", expect = Expect.ACCEPTABLE, desc = "Full store from T1.")
+@Outcome(id = "$default$", expect = Expect.ACCEPTABLE, desc = "Full store from T2.")
 @Outcome(expect = Expect.ACCEPTABLE_INTERESTING, desc = "Conflicting stores, persisting non-atomic result.")
 @State
 public class $name$ {
