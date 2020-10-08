@@ -143,6 +143,27 @@ public class Chapter0aTestGenerator {
 
         makeTests(
                 dest,
+                GeneratorUtils.readFromResource("/accessAtomic/X-ArrayCopySrcAtomicityTest.java.template"),
+                "accessAtomic.arraycopy.src",
+                new String[]{ "" }
+        );
+
+        makeTests(
+                dest,
+                GeneratorUtils.readFromResource("/accessAtomic/X-ArrayCopyDstAtomicityTest.java.template"),
+                "accessAtomic.arraycopy.dst",
+                new String[]{ "" }
+        );
+
+        makeTests(
+                dest,
+                GeneratorUtils.readFromResource("/accessAtomic/X-ArrayCopyConflictAtomicityTest.java.template"),
+                "accessAtomic.arraycopy.conflict",
+                new String[]{ "" }
+        );
+
+        makeTests(
+                dest,
                 GeneratorUtils.readFromResource("/tearing/X-ArrayTearingTest.java.template"),
                 "tearing.arrays.small",
                 new String[]{ "", "volatile" }
