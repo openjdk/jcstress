@@ -70,6 +70,11 @@ public class JCStress {
         SortedSet<String> tests = getTests();
         List<TestConfig> configs = prepareRunProgram(tests);
 
+        if (configs.isEmpty()) {
+            out.println("FATAL: No matching tests.");
+            return;
+        }
+
         ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), tests.size(), configs.size());
         DiskWriteCollector diskCollector = new DiskWriteCollector(opts.getResultFile());
         TestResultCollector mux = MuxCollector.of(printer, diskCollector);
