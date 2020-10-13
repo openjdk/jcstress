@@ -42,6 +42,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class ConsoleReportPrinter implements TestResultCollector {
 
+    private static final Integer PRINT_INTERVAL_MS = Integer.getInteger("jcstress.console.printIntervalMs");
+
     private final boolean verbose;
     private final PrintWriter output;
     private final long expectedTests;
@@ -56,6 +58,9 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
     private long firstTest;
 
+    private final long printIntervalMs;
+    private long lastPrint;
+
     private boolean progressInteractive;
     private int progressLen;
 
@@ -64,14 +69,23 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private long softErrors;
     private long hardErrors;
 
-    public ConsoleReportPrinter(Options opts, PrintWriter pw, int expectedTests, int expectedForks) throws FileNotFoundException {
+    public ConsoleReportPrinter(Options opts, PrintWriter pw, int expectedTests, int expectedForks) {
         this.output = pw;
         this.expectedTests = expectedTests;
         this.expectedForks = expectedForks;
         this.expectedIterations = expectedForks * (opts.getIterations() + 1); // +1 sanity check iteration #0
         verbose = opts.isVerbose();
-        progressInteractive = (System.console() != null);
         progressLen = 1;
+
+        progressInteractive = (System.console() != null);
+        output.println("  Attached the " + (progressInteractive ? "interactive console" : "non-interactive output stream") + ".");
+
+        printIntervalMs = (PRINT_INTERVAL_MS != null) ?
+                PRINT_INTERVAL_MS :
+                progressInteractive ? 1_000 : 15_000;
+
+        output.println("  Printing the progress line at least every " + printIntervalMs + " milliseconds.");
+        output.println();
     }
 
     @Override
@@ -114,17 +128,32 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 throw new IllegalStateException("Illegal status: " + r.status());
         }
 
-        if (progressInteractive) {
+        boolean shouldPrintResults =
+                inHardError ||
+                !grading.isPassed ||
+                grading.hasInteresting ||
+                verbose;
+
+        long currentTime = System.nanoTime();
+
+        boolean shouldPrintStatusLine =
+                shouldPrintResults ||
+                TimeUnit.NANOSECONDS.toMillis(currentTime - lastPrint) >= printIntervalMs;
+
+        if (shouldPrintStatusLine && progressInteractive) {
             output.printf("\r%" + progressLen + "s\r", "");
         }
 
-        if (inHardError || !grading.isPassed || grading.hasInteresting || verbose) {
+        if (shouldPrintResults) {
+            if (!progressInteractive) {
+                output.println();
+            }
             output.printf("%10s %s%n", "[" + ReportUtils.statusToLabel(r) + "]", StringUtils.chunkName(r.getName()));
             ReportUtils.printDetails(output, r, true);
             ReportUtils.printMessages(output, r);
         }
 
-        if (progressInteractive || (observedIterations & 127) == 0) {
+        if (shouldPrintStatusLine) {
             String line = String.format("(ETA: %10s) (Sample Rate: %s) (Tests: %d of %d) (Forks: %2d of %d) (Iterations: %2d of %d; %d passed, %d failed, %d soft errs, %d hard errs) ",
                     computeETA(),
                     computeSpeed(),
@@ -138,6 +167,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 output.println();
             }
             output.flush();
+            lastPrint = currentTime;
         }
     }
 
