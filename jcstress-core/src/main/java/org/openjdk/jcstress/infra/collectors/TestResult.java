@@ -107,4 +107,8 @@ public class TestResult implements Serializable {
     public TestGrading grading() {
         return TestGrading.grade(this);
     }
+
+    public boolean hasSamples() {
+        return !states.isEmpty();
+    }
 }

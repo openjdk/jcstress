@@ -121,6 +121,10 @@ public class ReportUtils {
             );
         }
 
+        if (!r.hasSamples()) {
+            return;
+        }
+
         int idLen = "Observed state".length();
         int occLen = "Occurrences".length();
         int expectLen = "Expectation".length();

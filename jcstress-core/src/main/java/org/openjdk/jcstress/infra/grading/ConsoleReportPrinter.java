@@ -91,12 +91,14 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private void printResult(TestResult r) {
         TestGrading grading = r.grading();
 
+        boolean inHardError = false;
         switch (r.status()) {
             case TIMEOUT_ERROR:
             case CHECK_TEST_ERROR:
             case TEST_ERROR:
             case VM_ERROR:
                 hardErrors++;
+                inHardError = true;
                 break;
             case API_MISMATCH:
                 softErrors++;
@@ -116,12 +118,11 @@ public class ConsoleReportPrinter implements TestResultCollector {
             output.printf("\r%" + progressLen + "s\r", "");
         }
 
-        if (!grading.isPassed || grading.hasInteresting || verbose) {
+        if (inHardError || !grading.isPassed || grading.hasInteresting || verbose) {
             output.printf("%10s %s%n", "[" + ReportUtils.statusToLabel(r) + "]", StringUtils.chunkName(r.getName()));
             ReportUtils.printDetails(output, r, true);
+            ReportUtils.printMessages(output, r);
         }
-
-        ReportUtils.printMessages(output, r);
 
         if (progressInteractive || (observedIterations & 127) == 0) {
             String line = String.format("(ETA: %10s) (Sample Rate: %s) (Tests: %d of %d) (Forks: %2d of %d) (Iterations: %2d of %d; %d passed, %d failed, %d soft errs, %d hard errs) ",
