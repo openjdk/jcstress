@@ -116,9 +116,8 @@ public class ConsoleReportPrinter implements TestResultCollector {
             output.printf("\r%" + progressLen + "s\r", "");
         }
 
-        output.printf("%10s %s%n", "[" + ReportUtils.statusToLabel(r) + "]", StringUtils.chunkName(r.getName()));
-
         if (!grading.isPassed || grading.hasInteresting || verbose) {
+            output.printf("%10s %s%n", "[" + ReportUtils.statusToLabel(r) + "]", StringUtils.chunkName(r.getName()));
             ReportUtils.printDetails(output, r, true);
         }
 
