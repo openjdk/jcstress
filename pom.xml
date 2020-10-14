@@ -29,7 +29,7 @@ questions.
 
     <groupId>org.openjdk.jcstress</groupId>
     <artifactId>jcstress-parent</artifactId>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.7</version>
     <packaging>pom</packaging>
 
     <name>JCStress Parent</name>
