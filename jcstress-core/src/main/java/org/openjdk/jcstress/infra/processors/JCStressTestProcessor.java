@@ -677,10 +677,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
             }
             if (member.getKind() == Tree.Kind.BLOCK) {
                 BlockTree b = (BlockTree)member;
-                // static initializers are fine
-                if (b.isStatic()) continue;
                 // no instance initializers of any kind
-                return false;
+                if (!b.isStatic()) return false;
             }
         }
         return true;
