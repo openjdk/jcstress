@@ -34,38 +34,18 @@ import org.openjdk.jcstress.infra.results.IIII_Result;
 @State
 public class PowerSCViolation {
 
-    // This is a draft, very narrow test to demonstrate JDK-8262877.
-    // The regular jcstress tests do not catch the issue somehow, probably
-    // due to inefficiencies in generated code that access IIII_Result.
+    @sun.misc.Contended
+    @jdk.internal.vm.annotation.Contended
+    volatile int x;
 
     @sun.misc.Contended
     @jdk.internal.vm.annotation.Contended
-    public volatile int x;
-
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
-    public volatile int y;
-
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
-    public int r1;
-
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
-    public int r2;
-
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
-    public int r3;
-
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
-    public int r4;
+    volatile int y;
 
     @Actor
-    public void actor1() {
+    public void actor1(IIII_Result r) {
         x = 2;
-        r1 = y;
+        r.r1 = y;
     }
 
     @Actor
@@ -74,23 +54,15 @@ public class PowerSCViolation {
     }
 
     @Actor
-    public void actor3() {
+    public void actor3(IIII_Result r) {
+        r.r2 = y;
         x = 1;
-        r2 = y;
     }
 
     @Actor
-    public void actor4() {
-        r3 = x;
-        r4 = x;
-    }
-
-    @Arbiter
-    public void dump(IIII_Result r) {
-        r.r1 = r1;
-        r.r2 = r2;
-        r.r3 = r3;
-        r.r4 = r4;
+    public void actor4(IIII_Result r) {
+        r.r3 = x;
+        r.r4 = x;
     }
 
 }
