@@ -145,6 +145,12 @@ public class VMSupport {
                 "-XX:+StressIGVN"
         );
 
+        detect("Unlocking C2 conditional constant propagation randomizer",
+                SimpleTestMain.class,
+                STRESS_C2_JVM_FLAGS,
+                "-XX:+StressCCP"
+        );
+
         detect("Testing allocation profiling",
                 AllocProfileMain.class,
                 null
