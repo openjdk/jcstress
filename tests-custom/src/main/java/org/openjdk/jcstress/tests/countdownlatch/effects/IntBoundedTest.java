@@ -48,9 +48,9 @@ public class IntBoundedTest {
     @Actor
     public void actor2(II_Result r) {
         try {
-            latch.await(1, TimeUnit.DAYS);
+            boolean success = latch.await(1, TimeUnit.DAYS);
             r.r1 = x;
-            r.r2 = 1;
+            r.r2 = success ? 1 : -1;
         } catch (InterruptedException e) {
             r.r1 = -1;
             r.r2 = -1;

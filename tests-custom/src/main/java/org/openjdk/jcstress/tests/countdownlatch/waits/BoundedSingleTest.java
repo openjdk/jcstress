@@ -46,8 +46,8 @@ public class BoundedSingleTest {
     @Actor
     public void actor2(II_Result r) {
         try {
-            latch.await(1, TimeUnit.DAYS);
-            r.r2 = 1;
+            boolean success = latch.await(1, TimeUnit.DAYS);
+            r.r2 = success ? 1 : -1;
         } catch (InterruptedException e) {
             r.r2 = -1;
         }

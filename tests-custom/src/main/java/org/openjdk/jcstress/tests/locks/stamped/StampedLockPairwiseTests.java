@@ -132,18 +132,13 @@ public class StampedLockPairwiseTests {
 
         public void tOR_V(II_Result r) {
             StampedLock lock = this.lock;
-            int x = 0, y = 0;
             long stamp = lock.tryOptimisticRead();
-            if (stamp != 0) {
-                x = x;
-                y = y;
-                if (!lock.validate(stamp)) {
-                    x = 0;
-                    y = 0;
-                }
+            int lx = x;
+            int ly = y;
+            if (lock.validate(stamp)) {
+                r.r1 = lx;
+                r.r2 = ly;
             }
-            r.r1 = x;
-            r.r2 = y;
         }
 
         public void tRL_tUR(II_Result r) {

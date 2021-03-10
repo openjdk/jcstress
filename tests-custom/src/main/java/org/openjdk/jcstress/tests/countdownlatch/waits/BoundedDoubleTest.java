@@ -52,8 +52,8 @@ public class BoundedDoubleTest {
     @Actor
     public void actor3(III_Result r) {
         try {
-            latch.await(1, TimeUnit.DAYS);
-            r.r3 = 1;
+            boolean success = latch.await(1, TimeUnit.DAYS);
+            r.r3 = success ? 1 : -1;
         } catch (InterruptedException e) {
             r.r3 = -1;
         }

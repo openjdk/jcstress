@@ -158,7 +158,6 @@ public class Chapter1dTestGenerator {
         map.put("setV", Values.VALUES.get(typeV));
         map.put("setGLiteral", Values.VALUES_LITERAL.get(typeG));
         map.put("setVLiteral", Values.VALUES_LITERAL.get(typeV));
-        map.put("package", pack);
 
         map.put("package", pack);
         map.put("byteOrder", String.valueOf(bo));
