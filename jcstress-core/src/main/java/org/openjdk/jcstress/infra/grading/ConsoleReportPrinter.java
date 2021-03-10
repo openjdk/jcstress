@@ -61,7 +61,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private final long printIntervalMs;
     private long lastPrint;
 
-    private boolean progressInteractive;
+    private final boolean progressInteractive;
     private int progressLen;
 
     private long passed;
@@ -69,7 +69,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private long softErrors;
     private long hardErrors;
 
-    public ConsoleReportPrinter(Options opts, PrintWriter pw, int expectedTests, int expectedForks) {
+    public ConsoleReportPrinter(Options opts, PrintWriter pw, long expectedTests, long expectedForks) {
         this.output = pw;
         this.expectedTests = expectedTests;
         this.expectedForks = expectedForks;

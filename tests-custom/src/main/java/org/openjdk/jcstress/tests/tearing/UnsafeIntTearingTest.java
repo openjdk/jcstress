@@ -51,8 +51,8 @@ public class UnsafeIntTearingTest {
     public static final int SIZE = 256;
 
     public static final Random RANDOM = new Random();
-    public static final int ARRAY_BASE_OFFSET = UnsafeHolder.U.arrayBaseOffset(byte[].class);
-    public static final int ARRAY_BASE_SCALE = UnsafeHolder.U.arrayIndexScale(byte[].class);
+    public static final long ARRAY_BASE_OFFSET = UnsafeHolder.U.arrayBaseOffset(byte[].class);
+    public static final long ARRAY_BASE_SCALE = UnsafeHolder.U.arrayIndexScale(byte[].class);
     public static final int COMPONENT_SIZE = 4;
 
     /** Alignment constraint: 4-bytes is default, for integers */
