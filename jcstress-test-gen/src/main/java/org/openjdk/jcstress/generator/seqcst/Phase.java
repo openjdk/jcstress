@@ -46,7 +46,13 @@ class Phase {
         this.count = count;
         this.vars = vars;
         this.threads = threads;
-        this.cases = (long) Math.pow(vars * threads * TYPES, count);
+
+        // Long-accurate Math.pow
+        long cases = 1L;
+        for (int c = 0; c < count; c++) {
+            cases *= vars * threads * TYPES;
+        }
+        this.cases = cases;
     }
 
     public List<MultiThread> run() {
