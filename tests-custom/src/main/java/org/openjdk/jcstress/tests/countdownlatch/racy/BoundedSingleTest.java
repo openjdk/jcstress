@@ -64,8 +64,8 @@ public class BoundedSingleTest {
     public void actor2(I_Result r) {
         try {
             CountDownLatch latch = getLatch();
-            latch.await(1, TimeUnit.DAYS);
-            r.r1 = 1;
+            boolean expired = latch.await(1, TimeUnit.DAYS);
+            r.r1 = expired ? -1 : 1;
         } catch (InterruptedException e) {
             r.r1 = -1;
         }
