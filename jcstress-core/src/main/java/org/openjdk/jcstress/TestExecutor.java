@@ -32,8 +32,6 @@ import org.openjdk.jcstress.link.BinaryLinkServer;
 import org.openjdk.jcstress.link.ServerListener;
 import org.openjdk.jcstress.vm.CPULayout;
 import org.openjdk.jcstress.vm.OSSupport;
-import org.openjdk.jcstress.util.HashMultimap;
-import org.openjdk.jcstress.util.Multimap;
 import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.vm.VMSupport;
 
@@ -60,20 +58,15 @@ public class TestExecutor {
 
     private final BinaryLinkServer server;
     private final int maxThreads;
-    private final int batchSize;
     private final TestResultCollector sink;
-    private final Multimap<BatchKey, TestConfig> tasks;
     private final EmbeddedExecutor embeddedExecutor;
     private final CPULayout cpuLayout;
 
     private final Map<String, VM> vmByToken;
 
-    public TestExecutor(int maxThreads, int batchSize, TestResultCollector sink, boolean possiblyForked) throws IOException {
+    public TestExecutor(int maxThreads, TestResultCollector sink, boolean possiblyForked) throws IOException {
         this.maxThreads = maxThreads;
-        this.batchSize = batchSize;
         this.sink = sink;
-
-        this.tasks = new HashMultimap<>();
         this.vmByToken = new ConcurrentHashMap<>();
 
         cpuLayout = new CPULayout(maxThreads);
@@ -86,40 +79,28 @@ public class TestExecutor {
 
             @Override
             public void onResult(String token, TestResult result) {
-                vmByToken.get(token).processResult(result);
                 sink.add(result);
             }
         }) : null;
         embeddedExecutor = new EmbeddedExecutor(sink, cpuLayout);
     }
 
-    public void runAll(List<TestConfig> configs) throws InterruptedException {
+    public void runAll(List<TestConfig> configs) {
         for (TestConfig cfg : configs) {
+            List<Integer> acquiredCPUs = acquireCPUs(cfg.threads);
+
             switch (cfg.runMode) {
                 case EMBEDDED:
-                    List<Integer> acquiredCPUs = acquireCPUs(cfg.threads);
                     embeddedExecutor.submit(cfg, acquiredCPUs);
                     break;
                 case FORKED:
-                    BatchKey batchKey = BatchKey.getFrom(cfg);
-                    tasks.put(batchKey, cfg);
-
-                    Collection<TestConfig> curBatch = tasks.get(batchKey);
-                    if (curBatch.size() >= batchSize) {
-                        tasks.remove(batchKey);
-                        doSchedule(batchKey, curBatch);
-                    }
+                    String token = "fork-token-" + ID.incrementAndGet();
+                    VM vm = new VM(server.getHost(), server.getPort(), token, cfg, acquiredCPUs);
+                    vmByToken.put(token, vm);
+                    vm.start();
                     break;
                 default:
                     throw new IllegalStateException("Unknown mode: " + cfg.runMode);
-            }
-        }
-
-        // Run down the remaining tasks
-        for (BatchKey key : tasks.keys()) {
-            Collection<TestConfig> curBatch = tasks.get(key);
-            if (!curBatch.isEmpty()) {
-                doSchedule(key, curBatch);
             }
         }
 
@@ -127,15 +108,6 @@ public class TestExecutor {
         acquireCPUs(maxThreads);
 
         server.terminate();
-    }
-
-    private void doSchedule(BatchKey batchKey, Collection<TestConfig> configs) {
-        List<Integer> claimedCPUs = acquireCPUs(batchKey.threads);
-
-        String token = "fork-token-" + ID.incrementAndGet();
-        VM vm = new VM(server.getHost(), server.getPort(), batchKey, token, configs, claimedCPUs);
-        vmByToken.put(token, vm);
-        vm.start();
     }
 
     private List<Integer> acquireCPUs(int cpus) {
@@ -157,9 +129,8 @@ public class TestExecutor {
             try {
                 if (!vm.checkTermination()) continue;
             } catch (ForkFailedException e) {
-                // Record the failure for the actual test
-                TestConfig failed = vm.getVictimTask();
-                TestResult result = new TestResult(failed, Status.VM_ERROR, -1);
+                TestConfig task = vm.getTask();
+                TestResult result = new TestResult(task, Status.VM_ERROR, -1);
                 for (String i : e.getInfo()) {
                     result.addAuxData(i);
                 }
@@ -168,38 +139,27 @@ public class TestExecutor {
 
             vmByToken.remove(vm.token, vm);
             cpuLayout.release(vm.claimedCPUs);
-
-            // Remaining tasks from the fork need to get back on queue
-            List<TestConfig> pending = vm.getPendingTasks();
-            if (!pending.isEmpty()) {
-                doSchedule(vm.key, pending);
-            }
         }
     }
 
     private static class VM {
         private final String host;
         private final int port;
-        private final BatchKey key;
         private final String token;
         private final File stdout;
         private final File stderr;
-        private final TestConfig firstTask;
-        private Process process;
-        private final List<TestConfig> pendingTasks;
+        private final TestConfig task;
         private final List<Integer> claimedCPUs;
-        private TestConfig currentTask;
-        private TestConfig lastTask;
+        private Process process;
+        private boolean processed;
         private IOException pendingException;
 
-        public VM(String host, int port, BatchKey key, String token, Collection<TestConfig> configs, List<Integer> claimedCPUs) {
+        public VM(String host, int port, String token, TestConfig task, List<Integer> claimedCPUs) {
             this.host = host;
             this.port = port;
-            this.key = key;
             this.token = token;
-            this.pendingTasks = new ArrayList<>(configs);
             this.claimedCPUs = claimedCPUs;
-            this.firstTask = pendingTasks.get(0);
+            this.task = task;
             try {
                 this.stdout = File.createTempFile("jcstress", "stdout");
                 this.stderr = File.createTempFile("jcstress", "stderr");
@@ -226,7 +186,7 @@ public class TestExecutor {
                 command.addAll(VMSupport.getJavaInvokeLine());
 
                 // jvm args
-                command.addAll(key.jvmArgs);
+                command.addAll(task.jvmArgs);
 
                 command.add(ForkedMain.class.getName());
 
@@ -282,70 +242,15 @@ public class TestExecutor {
         }
 
         public synchronized TestConfig jobRequest() {
-            if (pendingTasks.isEmpty()) {
+            if (processed) {
                 return null;
-            } else {
-                TestConfig task = pendingTasks.remove(0);
-                currentTask = task;
-                return task;
             }
+            processed = true;
+            return getTask();
         }
 
-        public synchronized void processResult(TestResult result) {
-            lastTask = currentTask;
-            currentTask = null;
-        }
-
-        public synchronized TestConfig getVictimTask() {
-            if (currentTask != null) {
-                // Current task had failed
-                return currentTask;
-            }
-
-            if (lastTask != null) {
-                // Already replied the results for last task, blame it too
-                return lastTask;
-            }
-
-            // We have not executed anything yet, blame the first task
-            return firstTask;
-        }
-
-        public List<TestConfig> getPendingTasks() {
-            return new ArrayList<>(pendingTasks);
-        }
-    }
-
-    static class BatchKey {
-        private int threads;
-        private List<String> jvmArgs;
-
-        BatchKey(int threads, List<String> jvmArgs) {
-            this.threads = threads;
-            this.jvmArgs = jvmArgs;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            BatchKey batchKey = (BatchKey) o;
-
-            if (threads != batchKey.threads) return false;
-            return jvmArgs.equals(batchKey.jvmArgs);
-
-        }
-
-        @Override
-        public int hashCode() {
-            int result = threads;
-            result = 31 * result + jvmArgs.hashCode();
-            return result;
-        }
-
-        static BatchKey getFrom(TestConfig cfg) {
-            return new BatchKey(cfg.threads, cfg.jvmArgs);
+        public TestConfig getTask() {
+            return task;
         }
     }
 

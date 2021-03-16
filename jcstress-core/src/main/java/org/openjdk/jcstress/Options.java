@@ -67,7 +67,6 @@ public class Options {
     private DeoptMode deoptMode;
     private Collection<String> jvmArgs;
     private Collection<String> jvmArgsPrepend;
-    private int batchSize;
 
     public Options(String[] args) {
         this.args = args;
@@ -111,10 +110,6 @@ public class Options {
         OptionSpec<Integer> maxFootprint = parser.accepts("mf", "Maximum footprint for each test, in megabytes. This " +
                 "affects the stride size: maximum footprint will never be exceeded, regardless of min/max stride sizes.")
                 .withRequiredArg().ofType(Integer.class).describedAs("MB");
-
-        OptionSpec<Integer> batchSize = parser.accepts("bs", "Maximum number of tests to execute in a single VM. Larger " +
-                "values will improve test performance, at expense of testing accuracy")
-                .withRequiredArg().ofType(Integer.class).describedAs("#");
 
         OptionSpec<SpinLoopStyle> spinStyle = parser.accepts("spinStyle", "Busy loop wait style. " +
                 "HARD = hard busy loop; THREAD_YIELD = use Thread.yield(); THREAD_SPIN_WAIT = use Thread.onSpinWait(); LOCKSUPPORT_PARK_NANOS = use LockSupport.parkNanos().")
@@ -190,10 +185,9 @@ public class Options {
 
         mode = orDefault(modeStr.value(set), "default");
         if (this.mode.equalsIgnoreCase("sanity")) {
-            this.time = 0;
+            this.time = 10;
             this.iters = 1;
-            this.forks = 1;
-            this.batchSize = 500;
+            this.forks = 0;
             this.minStride = 10;
             this.maxStride = 10;
             this.deoptMode = DeoptMode.NONE;
@@ -202,25 +196,21 @@ public class Options {
             this.time = 200;
             this.iters = 5;
             this.forks = 1;
-            this.batchSize = 20;
         } else
         if (this.mode.equalsIgnoreCase("default")) {
             this.time = 1000;
             this.iters = 5;
             this.forks = 1;
-            this.batchSize = 5;
         } else
         if (this.mode.equalsIgnoreCase("tough")) {
             this.time = 1000;
             this.iters = 10;
             this.forks = 10;
-            this.batchSize = 5;
         } else
         if (this.mode.equalsIgnoreCase("stress")) {
             this.time = 1000;
             this.iters = 50;
             this.forks = 10;
-            this.batchSize = 1;
         } else {
             System.err.println("Unknown test mode: " + this.mode);
             System.err.println();
@@ -232,7 +222,6 @@ public class Options {
         this.time = orDefault(set.valueOf(time), this.time);
         this.iters = orDefault(set.valueOf(iters), this.iters);
         this.forks = orDefault(set.valueOf(forks), this.forks);
-        this.batchSize = orDefault(set.valueOf(batchSize), this.batchSize);
         this.deoptMode = orDefault(set.valueOf(deoptMode), DeoptMode.ALL);
 
         this.minStride = orDefault(set.valueOf(minStride), 10);
@@ -276,7 +265,6 @@ public class Options {
         out.printf("  Writing the test results to \"%s\"%n", resultFile);
         out.printf("  Parsing results to \"%s\"%n", resultDir);
         out.printf("  Running each test matching \"%s\" for %d forks, %d iterations, %d ms each%n", getTestFilter(), getForks(), getIterations(), getTime());
-        out.printf("  Each JVM would execute at most %d tests in the row.%n", getBatchSize());
         out.printf("  Solo stride size will be autobalanced within [%d, %d] elements, but taking no more than %d Mb.%n", getMinStride(), getMaxStride(), getMaxFootprintMb());
 
         out.println();
@@ -367,7 +355,4 @@ public class Options {
         return maxFootprint;
     }
 
-    public int getBatchSize() {
-        return batchSize;
-    }
 }
