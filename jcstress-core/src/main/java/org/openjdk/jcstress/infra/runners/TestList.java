@@ -33,9 +33,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class TestList {
@@ -60,11 +58,17 @@ public class TestList {
                         String name = read.nextString();
                         String runner = read.nextString();
                         String description = read.nextString();
+
+                        List<String> actorNames = new ArrayList<>();
                         int actorCount = read.nextInt();
+                        for (int c = 0; c < actorCount; c++) {
+                            actorNames.add(read.nextString());
+                        }
+
                         boolean requiresFork = read.nextBoolean();
                         int caseCount = read.nextInt();
 
-                        TestInfo testInfo = new TestInfo(name, runner, description, actorCount, requiresFork);
+                        TestInfo testInfo = new TestInfo(name, runner, description, actorCount, actorNames, requiresFork);
                         m.put(name, testInfo);
 
                         for (int c = 0; c < caseCount; c++) {

@@ -48,6 +48,7 @@ public class TestConfig implements Serializable {
     public final RunMode runMode;
     public final int forkId;
     public final int maxFootprintMB;
+    public final List<String> actorNames;
     public int minStride;
     public int maxStride;
     public StrideCap strideCap;
@@ -78,6 +79,7 @@ public class TestConfig implements Serializable {
         threads = info.threads();
         name = info.name();
         generatedRunnerName = info.generatedRunner();
+        actorNames = info.actorNames();
         strideCap = StrideCap.NONE;
     }
 

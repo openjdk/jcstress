@@ -32,6 +32,7 @@ import org.openjdk.jcstress.util.InputStreamDrainer;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,9 +46,14 @@ public class VMSupport {
 
     private static final Collection<Collection<String>> AVAIL_JVM_MODES = new ArrayList<>();
     private static volatile boolean THREAD_SPIN_WAIT_AVAILABLE;
+    private static volatile boolean COMPILER_DIRECTIVES_AVAILABLE;
 
     public static boolean spinWaitHintAvailable() {
         return THREAD_SPIN_WAIT_AVAILABLE;
+    }
+
+    public static boolean compilerDirectivesAvailable() {
+        return COMPILER_DIRECTIVES_AVAILABLE;
     }
 
     public static void initFlags(Options opts) {
@@ -157,10 +163,29 @@ public class VMSupport {
         );
 
         THREAD_SPIN_WAIT_AVAILABLE =
-                detect("Trying Thread.onSpinWait",
+                detect("Testing Thread.onSpinWait",
                         ThreadSpinWaitTestMain.class,
                         null
                 );
+
+        try {
+            File temp = File.createTempFile("jcstress", "directives");
+
+            PrintWriter pw = new PrintWriter(temp);
+            pw.println("[ { match: \"*::*\", PrintInlining: true } ]");
+            pw.close();
+
+            COMPILER_DIRECTIVES_AVAILABLE =
+                    detect("Testing compiler directives",
+                            SimpleTestMain.class,
+                            null,
+                            "-XX:CompilerDirectivesFile=" + temp.getAbsolutePath()
+                    );
+
+            temp.delete();
+        } catch (IOException e) {
+            // Do nothing.
+        }
 
         System.out.println();
     }

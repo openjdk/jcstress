@@ -35,6 +35,7 @@ import org.openjdk.jmh.annotations.*;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -55,7 +56,7 @@ public class SampleTestBench {
         String testName = SampleTest.class.getCanonicalName();
         String runnerName = SampleTest_jcstress.class.getCanonicalName();
 
-        TestInfo ti = new TestInfo(testName, runnerName, "", 2, false);
+        TestInfo ti = new TestInfo(testName, runnerName, "", 2, Arrays.asList("a1", "a2"), false);
         TestConfig cfg = new TestConfig(opts, ti, TestConfig.RunMode.EMBEDDED, 1, Collections.emptyList());
 
         pool = Executors.newCachedThreadPool();

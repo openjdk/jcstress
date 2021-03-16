@@ -27,7 +27,9 @@ package org.openjdk.jcstress;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
+import org.openjdk.jcstress.infra.processors.JCStressTestProcessor;
 import org.openjdk.jcstress.infra.runners.TestConfig;
+import org.openjdk.jcstress.infra.runners.WorkerSync;
 import org.openjdk.jcstress.link.BinaryLinkServer;
 import org.openjdk.jcstress.link.ServerListener;
 import org.openjdk.jcstress.vm.CPULayout;
@@ -35,8 +37,7 @@ import org.openjdk.jcstress.vm.OSSupport;
 import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.vm.VMSupport;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.*;
@@ -148,6 +149,7 @@ public class TestExecutor {
         private final String token;
         private final File stdout;
         private final File stderr;
+        private final File compilerDirectives;
         private final TestConfig task;
         private final List<Integer> claimedCPUs;
         private Process process;
@@ -163,11 +165,58 @@ public class TestExecutor {
             try {
                 this.stdout = File.createTempFile("jcstress", "stdout");
                 this.stderr = File.createTempFile("jcstress", "stderr");
+                this.compilerDirectives = File.createTempFile("jcstress", "directives");
+
+                if (VMSupport.compilerDirectivesAvailable()) {
+                    generateDirectives();
+                }
 
                 // Register these files for removal in case we terminate through the uncommon path
                 this.stdout.deleteOnExit();
                 this.stderr.deleteOnExit();
+                this.compilerDirectives.deleteOnExit();
             } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        void generateDirectives() {
+            try {
+                PrintWriter pw = new PrintWriter(compilerDirectives);
+                pw.println("[");
+
+                // The task loop:
+                //   - avoid inlining the run loop, it should be compiled as hot code
+                //   - force inline the auxiliary methods and classes in the run loop
+                pw.println("  {");
+                pw.println("    match: \"" + task.generatedRunnerName + "::" + JCStressTestProcessor.TASK_LOOP_PREFIX + "*\",");
+                pw.println("    inline: \"-" + task.generatedRunnerName + "::" + JCStressTestProcessor.RUN_LOOP_PREFIX + "*\",");
+                pw.println("    inline: \"+" + task.generatedRunnerName + "::" + JCStressTestProcessor.AUX_PREFIX + "*\",");
+                pw.println("    inline: \"+" + WorkerSync.class.getName() + "::*\",");
+                pw.println("    inline: \"+java.util.concurrent.atomic.*::*\",");
+                pw.println("  },");
+
+                // Force inline everything from WorkerSync. WorkerSync does not use anything
+                // too deeply, so inlining everything is fine.
+                pw.println("  {");
+                pw.println("    match: \"" + WorkerSync.class.getName() + "::*" + "\",");
+                pw.println("    inline: \"+*::*\",");
+                pw.println("  },");
+
+                // The run loop:
+                //   - force inline of the workload methods
+                //   - force inline of sink methods
+                for (String an : task.actorNames) {
+                    pw.println("  {");
+                    pw.println("    match: \"" + task.generatedRunnerName + "::" + JCStressTestProcessor.RUN_LOOP_PREFIX + an + "\",");
+                    pw.println("    inline: \"+" + task.name + "::" + an + "\",");
+                    pw.println("    inline: \"+" + task.generatedRunnerName + "::" + JCStressTestProcessor.AUX_PREFIX + "*\",");
+                    pw.println("  },");
+                }
+                pw.println("]");
+                pw.flush();
+                pw.close();
+            } catch (FileNotFoundException e) {
                 throw new IllegalStateException(e);
             }
         }
@@ -187,6 +236,10 @@ public class TestExecutor {
 
                 // jvm args
                 command.addAll(task.jvmArgs);
+
+                if (VMSupport.compilerDirectivesAvailable()) {
+                    command.add("-XX:CompilerDirectivesFile=" + compilerDirectives.getAbsolutePath());
+                }
 
                 command.add(ForkedMain.class.getName());
 

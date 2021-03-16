@@ -34,6 +34,7 @@ import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 
 import static org.openjdk.jcstress.util.StringUtils.getFirstLine;
@@ -62,7 +63,7 @@ public class EmbeddedExecutorTest {
     private TestConfig createSimpleConfigFor(String runnerClassName) throws IOException {
         Options opts = new Options(new String[]{});
         opts.parse();
-        TestInfo info = new TestInfo("", runnerClassName, "", 4, false);
+        TestInfo info = new TestInfo("", runnerClassName, "", 4, Arrays.asList("a1", "a2", "a3", "a4"), false);
         return new TestConfig(opts, info, TestConfig.RunMode.FORKED, 1, Collections.emptyList());
     }
 
