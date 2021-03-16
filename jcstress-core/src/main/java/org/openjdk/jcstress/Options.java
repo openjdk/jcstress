@@ -187,7 +187,7 @@ public class Options {
         if (this.mode.equalsIgnoreCase("sanity")) {
             this.time = 0;
             this.iters = 1;
-            this.forks = 1;
+            this.forks = 0;
             this.minStride = 10;
             this.maxStride = 10;
             this.deoptMode = DeoptMode.NONE;
