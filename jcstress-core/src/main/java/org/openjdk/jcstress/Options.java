@@ -185,7 +185,7 @@ public class Options {
 
         mode = orDefault(modeStr.value(set), "default");
         if (this.mode.equalsIgnoreCase("sanity")) {
-            this.time = 0;
+            this.time = 50;
             this.iters = 1;
             this.forks = 0;
             this.minStride = 10;
