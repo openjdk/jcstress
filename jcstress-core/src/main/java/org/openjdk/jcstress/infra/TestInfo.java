@@ -28,6 +28,7 @@ import org.openjdk.jcstress.annotations.Expect;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class TestInfo {
@@ -39,8 +40,9 @@ public class TestInfo {
     private final Collection<StateCase> stateCases;
     private StateCase unmatched;
     private final Collection<String> refs;
+    private final List<String> actorNames;
 
-    public TestInfo(String name, String runner, String description, int threads, boolean requiresFork) {
+    public TestInfo(String name, String runner, String description, int threads, List<String> actorNames, boolean requiresFork) {
         this.name = name;
         this.runner = runner;
         this.description = description;
@@ -48,6 +50,7 @@ public class TestInfo {
         this.requiresFork = requiresFork;
         this.stateCases = new ArrayList<>();
         this.refs = new ArrayList<>();
+        this.actorNames = actorNames;
     }
 
     public StateCase unmatched() {
@@ -61,6 +64,8 @@ public class TestInfo {
     public Collection<StateCase> cases() {
         return stateCases;
     }
+
+    public List<String> actorNames() { return actorNames; }
 
     public void addCase(StateCase aStateCase) {
         if (aStateCase.matchPattern().isEmpty()) {
