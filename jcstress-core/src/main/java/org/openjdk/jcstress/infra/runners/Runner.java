@@ -116,6 +116,14 @@ public abstract class Runner<R> {
         collector.add(result);
     }
 
+    protected void dump(Counter<R> cnt) {
+        TestResult result = prepareResult(Status.NORMAL);
+        for (R e : cnt.elementSet()) {
+             result.addState(String.valueOf(e), cnt.count(e));
+        }
+        collector.add(result);
+    }
+
     protected void dump(Counter<R>[] results) {
         TestResult result = prepareResult(Status.NORMAL);
         for (Counter<R> cnt : results) {

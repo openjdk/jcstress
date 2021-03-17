@@ -767,12 +767,11 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
         pw.println("            if (results.count(Outcome.STALE) > 0) {");
         pw.println("                messages.add(\"Have stale threads, forcing VM to exit for proper cleanup.\");");
-        pw.println("                dump(c, results);");
+        pw.println("                dump(results);");
         pw.println("                System.exit(0);");
-        pw.println("            } else {");
-        pw.println("                dump(c, results);");
         pw.println("            }");
         pw.println("        }");
+        pw.println("        dump(results);");
         pw.println("    }");
         pw.println();
         pw.println("    @Override");
