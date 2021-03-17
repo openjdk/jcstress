@@ -43,21 +43,15 @@ public class TestResult implements Serializable {
 
     private final TestConfig config;
     private final Status status;
-    private final int iterationId;
     private final Multiset<String> states;
     private volatile Environment env;
     private final List<String> auxData;
 
-    public TestResult(TestConfig config, Status status, int iterationId) {
+    public TestResult(TestConfig config, Status status) {
         this.config = config;
         this.status = status;
-        this.iterationId = iterationId;
         this.states = new HashMultiset<>();
         this.auxData = new ArrayList<>();
-    }
-
-    public int getIteration() {
-        return iterationId;
     }
 
     public void addState(String result, long count) {

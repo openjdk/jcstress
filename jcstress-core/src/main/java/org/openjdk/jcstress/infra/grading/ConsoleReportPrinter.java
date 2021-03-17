@@ -30,7 +30,6 @@ import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.util.StringUtils;
 
-import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -47,10 +46,10 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private final boolean verbose;
     private final PrintWriter output;
     private final long expectedTests;
-    private final long expectedIterations;
     private final long expectedForks;
+    private final long expectedResults;
 
-    private long observedIterations;
+    private long observedResults;
     private long observedCount;
 
     private final Set<String> observedTests = Collections.newSetFromMap(new HashMap<>());
@@ -73,7 +72,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
         this.output = pw;
         this.expectedTests = expectedTests;
         this.expectedForks = expectedForks;
-        this.expectedIterations = expectedForks * (opts.getIterations() + 1); // +1 sanity check iteration #0
+        this.expectedResults = expectedForks;
         verbose = opts.isVerbose();
         progressLen = 1;
 
@@ -96,7 +95,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
         observedTests.add(r.getName());
         observedForks.add(new ConfigFork(r.getConfig()));
-        observedIterations++;
+        observedResults++;
         observedCount += r.getTotalCount();
 
         printResult(r);
@@ -154,12 +153,12 @@ public class ConsoleReportPrinter implements TestResultCollector {
         }
 
         if (shouldPrintStatusLine) {
-            String line = String.format("(ETA: %10s) (Sample Rate: %s) (Tests: %d of %d) (Forks: %2d of %d) (Iterations: %2d of %d; %d passed, %d failed, %d soft errs, %d hard errs) ",
+            String line = String.format("(ETA: %10s) (Sample Rate: %s) (Tests: %d of %d) (Forks: %2d of %d) (Results: %2d of %d; %d passed, %d failed, %d soft errs, %d hard errs) ",
                     computeETA(),
                     computeSpeed(),
                     observedTests.size(), expectedTests,
                     observedForks.size(), expectedForks,
-                    observedIterations, expectedIterations, passed, failed, softErrors, hardErrors
+                    observedResults, expectedResults, passed, failed, softErrors, hardErrors
             );
             progressLen = line.length();
             output.print(line);
@@ -201,12 +200,12 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
     private String computeETA() {
         long timeSpent = System.nanoTime() - firstTest;
-        long resultsGot = observedIterations;
+        long resultsGot = observedResults;
         if (resultsGot == 0) {
             return "n/a";
         }
 
-        long nsToGo = (long)(timeSpent * (1.0 * (expectedIterations - 1) / resultsGot - 1));
+        long nsToGo = (long)(timeSpent * (1.0 * (expectedResults - 1) / resultsGot - 1));
         if (nsToGo > 0) {
             String result = "";
             long days = TimeUnit.NANOSECONDS.toDays(nsToGo);
