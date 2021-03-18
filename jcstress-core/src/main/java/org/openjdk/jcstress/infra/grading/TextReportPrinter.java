@@ -26,6 +26,7 @@ package org.openjdk.jcstress.infra.grading;
 
 
 import org.openjdk.jcstress.Options;
+import org.openjdk.jcstress.Verbosity;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.InProcessCollector;
 import org.openjdk.jcstress.infra.collectors.TestResult;
@@ -44,14 +45,14 @@ import java.util.function.Predicate;
 public class TextReportPrinter {
 
     private final InProcessCollector collector;
-    private final boolean verbose;
+    private final Verbosity verbosity;
     private final PrintWriter pw;
     private final Set<TestResult> emittedTests;
 
     public TextReportPrinter(Options opts, InProcessCollector collector) throws FileNotFoundException {
         this.collector = collector;
         this.pw = new PrintWriter(System.out, true);
-        this.verbose = opts.isVerbose();
+        this.verbosity = opts.verbosity();
         this.emittedTests = new HashSet<>();
     }
 
@@ -92,7 +93,7 @@ public class TextReportPrinter {
                 "All remaining tests",
                 "Tests that do not fall into any of the previous categories.",
                 r -> !emittedTests.contains(r),
-                verbose);
+                verbosity.printAllTests());
 
         pw.println("------------------------------------------------------------------------------------------------------------------------");
     }

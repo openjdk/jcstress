@@ -57,7 +57,7 @@ public class Options {
     private final String[] args;
     private boolean parse;
     private boolean list;
-    private boolean verbose;
+    private Verbosity verbosity;
     private int totalCpuCount;
     private int cpuCount;
     private int forks;
@@ -136,7 +136,9 @@ public class Options {
                 "This option only affects forked runs.")
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
-        parser.accepts("v", "Be extra verbose.");
+        parser.accepts("v", "Be verbose.");
+        parser.accepts("vv", "Be extra verbose.");
+        parser.accepts("vvv", "Be extra extra verbose.");
         parser.accepts("h", "Print this help.");
 
         OptionSet set;
@@ -169,7 +171,15 @@ public class Options {
             this.resultFile = "jcstress-results-" + timestamp + ".bin.gz";
         }
         this.list = orDefault(set.has(list), false);
-        this.verbose = orDefault(set.has("v"), false);
+        if (set.has("vvv")) {
+            this.verbosity = new Verbosity(3);
+        } else if (set.has("vv")) {
+            this.verbosity = new Verbosity(2);
+        } else if (set.has("v")) {
+            this.verbosity = new Verbosity(1);
+        } else {
+            this.verbosity = new Verbosity(0);
+        }
 
         totalCpuCount = VMSupport.figureOutHotCPUs();
         cpuCount = orDefault(set.valueOf(cpus), totalCpuCount);
@@ -327,8 +337,8 @@ public class Options {
         return iters;
     }
 
-    public boolean isVerbose() {
-        return verbose;
+    public Verbosity verbosity() {
+        return verbosity;
     }
 
     public int getCPUCount() {

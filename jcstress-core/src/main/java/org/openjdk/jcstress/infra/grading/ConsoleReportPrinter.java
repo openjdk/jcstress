@@ -25,6 +25,7 @@
 package org.openjdk.jcstress.infra.grading;
 
 import org.openjdk.jcstress.Options;
+import org.openjdk.jcstress.Verbosity;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.TestConfig;
@@ -43,7 +44,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
     private static final Integer PRINT_INTERVAL_MS = Integer.getInteger("jcstress.console.printIntervalMs");
 
-    private final boolean verbose;
+    private final Verbosity verbosity;
     private final PrintWriter output;
     private final long expectedTests;
     private final long expectedForks;
@@ -73,7 +74,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
         this.expectedTests = expectedTests;
         this.expectedForks = expectedForks;
         this.expectedResults = expectedForks;
-        verbose = opts.isVerbose();
+        verbosity = opts.verbosity();
         progressLen = 1;
 
         progressInteractive = (System.console() != null);
@@ -131,7 +132,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 inHardError ||
                 !grading.isPassed ||
                 grading.hasInteresting ||
-                verbose;
+                verbosity.printAllTests();
 
         long currentTime = System.nanoTime();
 

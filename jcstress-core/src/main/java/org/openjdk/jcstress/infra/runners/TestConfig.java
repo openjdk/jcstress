@@ -37,7 +37,6 @@ import java.util.function.Consumer;
 public class TestConfig implements Serializable {
 
     public final SpinLoopStyle spinLoopStyle;
-    public final boolean verbose;
     public final int time;
     public final int iters;
     public final DeoptMode deoptMode;
@@ -73,7 +72,6 @@ public class TestConfig implements Serializable {
         maxStride = opts.getMaxStride();
         iters = opts.getIterations();
         spinLoopStyle = opts.getSpinStyle();
-        verbose = opts.isVerbose();
         deoptMode = opts.deoptMode();
         maxFootprintMB = opts.getMaxFootprintMb();
         threads = info.threads();

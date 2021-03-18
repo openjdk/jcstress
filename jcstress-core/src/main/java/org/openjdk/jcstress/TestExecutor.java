@@ -59,14 +59,16 @@ public class TestExecutor {
 
     private final BinaryLinkServer server;
     private final int maxThreads;
+    private final Verbosity verbosity;
     private final TestResultCollector sink;
     private final EmbeddedExecutor embeddedExecutor;
     private final CPULayout cpuLayout;
 
     private final Map<String, VM> vmByToken;
 
-    public TestExecutor(int maxThreads, TestResultCollector sink, boolean possiblyForked) throws IOException {
+    public TestExecutor(int maxThreads, Verbosity verbosity, TestResultCollector sink, boolean possiblyForked) throws IOException {
         this.maxThreads = maxThreads;
+        this.verbosity = verbosity;
         this.sink = sink;
         this.vmByToken = new ConcurrentHashMap<>();
 
@@ -134,7 +136,7 @@ public class TestExecutor {
         }
     }
 
-    private static class VM {
+    private class VM {
         private final String host;
         private final int port;
         private final String token;
@@ -203,6 +205,9 @@ public class TestExecutor {
                     pw.println("    match: \"" + task.generatedRunnerName + "::" + JCStressTestProcessor.RUN_LOOP_PREFIX + an + "\",");
                     pw.println("    inline: \"+" + task.name + "::" + an + "\",");
                     pw.println("    inline: \"+" + task.generatedRunnerName + "::" + JCStressTestProcessor.AUX_PREFIX + "*\",");
+                    if (VMSupport.printAssemblyAvailable() && verbosity.printAssembly()) {
+                        pw.println("    PrintAssembly: true,");
+                    }
                     pw.println("  },");
                 }
                 pw.println("]");

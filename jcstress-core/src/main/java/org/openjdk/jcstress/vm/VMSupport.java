@@ -47,6 +47,7 @@ public class VMSupport {
     private static final Collection<Collection<String>> AVAIL_JVM_MODES = new ArrayList<>();
     private static volatile boolean THREAD_SPIN_WAIT_AVAILABLE;
     private static volatile boolean COMPILER_DIRECTIVES_AVAILABLE;
+    private static volatile boolean PRINT_ASSEMBLY_AVAILABLE;
 
     public static boolean spinWaitHintAvailable() {
         return THREAD_SPIN_WAIT_AVAILABLE;
@@ -54,6 +55,10 @@ public class VMSupport {
 
     public static boolean compilerDirectivesAvailable() {
         return COMPILER_DIRECTIVES_AVAILABLE;
+    }
+
+    public static boolean printAssemblyAvailable() {
+        return PRINT_ASSEMBLY_AVAILABLE;
     }
 
     public static void initFlags(Options opts) {
@@ -88,7 +93,7 @@ public class VMSupport {
         detect("Trimming down the number of compiler threads",
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
-                "-XX:CICompilerCount=4"
+                "-XX:CICompilerCount=2" // This is the absolute minimum for tiered configurations
         );
 
         detect("Trimming down the number of parallel GC threads",
@@ -166,6 +171,13 @@ public class VMSupport {
                 detect("Testing Thread.onSpinWait",
                         ThreadSpinWaitTestMain.class,
                         null
+                );
+
+        PRINT_ASSEMBLY_AVAILABLE =
+                detect("Testing PrintAssembly",
+                        SimpleTestMain.class,
+                        null,
+                        "-XX:+PrintAssembly"
                 );
 
         try {
