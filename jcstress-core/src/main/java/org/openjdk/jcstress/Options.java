@@ -57,7 +57,7 @@ public class Options {
     private final String[] args;
     private boolean parse;
     private boolean list;
-    private int verboseLevel;
+    private Verbosity verbosity;
     private int totalCpuCount;
     private int cpuCount;
     private int forks;
@@ -172,13 +172,13 @@ public class Options {
         }
         this.list = orDefault(set.has(list), false);
         if (set.has("vvv")) {
-            this.verboseLevel = 3;
+            this.verbosity = new Verbosity(3);
         } else if (set.has("vv")) {
-            this.verboseLevel = 2;
+            this.verbosity = new Verbosity(2);
         } else if (set.has("v")) {
-            this.verboseLevel = 1;
+            this.verbosity = new Verbosity(1);
         } else {
-            this.verboseLevel = 0;
+            this.verbosity = new Verbosity(0);
         }
 
         totalCpuCount = VMSupport.figureOutHotCPUs();
@@ -337,8 +337,8 @@ public class Options {
         return iters;
     }
 
-    public int verboseLevel() {
-        return verboseLevel;
+    public Verbosity verbosity() {
+        return verbosity;
     }
 
     public int getCPUCount() {
