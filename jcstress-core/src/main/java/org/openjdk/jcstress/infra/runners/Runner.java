@@ -69,13 +69,16 @@ public abstract class Runner<R> {
      * This method blocks until test is complete
      */
     public void run() {
+        @SuppressWarnings("unchecked")
+        Counter<R>[] results = (Counter<R>[]) new Counter[config.iters + 1];
+
         try {
-            dump(0, sanityCheck());
+            results[0] = sanityCheck();
         } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
-            dumpFailure(0, Status.API_MISMATCH, "Test sanity check failed, skipping", e);
+            dumpFailure(Status.API_MISMATCH, "Test sanity check failed, skipping", e);
             return;
         } catch (Throwable e) {
-            dumpFailure(0, Status.CHECK_TEST_ERROR, "Check test failed", e);
+            dumpFailure(Status.CHECK_TEST_ERROR, "Check test failed", e);
             return;
         }
 
@@ -86,12 +89,13 @@ public abstract class Runner<R> {
         }
 
         for (int c = 1; c <= config.iters; c++) {
-            dump(c, internalRun());
+            results[c] = internalRun();
         }
+        dump(results);
     }
 
-    private TestResult prepareResult(int iteration, Status status) {
-        TestResult result = new TestResult(config, status, iteration);
+    private TestResult prepareResult(Status status) {
+        TestResult result = new TestResult(config, status);
         for (String msg : messages) {
             result.addAuxData(msg);
         }
@@ -99,23 +103,33 @@ public abstract class Runner<R> {
         return result;
     }
 
-    protected void dumpFailure(int iteration, Status status, String message) {
+    protected void dumpFailure(Status status, String message) {
         messages.add(message);
-        TestResult result = prepareResult(iteration, status);
+        TestResult result = prepareResult(status);
         collector.add(result);
     }
 
-    protected void dumpFailure(int iteration, Status status, String message, Throwable aux) {
+    protected void dumpFailure(Status status, String message, Throwable aux) {
         messages.add(message);
-        TestResult result = prepareResult(iteration, status);
+        TestResult result = prepareResult(status);
         result.addAuxData(StringUtils.getStacktrace(aux));
         collector.add(result);
     }
 
-    protected void dump(int iteration, Counter<R> results) {
-        TestResult result = prepareResult(iteration, Status.NORMAL);
-        for (R e : results.elementSet()) {
-            result.addState(String.valueOf(e), results.count(e));
+    protected void dump(Counter<R> cnt) {
+        TestResult result = prepareResult(Status.NORMAL);
+        for (R e : cnt.elementSet()) {
+             result.addState(String.valueOf(e), cnt.count(e));
+        }
+        collector.add(result);
+    }
+
+    protected void dump(Counter<R>[] results) {
+        TestResult result = prepareResult(Status.NORMAL);
+        for (Counter<R> cnt : results) {
+            for (R e : cnt.elementSet()) {
+                result.addState(String.valueOf(e), cnt.count(e));
+            }
         }
         collector.add(result);
     }
@@ -135,7 +149,7 @@ public abstract class Runner<R> {
                 } catch (TimeoutException e) {
                     allStopped = false;
                 } catch (ExecutionException e) {
-                    dumpFailure(-1, Status.TEST_ERROR, "Unrecoverable error while running", e.getCause());
+                    dumpFailure(Status.TEST_ERROR, "Unrecoverable error while running", e.getCause());
                     return;
                 } catch (InterruptedException e) {
                     return;
@@ -144,7 +158,7 @@ public abstract class Runner<R> {
 
             long timeSpent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
             if (timeSpent > Math.max(10*config.time, MIN_TIMEOUT_MS)) {
-                dumpFailure(-1, Status.TIMEOUT_ERROR, "Timeout waiting for tasks to complete: " + timeSpent + " ms");
+                dumpFailure(Status.TIMEOUT_ERROR, "Timeout waiting for tasks to complete: " + timeSpent + " ms");
                 return;
             }
         }

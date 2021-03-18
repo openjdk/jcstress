@@ -131,7 +131,7 @@ public class TestExecutor {
                 if (!vm.checkTermination()) continue;
             } catch (ForkFailedException e) {
                 TestConfig task = vm.getTask();
-                TestResult result = new TestResult(task, Status.VM_ERROR, -1);
+                TestResult result = new TestResult(task, Status.VM_ERROR);
                 for (String i : e.getInfo()) {
                     result.addAuxData(i);
                 }

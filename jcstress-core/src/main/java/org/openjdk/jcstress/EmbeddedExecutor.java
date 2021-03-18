@@ -82,11 +82,11 @@ public class EmbeddedExecutor {
                 Runner<?> o = (Runner<?>) cnstr.newInstance(config, sink, pool);
                 o.run();
             } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
-                TestResult result = new TestResult(config, Status.API_MISMATCH, 0);
+                TestResult result = new TestResult(config, Status.API_MISMATCH);
                 result.addAuxData(StringUtils.getStacktrace(e));
                 sink.add(result);
             } catch (Throwable ex) {
-                TestResult result = new TestResult(config, Status.TEST_ERROR, 0);
+                TestResult result = new TestResult(config, Status.TEST_ERROR);
                 result.addAuxData(StringUtils.getStacktrace(ex));
                 sink.add(result);
             } finally {

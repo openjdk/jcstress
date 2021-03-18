@@ -94,7 +94,7 @@ public class ReportUtils {
             auxData.addAll(r.getAuxData());
         }
 
-        TestResult root = new TestResult(config, status, 0);
+        TestResult root = new TestResult(config, status);
 
         for (String s : stateCounts.keys()) {
             root.addState(s, stateCounts.count(s));
@@ -110,9 +110,8 @@ public class ReportUtils {
 
     public static void printDetails(PrintWriter pw, TestResult r, boolean inProgress) {
         if (inProgress) {
-            pw.format("    (fork: #%d, iteration #%d, JVM args: %s)%n",
+            pw.format("    (fork: #%d, JVM args: %s)%n",
                     r.getConfig().forkId + 1,
-                    r.getIteration(),
                     r.getConfig().jvmArgs
             );
         } else {
