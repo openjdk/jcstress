@@ -45,21 +45,41 @@ public class TestResult implements Serializable {
     private final Status status;
     private final Multiset<String> states;
     private volatile Environment env;
-    private final List<String> auxData;
+    private final List<String> messages;
+    private final List<String> vmOut;
+    private final List<String> vmErr;
 
     public TestResult(TestConfig config, Status status) {
         this.config = config;
         this.status = status;
         this.states = new HashMultiset<>();
-        this.auxData = new ArrayList<>();
+        this.messages = new ArrayList<>();
+        this.vmOut = new ArrayList<>();
+        this.vmErr = new ArrayList<>();
     }
 
     public void addState(String result, long count) {
         states.add(result, count);
     }
 
-    public void addAuxData(String data) {
-        auxData.add(data);
+    public void addMessage(String msg) {
+        messages.add(msg);
+    }
+
+    public void addVMOut(String msg) {
+        vmOut.add(msg);
+    }
+
+    public void addVMOut(Collection<String> msg) {
+        vmOut.addAll(msg);
+    }
+
+    public void addVMErr(String msg) {
+        vmErr.add(msg);
+    }
+
+    public void addVMErr(Collection<String> msg) {
+        vmErr.addAll(msg);
     }
 
     public void setEnv(Environment e) {
@@ -78,8 +98,16 @@ public class TestResult implements Serializable {
         return status;
     }
 
-    public List<String> getAuxData() {
-        return auxData;
+    public List<String> getMessages() {
+        return messages;
+    }
+
+    public List<String> getVmOut() {
+        return vmOut;
+    }
+
+    public List<String> getVmErr() {
+        return vmErr;
     }
 
     public long getTotalCount() {

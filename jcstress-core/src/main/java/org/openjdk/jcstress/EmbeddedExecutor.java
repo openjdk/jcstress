@@ -38,7 +38,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 public class EmbeddedExecutor {
 
@@ -83,11 +82,11 @@ public class EmbeddedExecutor {
                 o.run();
             } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
                 TestResult result = new TestResult(config, Status.API_MISMATCH);
-                result.addAuxData(StringUtils.getStacktrace(e));
+                result.addMessage(StringUtils.getStacktrace(e));
                 sink.add(result);
             } catch (Throwable ex) {
                 TestResult result = new TestResult(config, Status.TEST_ERROR);
-                result.addAuxData(StringUtils.getStacktrace(ex));
+                result.addMessage(StringUtils.getStacktrace(ex));
                 sink.add(result);
             } finally {
                 if (acquiredCPUs != null) {

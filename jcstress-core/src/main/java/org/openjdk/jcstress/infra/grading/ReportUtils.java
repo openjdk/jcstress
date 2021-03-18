@@ -91,7 +91,7 @@ public class ReportUtils {
                 stateCounts.add(s, r.getCount(s));
             }
             env = r.getEnv();
-            auxData.addAll(r.getAuxData());
+            auxData.addAll(r.getMessages());
         }
 
         TestResult root = new TestResult(config, status);
@@ -103,7 +103,7 @@ public class ReportUtils {
         root.setEnv(env);
 
         for (String data : auxData) {
-            root.addAuxData(data);
+            root.addMessage(data);
         }
         return root;
     }
@@ -160,19 +160,63 @@ public class ReportUtils {
     }
 
     public static void printMessages(PrintWriter pw, TestResult r) {
-        if (!r.getAuxData().isEmpty()) {
-            pw.println("    Messages: ");
-            for (String data : r.getAuxData()) {
-                if (skipMessage(data)) continue;
-                pw.println("        " + data);
+        boolean errMsgsPrinted = false;
+        for (String data : r.getMessages()) {
+            if (skipMessage(data)) continue;
+            if (!errMsgsPrinted) {
+                pw.println("    Messages: ");
+                errMsgsPrinted = true;
             }
+            pw.println("        " + data);
+        }
+        if (errMsgsPrinted) {
+            pw.println();
+        }
+
+        boolean vmOutPrinted = false;
+        for (String data : r.getVmOut()) {
+            if (skipMessage(data)) continue;
+            if (!vmOutPrinted) {
+                pw.println("    VM output stream: ");
+                vmOutPrinted = true;
+            }
+            pw.println("        " + data);
+        }
+        if (vmOutPrinted) {
+            pw.println();
+        }
+
+        boolean vmErrPrinted = false;
+        for (String data : r.getVmErr()) {
+            if (skipMessage(data)) continue;
+            if (!vmErrPrinted) {
+                pw.println("    VM error stream: ");
+                vmErrPrinted = true;
+            }
+            pw.println("        " + data);
+        }
+        if (vmErrPrinted) {
             pw.println();
         }
     }
 
     private static boolean skipMessage(String data) {
-        if (data != null && data.startsWith("Warning: 'NoSuchMethodError' on register of sun.hotspot.WhiteBox"))
+        if (data == null) {
             return true;
+        }
+
+        if (data.startsWith("Warning: 'NoSuchMethodError' on register of sun.hotspot.WhiteBox")) {
+            return true;
+        }
+
+        if (data.contains("Option MaxRAMFraction was deprecated in version") ||
+            data.contains("Option MinRAMFraction was deprecated in version")) {
+            return true;
+        }
+
+        if (data.contains("compiler directives added")) {
+            return true;
+        }
 
         return false;
     }
