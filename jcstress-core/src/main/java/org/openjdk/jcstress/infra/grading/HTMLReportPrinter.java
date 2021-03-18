@@ -427,10 +427,10 @@ public class HTMLReportPrinter {
         o.println("<h3>Auxiliary data</h3>");
 
         for (TestResult r : sorted) {
-            if (!r.getAuxData().isEmpty()) {
+            if (!r.getMessages().isEmpty()) {
                 o.println("<p><b>" + r.getConfig() + "</b></p>");
                 o.println("<pre>");
-                for (String data : r.getAuxData()) {
+                for (String data : r.getMessages()) {
                     o.println(data);
                 }
                 o.println("</pre>");

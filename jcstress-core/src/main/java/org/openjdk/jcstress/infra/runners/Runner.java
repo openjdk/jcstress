@@ -97,7 +97,7 @@ public abstract class Runner<R> {
     private TestResult prepareResult(Status status) {
         TestResult result = new TestResult(config, status);
         for (String msg : messages) {
-            result.addAuxData(msg);
+            result.addMessage(msg);
         }
         messages.clear();
         return result;
@@ -112,7 +112,7 @@ public abstract class Runner<R> {
     protected void dumpFailure(Status status, String message, Throwable aux) {
         messages.add(message);
         TestResult result = prepareResult(status);
-        result.addAuxData(StringUtils.getStacktrace(aux));
+        result.addMessage(StringUtils.getStacktrace(aux));
         collector.add(result);
     }
 

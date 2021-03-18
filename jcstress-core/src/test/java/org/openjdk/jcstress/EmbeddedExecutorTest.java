@@ -55,7 +55,7 @@ public class EmbeddedExecutorTest {
         TestResult testResult = sink.getTestResults().iterator().next();
         Assert.assertEquals("Should report a test error", Status.TEST_ERROR, testResult.status());
 
-        String errorMessage = testResult.getAuxData().get(0);
+        String errorMessage = testResult.getMessages().get(0);
         Assert.assertEquals("Should report the test error reason", "java.lang.ClassNotFoundException: my.missing.ClassName",
                 getFirstLine(errorMessage));
     }

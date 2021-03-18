@@ -80,7 +80,7 @@ public class TestExecutor {
 
             @Override
             public void onResult(String token, TestResult result) {
-                sink.add(result);
+                vmByToken.get(token).recordResult(result);
             }
         }) : null;
         embeddedExecutor = new EmbeddedExecutor(sink, cpuLayout);
@@ -127,19 +127,10 @@ public class TestExecutor {
 
     private void processReadyVMs() {
         for (VM vm : vmByToken.values()) {
-            try {
-                if (!vm.checkTermination()) continue;
-            } catch (ForkFailedException e) {
-                TestConfig task = vm.getTask();
-                TestResult result = new TestResult(task, Status.VM_ERROR);
-                for (String i : e.getInfo()) {
-                    result.addAuxData(i);
-                }
-                sink.add(result);
+            if (vm.checkCompleted(sink)) {
+                vmByToken.remove(vm.token, vm);
+                cpuLayout.release(vm.claimedCPUs);
             }
-
-            vmByToken.remove(vm.token, vm);
-            cpuLayout.release(vm.claimedCPUs);
         }
     }
 
@@ -155,6 +146,7 @@ public class TestExecutor {
         private Process process;
         private boolean processed;
         private IOException pendingException;
+        private TestResult result;
 
         public VM(String host, int port, String token, TestConfig task, List<Integer> claimedCPUs) {
             this.host = host;
@@ -258,42 +250,6 @@ public class TestExecutor {
             }
         }
 
-        boolean checkTermination() {
-            if (pendingException != null) {
-                throw new ForkFailedException(pendingException.getMessage());
-            }
-
-            if (process.isAlive()) {
-                return false;
-            } else {
-                // Try to poll the exit code, and fail if it's not zero.
-                try {
-                    int ecode = process.waitFor();
-                    if (ecode != 0) {
-                        List<String> output = new ArrayList<>();
-                        try {
-                            output.addAll(Files.readAllLines(stdout.toPath()));
-                        } catch (IOException e) {
-                            output.add("Failed to read stdout: " + e.getMessage());
-                        }
-                        try {
-                            output.addAll(Files.readAllLines(stderr.toPath()));
-                        } catch (IOException e) {
-                            output.add("Failed to read stderr: " + e.getMessage());
-                        }
-                        throw new ForkFailedException(output);
-                    }
-                } catch (InterruptedException ex) {
-                    throw new ForkFailedException(ex.getMessage());
-                } finally {
-                    // The process is definitely dead, remove the temporary files.
-                    stdout.delete();
-                    stderr.delete();
-                }
-                return true;
-            }
-        }
-
         public synchronized TestConfig jobRequest() {
             if (processed) {
                 return null;
@@ -304,6 +260,72 @@ public class TestExecutor {
 
         public TestConfig getTask() {
             return task;
+        }
+
+        public boolean checkCompleted(TestResultCollector sink) {
+            // There is a pending exception that terminated the target VM.
+            if (pendingException != null) {
+                dumpFailure(sink, Collections.singleton(pendingException.getMessage()), Collections.emptyList());
+                return true;
+            }
+
+            // Process is still alive, no need to ask about the status.
+            if (process.isAlive()) {
+                return false;
+            }
+
+            // Try to poll the exit code, and fail if it's not zero.
+            try {
+                int ecode = process.waitFor();
+
+                List<String> out = new ArrayList<>();
+                try {
+                    out.addAll(Files.readAllLines(stdout.toPath()));
+                } catch (IOException e) {
+                    out.add("Failed to read stdout: " + e.getMessage());
+                }
+
+                List<String> err = new ArrayList<>();
+                try {
+                    err.addAll(Files.readAllLines(stderr.toPath()));
+                } catch (IOException e) {
+                    err.add("Failed to read stderr: " + e.getMessage());
+                }
+
+                if (ecode != 0) {
+                    dumpFailure(sink, out, err);
+                } else {
+                    result.addVMOut(out);
+                    result.addVMErr(err);
+                    sink.add(result);
+                }
+            } catch (InterruptedException ex) {
+                dumpFailure(sink, Collections.singleton(ex.getMessage()), Collections.emptyList());
+            } finally {
+                // The process is definitely dead, remove the temporary files.
+                stdout.delete();
+                stderr.delete();
+            }
+            return true;
+        }
+
+        private void dumpFailure(TestResultCollector sink, Collection<String> out, Collection<String> err) {
+            TestConfig task = getTask();
+            TestResult result = new TestResult(task, Status.VM_ERROR);
+            for (String i : out) {
+                result.addMessage(i);
+            }
+            for (String i : err) {
+                result.addMessage(i);
+            }
+            sink.add(result);
+        }
+
+        public void recordResult(TestResult r) {
+            if (result != null) {
+                throw new IllegalStateException("VM had already published a result.");
+            }
+            result = r;
         }
     }
 
