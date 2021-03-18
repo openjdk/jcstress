@@ -44,14 +44,14 @@ import java.util.function.Predicate;
 public class TextReportPrinter {
 
     private final InProcessCollector collector;
-    private final boolean verbose;
+    private final int verboseLevel;
     private final PrintWriter pw;
     private final Set<TestResult> emittedTests;
 
     public TextReportPrinter(Options opts, InProcessCollector collector) throws FileNotFoundException {
         this.collector = collector;
         this.pw = new PrintWriter(System.out, true);
-        this.verbose = opts.isVerbose();
+        this.verboseLevel = opts.verboseLevel();
         this.emittedTests = new HashSet<>();
     }
 
@@ -92,7 +92,7 @@ public class TextReportPrinter {
                 "All remaining tests",
                 "Tests that do not fall into any of the previous categories.",
                 r -> !emittedTests.contains(r),
-                verbose);
+                verboseLevel >= 1);
 
         pw.println("------------------------------------------------------------------------------------------------------------------------");
     }

@@ -43,7 +43,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
     private static final Integer PRINT_INTERVAL_MS = Integer.getInteger("jcstress.console.printIntervalMs");
 
-    private final boolean verbose;
+    private final int verboseLevel;
     private final PrintWriter output;
     private final long expectedTests;
     private final long expectedForks;
@@ -73,7 +73,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
         this.expectedTests = expectedTests;
         this.expectedForks = expectedForks;
         this.expectedResults = expectedForks;
-        verbose = opts.isVerbose();
+        verboseLevel = opts.verboseLevel();
         progressLen = 1;
 
         progressInteractive = (System.console() != null);
@@ -131,7 +131,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 inHardError ||
                 !grading.isPassed ||
                 grading.hasInteresting ||
-                verbose;
+                verboseLevel >= 1;
 
         long currentTime = System.nanoTime();
 
