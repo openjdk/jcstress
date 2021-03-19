@@ -109,15 +109,10 @@ public class ReportUtils {
     }
 
     public static void printDetails(PrintWriter pw, TestResult r, boolean inProgress) {
+        pw.format("    (compilation: %s)%n", r.getConfig().getCompileMode());
+        pw.format("    (JVM args: %s)%n", r.getConfig().jvmArgs);
         if (inProgress) {
-            pw.format("    (fork: #%d, JVM args: %s)%n",
-                    r.getConfig().forkId + 1,
-                    r.getConfig().jvmArgs
-            );
-        } else {
-            pw.format("    (JVM args: %s)%n",
-                    r.getConfig().jvmArgs
-            );
+            pw.format("    (fork: #%d)%n", r.getConfig().forkId + 1);
         }
 
         if (!r.hasSamples()) {

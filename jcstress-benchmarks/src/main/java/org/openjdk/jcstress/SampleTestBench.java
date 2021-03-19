@@ -57,7 +57,7 @@ public class SampleTestBench {
         String runnerName = SampleTest_jcstress.class.getCanonicalName();
 
         TestInfo ti = new TestInfo(testName, runnerName, "", 2, Arrays.asList("a1", "a2"), false);
-        TestConfig cfg = new TestConfig(opts, ti, TestConfig.RunMode.EMBEDDED, 1, Collections.emptyList());
+        TestConfig cfg = new TestConfig(opts, ti, TestConfig.RunMode.EMBEDDED, 1, Collections.emptyList(), CompileMode.UNIFIED);
 
         pool = Executors.newCachedThreadPool();
 

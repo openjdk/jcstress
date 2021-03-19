@@ -36,7 +36,6 @@ import org.openjdk.jcstress.vm.OSSupport;
 import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.*;
-import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -59,9 +58,9 @@ public class JCStress {
 
         VMSupport.initFlags(opts);
 
-        VMSupport.detectAvailableVMModes(opts.getJvmArgs(), opts.getJvmArgsPrepend());
-        if (VMSupport.getAvailableVMModes().isEmpty()) {
-            out.println("FATAL: No JVM modes to run with.");
+        VMSupport.detectAvailableVMConfigs(opts.isSplitCompilation(), opts.getJvmArgs(), opts.getJvmArgsPrepend());
+        if (VMSupport.getAvailableVMConfigs().isEmpty()) {
+            out.println("FATAL: No JVM configurations to run with.");
             return;
         }
 
@@ -114,14 +113,26 @@ public class JCStress {
     private List<TestConfig> prepareRunProgram(Set<String> tests) {
         List<TestConfig> configs = new ArrayList<>();
         if (opts.shouldFork()) {
-            List<String> inputArgs = ManagementFactory.getRuntimeMXBean().getInputArguments();
-            for (String test : tests) {
-                for (Collection<String> jvmArgs : VMSupport.getAvailableVMModes()) {
-                    List<String> fullArgs = new ArrayList<>();
-                    fullArgs.addAll(inputArgs);
-                    fullArgs.addAll(jvmArgs);
-                    for (int f = 0; f < opts.getForks(); f++) {
-                        configs.add(new TestConfig(opts, TestList.getInfo(test), TestConfig.RunMode.FORKED, f, fullArgs));
+            for (VMSupport.Config config : VMSupport.getAvailableVMConfigs()) {
+                for (String test : tests) {
+                    TestInfo info = TestList.getInfo(test);
+                    if (opts.isSplitCompilation() && VMSupport.compilerDirectivesAvailable()) {
+                        for (int cc = 0; cc < CompileMode.casesFor(info.threads()); cc++) {
+                            CompileMode cm = new CompileMode(cc, info.actorNames(), info.threads());
+                            if (config.onlyIfC2() && !cm.hasC2()) {
+                                // This configuration is expected to run only when C2 is enabled,
+                                // but compilation mode does not include C2. Can skip it to optimize
+                                // testing time.
+                                continue;
+                            }
+                            for (int f = 0; f < opts.getForks(); f++) {
+                                configs.add(new TestConfig(opts, info, TestConfig.RunMode.FORKED, f, config.args(), cc));
+                            }
+                        }
+                    } else {
+                        for (int f = 0; f < opts.getForks(); f++) {
+                            configs.add(new TestConfig(opts, info, TestConfig.RunMode.FORKED, f, config.args(), CompileMode.UNIFIED));
+                        }
                     }
                 }
             }
@@ -129,7 +140,7 @@ public class JCStress {
             for (String test : tests) {
                 TestInfo info = TestList.getInfo(test);
                 TestConfig.RunMode mode = info.requiresFork() ? TestConfig.RunMode.FORKED : TestConfig.RunMode.EMBEDDED;
-                configs.add(new TestConfig(opts, info, mode, -1, Collections.emptyList()));
+                configs.add(new TestConfig(opts, info, mode, -1, Collections.emptyList(), CompileMode.UNIFIED));
             }
         }
 

@@ -33,6 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,9 +43,10 @@ import java.util.stream.Collectors;
 public class VMSupport {
 
     private static final List<String> GLOBAL_JVM_FLAGS = new ArrayList<>();
-    private static final List<String> STRESS_C2_JVM_FLAGS = new ArrayList<>();
+    private static final List<String> C2_STRESS_JVM_FLAGS = new ArrayList<>();
+    private static final List<String> C2_ONLY_STRESS_JVM_FLAGS = new ArrayList<>();
 
-    private static final Collection<Collection<String>> AVAIL_JVM_MODES = new ArrayList<>();
+    private static final List<Config> AVAIL_JVM_CONFIGS = new ArrayList<>();
     private static volatile boolean THREAD_SPIN_WAIT_AVAILABLE;
     private static volatile boolean COMPILER_DIRECTIVES_AVAILABLE;
     private static volatile boolean PRINT_ASSEMBLY_AVAILABLE;
@@ -141,31 +143,32 @@ public class VMSupport {
             throw new IllegalStateException("Fatal error: WhiteBoxAPI JAR problems.", e);
         }
 
-        STRESS_C2_JVM_FLAGS.add("-XX:-TieredCompilation");
-
         detect("Unlocking C2 local code motion randomizer",
                 SimpleTestMain.class,
-                STRESS_C2_JVM_FLAGS,
+                C2_STRESS_JVM_FLAGS,
                 "-XX:+StressLCM"
         );
 
         detect("Unlocking C2 global code motion randomizer",
                 SimpleTestMain.class,
-                STRESS_C2_JVM_FLAGS,
+                C2_STRESS_JVM_FLAGS,
                 "-XX:+StressGCM"
         );
 
         detect("Unlocking C2 iterative global value numbering randomizer",
                 SimpleTestMain.class,
-                STRESS_C2_JVM_FLAGS,
+                C2_STRESS_JVM_FLAGS,
                 "-XX:+StressIGVN"
         );
 
         detect("Unlocking C2 conditional constant propagation randomizer",
                 SimpleTestMain.class,
-                STRESS_C2_JVM_FLAGS,
+                C2_STRESS_JVM_FLAGS,
                 "-XX:+StressCCP"
         );
+
+        C2_ONLY_STRESS_JVM_FLAGS.add("-XX:-TieredCompilation");
+        C2_ONLY_STRESS_JVM_FLAGS.addAll(C2_STRESS_JVM_FLAGS);
 
         detect("Testing allocation profiling",
                 AllocProfileMain.class,
@@ -223,49 +226,72 @@ public class VMSupport {
         }
     }
 
-    public static void detectAvailableVMModes(Collection<String> jvmArgs, Collection<String> jvmArgsPrepend) {
-        Collection<Collection<String>> modes;
+    public static void detectAvailableVMConfigs(boolean splitCompilation, List<String> jvmArgs, List<String> jvmArgsPrepend) {
+        System.out.println("Probing what VM configurations are available:");
+        System.out.println(" (failures are non-fatal, but may miss some interesting cases)");
 
-        if (jvmArgs != null) {
-            modes = Collections.singleton(jvmArgs);
+        List<Config> configs;
+
+        if (!jvmArgs.isEmpty()) {
+            configs = Collections.singletonList(new Config(jvmArgs, false));
+        } else if (splitCompilation && COMPILER_DIRECTIVES_AVAILABLE) {
+            System.out.println(" (split compilation is requested and compiler directives are available)");
+            configs = Arrays.asList(
+                    // Default global
+                    new Config(Collections.emptyList(), false),
+
+                    // C2 compilations stress
+                    new Config(C2_STRESS_JVM_FLAGS, true)
+            );
         } else {
-            modes = Arrays.asList(
-                    // Intepreted
-                    Arrays.asList("-Xint"),
+            configs = Arrays.asList(
+                    // Interpreted
+                    new Config(Arrays.asList("-Xint"), false),
 
                     // C1
-                    Arrays.asList("-XX:TieredStopAtLevel=1"),
+                    new Config(Arrays.asList("-XX:TieredStopAtLevel=1"), false),
 
                     // C2
-                    Arrays.asList("-XX:-TieredCompilation"),
+                    new Config(Arrays.asList("-XX:-TieredCompilation"), false),
 
-                    // C2 + stress
-                    STRESS_C2_JVM_FLAGS
+                    // C2 only + stress
+                    new Config(C2_ONLY_STRESS_JVM_FLAGS, true)
             );
+        }
+
+        // Mix in input arguments, if available
+        List<String> inputArgs = ManagementFactory.getRuntimeMXBean().getInputArguments();
+        if (!inputArgs.isEmpty()) {
+            configs = configs.stream().map(c -> {
+                List<String> l = new ArrayList<>();
+                l.addAll(inputArgs);
+                l.addAll(c.args());
+                return new Config(l, c.onlyIfC2());
+            }).collect(Collectors.toList());
         }
 
         // Mix in prepends, if available
         if (jvmArgsPrepend != null) {
-            modes = modes.stream().map(c -> {
-                Collection<String> l = new ArrayList<>();
+            configs = configs.stream().map(c -> {
+                List<String> l = new ArrayList<>();
                 l.addAll(jvmArgsPrepend);
-                l.addAll(c);
-                return l;
+                l.addAll(c.args());
+                return new Config(l, c.onlyIfC2());
             }).collect(Collectors.toList());
         }
 
-        System.out.println("Probing what VM modes are available:");
-        System.out.println(" (failures are non-fatal, but may miss some interesting cases)");
         System.out.println();
-        for (Collection<String> mode : modes) {
+
+        for (Config config : configs) {
+            List<String> args = config.args();
             try {
-                List<String> line = new ArrayList<>(mode);
+                List<String> line = new ArrayList<>(args);
                 line.add(SimpleTestMain.class.getName());
                 tryWith(line.toArray(new String[0]));
-                AVAIL_JVM_MODES.add(mode);
-                System.out.printf("----- [OK] %s%n", mode);
+                AVAIL_JVM_CONFIGS.add(config);
+                System.out.printf("----- [OK] %s%n", args);
             } catch (VMSupportException e) {
-                System.out.printf("----- [N/A] %s%n", mode);
+                System.out.printf("----- [N/A] %s%n", args);
                 System.out.println(e.getMessage());
                 System.out.println();
             }
@@ -339,8 +365,8 @@ public class VMSupport {
     }
 
 
-    public static Collection<Collection<String>> getAvailableVMModes() {
-        return AVAIL_JVM_MODES;
+    public static List<Config> getAvailableVMConfigs() {
+        return AVAIL_JVM_CONFIGS;
     }
 
     /**
@@ -391,6 +417,24 @@ public class VMSupport {
         @Override
         public void run() {
             while (!Thread.interrupted()) ; // burn;
+        }
+    }
+
+    public static class Config {
+        private final List<String> args;
+        private final boolean onlyIfC2;
+
+        private Config(List<String> args, boolean onlyIfC2) {
+            this.args = args;
+            this.onlyIfC2 = onlyIfC2;
+        }
+
+        public boolean onlyIfC2() {
+            return onlyIfC2;
+        }
+
+        public List<String> args() {
+            return args;
         }
     }
 

@@ -50,7 +50,7 @@ public class StringUtils {
         }
     }
 
-    public static Collection<String> splitQuotedEscape(String src) {
+    public static List<String> splitQuotedEscape(String src) {
         List<String> results = new ArrayList<>();
 
         StringBuilder sb = new StringBuilder();
