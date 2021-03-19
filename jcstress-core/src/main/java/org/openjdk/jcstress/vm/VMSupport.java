@@ -72,46 +72,38 @@ public class VMSupport {
                 "-XX:+UnlockDiagnosticVMOptions"
         );
 
-        // Rationale: every test VM uses at least 2 threads. Which means there are at max $CPU/2 VMs.
-        // Reserving half of the RSS of each VM to Java heap leaves enough space for native RSS and
-        // other processes. This means multiplying the factor by 2. These two adjustments cancel each
-        // other.
-        //
-        // It does not matter if user requested lower number of VMs, we still want to follow
-        // the global per-VM fraction. This would trim down the memory requirements along with
-        // CPU requirements.
-        //
-        // Setting -Xms/-Xmx explicitly is supposed to override these defaults.
-        //
-        int part = opts.getTotalCPUCount();
+        // Rationale for GC options: the tests are supposed to run in a very tight memory
+        // constraints.
 
-        detect("Trimming down the default VM heap size to 1/" + part + "-th of max RAM",
+        int part = 256;
+
+        detect("Trimming down the VM heap size to " + part + "M",
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
-                "-XX:MaxRAMFraction=" + part, "-XX:MinRAMFraction=" + part);
-
-        detect("Trimming down the number of compiler threads",
-                SimpleTestMain.class,
-                GLOBAL_JVM_FLAGS,
-                "-XX:CICompilerCount=2" // This is the absolute minimum for tiered configurations
-        );
+                "-Xms" + part + "M", "-Xmx" + part + "M");
 
         detect("Trimming down the number of parallel GC threads",
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
-                "-XX:ParallelGCThreads=4"
+                "-XX:ParallelGCThreads=2"
         );
 
         detect("Trimming down the number of concurrent GC threads",
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
-                "-XX:ConcGCThreads=4"
+                "-XX:ConcGCThreads=2"
         );
 
         detect("Trimming down the number of G1 concurrent refinement GC threads",
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
-                "-XX:G1ConcRefinementThreads=4"
+                "-XX:G1ConcRefinementThreads=2"
+        );
+
+        detect("Trimming down the number of compiler threads",
+                SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
+                "-XX:CICompilerCount=2" // This is the absolute minimum for tiered configurations
         );
 
         detect("Testing @Contended works on all results and infra objects",
