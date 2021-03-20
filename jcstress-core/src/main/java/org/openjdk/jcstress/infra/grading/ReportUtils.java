@@ -209,11 +209,6 @@ public class ReportUtils {
             return true;
         }
 
-        if (data.contains("Option MaxRAMFraction was deprecated in version") ||
-            data.contains("Option MinRAMFraction was deprecated in version")) {
-            return true;
-        }
-
         if (data.contains("compiler directives added")) {
             return true;
         }

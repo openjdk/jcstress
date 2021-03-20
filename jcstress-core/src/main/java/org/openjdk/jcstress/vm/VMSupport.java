@@ -72,46 +72,51 @@ public class VMSupport {
                 "-XX:+UnlockDiagnosticVMOptions"
         );
 
-        // Rationale: every test VM uses at least 2 threads. Which means there are at max $CPU/2 VMs.
-        // Reserving half of the RSS of each VM to Java heap leaves enough space for native RSS and
-        // other processes. This means multiplying the factor by 2. These two adjustments cancel each
-        // other.
-        //
-        // It does not matter if user requested lower number of VMs, we still want to follow
-        // the global per-VM fraction. This would trim down the memory requirements along with
-        // CPU requirements.
-        //
-        // Setting -Xms/-Xmx explicitly is supposed to override these defaults.
-        //
-        int part = opts.getTotalCPUCount();
+        // Tests are supposed to run in a very tight memory constraints:
+        // the test objects are small and reused where possible. The footprint
+        // testing machinery would select appropriate stride sizes to fit the heap.
+        // Users can override this to work on smaller/larger machines, but it should
+        // not be necessary, as even the smallest machines usually have more than 256M
+        // of system memory per CPU.
 
-        detect("Trimming down the default VM heap size to 1/" + part + "-th of max RAM",
+        int heap = opts.getHeapPerForkMb();
+        detect("Trimming down the VM heap size to " + heap + "M",
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
-                "-XX:MaxRAMFraction=" + part, "-XX:MinRAMFraction=" + part);
+                "-Xms" + heap + "M", "-Xmx" + heap + "M");
 
-        detect("Trimming down the number of compiler threads",
-                SimpleTestMain.class,
-                GLOBAL_JVM_FLAGS,
-                "-XX:CICompilerCount=2" // This is the absolute minimum for tiered configurations
-        );
+        // The tests are usually not GC heavy. The minimum amount of threads a jcstress
+        // test uses is 2, so we can expect the CPU affinity machinery to allocate at
+        // least 2 CPUs per fork. This gives us the upper bound for the number of GC threads: 2,
+        // otherwise we risk oversubscribing the forked VM.
+        //
+        // We could, theoretically, drop the number of GC threads to 1, but GC ergonomics
+        // sometimes decides to switch to single-threaded mode in some GC implementations
+        // (e.g. for reference processing), and it would make sense to let GC run in multi-threaded
+        // modes instead.
 
         detect("Trimming down the number of parallel GC threads",
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
-                "-XX:ParallelGCThreads=4"
+                "-XX:ParallelGCThreads=2"
         );
 
         detect("Trimming down the number of concurrent GC threads",
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
-                "-XX:ConcGCThreads=4"
+                "-XX:ConcGCThreads=2"
         );
 
         detect("Trimming down the number of G1 concurrent refinement GC threads",
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
-                "-XX:G1ConcRefinementThreads=4"
+                "-XX:G1ConcRefinementThreads=2"
+        );
+
+        detect("Trimming down the number of compiler threads",
+                SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
+                "-XX:CICompilerCount=2" // This is the absolute minimum for tiered configurations
         );
 
         detect("Testing @Contended works on all results and infra objects",
