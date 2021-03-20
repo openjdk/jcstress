@@ -51,15 +51,14 @@ public class Options {
     private String resultDir;
     private String testFilter;
     private int minStride, maxStride;
-    private int maxFootprint;
     private int time;
     private int iters;
     private final String[] args;
     private boolean parse;
     private boolean list;
     private Verbosity verbosity;
-    private int totalCpuCount;
     private int cpuCount;
+    private int heapPerFork;
     private int forks;
     private String mode;
     private SpinLoopStyle spinStyle;
@@ -107,7 +106,7 @@ public class Options {
                 "Reducing the number of CPUs limits the amount of resources (including memory) the run is using.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
-        OptionSpec<Integer> maxFootprint = parser.accepts("mf", "Maximum footprint for each test, in megabytes. This " +
+        OptionSpec<Integer> heapPerFork = parser.accepts("hs", "Java heap size per fork, in megabytes. This " +
                 "affects the stride size: maximum footprint will never be exceeded, regardless of min/max stride sizes.")
                 .withRequiredArg().ofType(Integer.class).describedAs("MB");
 
@@ -181,7 +180,7 @@ public class Options {
             this.verbosity = new Verbosity(0);
         }
 
-        totalCpuCount = VMSupport.figureOutHotCPUs();
+        int totalCpuCount = VMSupport.figureOutHotCPUs();
         cpuCount = orDefault(set.valueOf(cpus), totalCpuCount);
 
         if (cpuCount > totalCpuCount) {
@@ -236,7 +235,7 @@ public class Options {
 
         this.minStride = orDefault(set.valueOf(minStride), 10);
         this.maxStride = orDefault(set.valueOf(maxStride), 10000);
-        this.maxFootprint = orDefault(set.valueOf(maxFootprint), 100);
+        this.heapPerFork = orDefault(set.valueOf(heapPerFork), 256);
 
         this.jvmArgs = processArgs(optJvmArgs, set);
         this.jvmArgsPrepend = processArgs(optJvmArgsPrepend, set);
@@ -345,10 +344,6 @@ public class Options {
         return cpuCount;
     }
 
-    public int getTotalCPUCount() {
-        return totalCpuCount;
-    }
-
     public String getResultFile() {
         return resultFile;
     }
@@ -361,8 +356,13 @@ public class Options {
         return jvmArgsPrepend;
     }
 
+    public int getHeapPerForkMb() {
+        return heapPerFork;
+    }
+
     public int getMaxFootprintMb() {
-        return maxFootprint;
+        // Half of heap size.
+        return getHeapPerForkMb() / 2;
     }
 
 }

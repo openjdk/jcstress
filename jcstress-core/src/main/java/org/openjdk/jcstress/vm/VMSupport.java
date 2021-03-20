@@ -72,15 +72,28 @@ public class VMSupport {
                 "-XX:+UnlockDiagnosticVMOptions"
         );
 
-        // Rationale for GC options: the tests are supposed to run in a very tight memory
-        // constraints.
+        // Tests are supposed to run in a very tight memory constraints:
+        // the test objects are small and reused where possible. The footprint
+        // testing machinery would select appropriate stride sizes to fit the heap.
+        // Users can override this to work on smaller/larger machines, but it should
+        // not be necessary, as even the smallest machines usually have more than 256M
+        // of system memory per CPU.
 
-        int part = 256;
-
-        detect("Trimming down the VM heap size to " + part + "M",
+        int heap = opts.getHeapPerForkMb();
+        detect("Trimming down the VM heap size to " + heap + "M",
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
-                "-Xms" + part + "M", "-Xmx" + part + "M");
+                "-Xms" + heap + "M", "-Xmx" + heap + "M");
+
+        // The tests are usually not GC heavy. The minimum amount of threads a jcstress
+        // test uses is 2, so we can expect the CPU affinity machinery to allocate at
+        // least 2 CPUs per fork. This gives us the upper bound for the number of GC threads: 2,
+        // otherwise we risk oversubscribing the forked VM.
+        //
+        // We could, theoretically, drop the number of GC threads to 1, but GC ergonomics
+        // sometimes decides to switch to single-threaded mode in some GC implementations
+        // (e.g. for reference processing), and it would make sense to let GC run in multi-threaded
+        // modes instead.
 
         detect("Trimming down the number of parallel GC threads",
                 SimpleTestMain.class,
