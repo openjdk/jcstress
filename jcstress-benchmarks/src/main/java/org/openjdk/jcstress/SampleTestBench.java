@@ -52,7 +52,7 @@ public class SampleTestBench {
         Options opts = new Options(new String[]{"-v", "-iters", "1", "-time", "5000", "-deoptMode", "NONE"});
         opts.parse();
         PrintWriter pw = new PrintWriter(System.out, true);
-        ConsoleReportPrinter sink = new ConsoleReportPrinter(opts, pw, 1, 1);
+        ConsoleReportPrinter sink = new ConsoleReportPrinter(opts, pw, 1);
 
         String testName = SampleTest.class.getCanonicalName();
         String runnerName = SampleTest_jcstress.class.getCanonicalName();
