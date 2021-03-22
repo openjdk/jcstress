@@ -25,6 +25,7 @@
 
 package org.openjdk.jcstress;
 
+import org.openjdk.jcstress.vm.CompileMode;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
@@ -57,7 +58,7 @@ public class SampleTestBench {
         String runnerName = SampleTest_jcstress.class.getCanonicalName();
 
         TestInfo ti = new TestInfo(testName, runnerName, "", 2, Arrays.asList("a1", "a2"), false);
-        TestConfig cfg = new TestConfig(opts, ti, TestConfig.RunMode.EMBEDDED, 1, Collections.emptyList());
+        TestConfig cfg = new TestConfig(opts, ti, TestConfig.RunMode.EMBEDDED, 1, Collections.emptyList(), CompileMode.UNIFIED);
 
         pool = Executors.newCachedThreadPool();
 

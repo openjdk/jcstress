@@ -24,6 +24,7 @@
  */
 package org.openjdk.jcstress.infra.runners;
 
+import org.openjdk.jcstress.vm.CompileMode;
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.vm.AllocProfileSupport;
@@ -48,6 +49,7 @@ public class TestConfig implements Serializable {
     public final int forkId;
     public final int maxFootprintMB;
     public final List<String> actorNames;
+    public final int compileMode;
     public int minStride;
     public int maxStride;
     public StrideCap strideCap;
@@ -63,7 +65,7 @@ public class TestConfig implements Serializable {
         TIME,
     }
 
-    public TestConfig(Options opts, TestInfo info, RunMode runMode, int forkId, List<String> jvmArgs) {
+    public TestConfig(Options opts, TestInfo info, RunMode runMode, int forkId, List<String> jvmArgs, int compileMode) {
         this.runMode = runMode;
         this.forkId = forkId;
         this.jvmArgs = jvmArgs;
@@ -78,6 +80,7 @@ public class TestConfig implements Serializable {
         name = info.name();
         generatedRunnerName = info.generatedRunner();
         actorNames = info.actorNames();
+        this.compileMode = compileMode;
         strideCap = StrideCap.NONE;
     }
 
@@ -135,6 +138,10 @@ public class TestConfig implements Serializable {
         return StrideCap.NONE;
     }
 
+    public CompileMode getCompileMode() {
+        return new CompileMode(compileMode, actorNames, threads);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -149,6 +156,7 @@ public class TestConfig implements Serializable {
         if (iters != that.iters) return false;
         if (deoptMode != that.deoptMode) return false;
         if (threads != that.threads) return false;
+        if (compileMode != that.compileMode) return false;
         if (!name.equals(that.name)) return false;
         if (!jvmArgs.equals(that.jvmArgs)) return false;
         return runMode == that.runMode;
@@ -164,6 +172,7 @@ public class TestConfig implements Serializable {
         result = 31 * result + iters;
         result = 31 * result + deoptMode.hashCode();
         result = 31 * result + threads;
+        result = 31 * result + compileMode;
         result = 31 * result + name.hashCode();
         result = 31 * result + jvmArgs.hashCode();
         result = 31 * result + runMode.hashCode();

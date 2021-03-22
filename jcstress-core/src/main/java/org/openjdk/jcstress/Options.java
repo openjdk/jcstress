@@ -37,10 +37,7 @@ import org.openjdk.jcstress.vm.VMSupport;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * Options.
@@ -64,8 +61,9 @@ public class Options {
     private SpinLoopStyle spinStyle;
     private String resultFile;
     private DeoptMode deoptMode;
-    private Collection<String> jvmArgs;
-    private Collection<String> jvmArgsPrepend;
+    private List<String> jvmArgs;
+    private List<String> jvmArgsPrepend;
+    private boolean splitCompilation;
 
     public Options(String[] args) {
         this.args = args;
@@ -134,6 +132,9 @@ public class Options {
                 "Either a single space-separated option line, or multiple options are accepted. " +
                 "This option only affects forked runs.")
                 .withRequiredArg().ofType(String.class).describedAs("string");
+
+        OptionSpec<Boolean> optSplitCompilation = parser.accepts("sc", "Use split per-actor compilation mode, if available.")
+                .withOptionalArg().ofType(Boolean.class).describedAs("bool");
 
         parser.accepts("v", "Be verbose.");
         parser.accepts("vv", "Be extra verbose.");
@@ -240,10 +241,12 @@ public class Options {
         this.jvmArgs = processArgs(optJvmArgs, set);
         this.jvmArgsPrepend = processArgs(optJvmArgsPrepend, set);
 
+        this.splitCompilation = orDefault(set.valueOf(optSplitCompilation), true);
+
         return true;
     }
 
-    private Collection<String> processArgs(OptionSpec<String> op, OptionSet set) {
+    private List<String> processArgs(OptionSpec<String> op, OptionSet set) {
         if (set.hasArgument(op)) {
             try {
                 List<String> vals = op.values(set);
@@ -256,7 +259,7 @@ public class Options {
                 return StringUtils.splitQuotedEscape(op.value(set));
             }
         } else {
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -348,11 +351,11 @@ public class Options {
         return resultFile;
     }
 
-    public Collection<String> getJvmArgs() {
+    public List<String> getJvmArgs() {
         return jvmArgs;
     }
 
-    public Collection<String> getJvmArgsPrepend() {
+    public List<String> getJvmArgsPrepend() {
         return jvmArgsPrepend;
     }
 
@@ -365,4 +368,7 @@ public class Options {
         return getHeapPerForkMb() / 2;
     }
 
+    public boolean isSplitCompilation() {
+        return splitCompilation;
+    }
 }

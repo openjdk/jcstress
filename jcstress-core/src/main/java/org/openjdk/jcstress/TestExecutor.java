@@ -33,6 +33,7 @@ import org.openjdk.jcstress.infra.runners.WorkerSync;
 import org.openjdk.jcstress.link.BinaryLinkServer;
 import org.openjdk.jcstress.link.ServerListener;
 import org.openjdk.jcstress.vm.CPULayout;
+import org.openjdk.jcstress.vm.CompileMode;
 import org.openjdk.jcstress.vm.OSSupport;
 import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.vm.VMSupport;
@@ -174,48 +175,89 @@ public class TestExecutor {
             }
         }
 
-        void generateDirectives() {
-            try {
-                PrintWriter pw = new PrintWriter(compilerDirectives);
-                pw.println("[");
+        void generateDirectives() throws IOException {
+            PrintWriter pw = new PrintWriter(compilerDirectives);
+            pw.println("[");
 
-                // The task loop:
-                //   - avoid inlining the run loop, it should be compiled as hot code
-                //   - force inline the auxiliary methods and classes in the run loop
+            // The task loop:
+            pw.println("  {");
+            pw.println("    match: \"" + task.generatedRunnerName + "::" + JCStressTestProcessor.TASK_LOOP_PREFIX + "*\",");
+
+            // Avoid inlining the run loop, it should be compiled as separate hot code
+            pw.println("    inline: \"-" + task.generatedRunnerName + "::" + JCStressTestProcessor.RUN_LOOP_PREFIX + "*\",");
+
+            // Force inline the auxiliary methods and classes in the run loop
+            pw.println("    inline: \"+" + task.generatedRunnerName + "::" + JCStressTestProcessor.AUX_PREFIX + "*\",");
+            pw.println("    inline: \"+" + WorkerSync.class.getName() + "::*\",");
+            pw.println("    inline: \"+java.util.concurrent.atomic.*::*\",");
+            pw.println("  },");
+
+            // Force inline everything from WorkerSync. WorkerSync does not use anything
+            // too deeply, so inlining everything is fine.
+            pw.println("  {");
+            pw.println("    match: \"" + WorkerSync.class.getName() + "::*" + "\",");
+            pw.println("    inline: \"+*::*\",");
+            pw.println("  },");
+
+            // The run loops:
+            CompileMode cm = task.getCompileMode();
+            for (int a = 0; a < task.threads; a++) {
+                String an = task.actorNames.get(a);
+
                 pw.println("  {");
-                pw.println("    match: \"" + task.generatedRunnerName + "::" + JCStressTestProcessor.TASK_LOOP_PREFIX + "*\",");
-                pw.println("    inline: \"-" + task.generatedRunnerName + "::" + JCStressTestProcessor.RUN_LOOP_PREFIX + "*\",");
+                pw.println("    match: \"" + task.generatedRunnerName + "::" + JCStressTestProcessor.RUN_LOOP_PREFIX + an + "\",");
                 pw.println("    inline: \"+" + task.generatedRunnerName + "::" + JCStressTestProcessor.AUX_PREFIX + "*\",");
-                pw.println("    inline: \"+" + WorkerSync.class.getName() + "::*\",");
-                pw.println("    inline: \"+java.util.concurrent.atomic.*::*\",");
-                pw.println("  },");
 
-                // Force inline everything from WorkerSync. WorkerSync does not use anything
-                // too deeply, so inlining everything is fine.
-                pw.println("  {");
-                pw.println("    match: \"" + WorkerSync.class.getName() + "::*" + "\",");
-                pw.println("    inline: \"+*::*\",");
-                pw.println("  },");
-
-                // The run loop:
-                //   - force inline of the workload methods
-                //   - force inline of sink methods
-                for (String an : task.actorNames) {
-                    pw.println("  {");
-                    pw.println("    match: \"" + task.generatedRunnerName + "::" + JCStressTestProcessor.RUN_LOOP_PREFIX + an + "\",");
+                // Force inline of actor methods if run in compiled mode: this would inherit
+                // compiler for them. Forbid inlining of actor methods in interpreted mode:
+                // this would make sure that while actor methods are running in interpreter,
+                // the run loop still runs in compiled mode, running faster. The call to interpreted
+                // method would happen anyway, even though through c2i transition.
+                if (cm.isInt(a)) {
+                    pw.println("    inline: \"-" + task.name + "::" + an + "\",");
+                } else {
                     pw.println("    inline: \"+" + task.name + "::" + an + "\",");
-                    pw.println("    inline: \"+" + task.generatedRunnerName + "::" + JCStressTestProcessor.AUX_PREFIX + "*\",");
-                    if (VMSupport.printAssemblyAvailable() && verbosity.printAssembly()) {
-                        pw.println("    PrintAssembly: true,");
-                    }
+                }
+
+                // Run loop should be compiled with C2? Forbid C1 compilation then.
+                if (cm.isC2(a)) {
+                    pw.println("    c1: {");
+                    pw.println("      Exclude: true,");
+                    pw.println("    },");
+                }
+
+                // Run loop should be compiled with C1? Forbid C2 compilation then.
+                if (cm.isC1(a)) {
+                    pw.println("    c2: {");
+                    pw.println("      Exclude: true,");
+                    pw.println("    },");
+                }
+                if (VMSupport.printAssemblyAvailable() && verbosity.printAssembly() && !cm.isInt(a)) {
+                    pw.println("    PrintAssembly: true,");
+                }
+                pw.println("  },");
+            }
+
+            for (int a = 0; a < task.threads; a++) {
+                String an = task.actorNames.get(a);
+
+                // If this actor runs in interpreted mode, then actor method should not be compiled.
+                // Allow run loop to be compiled with the best compiler available.
+                if (cm.isInt(a)) {
+                    pw.println("  {");
+                    pw.println("    match: \"+" + task.name + "::" + an + "\",");
+                    pw.println("    c1: {");
+                    pw.println("      Exclude: true,");
+                    pw.println("    },");
+                    pw.println("    c2: {");
+                    pw.println("      Exclude: true,");
+                    pw.println("    },");
                     pw.println("  },");
                 }
-                pw.println("]");
-                pw.flush();
-                pw.close();
-            } catch (FileNotFoundException e) {
-                throw new IllegalStateException(e);
             }
+            pw.println("]");
+            pw.flush();
+            pw.close();
         }
 
         void start() {
