@@ -32,6 +32,7 @@ import org.openjdk.jcstress.infra.grading.TextReportPrinter;
 import org.openjdk.jcstress.infra.grading.HTMLReportPrinter;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.TestList;
+import org.openjdk.jcstress.vm.CompileMode;
 import org.openjdk.jcstress.vm.OSSupport;
 import org.openjdk.jcstress.vm.VMSupport;
 
@@ -117,30 +118,16 @@ public class JCStress {
                 for (String test : tests) {
                     TestInfo info = TestList.getInfo(test);
                     if (opts.isSplitCompilation() && VMSupport.compilerDirectivesAvailable()) {
-                        for (int cc = 0; cc < CompileMode.casesFor(info.threads()); cc++) {
-                            CompileMode cm = new CompileMode(cc, info.actorNames(), info.threads());
-                            if (config.onlyIfC2() && !cm.hasC2()) {
-                                // This configuration is expected to run only when C2 is enabled,
-                                // but compilation mode does not include C2. Can skip it to optimize
-                                // testing time.
-                                continue;
-                            }
-                            for (int f = 0; f < opts.getForks(); f++) {
-                                configs.add(new TestConfig(opts, info, TestConfig.RunMode.FORKED, f, config.args(), cc));
-                            }
-                        }
+                        forkedSplit(configs, config, info);
                     } else {
-                        for (int f = 0; f < opts.getForks(); f++) {
-                            configs.add(new TestConfig(opts, info, TestConfig.RunMode.FORKED, f, config.args(), CompileMode.UNIFIED));
-                        }
+                        forkedUnified(configs, config, info);
                     }
                 }
             }
         } else {
             for (String test : tests) {
                 TestInfo info = TestList.getInfo(test);
-                TestConfig.RunMode mode = info.requiresFork() ? TestConfig.RunMode.FORKED : TestConfig.RunMode.EMBEDDED;
-                configs.add(new TestConfig(opts, info, mode, -1, Collections.emptyList(), CompileMode.UNIFIED));
+                embedded(configs, info);
             }
         }
 
@@ -148,6 +135,32 @@ public class JCStress {
         Collections.shuffle(configs);
 
         return configs;
+    }
+
+    private void forkedSplit(List<TestConfig> testConfigs, VMSupport.Config config, TestInfo info) {
+        for (int cc = 0; cc < CompileMode.casesFor(info.threads()); cc++) {
+            CompileMode cm = new CompileMode(cc, info.actorNames(), info.threads());
+            if (config.onlyIfC2() && !cm.hasC2()) {
+                // This configuration is expected to run only when C2 is enabled,
+                // but compilation mode does not include C2. Can skip it to optimize
+                // testing time.
+                continue;
+            }
+            for (int f = 0; f < opts.getForks(); f++) {
+                testConfigs.add(new TestConfig(opts, info, TestConfig.RunMode.FORKED, f, config.args(), cc));
+            }
+        }
+    }
+
+    private void forkedUnified(List<TestConfig> testConfigs, VMSupport.Config config, TestInfo info) {
+        for (int f = 0; f < opts.getForks(); f++) {
+            testConfigs.add(new TestConfig(opts, info, TestConfig.RunMode.FORKED, f, config.args(), CompileMode.UNIFIED));
+        }
+    }
+
+    private void embedded(List<TestConfig> testConfigs, TestInfo info) {
+        TestConfig.RunMode mode = info.requiresFork() ? TestConfig.RunMode.FORKED : TestConfig.RunMode.EMBEDDED;
+        testConfigs.add(new TestConfig(opts, info, mode, -1, Collections.emptyList(), CompileMode.UNIFIED));
     }
 
     public SortedSet<String> getTests() {

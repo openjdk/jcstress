@@ -24,7 +24,7 @@
  */
 package org.openjdk.jcstress.infra.runners;
 
-import org.openjdk.jcstress.CompileMode;
+import org.openjdk.jcstress.vm.CompileMode;
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.vm.AllocProfileSupport;

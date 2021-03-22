@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress;
+package org.openjdk.jcstress.vm;
 
 import java.util.List;
 
@@ -109,6 +109,5 @@ public class CompileMode {
         }
         return sb.toString();
     }
-
 
 }

@@ -25,6 +25,7 @@
 
 package org.openjdk.jcstress;
 
+import org.openjdk.jcstress.vm.CompileMode;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;

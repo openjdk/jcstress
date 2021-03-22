@@ -33,6 +33,7 @@ import org.openjdk.jcstress.infra.runners.WorkerSync;
 import org.openjdk.jcstress.link.BinaryLinkServer;
 import org.openjdk.jcstress.link.ServerListener;
 import org.openjdk.jcstress.vm.CPULayout;
+import org.openjdk.jcstress.vm.CompileMode;
 import org.openjdk.jcstress.vm.OSSupport;
 import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.vm.VMSupport;

@@ -32,6 +32,7 @@ import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.InProcessCollector;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.TestConfig;
+import org.openjdk.jcstress.vm.CompileMode;
 
 import java.io.IOException;
 import java.util.Arrays;

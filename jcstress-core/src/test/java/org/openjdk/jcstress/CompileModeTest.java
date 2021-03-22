@@ -2,6 +2,7 @@ package org.openjdk.jcstress;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openjdk.jcstress.vm.CompileMode;
 
 import java.util.Arrays;
 
