@@ -28,11 +28,9 @@ import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.Verbosity;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
-import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.util.StringUtils;
 
 import java.io.PrintWriter;
-import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,15 +44,12 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
     private final Verbosity verbosity;
     private final PrintWriter output;
-    private final long expectedTests;
-    private final long expectedForks;
+
     private final long expectedResults;
-
     private long observedResults;
-    private long observedCount;
 
-    private final Set<String> observedTests = Collections.newSetFromMap(new HashMap<>());
-    private final Set<ConfigFork> observedForks = Collections.newSetFromMap(new HashMap<>());
+    private long sampleCount;
+    private long sampleResults;
 
     private long firstTest;
 
@@ -69,10 +64,8 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private long softErrors;
     private long hardErrors;
 
-    public ConsoleReportPrinter(Options opts, PrintWriter pw, long expectedTests, long expectedForks) {
+    public ConsoleReportPrinter(Options opts, PrintWriter pw, long expectedForks) {
         this.output = pw;
-        this.expectedTests = expectedTests;
-        this.expectedForks = expectedForks;
         this.expectedResults = expectedForks;
         verbosity = opts.verbosity();
         progressLen = 1;
@@ -84,7 +77,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 PRINT_INTERVAL_MS :
                 progressInteractive ? 1_000 : 15_000;
 
-        output.println("  Printing the progress line at least every " + printIntervalMs + " milliseconds.");
+        output.println("  Printing the progress line at most every " + printIntervalMs + " milliseconds.");
         output.println();
     }
 
@@ -92,13 +85,13 @@ public class ConsoleReportPrinter implements TestResultCollector {
     public synchronized void add(TestResult r) {
         if (firstTest == 0) {
             firstTest = System.nanoTime();
+        } else {
+            // First event does not have reliable time estimate, do not record it.
+            sampleCount += r.getTotalCount();
+            sampleResults++;
         }
 
-        observedTests.add(r.getName());
-        observedForks.add(new ConfigFork(r.getConfig()));
         observedResults++;
-        observedCount += r.getTotalCount();
-
         printResult(r);
     }
 
@@ -154,11 +147,9 @@ public class ConsoleReportPrinter implements TestResultCollector {
         }
 
         if (shouldPrintStatusLine) {
-            String line = String.format("(ETA: %10s) (Sample Rate: %s) (Tests: %d of %d) (Forks: %2d of %d) (Results: %2d of %d; %d passed, %d failed, %d soft errs, %d hard errs) ",
+            String line = String.format("(ETA: %10s) (Sample Rate: %s) (Results: %2d of %d; %d passed, %d failed, %d soft errs, %d hard errs) ",
                     computeETA(),
                     computeSpeed(),
-                    observedTests.size(), expectedTests,
-                    observedForks.size(), expectedForks,
                     observedResults, expectedResults, passed, failed, softErrors, hardErrors
             );
             progressLen = line.length();
@@ -172,8 +163,12 @@ public class ConsoleReportPrinter implements TestResultCollector {
     }
 
     private String computeSpeed() {
+        if (sampleCount == 0) {
+            return "N/A";
+        }
+
         long timeSpent = System.nanoTime() - firstTest;
-        double v = 1.0 * TimeUnit.SECONDS.toNanos(1) * observedCount / timeSpent;
+        double v = 1.0 * TimeUnit.SECONDS.toNanos(1) * sampleCount / timeSpent;
 
         final long K = 1000;
         final long M = 1000*K;
@@ -201,9 +196,9 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
     private String computeETA() {
         long timeSpent = System.nanoTime() - firstTest;
-        long resultsGot = observedResults;
+        long resultsGot = sampleResults;
         if (resultsGot == 0) {
-            return "n/a";
+            return "N/A";
         }
 
         long nsToGo = (long)(timeSpent * (1.0 * (expectedResults - 1) / resultsGot - 1));
@@ -226,32 +221,6 @@ public class ConsoleReportPrinter implements TestResultCollector {
             return result;
         } else {
             return "now";
-        }
-    }
-
-    static class ConfigFork {
-        private TestConfig config;
-
-        public ConfigFork(TestConfig config) {
-            this.config = config;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            ConfigFork that = (ConfigFork) o;
-
-            if (config.forkId != that.config.forkId) return false;
-            return config.equals(that.config);
-        }
-
-        @Override
-        public int hashCode() {
-            int result = config.hashCode();
-            result = 31 * result + config.forkId;
-            return result;
         }
     }
 
