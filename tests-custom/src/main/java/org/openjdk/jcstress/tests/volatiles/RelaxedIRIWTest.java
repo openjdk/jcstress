@@ -34,16 +34,16 @@ import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.IIII_Result;
 
 @JCStressTest
-@Description("Tests the IRIW sequential consistency: strongest case.")
+@Description("Tests the IRIW sequential consistency: non-synchronized test.")
 @Outcome(id = "0, 1, 0, 1", expect = Expect.ACCEPTABLE, desc = "This is a rare event, because it requires precise juxtaposition of threads to observe.")
-@Outcome(id = "1, 0, 1, 0", expect = Expect.FORBIDDEN,  desc = "Threads see the updates in the inconsistent order")
+@Outcome(id = "1, 0, 1, 0", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Threads see the updates in the inconsistent order")
 @Outcome(                   expect = Expect.ACCEPTABLE, desc = "All other cases are acceptable.")
 @Ref("http://cs.oswego.edu/pipermail/concurrency-interest/2013-January/010608.html")
 @State
-public class VolatileIRIWTest {
+public class RelaxedIRIWTest {
 
-    public volatile int x;
-    public volatile int y;
+    public int x;
+    public int y;
 
     @Actor
     public void actor1() {
