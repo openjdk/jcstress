@@ -342,8 +342,8 @@ public class TestExecutor {
                 if (ecode != 0) {
                     dumpFailure(sink, out, err);
                 } else {
-                    result.addVMOut(out);
-                    result.addVMErr(err);
+                    result.addVMOuts(out);
+                    result.addVMErrs(err);
                     sink.add(result);
                 }
             } catch (InterruptedException ex) {

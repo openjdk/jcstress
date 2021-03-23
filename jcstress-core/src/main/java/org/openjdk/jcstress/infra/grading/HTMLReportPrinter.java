@@ -53,7 +53,7 @@ public class HTMLReportPrinter {
     private final InProcessCollector collector;
     private int cellStyle = 1;
 
-    public HTMLReportPrinter(Options opts, InProcessCollector collector) throws FileNotFoundException {
+    public HTMLReportPrinter(Options opts, InProcessCollector collector) {
         this.collector = collector;
         this.resultDir = opts.getResultDest();
         new File(resultDir).mkdirs();
@@ -379,7 +379,7 @@ public class HTMLReportPrinter {
             keys.addAll(r.getStateKeys());
         }
 
-        o.println("<table width=100% cellpadding=5>");
+        o.println("<table cellpadding=5>");
         o.println("<tr>");
         o.println("<th>Observed state</th>");
         for (int c = 0; c < configs; c++) {
@@ -424,13 +424,41 @@ public class HTMLReportPrinter {
 
         o.println("</table>");
 
-        o.println("<h3>Auxiliary data</h3>");
+        o.println("<h3>Messages</h3>");
 
         for (TestResult r : sorted) {
             if (!r.getMessages().isEmpty()) {
                 o.println("<p><b>" + r.getConfig() + "</b></p>");
                 o.println("<pre>");
                 for (String data : r.getMessages()) {
+                    o.println(data);
+                }
+                o.println("</pre>");
+                o.println();
+            }
+        }
+
+        o.println("<h3>VM Output Streams</h3>");
+
+        for (TestResult r : sorted) {
+            if (!r.getVmOut().isEmpty()) {
+                o.println("<p><b>" + r.getConfig() + "</b></p>");
+                o.println("<pre>");
+                for (String data : r.getVmOut()) {
+                    o.println(data);
+                }
+                o.println("</pre>");
+                o.println();
+            }
+        }
+
+        o.println("<h3>VM Error Streams</h3>");
+
+        for (TestResult r : sorted) {
+            if (!r.getVmErr().isEmpty()) {
+                o.println("<p><b>" + r.getConfig() + "</b></p>");
+                o.println("<pre>");
+                for (String data : r.getVmErr()) {
                     o.println(data);
                 }
                 o.println("</pre>");

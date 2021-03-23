@@ -25,6 +25,7 @@
 package org.openjdk.jcstress.infra.collectors;
 
 import org.openjdk.jcstress.infra.Status;
+import org.openjdk.jcstress.infra.grading.ReportUtils;
 import org.openjdk.jcstress.infra.grading.TestGrading;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.util.Environment;
@@ -63,23 +64,36 @@ public class TestResult implements Serializable {
     }
 
     public void addMessage(String msg) {
+        if (ReportUtils.skipMessage(msg)) return;
         messages.add(msg);
     }
 
+    public void addMessages(Collection<String> msgs) {
+        for (String m : msgs) {
+            addMessage(m);
+        }
+    }
+
     public void addVMOut(String msg) {
+        if (ReportUtils.skipMessage(msg)) return;
         vmOut.add(msg);
     }
 
-    public void addVMOut(Collection<String> msg) {
-        vmOut.addAll(msg);
+    public void addVMOuts(Collection<String> msgs) {
+        for (String m : msgs) {
+            addVMOut(m);
+        }
     }
 
     public void addVMErr(String msg) {
+        if (ReportUtils.skipMessage(msg)) return;
         vmErr.add(msg);
     }
 
-    public void addVMErr(Collection<String> msg) {
-        vmErr.addAll(msg);
+    public void addVMErrs(Collection<String> msgs) {
+        for (String m : msgs) {
+            addVMErr(m);
+        }
     }
 
     public void setEnv(Environment e) {

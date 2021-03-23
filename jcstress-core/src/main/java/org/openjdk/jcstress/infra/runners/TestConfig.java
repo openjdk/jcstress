@@ -149,6 +149,7 @@ public class TestConfig implements Serializable {
 
         TestConfig that = (TestConfig) o;
 
+        if (!name.equals(that.name)) return false;
         if (spinLoopStyle != that.spinLoopStyle) return false;
         if (minStride != that.minStride) return false;
         if (maxStride != that.maxStride) return false;
@@ -157,7 +158,6 @@ public class TestConfig implements Serializable {
         if (deoptMode != that.deoptMode) return false;
         if (threads != that.threads) return false;
         if (compileMode != that.compileMode) return false;
-        if (!name.equals(that.name)) return false;
         if (!jvmArgs.equals(that.jvmArgs)) return false;
         return runMode == that.runMode;
 
@@ -165,25 +165,11 @@ public class TestConfig implements Serializable {
 
     @Override
     public int hashCode() {
-        int result = spinLoopStyle.hashCode();
-        result = 31 * result + minStride;
-        result = 31 * result + maxStride;
-        result = 31 * result + time;
-        result = 31 * result + iters;
-        result = 31 * result + deoptMode.hashCode();
-        result = 31 * result + threads;
-        result = 31 * result + compileMode;
-        result = 31 * result + name.hashCode();
-        result = 31 * result + jvmArgs.hashCode();
-        result = 31 * result + runMode.hashCode();
-        return result;
+        return name.hashCode();
     }
 
     @Override
     public String toString() {
-        return "JVM options: " + jvmArgs + "\n" +
-                "Iterations: " + iters + "\n" +
-                "Time: " + time + "\n" +
-                "Stride: [" + minStride + ", " + maxStride + "] (capped by " + strideCap + ")";
+        return "JVM options: " + jvmArgs +"; Compile mode: " + getCompileMode();
     }
 }
