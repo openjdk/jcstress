@@ -232,9 +232,15 @@ public class TestExecutor {
                     pw.println("      Exclude: true,");
                     pw.println("    },");
                 }
+
                 if (VMSupport.printAssemblyAvailable() && verbosity.printAssembly() && !cm.isInt(a)) {
                     pw.println("    PrintAssembly: true,");
                 }
+
+                // The test is running in resource-constrained JVM. Block the run loop execution until
+                // compiled code is available. This would le compilers compile the code in relative peace.
+                pw.println("    BackgroundCompilation: false,");
+
                 pw.println("  },");
             }
 
