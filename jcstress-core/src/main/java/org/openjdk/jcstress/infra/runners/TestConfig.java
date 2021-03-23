@@ -24,9 +24,10 @@
  */
 package org.openjdk.jcstress.infra.runners;
 
-import org.openjdk.jcstress.vm.CompileMode;
+import org.openjdk.jcstress.os.SchedulingClass;
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.infra.TestInfo;
+import org.openjdk.jcstress.os.CPUMap;
 import org.openjdk.jcstress.vm.AllocProfileSupport;
 import org.openjdk.jcstress.vm.DeoptMode;
 
@@ -36,7 +37,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class TestConfig implements Serializable {
-
     public final SpinLoopStyle spinLoopStyle;
     public final int time;
     public final int iters;
@@ -45,18 +45,18 @@ public class TestConfig implements Serializable {
     public final String name;
     public final String generatedRunnerName;
     public final List<String> jvmArgs;
-    public final RunMode runMode;
     public final int forkId;
     public final int maxFootprintMB;
     public final List<String> actorNames;
     public final int compileMode;
+    public final SchedulingClass shClass;
     public int minStride;
     public int maxStride;
     public StrideCap strideCap;
+    public CPUMap cpuMap;
 
-    public enum RunMode {
-        EMBEDDED,
-        FORKED,
+    public void setCPUMap(CPUMap cpuMap) {
+        this.cpuMap = cpuMap;
     }
 
     public enum StrideCap {
@@ -65,8 +65,7 @@ public class TestConfig implements Serializable {
         TIME,
     }
 
-    public TestConfig(Options opts, TestInfo info, RunMode runMode, int forkId, List<String> jvmArgs, int compileMode) {
-        this.runMode = runMode;
+    public TestConfig(Options opts, TestInfo info, int forkId, List<String> jvmArgs, int compileMode, SchedulingClass scl) {
         this.forkId = forkId;
         this.jvmArgs = jvmArgs;
         time = opts.getTime();
@@ -81,6 +80,7 @@ public class TestConfig implements Serializable {
         generatedRunnerName = info.generatedRunner();
         actorNames = info.actorNames();
         this.compileMode = compileMode;
+        shClass = scl;
         strideCap = StrideCap.NONE;
     }
 
@@ -142,6 +142,10 @@ public class TestConfig implements Serializable {
         return compileMode;
     }
 
+    public SchedulingClass getSchedulingClass() {
+        return shClass;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -159,8 +163,8 @@ public class TestConfig implements Serializable {
         if (threads != that.threads) return false;
         if (compileMode != that.compileMode) return false;
         if (!jvmArgs.equals(that.jvmArgs)) return false;
-        return runMode == that.runMode;
-
+        if (!shClass.equals(that.shClass)) return false;
+        return true;
     }
 
     @Override

@@ -403,14 +403,19 @@ public class VMSupport {
                 (isWindows() ? ".exe" : "");
     }
 
-    private static boolean isWindows() {
+    public static boolean isWindows() {
         return System.getProperty("os.name").contains("indows");
     }
 
+    public static boolean isLinux() {
+        return System.getProperty("os.name").contains("Linux");
+    }
 
     public static List<Config> getAvailableVMConfigs() {
         return AVAIL_JVM_CONFIGS;
     }
+
+    private static int HOT_CPUS = -1;
 
     /**
      * Warm up the CPU schedulers, bring all the CPUs online to get the
@@ -419,6 +424,10 @@ public class VMSupport {
      * @return online CPU count
      */
     public static int figureOutHotCPUs() {
+        if (HOT_CPUS != -1) {
+            return HOT_CPUS;
+        }
+
         ExecutorService service = Executors.newCachedThreadPool();
 
         System.out.print("Burning up to figure out the exact CPU count...");
@@ -451,6 +460,8 @@ public class VMSupport {
 
         System.out.println(" done!");
         System.out.println();
+
+        HOT_CPUS = max;
 
         return max;
     }

@@ -29,6 +29,7 @@ import com.sun.source.util.Trees;
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.*;
+import org.openjdk.jcstress.os.AffinitySupport;
 import org.openjdk.jcstress.util.*;
 import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
@@ -541,6 +542,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println();
             pw.println("    private Counter<" + r + "> " + TASK_LOOP_PREFIX + a.getSimpleName() + "() {");
             pw.println("        Counter<" + r + "> counter = new Counter<>();");
+            pw.println("        AffinitySupport.bind(config.cpuMap.actorMap()[" + n + "]);");
             pw.println("        while (true) {");
             pw.println("            WorkerSync sync = workerSync;");
             pw.println("            if (sync.stopped) {");
@@ -936,6 +938,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 Runner.class, WorkerSync.class, Counter.class,
                 WhiteBoxSupport.class, ExecutionException.class,
                 Callable.class, Collections.class, List.class,
+                AffinitySupport.class
         };
 
         for (Class<?> c : imports) {

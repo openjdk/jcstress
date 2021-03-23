@@ -32,10 +32,11 @@ import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.WorkerSync;
 import org.openjdk.jcstress.link.BinaryLinkServer;
 import org.openjdk.jcstress.link.ServerListener;
-import org.openjdk.jcstress.vm.CPULayout;
+import org.openjdk.jcstress.os.AffinityMode;
+import org.openjdk.jcstress.os.CPUMap;
+import org.openjdk.jcstress.os.OSSupport;
+import org.openjdk.jcstress.os.Scheduler;
 import org.openjdk.jcstress.vm.CompileMode;
-import org.openjdk.jcstress.vm.OSSupport;
-import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.*;
@@ -59,23 +60,19 @@ public class TestExecutor {
     static final AtomicInteger ID = new AtomicInteger();
 
     private final BinaryLinkServer server;
-    private final int maxThreads;
     private final Verbosity verbosity;
     private final TestResultCollector sink;
-    private final EmbeddedExecutor embeddedExecutor;
-    private final CPULayout cpuLayout;
+    private final Scheduler scheduler;
 
     private final Map<String, VM> vmByToken;
 
-    public TestExecutor(int maxThreads, Verbosity verbosity, TestResultCollector sink, boolean possiblyForked) throws IOException {
-        this.maxThreads = maxThreads;
+    public TestExecutor(Verbosity verbosity, TestResultCollector sink, Scheduler scheduler) throws IOException {
         this.verbosity = verbosity;
         this.sink = sink;
         this.vmByToken = new ConcurrentHashMap<>();
+        this.scheduler = scheduler;
 
-        cpuLayout = new CPULayout(maxThreads);
-
-        server = possiblyForked ? new BinaryLinkServer(new ServerListener() {
+        server = new BinaryLinkServer(new ServerListener() {
             @Override
             public TestConfig onJobRequest(String token) {
                 return vmByToken.get(token).jobRequest();
@@ -85,56 +82,61 @@ public class TestExecutor {
             public void onResult(String token, TestResult result) {
                 vmByToken.get(token).recordResult(result);
             }
-        }) : null;
-        embeddedExecutor = new EmbeddedExecutor(sink, cpuLayout);
+        });
     }
 
     public void runAll(List<TestConfig> configs) {
-        for (TestConfig cfg : configs) {
-            List<Integer> acquiredCPUs = acquireCPUs(cfg.threads);
-
-            switch (cfg.runMode) {
-                case EMBEDDED:
-                    embeddedExecutor.submit(cfg, acquiredCPUs);
-                    break;
-                case FORKED:
+        while (!configs.isEmpty()) {
+            List<TestConfig> leftover = new ArrayList<>();
+            for (TestConfig cfg : configs) {
+                CPUMap cpuMap = scheduler.tryAcquire(cfg.shClass);
+                if (cpuMap != null) {
+                    cfg.setCPUMap(cpuMap);
                     String token = "fork-token-" + ID.incrementAndGet();
-                    VM vm = new VM(server.getHost(), server.getPort(), token, cfg, acquiredCPUs);
+                    VM vm = new VM(server.getHost(), server.getPort(), token, cfg, cpuMap);
                     vmByToken.put(token, vm);
                     vm.start();
-                    break;
-                default:
-                    throw new IllegalStateException("Unknown mode: " + cfg.runMode);
+                } else {
+                    leftover.add(cfg);
+                }
+            }
+
+            configs = leftover;
+
+            // Wait until any VM finishes before rescheduling
+            while (!processReadyVMs()) {
+                try {
+                    Thread.sleep(SPIN_WAIT_DELAY_MS);
+                } catch (InterruptedException e) {
+                    // do nothing
+                }
             }
         }
 
         // Wait until all threads are done, which means everything got processed
-        acquireCPUs(maxThreads);
+        while (!vmByToken.isEmpty()) {
+            while (!processReadyVMs()) {
+                try {
+                    Thread.sleep(SPIN_WAIT_DELAY_MS);
+                } catch (InterruptedException e) {
+                    // do nothing
+                }
+            }
+        }
 
         server.terminate();
     }
 
-    private List<Integer> acquireCPUs(int cpus) {
-        List<Integer> acquired;
-        while ((acquired = cpuLayout.tryAcquire(cpus)) == null) {
-            processReadyVMs();
-            try {
-                Thread.sleep(SPIN_WAIT_DELAY_MS);
-            } catch (InterruptedException e) {
-                // do nothing
-            }
-        }
-
-        return acquired;
-    }
-
-    private void processReadyVMs() {
+    private boolean processReadyVMs() {
+        boolean reclaimed = false;
         for (VM vm : vmByToken.values()) {
             if (vm.checkCompleted(sink)) {
                 vmByToken.remove(vm.token, vm);
-                cpuLayout.release(vm.claimedCPUs);
+                scheduler.release(vm.cpuMap);
+                reclaimed = true;
             }
         }
+        return reclaimed;
     }
 
     private class VM {
@@ -145,17 +147,17 @@ public class TestExecutor {
         private final File stderr;
         private final File compilerDirectives;
         private final TestConfig task;
-        private final List<Integer> claimedCPUs;
+        private final CPUMap cpuMap;
         private Process process;
         private boolean processed;
         private IOException pendingException;
         private TestResult result;
 
-        public VM(String host, int port, String token, TestConfig task, List<Integer> claimedCPUs) {
+        public VM(String host, int port, String token, TestConfig task, CPUMap cpuMap) {
             this.host = host;
             this.port = port;
             this.token = token;
-            this.claimedCPUs = claimedCPUs;
+            this.cpuMap = cpuMap;
             this.task = task;
             try {
                 this.stdout = File.createTempFile("jcstress", "stdout");
@@ -280,10 +282,10 @@ public class TestExecutor {
             try {
                 List<String> command = new ArrayList<>();
 
-                if (OSSupport.taskSetAvailable()) {
+                if (OSSupport.taskSetAvailable() && (task.shClass.mode() != AffinityMode.NONE)) {
                     command.add("taskset");
                     command.add("-c");
-                    command.add(StringUtils.join(claimedCPUs, ","));
+                    command.add(cpuMap.globalAffinityMap());
                 }
 
                 // basic Java line

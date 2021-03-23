@@ -101,14 +101,11 @@ public class CompileMode {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("split; ");
+        sb.append("split");
+        sb.append(System.lineSeparator());
         for (int a = 0; a < actorNames.size(); a++) {
-            if (a != 0) {
-                sb.append(", ");
-            }
-            sb.append("\"");
+            sb.append("    ");
             sb.append(actorNames.get(a));
-            sb.append("\"");
             sb.append(": ");
             int v = actorMode(mode, a);
             switch (v) {
@@ -124,6 +121,7 @@ public class CompileMode {
                 default:
                     throw new IllegalStateException("Unhandled mode: " + v);
             }
+            sb.append(System.lineSeparator());
         }
         return sb.toString();
     }

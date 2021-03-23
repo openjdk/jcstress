@@ -22,9 +22,10 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.vm;
+package org.openjdk.jcstress.os;
 
 import org.openjdk.jcstress.util.InputStreamDrainer;
+import org.openjdk.jcstress.vm.VMSupportException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -40,13 +41,28 @@ public class OSSupport {
         return TASKSET_AVAILABLE;
     }
 
+    private static volatile boolean AFFINITY_SUPPORT_AVAILABLE;
+    public static boolean affinitySupportAvailable() {
+        return AFFINITY_SUPPORT_AVAILABLE;
+    }
+
     public static void init() {
         System.out.println("Probing the target OS:");
         System.out.println(" (all failures are non-fatal, but may affect testing accuracy)");
         System.out.println();
 
-        TASKSET_AVAILABLE = detectCommand("Trying to set affinity with taskset",
+        TASKSET_AVAILABLE = detectCommand("Trying to set global affinity with taskset",
                 "taskset", "-c", "0");
+
+        try {
+            AffinitySupport.tryBind();
+            System.out.printf("----- %s %s%n", "[OK]", "Trying to set per-thread affinity with syscalls");
+            AFFINITY_SUPPORT_AVAILABLE = true;
+        } catch (Throwable e) {
+            System.out.printf("----- %s %s%n", "[FAILED]", "Trying to set per-thread affinity with syscalls");
+            System.out.println(e.getMessage());
+            AFFINITY_SUPPORT_AVAILABLE = false;
+        }
 
         System.out.println();
     }
