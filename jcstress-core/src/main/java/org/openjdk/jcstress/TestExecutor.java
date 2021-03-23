@@ -190,6 +190,11 @@ public class TestExecutor {
             pw.println("    inline: \"+" + task.generatedRunnerName + "::" + JCStressTestProcessor.AUX_PREFIX + "*\",");
             pw.println("    inline: \"+" + WorkerSync.class.getName() + "::*\",");
             pw.println("    inline: \"+java.util.concurrent.atomic.*::*\",");
+
+            // The test is running in resource-constrained JVM. Block the task loop execution until
+            // compiled code is available. This would allow compilers to work in relative peace.
+            pw.println("    BackgroundCompilation: false,");
+
             pw.println("  },");
 
             // Force inline everything from WorkerSync. WorkerSync does not use anything
@@ -197,6 +202,11 @@ public class TestExecutor {
             pw.println("  {");
             pw.println("    match: \"" + WorkerSync.class.getName() + "::*" + "\",");
             pw.println("    inline: \"+*::*\",");
+
+            // The test is running in resource-constrained JVM. Block the WorkerSync execution until
+            // compiled code is available. This would allow compilers to work in relative peace.
+            pw.println("    BackgroundCompilation: false,");
+
             pw.println("  },");
 
             // The run loops:
@@ -232,9 +242,15 @@ public class TestExecutor {
                     pw.println("      Exclude: true,");
                     pw.println("    },");
                 }
+
                 if (VMSupport.printAssemblyAvailable() && verbosity.printAssembly() && !cm.isInt(a)) {
                     pw.println("    PrintAssembly: true,");
                 }
+
+                // The test is running in resource-constrained JVM. Block the run loop execution until
+                // compiled code is available. This would allow compilers to work in relative peace.
+                pw.println("    BackgroundCompilation: false,");
+
                 pw.println("  },");
             }
 
