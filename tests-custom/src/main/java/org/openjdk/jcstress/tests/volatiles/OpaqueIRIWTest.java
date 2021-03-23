@@ -24,47 +24,55 @@
  */
 package org.openjdk.jcstress.tests.volatiles;
 
-import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.Description;
-import org.openjdk.jcstress.annotations.Expect;
-import org.openjdk.jcstress.annotations.JCStressTest;
-import org.openjdk.jcstress.annotations.Outcome;
-import org.openjdk.jcstress.annotations.Ref;
-import org.openjdk.jcstress.annotations.State;
+import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.IIII_Result;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+
 @JCStressTest
-@Description("Tests the IRIW sequential consistency.")
-@Outcome(id = "0, 1, 1, 0", expect = Expect.ACCEPTABLE, desc = "This is a rare event, because it requires precise juxtaposition of threads to observe.")
-@Outcome(id = "1, 0, 0, 1", expect = Expect.ACCEPTABLE, desc = "Threads see the updates in the inconsistent order")
-@Outcome(                     expect = Expect.ACCEPTABLE, desc =  "All other cases are acceptable.")
+@Description("Tests the IRIW sequential consistency: machine ordering case.")
+@Outcome(id = "0, 1, 0, 1", expect = Expect.ACCEPTABLE, desc = "This is a rare event, because it requires precise juxtaposition of threads to observe.")
+@Outcome(id = "1, 0, 1, 0", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Threads see the updates in the inconsistent order")
+@Outcome(                   expect = Expect.ACCEPTABLE, desc = "All other cases are acceptable.")
 @Ref("http://cs.oswego.edu/pipermail/concurrency-interest/2013-January/010608.html")
 @State
-public class IRIWTest {
+public class OpaqueIRIWTest {
+
+    static final VarHandle VH_X, VH_Y;
+
+    static {
+        try {
+            VH_X = MethodHandles.lookup().findVarHandle(OpaqueIRIWTest.class, "x", int.class);
+            VH_Y = MethodHandles.lookup().findVarHandle(OpaqueIRIWTest.class, "y", int.class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     public int x;
     public int y;
 
     @Actor
     public void actor1() {
-        x = 1;
+        VH_X.setOpaque(this, 1);
     }
 
     @Actor
     public void actor2() {
-        y = 1;
+        VH_Y.setOpaque(this, 1);
     }
 
     @Actor
     public void actor3(IIII_Result r) {
-        r.r1 = x;
-        r.r2 = y;
+        r.r1 = (int) VH_X.getOpaque(this);
+        r.r2 = (int) VH_Y.getOpaque(this);
     }
 
     @Actor
     public void actor4(IIII_Result r) {
-        r.r4 = y;
-        r.r3 = x;
+        r.r3 = (int) VH_Y.getOpaque(this);
+        r.r4 = (int) VH_X.getOpaque(this);
     }
 
 }
