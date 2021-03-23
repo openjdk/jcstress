@@ -81,7 +81,10 @@ public class ReportUtils {
     private static TestResult merged(TestConfig config, Collection<TestResult> mergeable) {
         Multiset<String> stateCounts = new HashMultiset<>();
 
-        List<String> auxData = new ArrayList<>();
+        List<String> messages = new ArrayList<>();
+
+        List<String> vmOuts = new ArrayList<>();
+        List<String> vmErrs = new ArrayList<>();
 
         Status status = Status.NORMAL;
         Environment env = null;
@@ -91,7 +94,9 @@ public class ReportUtils {
                 stateCounts.add(s, r.getCount(s));
             }
             env = r.getEnv();
-            auxData.addAll(r.getMessages());
+            messages.addAll(r.getMessages());
+            vmOuts.addAll(r.getVmOut());
+            vmErrs.addAll(r.getVmErr());
         }
 
         TestResult root = new TestResult(config, status);
@@ -102,9 +107,13 @@ public class ReportUtils {
 
         root.setEnv(env);
 
-        for (String data : auxData) {
+        for (String data : messages) {
             root.addMessage(data);
         }
+
+        root.addVMOuts(vmOuts);
+        root.addVMErrs(vmErrs);
+
         return root;
     }
 
@@ -195,7 +204,7 @@ public class ReportUtils {
         }
     }
 
-    private static boolean skipMessage(String data) {
+    public static boolean skipMessage(String data) {
         if (data == null) {
             return true;
         }

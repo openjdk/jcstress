@@ -96,7 +96,9 @@ public class JCStress {
 
     public void parseResults() throws Exception {
         InProcessCollector collector = new InProcessCollector();
-        new DiskReadCollector(opts.getResultFile(), collector).dump();
+        DiskReadCollector drc = new DiskReadCollector(opts.getResultFile(), collector);
+        drc.dump();
+        drc.close();
 
         new TextReportPrinter(opts, collector).work();
         new HTMLReportPrinter(opts, collector).work();
