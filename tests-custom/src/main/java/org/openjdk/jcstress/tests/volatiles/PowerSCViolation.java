@@ -55,14 +55,17 @@ public class PowerSCViolation {
 
     @Actor
     public void actor3(IIII_Result r) {
-        r.r2 = y;
+        int r2 = y;
         x = 1;
+        r.r2 = r2;
     }
 
     @Actor
     public void actor4(IIII_Result r) {
-        r.r3 = x;
-        r.r4 = x;
+        int x1 = x;
+        int x2 = x;
+        r.r3 = x1;
+        r.r4 = x2;
     }
 
 }
