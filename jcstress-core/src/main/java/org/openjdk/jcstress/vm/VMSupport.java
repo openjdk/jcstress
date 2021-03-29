@@ -143,6 +143,12 @@ public class VMSupport {
             throw new IllegalStateException("Fatal error: WhiteBoxAPI JAR problems.", e);
         }
 
+        detect("Unlocking debug information for non-safepoints",
+                SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
+                "-XX:+DebugNonSafepoints"
+        );
+
         detect("Unlocking C2 local code motion randomizer",
                 SimpleTestMain.class,
                 C2_STRESS_JVM_FLAGS,
