@@ -210,7 +210,7 @@ public class TestExecutor {
             pw.println("  },");
 
             // The run loops:
-            CompileMode cm = task.getCompileMode();
+            int cm = task.getCompileMode();
             for (int a = 0; a < task.threads; a++) {
                 String an = task.actorNames.get(a);
 
@@ -223,27 +223,27 @@ public class TestExecutor {
                 // this would make sure that while actor methods are running in interpreter,
                 // the run loop still runs in compiled mode, running faster. The call to interpreted
                 // method would happen anyway, even though through c2i transition.
-                if (cm.isInt(a)) {
+                if (CompileMode.isInt(cm, a)) {
                     pw.println("    inline: \"-" + task.name + "::" + an + "\",");
                 } else {
                     pw.println("    inline: \"+" + task.name + "::" + an + "\",");
                 }
 
                 // Run loop should be compiled with C2? Forbid C1 compilation then.
-                if (cm.isC2(a)) {
+                if (CompileMode.isC2(cm, a)) {
                     pw.println("    c1: {");
                     pw.println("      Exclude: true,");
                     pw.println("    },");
                 }
 
                 // Run loop should be compiled with C1? Forbid C2 compilation then.
-                if (cm.isC1(a)) {
+                if (CompileMode.isC1(cm, a)) {
                     pw.println("    c2: {");
                     pw.println("      Exclude: true,");
                     pw.println("    },");
                 }
 
-                if (VMSupport.printAssemblyAvailable() && verbosity.printAssembly() && !cm.isInt(a)) {
+                if (VMSupport.printAssemblyAvailable() && verbosity.printAssembly() && !CompileMode.isInt(cm, a)) {
                     pw.println("    PrintAssembly: true,");
                 }
 
@@ -259,7 +259,7 @@ public class TestExecutor {
 
                 // If this actor runs in interpreted mode, then actor method should not be compiled.
                 // Allow run loop to be compiled with the best compiler available.
-                if (cm.isInt(a)) {
+                if (CompileMode.isInt(cm, a)) {
                     pw.println("  {");
                     pw.println("    match: \"+" + task.name + "::" + an + "\",");
                     pw.println("    c1: {");

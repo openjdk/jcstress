@@ -51,6 +51,10 @@ public class VMSupport {
     private static volatile boolean COMPILER_DIRECTIVES_AVAILABLE;
     private static volatile boolean PRINT_ASSEMBLY_AVAILABLE;
 
+    private static volatile boolean C1_AVAILABLE;
+    private static volatile boolean C2_AVAILABLE;
+    private static volatile boolean COMPILERS_AVAILABLE;
+
     public static boolean spinWaitHintAvailable() {
         return THREAD_SPIN_WAIT_AVAILABLE;
     }
@@ -63,6 +67,14 @@ public class VMSupport {
         return PRINT_ASSEMBLY_AVAILABLE;
     }
 
+    public static boolean c1Available() {
+        return C1_AVAILABLE;
+    }
+
+    public static boolean c2Available() {
+        return C2_AVAILABLE;
+    }
+
     public static void initFlags(Options opts) {
         System.out.println("Initializing and probing the target VM: ");
         System.out.println(" (all failures are non-fatal, but may affect testing accuracy)");
@@ -73,6 +85,20 @@ public class VMSupport {
                 GLOBAL_JVM_FLAGS,
                 "-XX:+UnlockDiagnosticVMOptions"
         );
+
+        C1_AVAILABLE = detect("Checking for C1 availability",
+                SimpleTestMain.class,
+                null,
+                "-XX:+C1ProfileCalls"
+        );
+
+        C2_AVAILABLE = detect("Checking for C2 availability",
+                SimpleTestMain.class,
+                null,
+                "-XX:+UseLoopPredicate"
+        );
+
+        COMPILERS_AVAILABLE = C1_AVAILABLE || C2_AVAILABLE;
 
         // Tests are supposed to run in a very tight memory constraints:
         // the test objects are small and reused where possible. The footprint
@@ -115,11 +141,13 @@ public class VMSupport {
                 "-XX:G1ConcRefinementThreads=2"
         );
 
-        detect("Trimming down the number of compiler threads",
-                SimpleTestMain.class,
-                GLOBAL_JVM_FLAGS,
-                "-XX:CICompilerCount=2" // This is the absolute minimum for tiered configurations
-        );
+        if (COMPILERS_AVAILABLE) {
+            detect("Trimming down the number of compiler threads",
+                    SimpleTestMain.class,
+                    GLOBAL_JVM_FLAGS,
+                    "-XX:CICompilerCount=2" // This is the absolute minimum for tiered configurations
+            );
+        }
 
         detect("Testing @Contended works on all results and infra objects",
                 ContendedTestMain.class,
@@ -149,32 +177,34 @@ public class VMSupport {
                 "-XX:+DebugNonSafepoints"
         );
 
-        detect("Unlocking C2 local code motion randomizer",
-                SimpleTestMain.class,
-                C2_STRESS_JVM_FLAGS,
-                "-XX:+StressLCM"
-        );
+        if (C2_AVAILABLE) {
+            detect("Unlocking C2 local code motion randomizer",
+                    SimpleTestMain.class,
+                    C2_STRESS_JVM_FLAGS,
+                    "-XX:+StressLCM"
+            );
 
-        detect("Unlocking C2 global code motion randomizer",
-                SimpleTestMain.class,
-                C2_STRESS_JVM_FLAGS,
-                "-XX:+StressGCM"
-        );
+            detect("Unlocking C2 global code motion randomizer",
+                    SimpleTestMain.class,
+                    C2_STRESS_JVM_FLAGS,
+                    "-XX:+StressGCM"
+            );
 
-        detect("Unlocking C2 iterative global value numbering randomizer",
-                SimpleTestMain.class,
-                C2_STRESS_JVM_FLAGS,
-                "-XX:+StressIGVN"
-        );
+            detect("Unlocking C2 iterative global value numbering randomizer",
+                    SimpleTestMain.class,
+                    C2_STRESS_JVM_FLAGS,
+                    "-XX:+StressIGVN"
+            );
 
-        detect("Unlocking C2 conditional constant propagation randomizer",
-                SimpleTestMain.class,
-                C2_STRESS_JVM_FLAGS,
-                "-XX:+StressCCP"
-        );
+            detect("Unlocking C2 conditional constant propagation randomizer",
+                    SimpleTestMain.class,
+                    C2_STRESS_JVM_FLAGS,
+                    "-XX:+StressCCP"
+            );
 
-        C2_ONLY_STRESS_JVM_FLAGS.add("-XX:-TieredCompilation");
-        C2_ONLY_STRESS_JVM_FLAGS.addAll(C2_STRESS_JVM_FLAGS);
+            C2_ONLY_STRESS_JVM_FLAGS.add("-XX:-TieredCompilation");
+            C2_ONLY_STRESS_JVM_FLAGS.addAll(C2_STRESS_JVM_FLAGS);
+        }
 
         detect("Testing allocation profiling",
                 AllocProfileMain.class,
@@ -187,30 +217,32 @@ public class VMSupport {
                         null
                 );
 
-        PRINT_ASSEMBLY_AVAILABLE =
+        if (COMPILERS_AVAILABLE) {
+            PRINT_ASSEMBLY_AVAILABLE =
                 detect("Testing PrintAssembly",
                         SimpleTestMain.class,
                         null,
                         "-XX:+PrintAssembly"
                 );
 
-        try {
-            File temp = File.createTempFile("jcstress", "directives");
+            try {
+                File temp = File.createTempFile("jcstress", "directives");
 
-            PrintWriter pw = new PrintWriter(temp);
-            pw.println("[ { match: \"*::*\", PrintInlining: true } ]");
-            pw.close();
+                PrintWriter pw = new PrintWriter(temp);
+                pw.println("[ { match: \"*::*\", PrintInlining: true } ]");
+                pw.close();
 
-            COMPILER_DIRECTIVES_AVAILABLE =
-                    detect("Testing compiler directives",
-                            SimpleTestMain.class,
-                            null,
-                            "-XX:CompilerDirectivesFile=" + temp.getAbsolutePath()
-                    );
+                COMPILER_DIRECTIVES_AVAILABLE =
+                        detect("Testing compiler directives",
+                                SimpleTestMain.class,
+                                null,
+                                "-XX:CompilerDirectivesFile=" + temp.getAbsolutePath()
+                        );
 
-            temp.delete();
-        } catch (IOException e) {
-            // Do nothing.
+                temp.delete();
+            } catch (IOException e) {
+                // Do nothing.
+            }
         }
 
         System.out.println();
@@ -236,44 +268,49 @@ public class VMSupport {
         System.out.println("Probing what VM configurations are available:");
         System.out.println(" (failures are non-fatal, but may miss some interesting cases)");
 
-        List<Config> configs;
+        LinkedHashSet<Config> configs = new LinkedHashSet<>();
 
         if (!jvmArgs.isEmpty()) {
-            configs = Collections.singletonList(new Config(jvmArgs, false));
+            configs.add(new Config(jvmArgs, false));
         } else if (splitCompilation && COMPILER_DIRECTIVES_AVAILABLE) {
             System.out.println(" (split compilation is requested and compiler directives are available)");
-            configs = Arrays.asList(
-                    // Default global
-                    new Config(Collections.emptyList(), false),
-
-                    // C2 compilations stress
-                    new Config(C2_STRESS_JVM_FLAGS, true)
-            );
+            // Default global
+            configs.add(new Config(Collections.emptyList(), false));
+            if (C2_AVAILABLE) {
+                // C2 compilations stress
+                configs.add(new Config(C2_STRESS_JVM_FLAGS, true));
+            }
         } else {
-            configs = Arrays.asList(
-                    // Interpreted
-                    new Config(Arrays.asList("-Xint"), false),
-
-                    // C1
-                    new Config(Arrays.asList("-XX:TieredStopAtLevel=1"), false),
-
-                    // C2
-                    new Config(Arrays.asList("-XX:-TieredCompilation"), false),
-
-                    // C2 only + stress
-                    new Config(C2_ONLY_STRESS_JVM_FLAGS, true)
-            );
+            // Interpreted
+            configs.add(new Config(Arrays.asList("-Xint"), false));
+            if (C1_AVAILABLE) {
+                // C1
+                configs.add(new Config(Arrays.asList("-XX:TieredStopAtLevel=1"), false));
+            }
+            if (C2_AVAILABLE) {
+                // C2
+                configs.add(new Config(Arrays.asList("-XX:-TieredCompilation"), false));
+                // C2 only + stress
+                configs.add(new Config(C2_ONLY_STRESS_JVM_FLAGS, true));
+            }
         }
 
         // Mix in input arguments, if available
-        List<String> inputArgs = ManagementFactory.getRuntimeMXBean().getInputArguments();
+        List<String> inputArgs = new ArrayList<>();
+
+        try {
+            inputArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
+        } catch (InternalError e) {
+            System.out.println("Warning: cannot get input arguments: " + e.getMessage());
+        }
+
         if (!inputArgs.isEmpty()) {
             configs = configs.stream().map(c -> {
                 List<String> l = new ArrayList<>();
                 l.addAll(inputArgs);
                 l.addAll(c.args());
                 return new Config(l, c.onlyIfC2());
-            }).collect(Collectors.toList());
+            }).collect(Collectors.toCollection(LinkedHashSet::new));
         }
 
         // Mix in prepends, if available
@@ -283,7 +320,7 @@ public class VMSupport {
                 l.addAll(jvmArgsPrepend);
                 l.addAll(c.args());
                 return new Config(l, c.onlyIfC2());
-            }).collect(Collectors.toList());
+            }).collect(Collectors.toCollection(LinkedHashSet::new));
         }
 
         System.out.println();
@@ -441,6 +478,20 @@ public class VMSupport {
 
         public List<String> args() {
             return args;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Config config = (Config) o;
+            return onlyIfC2 == config.onlyIfC2 &&
+                    args.equals(config.args);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(args, onlyIfC2);
         }
     }
 
