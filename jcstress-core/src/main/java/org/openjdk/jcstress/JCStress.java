@@ -24,7 +24,6 @@
  */
 package org.openjdk.jcstress;
 
-import jdk.internal.misc.VM;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.*;
 import org.openjdk.jcstress.infra.grading.ConsoleReportPrinter;
