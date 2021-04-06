@@ -28,7 +28,6 @@ import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.Verbosity;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
-import org.openjdk.jcstress.util.StringUtils;
 
 import java.io.PrintWriter;
 import java.util.concurrent.TimeUnit;
@@ -141,9 +140,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
             if (!progressInteractive) {
                 output.println();
             }
-            output.printf("%10s %s%n", "[" + ReportUtils.statusToLabel(r) + "]", StringUtils.chunkName(r.getName()));
-            ReportUtils.printDetails(output, r, true);
-            ReportUtils.printMessages(output, r);
+            ReportUtils.printResult(output, r, true);
         }
 
         if (shouldPrintStatusLine) {

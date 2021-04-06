@@ -118,12 +118,17 @@ public class ReportUtils {
         return root;
     }
 
-    public static void printDetails(PrintWriter pw, TestResult r, boolean inProgress) {
-        pw.format("    (compilation: %s)%n", CompileMode.description(r.getConfig().getCompileMode(), r.getConfig().actorNames));
-        pw.format("    (JVM args: %s)%n", r.getConfig().jvmArgs);
+    public static void printResult(PrintWriter pw, TestResult r, boolean inProgress) {
+        String label = StringUtils.leftPadDash("[" + ReportUtils.statusToLabel(r) + "]", 10);
+        String testName = StringUtils.chunkName(r.getName());
+        pw.printf("%10s %s%n", label, testName);
+        pw.println();
+        pw.format("  Compilation: %s%n", CompileMode.description(r.getConfig().getCompileMode(), r.getConfig().actorNames));
+        pw.format("  JVM args: %s%n", r.getConfig().jvmArgs);
         if (inProgress) {
-            pw.format("    (fork: #%d)%n", r.getConfig().forkId + 1);
+            pw.format("  Fork: #%d%n", r.getConfig().forkId + 1);
         }
+        pw.println();
 
         if (!r.hasSamples()) {
             return;
@@ -162,17 +167,15 @@ public class ReportUtils {
         }
 
         pw.println();
-    }
 
-    public static void printMessages(PrintWriter pw, TestResult r) {
         boolean errMsgsPrinted = false;
         for (String data : r.getMessages()) {
             if (skipMessage(data)) continue;
             if (!errMsgsPrinted) {
-                pw.println("    Messages: ");
+                pw.println("  Messages: ");
                 errMsgsPrinted = true;
             }
-            pw.println("        " + data);
+            pw.println("    " + data);
         }
         if (errMsgsPrinted) {
             pw.println();
@@ -182,10 +185,10 @@ public class ReportUtils {
         for (String data : r.getVmOut()) {
             if (skipMessage(data)) continue;
             if (!vmOutPrinted) {
-                pw.println("    VM output stream: ");
+                pw.println("  VM output stream: ");
                 vmOutPrinted = true;
             }
-            pw.println("        " + data);
+            pw.println("    " + data);
         }
         if (vmOutPrinted) {
             pw.println();
@@ -195,10 +198,10 @@ public class ReportUtils {
         for (String data : r.getVmErr()) {
             if (skipMessage(data)) continue;
             if (!vmErrPrinted) {
-                pw.println("    VM error stream: ");
+                pw.println("  VM error stream: ");
                 vmErrPrinted = true;
             }
-            pw.println("        " + data);
+            pw.println("    " + data);
         }
         if (vmErrPrinted) {
             pw.println();
