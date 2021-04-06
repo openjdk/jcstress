@@ -118,4 +118,21 @@ public class StringUtils {
         }
         return src;
     }
+
+    static final String[] PADS;
+
+    static {
+        PADS = new String[10];
+        String p = "";
+        for (int c = 0; c < PADS.length; c++) {
+            PADS[c] = p;
+            p = p + ".";
+        }
+    }
+
+    public static String leftPadDash(String src, int count) {
+        int need = count - src.length() - 1;
+        if (need <= 0) return src;
+        return PADS[need] + " " + src;
+    }
 }

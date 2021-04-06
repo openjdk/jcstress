@@ -30,7 +30,6 @@ import org.openjdk.jcstress.Verbosity;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.InProcessCollector;
 import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.util.StringUtils;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -49,20 +48,20 @@ public class TextReportPrinter {
     private final PrintWriter pw;
     private final Set<TestResult> emittedTests;
 
-    public TextReportPrinter(Options opts, InProcessCollector collector) throws FileNotFoundException {
+    public TextReportPrinter(Options opts, InProcessCollector collector) {
         this.collector = collector;
         this.pw = new PrintWriter(System.out, true);
         this.verbosity = opts.verbosity();
         this.emittedTests = new HashSet<>();
     }
 
-    public void work() throws FileNotFoundException {
+    public void work() {
         emittedTests.clear();
 
         List<TestResult> byConfig = ReportUtils.mergedByConfig(collector.getTestResults());
         Collections.sort(byConfig, Comparator
                 .comparing(TestResult::getName)
-                .thenComparing(Comparator.comparing(t -> t.getConfig().jvmArgs.toString())));
+                .thenComparing(t -> t.getConfig().jvmArgs.toString()));
 
         pw.println("RUN RESULTS:");
         pw.println("------------------------------------------------------------------------------------------------------------------------");
@@ -108,23 +107,25 @@ public class TextReportPrinter {
         pw.println("  " + subHeader);
         pw.println();
         pw.println("  " + list.stream().filter(predicate).count() + " matching test results. " + (!emitDetails ? " Use -v to print them." : ""));
+        pw.println();
 
         if (emitDetails) {
+            boolean emitted = false;
             for (TestResult result : list) {
                 if (predicate.test(result)) {
                     emitTest(result);
+                    emitted = true;
                 }
             }
+            if (emitted) {
+                pw.println();
+            }
         }
-
-        pw.println();
     }
 
     public void emitTest(TestResult result) {
         emittedTests.add(result);
-        pw.printf("%10s %s%n", "[" + ReportUtils.statusToLabel(result) + "]", StringUtils.chunkName(result.getName()));
-        ReportUtils.printDetails(pw, result, false);
-        ReportUtils.printMessages(pw, result);
+        ReportUtils.printResult(pw, result, false);
     }
 
 }

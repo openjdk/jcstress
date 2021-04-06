@@ -471,7 +471,7 @@ public class HTMLReportPrinter {
 
     public String selectHTMLColor(Expect type, boolean isZero) {
         String rgb = Integer.toHexString(selectColor(type, isZero).getRGB());
-        return "#" + rgb.substring(2, rgb.length());
+        return "#" + rgb.substring(2);
     }
 
     public Color selectColor(Expect type, boolean isZero) {
