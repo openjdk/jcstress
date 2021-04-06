@@ -28,76 +28,81 @@ import java.util.List;
 
 public class CompileMode {
 
-    public static final int VARIANTS = 3;
+    public static final int MAX_MODES = 3;
+    private static final int MODE_INT = 0;
+    private static final int MODE_C1 = 1;
+    private static final int MODE_C2 = 2;
+
     public static final int UNIFIED = -1;
 
-    private final int mode;
-    private final List<String> actorNames;
-    private final int actors;
+    public static int[] casesFor(int actors, boolean c1, boolean c2) {
+        int modes = 1 + (c1 ? 1 : 0) + (c2 ? 1 : 0);
 
-    public CompileMode(int mode, List<String> actorNames, int actors) {
-        this.mode = mode;
-        this.actorNames = actorNames;
-        this.actors = actors;
-    }
+        int len = 1;
+        int maxLen = 1;
+        for (int a = 0; a < actors; a++) {
+            len *= modes;
+            maxLen *= MAX_MODES;
+        }
 
-    public static int casesFor(int actors) {
-        int cases = 1;
-        for (int c = 0; c < actors; c++) {
-            cases *= VARIANTS;
+        int[] cases = new int[len];
+        int idx = 0;
+        for (int c = 0; c < maxLen; c++) {
+            if (!c1 && hasC1(c, actors)) continue;
+            if (!c2 && hasC2(c, actors)) continue;
+            cases[idx++] = c;
         }
         return cases;
     }
 
-    private int actorMode(int actor) {
+    private static int actorMode(int mode, int actor) {
         int m = mode;
         for (int a = 0; a < actor; a++) {
-            m /= VARIANTS;
+            m /= MAX_MODES;
         }
-        return m % VARIANTS;
+        return m % MAX_MODES;
     }
 
-    public boolean isInt(int actor) {
-        return (mode != UNIFIED) && (actorMode(actor) == 0);
+    public static boolean isInt(int mode, int actor) {
+        return (mode != UNIFIED) && (actorMode(mode, actor) == MODE_INT);
     }
 
-    public boolean isC1(int actor) {
-        return (mode != UNIFIED) && (actorMode(actor) == 1);
+    public static boolean isC1(int mode, int actor) {
+        return (mode != UNIFIED) && (actorMode(mode, actor) == MODE_C1);
     }
 
-    public boolean isC2(int actor) {
-        return (mode != UNIFIED) && (actorMode(actor) == 2);
+    public static boolean isC2(int mode, int actor) {
+        return (mode != UNIFIED) && (actorMode(mode, actor) == MODE_C2);
     }
 
-    public boolean hasC2() {
+    public static boolean hasC2(int mode, int actors) {
         if (mode == UNIFIED) {
             return true;
         }
         for (int a = 0; a < actors; a++) {
-            if (isC2(a)) return true;
+            if (isC2(mode, a)) return true;
         }
         return false;
     }
 
-    private String actorModeToString(int actor) {
-        int v = actorMode(actor);
-        switch (v) {
-            case 0: return "Interpreter";
-            case 1: return "C1";
-            case 2: return "C2";
-            default:
-                throw new IllegalStateException("Unhandled variant: " + v);
+    private static boolean hasC1(int mode, int actors) {
+        if (mode == UNIFIED) {
+            return true;
         }
+        for (int a = 0; a < actors; a++) {
+            if (isC1(mode, a)) return true;
+        }
+        return false;
     }
 
-    public String toString() {
+    public static String description(int mode, List<String> actorNames) {
         if (mode == UNIFIED) {
             return "unified across all actors";
         }
 
         StringBuilder sb = new StringBuilder();
         sb.append("split; ");
-        for (int a = 0; a < actors; a++) {
+        for (int a = 0; a < actorNames.size(); a++) {
             if (a != 0) {
                 sb.append(", ");
             }
@@ -105,7 +110,20 @@ public class CompileMode {
             sb.append(actorNames.get(a));
             sb.append("\"");
             sb.append(": ");
-            sb.append(actorModeToString(a));
+            int v = actorMode(mode, a);
+            switch (v) {
+                case 0:
+                    sb.append("Interpreter");
+                    break;
+                case 1:
+                    sb.append("C1");
+                    break;
+                case 2:
+                    sb.append("C2");
+                    break;
+                default:
+                    throw new IllegalStateException("Unhandled mode: " + v);
+            }
         }
         return sb.toString();
     }

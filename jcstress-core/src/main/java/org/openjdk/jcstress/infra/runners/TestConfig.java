@@ -138,8 +138,8 @@ public class TestConfig implements Serializable {
         return StrideCap.NONE;
     }
 
-    public CompileMode getCompileMode() {
-        return new CompileMode(compileMode, actorNames, threads);
+    public int getCompileMode() {
+        return compileMode;
     }
 
     @Override

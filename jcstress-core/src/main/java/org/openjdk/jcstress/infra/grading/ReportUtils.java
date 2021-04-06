@@ -32,6 +32,7 @@ import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.util.*;
+import org.openjdk.jcstress.vm.CompileMode;
 
 import java.io.PrintWriter;
 import java.util.*;
@@ -118,7 +119,7 @@ public class ReportUtils {
     }
 
     public static void printDetails(PrintWriter pw, TestResult r, boolean inProgress) {
-        pw.format("    (compilation: %s)%n", r.getConfig().getCompileMode());
+        pw.format("    (compilation: %s)%n", CompileMode.description(r.getConfig().getCompileMode(), r.getConfig().actorNames));
         pw.format("    (JVM args: %s)%n", r.getConfig().jvmArgs);
         if (inProgress) {
             pw.format("    (fork: #%d)%n", r.getConfig().forkId + 1);

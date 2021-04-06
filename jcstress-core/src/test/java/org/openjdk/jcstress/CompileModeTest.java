@@ -4,37 +4,29 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jcstress.vm.CompileMode;
 
-import java.util.Arrays;
-
 public class CompileModeTest {
 
     @Test
     public void unified() {
-        CompileMode cm = new CompileMode(CompileMode.UNIFIED, Arrays.asList("actor1", "actor2"), 2);
-
         for (int a = 0; a < 2; a++) {
-            Assert.assertTrue(!cm.isInt(a));
-            Assert.assertTrue(!cm.isC1(a));
-            Assert.assertTrue(!cm.isC2(a));
+            Assert.assertTrue(!CompileMode.isInt(CompileMode.UNIFIED, a));
+            Assert.assertTrue(!CompileMode.isC1(CompileMode.UNIFIED, a));
+            Assert.assertTrue(!CompileMode.isC2(CompileMode.UNIFIED, a));
         }
 
-        Assert.assertTrue(cm.hasC2());
+        for (int a = 0; a < 4; a++) {
+            Assert.assertTrue(CompileMode.hasC2(CompileMode.UNIFIED, a));
+        }
     }
 
     @Test
     public void splitComplete_1() {
-        int cases = CompileMode.casesFor(1);
-
-        CompileMode[] modes = new CompileMode[cases];
-
-        for (int c = 0; c < cases; c++) {
-            modes[c] = new CompileMode(c, Arrays.asList("actor1"), 1);
-        }
+        int[] cases = CompileMode.casesFor(1, true, true);
 
         // Check all these configs are present:
-        for (int a0 = 0; a0 < CompileMode.VARIANTS; a0++) {
+        for (int a0 = 0; a0 < CompileMode.MAX_MODES; a0++) {
             boolean ex = false;
-            for (CompileMode cm : modes) {
+            for (int cm : cases) {
                 ex |= select(a0, cm, 0);
             }
             Assert.assertTrue("Mode does not exist: " + a0, ex);
@@ -43,19 +35,13 @@ public class CompileModeTest {
 
     @Test
     public void splitComplete_2() {
-        int cases = CompileMode.casesFor(2);
-
-        CompileMode[] modes = new CompileMode[cases];
-
-        for (int c = 0; c < cases; c++) {
-            modes[c] = new CompileMode(c, Arrays.asList("actor1", "actor2"), 2);
-        }
+        int[] cases = CompileMode.casesFor(2, true, true);
 
         // Check all these configs are present:
-        for (int a0 = 0; a0 < CompileMode.VARIANTS; a0++) {
-            for (int a1 = 0; a1 < CompileMode.VARIANTS; a1++) {
+        for (int a0 = 0; a0 < CompileMode.MAX_MODES; a0++) {
+            for (int a1 = 0; a1 < CompileMode.MAX_MODES; a1++) {
                 boolean ex = false;
-                for (CompileMode cm : modes) {
+                for (int cm : cases) {
                     ex |= select(a0, cm, 0) &&
                           select(a1, cm, 1);
                 }
@@ -66,20 +52,14 @@ public class CompileModeTest {
 
     @Test
     public void splitComplete_3() {
-        int cases = CompileMode.casesFor(3);
-
-        CompileMode[] modes = new CompileMode[cases];
-
-        for (int c = 0; c < cases; c++) {
-            modes[c] = new CompileMode(c, Arrays.asList("actor1", "actor2", "actor3"), 3);
-        }
+        int[] cases = CompileMode.casesFor(3, true, true);
 
         // Check all these configs are present:
-        for (int a0 = 0; a0 < CompileMode.VARIANTS; a0++) {
-            for (int a1 = 0; a1 < CompileMode.VARIANTS; a1++) {
-                for (int a2 = 0; a2 < CompileMode.VARIANTS; a2++) {
+        for (int a0 = 0; a0 < CompileMode.MAX_MODES; a0++) {
+            for (int a1 = 0; a1 < CompileMode.MAX_MODES; a1++) {
+                for (int a2 = 0; a2 < CompileMode.MAX_MODES; a2++) {
                     boolean ex = false;
-                    for (CompileMode cm : modes) {
+                    for (int cm : cases) {
                         ex |= select(a0, cm, 0) &&
                               select(a1, cm, 1) &&
                               select(a2, cm, 2);
@@ -91,42 +71,70 @@ public class CompileModeTest {
     }
 
     @Test
-    public void splitComplete_4() {
-        int cases = CompileMode.casesFor(4);
+    public void splitOnlyC1_3() {
+        boolean hasInt = false;
+        boolean hasC1 = false;
+        boolean hasC2 = false;
 
-        CompileMode[] modes = new CompileMode[cases];
-
-        for (int c = 0; c < cases; c++) {
-            modes[c] = new CompileMode(c, Arrays.asList("actor1", "actor2", "actor3", "actor4"), 4);
-        }
-
-        // Check all these configs are present:
-        for (int a0 = 0; a0 < CompileMode.VARIANTS; a0++) {
-            for (int a1 = 0; a1 < CompileMode.VARIANTS; a1++) {
-                for (int a2 = 0; a2 < CompileMode.VARIANTS; a2++) {
-                    for (int a3 = 0; a3 < CompileMode.VARIANTS; a3++) {
-                        boolean ex = false;
-                        for (CompileMode cm : modes) {
-                            ex |= select(a0, cm, 0) &&
-                                  select(a1, cm, 1) &&
-                                  select(a2, cm, 2) &&
-                                  select(a3, cm, 3);
-                        }
-                        Assert.assertTrue("Mode does not exist: " + a0 + ", " + a1 + ", " + a2 + ", " + a3, ex);
-                    }
-                }
+        for (int cm : CompileMode.casesFor(3, true, false)) {
+            for (int a = 0; a < 3; a++) {
+                hasInt |= CompileMode.isInt(cm, a);
+                hasC1 |= CompileMode.isC1(cm, a);
+                hasC2 |= CompileMode.isC2(cm, a);
             }
+            Assert.assertFalse("C2 modes should not exist: " + cm, hasC2);
         }
+
+        Assert.assertTrue("Interpreter modes should not exist", hasInt);
+        Assert.assertTrue("C1 modes should exist", hasC1);
     }
 
-    private boolean select(int m, CompileMode cm, int a) {
+    @Test
+    public void splitOnlyC2_3() {
+        boolean hasInt = false;
+        boolean hasC1 = false;
+        boolean hasC2 = false;
+
+        for (int cm : CompileMode.casesFor(3, false, true)) {
+            for (int a = 0; a < 3; a++) {
+                hasInt |= CompileMode.isInt(cm, a);
+                hasC1 |= CompileMode.isC1(cm, a);
+                hasC2 |= CompileMode.isC2(cm, a);
+            }
+            Assert.assertFalse("C1 modes should not exist: " + cm, hasC1);
+        }
+
+        Assert.assertTrue("Interpreter modes should exist", hasInt);
+        Assert.assertTrue("C2 modes should exist", hasC2);
+    }
+
+    @Test
+    public void splitOnlyInt_3() {
+        boolean hasInt = false;
+        boolean hasC1 = false;
+        boolean hasC2 = false;
+
+        for (int cm : CompileMode.casesFor(3, false, false)) {
+            for (int a = 0; a < 3; a++) {
+                hasInt |= CompileMode.isInt(cm, a);
+                hasC1 |= CompileMode.isC1(cm, a);
+                hasC2 |= CompileMode.isC2(cm,a);
+            }
+            Assert.assertFalse("C1 modes should not exist: " + cm, hasC1);
+            Assert.assertFalse("C2 modes should not exist: " + cm, hasC2);
+        }
+
+        Assert.assertTrue("Interpreter modes should exist", hasInt);
+    }
+
+    private boolean select(int m, int cm, int a) {
         switch (m) {
             case 0:
-                return cm.isInt(a);
+                return CompileMode.isInt(cm, a);
             case 1:
-                return cm.isC1(a);
+                return CompileMode.isC1(cm, a);
             case 2:
-                return cm.isC2(a);
+                return CompileMode.isC2(cm, a);
             default:
                 throw new IllegalStateException("Unknown mode");
         }

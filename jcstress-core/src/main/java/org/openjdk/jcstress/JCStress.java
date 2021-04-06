@@ -140,9 +140,8 @@ public class JCStress {
     }
 
     private void forkedSplit(List<TestConfig> testConfigs, VMSupport.Config config, TestInfo info) {
-        for (int cc = 0; cc < CompileMode.casesFor(info.threads()); cc++) {
-            CompileMode cm = new CompileMode(cc, info.actorNames(), info.threads());
-            if (config.onlyIfC2() && !cm.hasC2()) {
+        for (int cc : CompileMode.casesFor(info.threads(), VMSupport.c1Available(), VMSupport.c2Available())) {
+            if (config.onlyIfC2() && CompileMode.hasC2(cc, info.threads())) {
                 // This configuration is expected to run only when C2 is enabled,
                 // but compilation mode does not include C2. Can skip it to optimize
                 // testing time.
