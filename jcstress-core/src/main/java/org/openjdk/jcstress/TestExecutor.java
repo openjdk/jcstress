@@ -328,7 +328,9 @@ public class TestExecutor {
         public boolean checkCompleted(TestResultCollector sink) {
             // There is a pending exception that terminated the target VM.
             if (pendingException != null) {
-                dumpFailure(sink, Collections.singleton(pendingException.getMessage()), Collections.emptyList());
+                result = new TestResult(task, Status.VM_ERROR);
+                result.addMessage(pendingException.getMessage());
+                sink.add(result);
                 return true;
             }
 
@@ -356,32 +358,22 @@ public class TestExecutor {
                 }
 
                 if (ecode != 0) {
-                    dumpFailure(sink, out, err);
-                } else {
-                    result.addVMOuts(out);
-                    result.addVMErrs(err);
-                    sink.add(result);
+                    result = new TestResult(task, Status.VM_ERROR);
+                    result.addMessage("Failed with error code " + ecode);
                 }
+                result.addVMOuts(out);
+                result.addVMErrs(err);
+                sink.add(result);
             } catch (InterruptedException ex) {
-                dumpFailure(sink, Collections.singleton(ex.getMessage()), Collections.emptyList());
+                result = new TestResult(task, Status.VM_ERROR);
+                result.addMessage(ex.getMessage());
+                sink.add(result);
             } finally {
                 // The process is definitely dead, remove the temporary files.
                 stdout.delete();
                 stderr.delete();
             }
             return true;
-        }
-
-        private void dumpFailure(TestResultCollector sink, Collection<String> out, Collection<String> err) {
-            TestConfig task = getTask();
-            TestResult result = new TestResult(task, Status.VM_ERROR);
-            for (String i : out) {
-                result.addMessage(i);
-            }
-            for (String i : err) {
-                result.addMessage(i);
-            }
-            sink.add(result);
         }
 
         public void recordResult(TestResult r) {

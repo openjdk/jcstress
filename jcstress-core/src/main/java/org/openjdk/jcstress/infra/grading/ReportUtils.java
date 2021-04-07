@@ -130,43 +130,41 @@ public class ReportUtils {
         }
         pw.println();
 
-        if (!r.hasSamples()) {
-            return;
+        if (r.hasSamples()) {
+            int idLen = "Observed state".length();
+            int occLen = "Occurrences".length();
+            int expectLen = "Expectation".length();
+            int descLen = 60;
+
+            for (String s : r.getStateKeys()) {
+                idLen = Math.max(idLen, s.length());
+                occLen = Math.max(occLen, String.format("%,d", r.getCount(s)).length());
+                expectLen = Math.max(expectLen, Expect.UNKNOWN.toString().length());
+            }
+
+            TestInfo test = TestList.getInfo(r.getName());
+            for (StateCase c : test.cases()) {
+                idLen = Math.max(idLen, c.matchPattern().length());
+                expectLen = Math.max(expectLen, c.expect().toString().length());
+            }
+            expectLen = Math.max(expectLen, test.unmatched().expect().toString().length());
+
+            idLen += 2;
+            occLen += 2;
+            expectLen += 2;
+
+            pw.printf("%" + idLen + "s %" + occLen + "s %" + expectLen + "s  %-" + descLen + "s%n", "Observed state", "Occurrences", "Expectation", "Interpretation");
+
+            for (GradingResult gradeRes : r.grading().gradingResults) {
+                pw.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
+                        StringUtils.cutoff(gradeRes.id, idLen),
+                        gradeRes.count,
+                        gradeRes.expect,
+                        StringUtils.cutoff(gradeRes.description, descLen));
+            }
+
+            pw.println();
         }
-
-        int idLen = "Observed state".length();
-        int occLen = "Occurrences".length();
-        int expectLen = "Expectation".length();
-        int descLen = 60;
-
-        for (String s : r.getStateKeys()) {
-            idLen = Math.max(idLen, s.length());
-            occLen = Math.max(occLen, String.format("%,d", r.getCount(s)).length());
-            expectLen = Math.max(expectLen, Expect.UNKNOWN.toString().length());
-        }
-
-        TestInfo test = TestList.getInfo(r.getName());
-        for (StateCase c : test.cases()) {
-            idLen = Math.max(idLen, c.matchPattern().length());
-            expectLen = Math.max(expectLen, c.expect().toString().length());
-        }
-        expectLen = Math.max(expectLen, test.unmatched().expect().toString().length());
-
-        idLen += 2;
-        occLen += 2;
-        expectLen += 2;
-
-        pw.printf("%" + idLen + "s %" + occLen +"s %" + expectLen + "s  %-" + descLen + "s%n", "Observed state", "Occurrences", "Expectation", "Interpretation");
-
-        for (GradingResult gradeRes : r.grading().gradingResults) {
-            pw.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
-                    StringUtils.cutoff(gradeRes.id, idLen),
-                    gradeRes.count,
-                    gradeRes.expect,
-                    StringUtils.cutoff(gradeRes.description, descLen));
-        }
-
-        pw.println();
 
         boolean errMsgsPrinted = false;
         for (String data : r.getMessages()) {
