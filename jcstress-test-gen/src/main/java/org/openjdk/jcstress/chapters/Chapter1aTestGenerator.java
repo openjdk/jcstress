@@ -106,7 +106,6 @@ public class Chapter1aTestGenerator {
     }
 
     private enum VarHandleMode {
-        NAKED("plain"),
         OPAQUE("opaque"),
         ACQ_REL("acqrel"),
         VOLATILE("volatiles"),
@@ -169,11 +168,6 @@ public class Chapter1aTestGenerator {
         map.put("byteOrder", String.valueOf(bo));
 
         switch (mode) {
-            case NAKED: {
-                map.put("setOp", "set");
-                map.put("getOp", "get");
-                break;
-            }
             case OPAQUE: {
                 map.put("setOp", "setOpaque");
                 map.put("getOp", "getOpaque");
@@ -198,39 +192,7 @@ public class Chapter1aTestGenerator {
     private static Set<String> keys(String type, VarHandleMode mode) {
         Set<String> set = new HashSet<>();
         set.add(type);
-        if (alwaysAtomic(type, mode)) {
-            set.add("alwaysAtomic");
-        }
-        if (coherent(type, mode)) {
-            set.add("coherent");
-        }
         return set;
-    }
-
-    private static boolean alwaysAtomic(String type, VarHandleMode mode) {
-        switch (mode) {
-            case NAKED:
-                return !(type.equals("double") || type.equals("long"));
-            case ACQ_REL:
-            case OPAQUE:
-            case VOLATILE:
-                return true;
-            default:
-                throw new IllegalStateException(mode.toString());
-        }
-    }
-
-    private static boolean coherent(String type, VarHandleMode mode) {
-        switch (mode) {
-            case NAKED:
-                return false;
-            case OPAQUE:
-            case ACQ_REL:
-            case VOLATILE:
-                return true;
-            default:
-                throw new IllegalStateException(mode.toString());
-        }
     }
 
     private static String testName(String type) {

@@ -56,20 +56,31 @@ public class SeqCstTraceGenerator {
          */
         List<MultiThread> multiThreads = new ArrayList<>();
 
-        final int COUNT_THRESH = 6;
-        final int VAR_THRESH = 3;
-        final int THREAD_THRESH = 4;
+        // (ops, variables, threads)
+        int[][] triplets = {
+                {2, 1, 2},
 
-        for (int c = 1; c <= COUNT_THRESH; c++) {
-            int minVars = 1;
-            int maxVars = c;
-            for (int v = minVars; v <= Math.min(maxVars, VAR_THRESH); v++) {
-                int minThreads = Math.max(2, c / 2);
-                int maxThreads = c;
-                for (int t = minThreads; t <= Math.min(maxThreads, THREAD_THRESH); t++) {
-                    multiThreads.addAll(new Phase(c, v, t).run());
-                }
-            }
+                {3, 1, 2},
+
+                {4, 1, 2},
+                {4, 2, 2},
+                {4, 2, 3},
+                {4, 2, 4},
+
+                {5, 1, 3},
+                {5, 1, 4},
+                {5, 2, 3},
+                {5, 2, 4},
+
+                {6, 1, 4},
+                {6, 2, 4},
+                {6, 3, 3},
+                {6, 3, 4},
+        };
+
+        for (int[] tri : triplets) {
+            List<MultiThread> p = new Phase(tri[0], tri[1], tri[2]).run();
+            multiThreads.addAll(p);
         }
 
         System.out.println(multiThreads.size() + " interesting testcases");

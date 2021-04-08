@@ -48,17 +48,10 @@ import org.openjdk.jcstress.infra.results.*;
         "$defaultV$, $setV$, $setG$",
         "$setV$, $setV$, $setG$",
     }, expect = Expect.ACCEPTABLE, desc = "Observing the value for guard, allowed to see latest value.")
-#if[racy]
-@Outcome(id = {
-        "$defaultV$, $defaultV$, $setG$",
-        "$setV$, $defaultV$, $setG$",
-    }, expect = Expect.ACCEPTABLE, desc = "Seeing previous writes, allowed with racy guard.")
-#else[racy]
 @Outcome(id = {
         "$defaultV$, $defaultV$, $setG$",
         "$setV$, $defaultV$, $setG$",
     }, expect = Expect.FORBIDDEN, desc = "Seeing previous writes, forbidden with proper guard.")
-#end[racy]
 @State
 public class $name$ {
 

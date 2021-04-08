@@ -36,14 +36,7 @@ import org.openjdk.jcstress.infra.results.$T$$T$_Result;
 @Outcome(id = "$value0$, $value1$", expect = Expect.ACCEPTABLE,  desc = "actor2 observe actor1 update, actor1 not yet observe actor2 update")
 @Outcome(id = "$value1$, $value1$", expect = Expect.ACCEPTABLE,  desc = "both actor1 and actor2 observe each other update")
 @Outcome(id = "$value0$, $value0$", expect = Expect.FORBIDDEN, desc = "if r1 = 0, store var must be submitted already before fullFence in actor2, r2 must get the update")
-#if[alwaysAtomic]
 @Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
-#else[alwaysAtomic]
-//if r1 is half-value or value0, store var is submitted before fullFence in actor2, r2 must be full-value, vice versa.
-@Outcome(id = "$value1$, .*", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Non-atomic access detected, allowed by spec.")
-@Outcome(id = ".*, $value1$", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Non-atomic access detected, allowed by spec")
-@Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
-#end[alwaysAtomic]
 @State
 public class $TestClassName$ {
 

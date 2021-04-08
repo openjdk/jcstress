@@ -35,12 +35,7 @@ import org.openjdk.jcstress.infra.results.$T$$T$_Result;
 @Outcome(id = "$value1$, $value0$", expect = Expect.ACCEPTABLE, desc = "store $value1$ to y in actor1 before load y in actor2")
 @Outcome(id = "$value1$, $value1$", expect = Expect.FORBIDDEN,  desc = "can't load var after store y in actor1.")
 @Outcome(id = "$value0$, $value1$", expect = Expect.FORBIDDEN,  desc = "this won't happen even if load var after store y because only if r1 = $value1$ var may be assigned to $value1$ and then r2 can be $value1$ from var.")
-#if[alwaysAtomic]
 @Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
-#else[alwaysAtomic]
-@Outcome(id = ".*, $value0$", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Non-atomic access detected, allowed by spec, r2 only can be assigned to 0.")
-@Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
-#end[alwaysAtomic]
 @State
 public class $TestClassName$ {
 

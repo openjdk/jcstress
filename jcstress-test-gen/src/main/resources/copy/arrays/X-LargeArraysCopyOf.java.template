@@ -42,11 +42,7 @@ import org.openjdk.jcstress.infra.results.*;
 #else[safe]
 @Outcome(id = "true, 2097152, 1", expect = Expect.ACCEPTABLE,  desc = "Seeing array, but some contents are default")
 @Outcome(id = "true, 2097152, 2", expect = Expect.ACCEPTABLE,  desc = "Seeing array, but some contents are weird")
-#if[alwaysAtomic]
 @Outcome(id = "true, 2097152, 3", expect = Expect.FORBIDDEN,   desc = "Seeing array, but some contents are default/weird")
-#else[alwaysAtomic]
-@Outcome(id = "true, 2097152, 3", expect = Expect.ACCEPTABLE,  desc = "Seeing array, but some contents are default/weird")
-#end[alwaysAtomic]
 #end[safe]
 @State
 public class $name$ {

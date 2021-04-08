@@ -53,8 +53,8 @@ public class TestGenerator {
     }
 
     public void generateMemoryEffects() throws IOException {
-        for (Class<?> varType : Types.SUPPORTED_PRIMITIVES) {
-            for (Class<?> guardType : Types.SUPPORTED_PRIMITIVES) {
+        for (Class<?> varType : Types.VAR_PRIMITIVE_TYPES) {
+            for (Class<?> guardType : Types.GUARD_PRIMITIVE_TYPES) {
                 generate(new Types(guardType, varType), new VolatileReadWrite(guardType), "volatile_" + guardType + "_" + varType, "org.openjdk.jcstress.tests.memeffects.basic.volatiles");
             }
             generate(new Types(int.class, varType), new SynchronizedBlock(), "lock_" + varType, "org.openjdk.jcstress.tests.memeffects.basic.lock");
@@ -203,9 +203,13 @@ public class TestGenerator {
     }
 
     public static class Types {
-        public static final Class<?>[] SUPPORTED_PRIMITIVES =
+        public static final Class<?>[] GUARD_PRIMITIVE_TYPES =
                 new Class<?>[] { boolean.class, byte.class, short.class, char.class,
-                                 int.class, long.class, float.class, double.class};
+                                 int.class, long.class, float.class, double.class };
+
+        // At least one per data width, plus both shapes of floating point
+        public static final Class<?>[] VAR_PRIMITIVE_TYPES =
+                new Class<?>[] { byte.class, short.class, int.class, long.class, float.class, double.class };
 
         public static final Class<?>[] SUPPORTED_ATOMICS =
                 new Class<?>[] { AtomicInteger.class, AtomicLong.class, AtomicBoolean.class };

@@ -132,6 +132,8 @@ public class Chapter1bTestGenerator {
             BufferType bufferType, String templateName, String template)
             throws IOException {
         for (Type type : VIEW_SOURCE.supportedTypes()) {
+            if (!type.alwaysAtomic) continue;
+
             for (Operation operation : target.operations) {
                 if (!VIEW_SOURCE.supported(operation.method, type))
                     break;
@@ -165,10 +167,7 @@ public class Chapter1bTestGenerator {
     }
 
     private static Set<String> keys(Type type) {
-        if (type.alwaysAtomic)
-            return of("alwaysAtomic");
-        else
-            return of();
+        return of();
     }
 
     private static Map<String, String> commonVars(Type type, String object, String pkg, String testName) {

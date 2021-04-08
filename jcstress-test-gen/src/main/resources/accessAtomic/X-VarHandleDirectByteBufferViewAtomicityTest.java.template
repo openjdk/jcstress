@@ -40,12 +40,7 @@ import org.openjdk.jcstress.infra.results.*;
 @JCStressTest
 @Outcome(id = "$default$", expect = Expect.ACCEPTABLE, desc = "Default value for the field. Allowed to see this: data race.")
 @Outcome(id = "$set$", expect = Expect.ACCEPTABLE, desc = "The value set by the actor thread. Observer sees the complete update.")
-#if[alwaysAtomic]
 @Outcome(expect = Expect.FORBIDDEN, desc = "Other values are forbidden: atomicity violation.")
-#else[alwaysAtomic]
-@Outcome(expect = Expect.ACCEPTABLE_INTERESTING, desc = "Non-atomic access detected, allowed by spec")
-@Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
-#end[alwaysAtomic]
 @State
 public class $name$ {
 

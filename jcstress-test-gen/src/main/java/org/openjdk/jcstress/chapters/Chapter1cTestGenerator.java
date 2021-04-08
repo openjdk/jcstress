@@ -59,6 +59,8 @@ public class Chapter1cTestGenerator {
 
     private static void makeFieldTests(String dest, Target target, String templateName, String template) throws IOException {
         for (String type : TYPES) {
+            if (!alwaysAtomic(type)) continue;
+
             for (Operation operation : target.operations) {
                 String result = template.replaceAll(target.target, operation.operation);
 
@@ -78,10 +80,7 @@ public class Chapter1cTestGenerator {
     }
 
     private static Set<String> keys(String type) {
-        if (alwaysAtomic(type))
-            return of("alwaysAtomic");
-        else
-            return of();
+        return of();
     }
 
     private static Map<String, String> vars(String type, String object, String pkg, String testName) {
