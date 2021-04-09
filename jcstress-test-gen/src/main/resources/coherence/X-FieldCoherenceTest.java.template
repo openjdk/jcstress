@@ -36,15 +36,7 @@ import org.openjdk.jcstress.infra.results.*;
 @Outcome(id = "$default$, $default$", expect = Expect.ACCEPTABLE, desc = "Default value for the fields. Allowed to see this: data race.")
 @Outcome(id = "$default$, $set$", expect = Expect.ACCEPTABLE, desc = "Observe second read, but not first: sequential consistency.")
 @Outcome(id = "$set$, $set$", expect = Expect.ACCEPTABLE, desc = "Observers sees both read.")
-#if[alwaysAtomic]
-#if[coherent]
 @Outcome(id = "$set$, $default$", expect = Expect.FORBIDDEN, desc = "Seeing first read, but not second: coherence violation.")
-#else[coherent]
-@Outcome(id = "$set$, $default$", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Seeing first read, but not second: non-coherent.")
-#end[coherent]
-#else[alwaysAtomic]
-@Outcome(id = ".*, .*", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Non-atomic accesses are allowed.")
-#end[alwaysAtomic]
 @State
 public class $name$ {
 

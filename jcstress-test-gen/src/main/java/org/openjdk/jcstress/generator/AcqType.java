@@ -26,12 +26,7 @@ package org.openjdk.jcstress.generator;
 
 public enum AcqType {
     get,
-    CAS,
-    incrementAndGet,
-    getAndIncrement,
-    decrementAndGet,
-    getAndDecrement,
-    addAndGet,
+    compareAndSet,
     getAndAdd,
     getAndSet,
 }

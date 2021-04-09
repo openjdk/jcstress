@@ -84,8 +84,6 @@ public class Chapter1dTestGenerator {
     }
 
     private enum VarHandleMode {
-        NAKED("plain"),
-        OPAQUE("opaque"),
         ACQ_REL("acqrel"),
         VOLATILE("volatiles"),
         ;
@@ -103,8 +101,8 @@ public class Chapter1dTestGenerator {
     }
 
     private static void makeTests(String dest, String template, String label) throws IOException {
-        // Only care about the access-atomic guards
-        for (VarHandleMode gs : new VarHandleMode[] { VarHandleMode.OPAQUE, VarHandleMode.ACQ_REL, VarHandleMode.VOLATILE } ) {
+        // Only care about modes where acq/rel is expected
+        for (VarHandleMode gs : new VarHandleMode[] { VarHandleMode.ACQ_REL, VarHandleMode.VOLATILE } ) {
             String pack = PREFIX + "." + label + "." + gs;
             for (String typeG : TYPES_G) {
                 for (String typeV : TYPES_V) {
@@ -120,8 +118,8 @@ public class Chapter1dTestGenerator {
     }
 
     private static void makeBufferTests(String dest, String template, String label) throws IOException {
-        // Only care about the access-atomic guards
-        for (VarHandleMode gs : new VarHandleMode[] { VarHandleMode.OPAQUE, VarHandleMode.ACQ_REL, VarHandleMode.VOLATILE } ) {
+        // Only care about modes where acq/rel is expected
+        for (VarHandleMode gs : new VarHandleMode[] { VarHandleMode.ACQ_REL, VarHandleMode.VOLATILE } ) {
             for (ByteOrder bo : new ByteOrder[] { ByteOrder.BIG_ENDIAN, ByteOrder.LITTLE_ENDIAN }) {
                 String pack = PREFIX + "." + label + "." + bo.toString().toLowerCase().replace("_endian", "") + "." + gs;
                 for (String typeG : TYPES_VIEWS) {
@@ -163,16 +161,6 @@ public class Chapter1dTestGenerator {
         map.put("byteOrder", String.valueOf(bo));
 
         switch (mode) {
-            case NAKED: {
-                map.put("setOp", "set");
-                map.put("getOp", "get");
-                break;
-            }
-            case OPAQUE: {
-                map.put("setOp", "setOpaque");
-                map.put("getOp", "getOpaque");
-                break;
-            }
             case ACQ_REL: {
                 map.put("setOp", "setRelease");
                 map.put("getOp", "getAcquire");
@@ -192,26 +180,9 @@ public class Chapter1dTestGenerator {
     private static Set<String> keys(String modifier, String type, VarHandleMode mode) {
         Set<String> set = new HashSet<>();
         set.add(type);
-        if (racy(mode)) {
-            set.add("racy");
-        }
         set.add(modifier);
         return set;
     }
-
-    private static boolean racy(VarHandleMode mode) {
-        switch (mode) {
-            case NAKED:
-            case OPAQUE:
-                return true;
-            case ACQ_REL:
-            case VOLATILE:
-                return false;
-            default:
-                throw new IllegalStateException(mode.toString());
-        }
-    }
-
 
     private static String testName(String typeG, String typeV) {
         return StringUtils.upcaseFirst(typeG) + StringUtils.upcaseFirst(typeV) + "Test";

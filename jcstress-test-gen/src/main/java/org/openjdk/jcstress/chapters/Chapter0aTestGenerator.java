@@ -202,6 +202,9 @@ public class Chapter0aTestGenerator {
         for (String modifier : modifiers) {
             String pack = PREFIX + "." + label + "." + (modifier.equals("") ? "plain" : modifier + "s");
             for (String type : TYPES) {
+                if (!alwaysAtomic(modifier, type, label)) continue;
+                if (!coherent(modifier, type, label)) continue;
+
                 String name = testName(type);
                 String res = Spp.spp(template,
                         keys(modifier, type, label),
@@ -232,12 +235,6 @@ public class Chapter0aTestGenerator {
     private static Set<String> keys(String modifier, String type, String label) {
         Set<String> set = new HashSet<>();
         set.add(type);
-        if (alwaysAtomic(modifier, type, label)) {
-            set.add("alwaysAtomic");
-        }
-        if (coherent(modifier, type, label)) {
-            set.add("coherent");
-        }
         set.add(modifier);
         return set;
     }

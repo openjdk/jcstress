@@ -57,7 +57,7 @@ public class Atomic_Updater_X implements Primitive {
     @Override
     public String printAcquire(String region) {
         switch (acqType) {
-            case CAS:
+            case compareAndSet:
                 return String.format("r.r1 = g.compareAndSet(this, %s, %s) ? %s : %s; \n" + region,
                         setValue,
                         defaultValue,
@@ -66,16 +66,6 @@ public class Atomic_Updater_X implements Primitive {
                 );
             case get:
                 return "r.r1 = g.get(this) == " + defaultValue + "? " + defaultValue + " : " + setValue + " ; \n" + region;
-            case incrementAndGet:
-                return "r.r1 = g.incrementAndGet(this) == (" + defaultValue + " + " + unitValue + ") ? " + defaultValue + " : " + setValue + "; \n" + region;
-            case getAndIncrement:
-                return "r.r1 = g.getAndIncrement(this) == " + defaultValue + "? " + defaultValue + " : " + setValue + " ; \n" + region;
-            case decrementAndGet:
-                return "r.r1 = g.decrementAndGet(this) == (" + defaultValue + " - " + unitValue + ") ? " + defaultValue + " : " + setValue + "; \n" + region;
-            case getAndDecrement:
-                return "r.r1 = g.getAndDecrement(this) == " + defaultValue + "? " + defaultValue + " : " + setValue + " ; \n" + region;
-            case addAndGet:
-                return "r.r1 = g.addAndGet(this, " + rValue + ") == (" + defaultValue + " + " + rValue + ") ? " + defaultValue + " : " + setValue + "; \n" + region;
             case getAndAdd:
                 return "r.r1 = g.getAndAdd(this, " + rValue + ") == " + defaultValue + "? " + defaultValue + " : " + setValue + " ; \n" + region;
             case getAndSet:
@@ -90,18 +80,8 @@ public class Atomic_Updater_X implements Primitive {
         switch (relType) {
             case set:
                 return region + "g.set(this, " +setValue + ");";
-            case CAS:
+            case compareAndSet:
                 return region + "g.compareAndSet(this, " + defaultValue + ", " +setValue + ");";
-            case incrementAndGet:
-                return region + "g.incrementAndGet(this);";
-            case getAndIncrement:
-                return region + "g.getAndIncrement(this);";
-            case decrementAndGet:
-                return region + "g.decrementAndGet(this);";
-            case getAndDecrement:
-                return region + "g.getAndDecrement(this);";
-            case addAndGet:
-                return region + "g.addAndGet(this, " + rValue + ");";
             case getAndAdd:
                 return region + "g.getAndAdd(this, " + rValue + ");";
             case getAndSet:

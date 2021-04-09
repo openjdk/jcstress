@@ -35,12 +35,7 @@ import org.openjdk.jcstress.infra.results.*;
 @JCStressTest
 @Outcome(id = "$default$", expect = Expect.ACCEPTABLE, desc = "Full store from T1.")
 @Outcome(id = "$set$", expect = Expect.ACCEPTABLE, desc = "Full store from T2.")
-#if[alwaysAtomic]
 @Outcome(expect = Expect.FORBIDDEN, desc = "Conflicting stores: atomicity violation.")
-#else[alwaysAtomic]
-@Outcome(expect = Expect.ACCEPTABLE_INTERESTING, desc = "Conflicting stores, persisting non-atomic result.")
-@Ref("http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.7")
-#end[alwaysAtomic]
 @State
 public class $name$ {
 

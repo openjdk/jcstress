@@ -39,11 +39,7 @@ import org.openjdk.jcstress.infra.results.*;
 #else[safe]
 @Outcome(id = "true, 1, $default$", expect = Expect.ACCEPTABLE, desc = "Seeing array, but not its contents.")
 #end[safe]
-#if[alwaysAtomic]
 @Outcome(id = "true, 1, $set$", expect = Expect.ACCEPTABLE, desc = "Seeing the complete update.")
-#else[alwaysAtomic]
-@Outcome(id = "true, 1, .*", expect = Expect.ACCEPTABLE, desc = "Observing non-atomic write/read.")
-#end[alwaysAtomic]
 @State
 public class $name$ {
 
