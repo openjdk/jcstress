@@ -6,7 +6,7 @@ import org.junit.Test;
 public class ArrayUtilsTest {
 
     @Test
-    public void testConcat() throws Exception {
+    public void testConcat() {
         Assert.assertArrayEquals("add one element to array of two",
                 new String[]{"1", "2", "3"},
                 ArrayUtils.concat(new String[]{"1", "2"}, "3"));
