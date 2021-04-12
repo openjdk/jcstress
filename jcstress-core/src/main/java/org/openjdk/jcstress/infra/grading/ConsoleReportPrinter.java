@@ -45,12 +45,11 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private final PrintWriter output;
 
     private final long expectedResults;
-    private long observedResults;
 
     private long sampleCount;
     private long sampleResults;
 
-    private long firstTest;
+    private long startTime;
 
     private final long printIntervalMs;
     private long lastPrint;
@@ -78,19 +77,15 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
         output.println("  Printing the progress line at most every " + printIntervalMs + " milliseconds.");
         output.println();
+
+        startTime = System.nanoTime();
     }
 
     @Override
     public synchronized void add(TestResult r) {
-        if (firstTest == 0) {
-            firstTest = System.nanoTime();
-        } else {
-            // First event does not have reliable time estimate, do not record it.
-            sampleCount += r.getTotalCount();
-            sampleResults++;
-        }
+        sampleCount += r.getTotalCount();
+        sampleResults++;
 
-        observedResults++;
         printResult(r);
     }
 
@@ -144,10 +139,10 @@ public class ConsoleReportPrinter implements TestResultCollector {
         }
 
         if (shouldPrintStatusLine) {
-            String line = String.format("(ETA: %10s) (Sample Rate: %s) (Results: %2d of %d; %d passed, %d failed, %d soft errs, %d hard errs) ",
+            String line = String.format("(ETA: %10s) (Sample Rate: %s) (Results: %d planned; %d passed, %d failed, %d soft errs, %d hard errs) ",
                     computeETA(),
                     computeSpeed(),
-                    observedResults, expectedResults, passed, failed, softErrors, hardErrors
+                    expectedResults, passed, failed, softErrors, hardErrors
             );
             progressLen = line.length();
             output.print(line);
@@ -164,7 +159,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
             return "N/A";
         }
 
-        long timeSpent = System.nanoTime() - firstTest;
+        long timeSpent = System.nanoTime() - startTime;
         double v = 1.0 * TimeUnit.SECONDS.toNanos(1) * sampleCount / timeSpent;
 
         final long K = 1000;
@@ -192,7 +187,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
     }
 
     private String computeETA() {
-        long timeSpent = System.nanoTime() - firstTest;
+        long timeSpent = System.nanoTime() - startTime;
         long resultsGot = sampleResults;
         if (resultsGot == 0) {
             return "N/A";
