@@ -54,7 +54,7 @@ public class AffinitySupport {
     }
 
     static class Linux {
-        private static CLibrary INSTANCE;
+        private static volatile CLibrary INSTANCE;
 
         public static void tryInit() {
             if (INSTANCE == null) {
