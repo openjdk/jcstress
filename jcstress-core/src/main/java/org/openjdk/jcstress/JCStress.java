@@ -32,8 +32,9 @@ import org.openjdk.jcstress.infra.grading.TextReportPrinter;
 import org.openjdk.jcstress.infra.grading.HTMLReportPrinter;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.TestList;
+import org.openjdk.jcstress.os.*;
+import org.openjdk.jcstress.os.topology.Topology;
 import org.openjdk.jcstress.vm.CompileMode;
-import org.openjdk.jcstress.vm.OSSupport;
 import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.*;
@@ -65,10 +66,20 @@ public class JCStress {
             return;
         }
 
-        opts.printSettingsOn(out);
-
         SortedSet<String> tests = getTests();
-        List<TestConfig> configs = prepareRunProgram(tests);
+
+        Topology topology = Topology.get();
+        System.out.println("Detecting CPU topology and computing scheduling classes:");
+        topology.printStatus(System.out);
+        out.println();
+
+        out.println("  Scheduling classes for matching tests:");
+        Scheduler scheduler = new Scheduler(topology, opts.getCPUCount());
+        Map<Integer, List<SchedulingClass>> classes = computeSchedulingClasses(tests, scheduler);
+
+        List<TestConfig> configs = prepareRunProgram(classes, tests);
+
+        opts.printSettingsOn(out);
 
         if (configs.isEmpty()) {
             out.println("FATAL: No matching tests.");
@@ -80,11 +91,13 @@ public class JCStress {
         TestResultCollector mux = MuxCollector.of(printer, diskCollector);
         SerializedBufferCollector sink = new SerializedBufferCollector(mux);
 
-        TestExecutor executor = new TestExecutor(opts.getCPUCount(), opts.verbosity(), sink, true);
+        TestExecutor executor = new TestExecutor(opts.verbosity(), sink, scheduler);
         executor.runAll(configs);
 
         sink.close();
         diskCollector.close();
+
+        printer.printFinishLine();
 
         out.println();
         out.println();
@@ -92,6 +105,28 @@ public class JCStress {
         out.println();
 
         parseResults();
+    }
+
+    private Map<Integer, List<SchedulingClass>> computeSchedulingClasses(SortedSet<String> tests, Scheduler scheduler) {
+        Map<Integer, List<SchedulingClass>> classes = new HashMap<>();
+        SortedSet<Integer> actorCounts = computeActorCounts(tests);
+        for (int a : actorCounts) {
+            classes.put(a, scheduler.scheduleClasses(a, opts.getCPUCount(), opts.affinityMode()));
+        }
+
+        for (int a : actorCounts) {
+            out.println("    " + a + " actors:");
+            List<SchedulingClass> scls = classes.get(a);
+            if (scls.isEmpty()) {
+                out.println("      No scheduling is possible, these tests would not run.");
+            } else {
+                for (SchedulingClass scl : scls) {
+                    out.println("      " + scl.toString());
+                }
+            }
+        }
+        out.println();
+        return classes;
     }
 
     public void parseResults() throws Exception {
@@ -113,23 +148,27 @@ public class JCStress {
         out.println("Done.");
     }
 
-    private List<TestConfig> prepareRunProgram(Set<String> tests) {
+    private SortedSet<Integer> computeActorCounts(Set<String> tests) {
+        SortedSet<Integer> counts = new TreeSet<>();
+        for (String test : tests) {
+            TestInfo info = TestList.getInfo(test);
+            counts.add(info.threads());
+        }
+        return counts;
+    }
+
+    private List<TestConfig> prepareRunProgram(Map<Integer, List<SchedulingClass>> scheduleClasses, Set<String> tests) {
         List<TestConfig> configs = new ArrayList<>();
-        if (opts.shouldFork()) {
-            for (VMSupport.Config config : VMSupport.getAvailableVMConfigs()) {
-                for (String test : tests) {
-                    TestInfo info = TestList.getInfo(test);
-                    if (opts.isSplitCompilation() && VMSupport.compilerDirectivesAvailable()) {
-                        forkedSplit(configs, config, info);
-                    } else {
-                        forkedUnified(configs, config, info);
-                    }
-                }
-            }
-        } else {
+        for (VMSupport.Config config : VMSupport.getAvailableVMConfigs()) {
             for (String test : tests) {
                 TestInfo info = TestList.getInfo(test);
-                embedded(configs, info);
+                for (SchedulingClass scl : scheduleClasses.get(info.threads())) {
+                    if (opts.isSplitCompilation() && VMSupport.compilerDirectivesAvailable()) {
+                        forkedSplit(configs, config, info, scl);
+                    } else {
+                        forkedUnified(configs, config, info, scl);
+                    }
+                }
             }
         }
 
@@ -139,7 +178,7 @@ public class JCStress {
         return configs;
     }
 
-    private void forkedSplit(List<TestConfig> testConfigs, VMSupport.Config config, TestInfo info) {
+    private void forkedSplit(List<TestConfig> testConfigs, VMSupport.Config config, TestInfo info, SchedulingClass scl) {
         for (int cc : CompileMode.casesFor(info.threads(), VMSupport.c1Available(), VMSupport.c2Available())) {
             if (config.onlyIfC2() && !CompileMode.hasC2(cc, info.threads())) {
                 // This configuration is expected to run only when C2 is enabled,
@@ -148,20 +187,15 @@ public class JCStress {
                 continue;
             }
             for (int f = 0; f < opts.getForks(); f++) {
-                testConfigs.add(new TestConfig(opts, info, TestConfig.RunMode.FORKED, f, config.args(), cc));
+                testConfigs.add(new TestConfig(opts, info, f, config.args(), cc, scl));
             }
         }
     }
 
-    private void forkedUnified(List<TestConfig> testConfigs, VMSupport.Config config, TestInfo info) {
+    private void forkedUnified(List<TestConfig> testConfigs, VMSupport.Config config, TestInfo info, SchedulingClass scl) {
         for (int f = 0; f < opts.getForks(); f++) {
-            testConfigs.add(new TestConfig(opts, info, TestConfig.RunMode.FORKED, f, config.args(), CompileMode.UNIFIED));
+            testConfigs.add(new TestConfig(opts, info, f, config.args(), CompileMode.UNIFIED, scl));
         }
-    }
-
-    private void embedded(List<TestConfig> testConfigs, TestInfo info) {
-        TestConfig.RunMode mode = info.requiresFork() ? TestConfig.RunMode.FORKED : TestConfig.RunMode.EMBEDDED;
-        testConfigs.add(new TestConfig(opts, info, mode, -1, Collections.emptyList(), CompileMode.UNIFIED));
     }
 
     public SortedSet<String> getTests() {

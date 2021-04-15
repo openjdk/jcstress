@@ -89,10 +89,24 @@ public class StringUtils {
         return (s != null) && !s.isEmpty();
     }
 
-    public static <T> String join(List<T> list, String delim) {
+    public static <T> String join(Collection<T> list, String delim) {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         for (T s : list) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append(delim);
+            }
+            sb.append(s);
+        }
+        return sb.toString();
+    }
+
+    public static String join(int[] list, String delim) {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (int s : list) {
             if (first) {
                 first = false;
             } else {
@@ -122,7 +136,7 @@ public class StringUtils {
     static final String[] PADS;
 
     static {
-        PADS = new String[10];
+        PADS = new String[15];
         String p = "";
         for (int c = 0; c < PADS.length; c++) {
             PADS[c] = p;
@@ -134,5 +148,23 @@ public class StringUtils {
         int need = count - src.length() - 1;
         if (need <= 0) return src;
         return PADS[need] + " " + src;
+    }
+
+    public static List<Integer> decodeCpuList(String line) {
+        List<Integer> r = new ArrayList<>();
+        String[] commaSplit = line.split(",");
+        for (String cs : commaSplit) {
+            String[] dashSplit = cs.split("-");
+            if (dashSplit.length == 1) {
+                r.add(Integer.parseInt(dashSplit[0]));
+            } else {
+                int left = Integer.parseInt(dashSplit[0]);
+                int right = Integer.parseInt(dashSplit[1]);
+                for (int c = left; c <= right; c++) {
+                    r.add(c);
+                }
+            }
+        }
+        return r;
     }
 }

@@ -121,14 +121,12 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 grading.hasInteresting ||
                 verbosity.printAllTests();
 
-        long currentTime = System.nanoTime();
-
         boolean shouldPrintStatusLine =
                 shouldPrintResults ||
-                TimeUnit.NANOSECONDS.toMillis(currentTime - lastPrint) >= printIntervalMs;
+                TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - lastPrint) >= printIntervalMs;
 
-        if (shouldPrintStatusLine && progressInteractive) {
-            output.printf("\r%" + progressLen + "s\r", "");
+        if (shouldPrintStatusLine) {
+            clearStatusLine();
         }
 
         if (shouldPrintResults) {
@@ -139,19 +137,36 @@ public class ConsoleReportPrinter implements TestResultCollector {
         }
 
         if (shouldPrintStatusLine) {
-            String line = String.format("(ETA: %10s) (Sample Rate: %s) (Results: %d planned; %d passed, %d failed, %d soft errs, %d hard errs) ",
-                    computeETA(),
-                    computeSpeed(),
-                    expectedResults, passed, failed, softErrors, hardErrors
-            );
-            progressLen = line.length();
-            output.print(line);
-            if (!progressInteractive) {
-                output.println();
-            }
-            output.flush();
-            lastPrint = currentTime;
+            printStatusLine();
         }
+    }
+
+    private void printStatusLine() {
+        long currentTime = System.nanoTime();
+        String line = String.format("(ETA: %10s) (Sample Rate: %s) (Results: %d planned; %d passed, %d failed, %d soft errs, %d hard errs) ",
+                computeETA(),
+                computeSpeed(),
+                expectedResults, passed, failed, softErrors, hardErrors
+        );
+        progressLen = line.length();
+        output.print(line);
+        if (!progressInteractive) {
+            output.println();
+        }
+        output.flush();
+        lastPrint = currentTime;
+
+    }
+
+    private void clearStatusLine() {
+        if (progressInteractive) {
+            output.printf("\r%" + progressLen + "s\r", "");
+        }
+    }
+
+    public void printFinishLine() {
+        clearStatusLine();
+        printStatusLine();
     }
 
     private String computeSpeed() {

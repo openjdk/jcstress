@@ -29,29 +29,30 @@ import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.Runner;
 import org.openjdk.jcstress.infra.runners.TestConfig;
+import org.openjdk.jcstress.os.CPUMap;
+import org.openjdk.jcstress.os.Scheduler;
 import org.openjdk.jcstress.util.StringUtils;
-import org.openjdk.jcstress.vm.CPULayout;
 
 import java.lang.reflect.Constructor;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class EmbeddedExecutor {
 
     private final ExecutorService pool;
     private final TestResultCollector sink;
-    private final CPULayout cpuLayout;
+    private final Scheduler scheduler;
 
     public EmbeddedExecutor(TestResultCollector sink) {
         this(sink, null);
     }
 
-    public EmbeddedExecutor(TestResultCollector sink, CPULayout cpuLayout) {
+    public EmbeddedExecutor(TestResultCollector sink, Scheduler cpuLayout) {
         this.sink = sink;
-        this.cpuLayout = cpuLayout;
+        this.scheduler = cpuLayout;
         pool = Executors.newCachedThreadPool(new ThreadFactory() {
             private final AtomicInteger id = new AtomicInteger();
 
@@ -65,7 +66,7 @@ public class EmbeddedExecutor {
         });
     }
 
-    public void submit(TestConfig config, List<Integer> acquiredCPUs) {
+    public void submit(TestConfig config, CPUMap acquiredCPUs) {
         pool.submit(task(config, acquiredCPUs));
     }
 
@@ -73,7 +74,7 @@ public class EmbeddedExecutor {
         task(config, null).run();
     }
 
-    private Runnable task(TestConfig config, List<Integer> acquiredCPUs) {
+    private Runnable task(TestConfig config, CPUMap acquiredCPUs) {
         return () -> {
             try {
                 Class<?> aClass = Class.forName(config.generatedRunnerName);
@@ -90,7 +91,7 @@ public class EmbeddedExecutor {
                 sink.add(result);
             } finally {
                 if (acquiredCPUs != null) {
-                    cpuLayout.release(acquiredCPUs);
+                    scheduler.release(acquiredCPUs);
                 }
             }
         };

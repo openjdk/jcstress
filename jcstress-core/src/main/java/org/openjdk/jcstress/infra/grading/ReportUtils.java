@@ -31,6 +31,8 @@ import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.TestList;
+import org.openjdk.jcstress.os.SchedulingClass;
+import org.openjdk.jcstress.os.CPUMap;
 import org.openjdk.jcstress.util.*;
 import org.openjdk.jcstress.vm.CompileMode;
 
@@ -119,14 +121,20 @@ public class ReportUtils {
     }
 
     public static void printResult(PrintWriter pw, TestResult r, boolean inProgress) {
-        String label = StringUtils.leftPadDash("[" + ReportUtils.statusToLabel(r) + "]", 10);
+        TestConfig config = r.getConfig();
+
+        String label = StringUtils.leftPadDash("[" + ReportUtils.statusToLabel(r) + "]", 15);
         String testName = StringUtils.chunkName(r.getName());
-        pw.printf("%10s %s%n", label, testName);
+        pw.printf("%15s %s%n", label, testName);
         pw.println();
-        pw.format("  Compilation: %s%n", CompileMode.description(r.getConfig().getCompileMode(), r.getConfig().actorNames));
-        pw.format("  JVM args: %s%n", r.getConfig().jvmArgs);
+        pw.format("  Scheduling class:%n");
+        pw.println(SchedulingClass.description(config.getSchedulingClass(), config.actorNames));
+        pw.format("  CPU allocation:%n");
+        pw.println(CPUMap.description(config.cpuMap, config.actorNames));
+        pw.format("  Compilation: %s%n", CompileMode.description(config.getCompileMode(), config.actorNames));
+        pw.format("  JVM args: %s%n", config.jvmArgs);
         if (inProgress) {
-            pw.format("  Fork: #%d%n", r.getConfig().forkId + 1);
+            pw.format("  Fork: #%d%n", config.forkId + 1);
         }
         pw.println();
 

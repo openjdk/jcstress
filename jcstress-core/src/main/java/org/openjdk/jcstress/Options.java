@@ -29,6 +29,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.openjdk.jcstress.infra.runners.SpinLoopStyle;
+import org.openjdk.jcstress.os.AffinityMode;
 import org.openjdk.jcstress.util.OptionFormatter;
 import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.vm.DeoptMode;
@@ -64,6 +65,7 @@ public class Options {
     private List<String> jvmArgs;
     private List<String> jvmArgsPrepend;
     private boolean splitCompilation;
+    private AffinityMode affinityMode;
 
     public Options(String[] args) {
         this.args = args;
@@ -136,6 +138,9 @@ public class Options {
         OptionSpec<Boolean> optSplitCompilation = parser.accepts("sc", "Use split per-actor compilation mode, if available.")
                 .withOptionalArg().ofType(Boolean.class).describedAs("bool");
 
+        OptionSpec<AffinityMode> optAffinityMode = parser.accepts("af", "Use the specific affinity mode, if available.")
+                .withOptionalArg().ofType(AffinityMode.class).describedAs("mode");
+
         parser.accepts("v", "Be verbose.");
         parser.accepts("vv", "Be extra verbose.");
         parser.accepts("vvv", "Be extra extra verbose.");
@@ -195,9 +200,9 @@ public class Options {
 
         mode = orDefault(modeStr.value(set), "default");
         if (this.mode.equalsIgnoreCase("sanity")) {
-            this.time = 10;
+            this.time = 1;
             this.iters = 1;
-            this.forks = 0;
+            this.forks = 1;
             this.minStride = 10;
             this.maxStride = 10;
             this.deoptMode = DeoptMode.NONE;
@@ -242,6 +247,7 @@ public class Options {
         this.jvmArgsPrepend = processArgs(optJvmArgsPrepend, set);
 
         this.splitCompilation = orDefault(set.valueOf(optSplitCompilation), true);
+        this.affinityMode = orDefault(set.valueOf(optAffinityMode), AffinityMode.LOCAL);
 
         return true;
     }
@@ -331,10 +337,6 @@ public class Options {
         return testFilter;
     }
 
-    public boolean shouldFork() {
-        return forks > 0;
-    }
-
     public int getIterations() {
         return iters;
     }
@@ -370,5 +372,9 @@ public class Options {
 
     public boolean isSplitCompilation() {
         return splitCompilation;
+    }
+
+    public AffinityMode affinityMode() {
+        return affinityMode;
     }
 }
