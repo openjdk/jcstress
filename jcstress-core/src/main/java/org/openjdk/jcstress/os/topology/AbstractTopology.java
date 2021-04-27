@@ -33,15 +33,16 @@ import java.util.*;
 
 public abstract class AbstractTopology implements Topology {
 
-    private final SortedSet<Integer> packages = new TreeSet<>();
-    private final SortedSet<Integer> threads = new TreeSet<>();
-    private final Map<Integer, Integer> threadToPackage = new TreeMap<>();
+    private SortedSet<Integer> packages = new TreeSet<>();
+    private SortedSet<Integer> cores    = new TreeSet<>();
+    private SortedSet<Integer> threads  = new TreeSet<>();
 
-    private SortedSet<Integer> cores = new TreeSet<>();
-    private Map<Integer, Integer> threadToCore = new TreeMap<>();
-    private Map<Integer, Integer> coreToPackage = new TreeMap<>();
-    private Multimap<Integer, Integer> coreToThread = new TreesetMultimap<>();
-    private Multimap<Integer, Integer> packageToCore = new TreesetMultimap<>();
+    private SortedMap<Integer, Integer> threadToPackage = new TreeMap<>();
+    private SortedMap<Integer, Integer> threadToCore    = new TreeMap<>();
+    private SortedMap<Integer, Integer> coreToPackage   = new TreeMap<>();
+
+    private Multimap<Integer, Integer>  coreToThread    = new TreesetMultimap<>();
+    private Multimap<Integer, Integer>  packageToCore   = new TreesetMultimap<>();
 
     private int packagesPerSystem = -1;
     private int coresPerPackage = -1;
@@ -98,12 +99,12 @@ public abstract class AbstractTopology implements Topology {
             }
         }
 
-        Map<Integer, Integer> nThreadToCore = new HashMap<>();
+        SortedMap<Integer, Integer> nThreadToCore = new TreeMap<>();
         for (int thread : threadToCore.keySet()) {
             nThreadToCore.put(thread, renumberCores.get(threadToCore.get(thread)));
         }
 
-        Map<Integer, Integer> nCoreToPackage = new HashMap<>();
+        SortedMap<Integer, Integer> nCoreToPackage = new TreeMap<>();
         for (int ocId : coreToPackage.keySet()) {
             nCoreToPackage.put(renumberCores.get(ocId), coreToPackage.get(ocId));
         }
@@ -120,6 +121,45 @@ public abstract class AbstractTopology implements Topology {
         coreToThread = nCoreToThread;
         coreToPackage = nCoreToPackage;
         threadToCore = nThreadToCore;
+        packageToCore = nPackageToCore;
+    }
+
+    protected void renumberPackages() {
+        checkNotFinished();
+
+        Map<Integer, Integer> renumberPackages = new HashMap<>();
+        SortedSet<Integer> nPackages = new TreeSet<>();
+        {
+            int npId = 0;
+            for (int opId : packages) {
+                if (!renumberPackages.containsKey(opId)) {
+                    renumberPackages.put(opId, npId++);
+                }
+                nPackages.add(renumberPackages.get(opId));
+            }
+        }
+
+        Multimap<Integer, Integer> nPackageToCore = new TreesetMultimap<>();
+        for (int opId : packages) {
+            int npId = renumberPackages.get(opId);
+            for (int core : packageToCore.get(opId)) {
+                nPackageToCore.put(npId, core);
+            }
+        }
+
+        SortedMap<Integer, Integer> nThreadToPackage = new TreeMap<>();
+        for (int thread : threadToPackage.keySet()) {
+            nThreadToPackage.put(thread, renumberPackages.get(threadToPackage.get(thread)));
+        }
+
+        SortedMap<Integer, Integer> nCoreToPackage = new TreeMap<>();
+        for (int core : coreToPackage.keySet()) {
+            nCoreToPackage.put(core, renumberPackages.get(coreToPackage.get(core)));
+        }
+
+        packages = nPackages;
+        threadToPackage = nThreadToPackage;
+        coreToPackage = nCoreToPackage;
         packageToCore = nPackageToCore;
     }
 

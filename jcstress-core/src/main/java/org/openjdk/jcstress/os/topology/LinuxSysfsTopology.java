@@ -127,6 +127,7 @@ public class LinuxSysfsTopology extends AbstractTopology {
             throw new TopologyParseException(e);
         }
 
+        renumberPackages();
         renumberCores();
         finish();
     }
