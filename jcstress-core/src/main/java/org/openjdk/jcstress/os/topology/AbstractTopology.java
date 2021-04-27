@@ -33,9 +33,10 @@ import java.util.*;
 
 public abstract class AbstractTopology implements Topology {
 
-    private final SortedSet<Integer> packages = new TreeSet<>();
     private final SortedSet<Integer> threads = new TreeSet<>();
-    private final Map<Integer, Integer> threadToPackage = new TreeMap<>();
+
+    private SortedSet<Integer> packages = new TreeSet<>();
+    private Map<Integer, Integer> threadToPackage = new TreeMap<>();
 
     private SortedSet<Integer> cores = new TreeSet<>();
     private Map<Integer, Integer> threadToCore = new TreeMap<>();
@@ -120,6 +121,45 @@ public abstract class AbstractTopology implements Topology {
         coreToThread = nCoreToThread;
         coreToPackage = nCoreToPackage;
         threadToCore = nThreadToCore;
+        packageToCore = nPackageToCore;
+    }
+
+    protected void renumberPackages() {
+        checkNotFinished();
+
+        Map<Integer, Integer> renumberPackages = new HashMap<>();
+        SortedSet<Integer> nPackages = new TreeSet<>();
+        {
+            int npId = 0;
+            for (int opId : packages) {
+                if (!renumberPackages.containsKey(opId)) {
+                    renumberPackages.put(opId, npId++);
+                }
+                nPackages.add(renumberPackages.get(opId));
+            }
+        }
+
+        Multimap<Integer, Integer> nPackageToCore = new TreesetMultimap<>();
+        for (int opId : packages) {
+            int npId = renumberPackages.get(opId);
+            for (int core : packageToCore.get(opId)) {
+                nPackageToCore.put(npId, core);
+            }
+        }
+
+        Map<Integer, Integer> nThreadToPackage = new TreeMap<>();
+        for (int thread : threadToPackage.keySet()) {
+            nThreadToPackage.put(thread, renumberPackages.get(threadToPackage.get(thread)));
+        }
+
+        Map<Integer, Integer> nCoreToPackage = new HashMap<>();
+        for (int core : coreToPackage.keySet()) {
+            nCoreToPackage.put(core, renumberPackages.get(coreToPackage.get(core)));
+        }
+
+        packages = nPackages;
+        threadToPackage = nThreadToPackage;
+        coreToPackage = nCoreToPackage;
         packageToCore = nPackageToCore;
     }
 
