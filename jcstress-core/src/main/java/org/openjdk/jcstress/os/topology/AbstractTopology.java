@@ -33,16 +33,16 @@ import java.util.*;
 
 public abstract class AbstractTopology implements Topology {
 
-    private final SortedSet<Integer> threads = new TreeSet<>();
-
     private SortedSet<Integer> packages = new TreeSet<>();
-    private SortedMap<Integer, Integer> threadToPackage = new TreeMap<>();
+    private SortedSet<Integer> cores    = new TreeSet<>();
+    private SortedSet<Integer> threads  = new TreeSet<>();
 
-    private SortedSet<Integer> cores = new TreeSet<>();
-    private SortedMap<Integer, Integer> threadToCore = new TreeMap<>();
-    private SortedMap<Integer, Integer> coreToPackage = new TreeMap<>();
-    private Multimap<Integer, Integer> coreToThread = new TreesetMultimap<>();
-    private Multimap<Integer, Integer> packageToCore = new TreesetMultimap<>();
+    private SortedMap<Integer, Integer> threadToPackage = new TreeMap<>();
+    private SortedMap<Integer, Integer> threadToCore    = new TreeMap<>();
+    private SortedMap<Integer, Integer> coreToPackage   = new TreeMap<>();
+
+    private Multimap<Integer, Integer>  coreToThread    = new TreesetMultimap<>();
+    private Multimap<Integer, Integer>  packageToCore   = new TreesetMultimap<>();
 
     private int packagesPerSystem = -1;
     private int coresPerPackage = -1;
