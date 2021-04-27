@@ -36,11 +36,11 @@ public abstract class AbstractTopology implements Topology {
     private final SortedSet<Integer> threads = new TreeSet<>();
 
     private SortedSet<Integer> packages = new TreeSet<>();
-    private Map<Integer, Integer> threadToPackage = new TreeMap<>();
+    private SortedMap<Integer, Integer> threadToPackage = new TreeMap<>();
 
     private SortedSet<Integer> cores = new TreeSet<>();
-    private Map<Integer, Integer> threadToCore = new TreeMap<>();
-    private Map<Integer, Integer> coreToPackage = new TreeMap<>();
+    private SortedMap<Integer, Integer> threadToCore = new TreeMap<>();
+    private SortedMap<Integer, Integer> coreToPackage = new TreeMap<>();
     private Multimap<Integer, Integer> coreToThread = new TreesetMultimap<>();
     private Multimap<Integer, Integer> packageToCore = new TreesetMultimap<>();
 
@@ -99,12 +99,12 @@ public abstract class AbstractTopology implements Topology {
             }
         }
 
-        Map<Integer, Integer> nThreadToCore = new HashMap<>();
+        SortedMap<Integer, Integer> nThreadToCore = new TreeMap<>();
         for (int thread : threadToCore.keySet()) {
             nThreadToCore.put(thread, renumberCores.get(threadToCore.get(thread)));
         }
 
-        Map<Integer, Integer> nCoreToPackage = new HashMap<>();
+        SortedMap<Integer, Integer> nCoreToPackage = new TreeMap<>();
         for (int ocId : coreToPackage.keySet()) {
             nCoreToPackage.put(renumberCores.get(ocId), coreToPackage.get(ocId));
         }
@@ -147,12 +147,12 @@ public abstract class AbstractTopology implements Topology {
             }
         }
 
-        Map<Integer, Integer> nThreadToPackage = new TreeMap<>();
+        SortedMap<Integer, Integer> nThreadToPackage = new TreeMap<>();
         for (int thread : threadToPackage.keySet()) {
             nThreadToPackage.put(thread, renumberPackages.get(threadToPackage.get(thread)));
         }
 
-        Map<Integer, Integer> nCoreToPackage = new HashMap<>();
+        SortedMap<Integer, Integer> nCoreToPackage = new TreeMap<>();
         for (int core : coreToPackage.keySet()) {
             nCoreToPackage.put(core, renumberPackages.get(coreToPackage.get(core)));
         }
