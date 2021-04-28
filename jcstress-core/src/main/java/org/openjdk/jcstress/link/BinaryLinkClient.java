@@ -75,7 +75,7 @@ public final class BinaryLinkClient {
         }
     }
 
-    public void addResult(String token, TestResult result) {
+    public void doneResult(String token, TestResult result) {
         try {
             requestResponse(new ResultsFrame(token, result));
         } catch (IOException e) {
@@ -83,11 +83,4 @@ public final class BinaryLinkClient {
         }
     }
 
-    public void done(String token) {
-        try {
-            requestResponse(new DoneFrame(token));
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
 }

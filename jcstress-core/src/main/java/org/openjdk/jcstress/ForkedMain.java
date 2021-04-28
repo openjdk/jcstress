@@ -26,7 +26,6 @@ package org.openjdk.jcstress;
 
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.Runner;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.link.BinaryLinkClient;
@@ -92,8 +91,7 @@ public class ForkedMain {
             result.addMessage(StringUtils.getStacktrace(ex));
         }
 
-        link.addResult(token, result);
-        link.done(token);
+        link.doneResult(token, result);
     }
 
 }

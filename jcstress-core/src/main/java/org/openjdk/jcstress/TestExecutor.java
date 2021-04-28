@@ -80,11 +80,6 @@ public class TestExecutor {
             @Override
             public void onResult(String token, TestResult result) {
                 vmByToken.get(token).recordResult(result);
-            }
-
-            @Override
-            public void onDone(String token) {
-                vmByToken.get(token).recordDone();
                 notifyChanged();
             }
         });
@@ -188,7 +183,6 @@ public class TestExecutor {
         private boolean processed;
         private IOException pendingException;
         private TestResult result;
-        private boolean isDone;
 
         public VM(String host, int port, String token, TestConfig task, CPUMap cpuMap) {
             this.host = host;
@@ -374,7 +368,7 @@ public class TestExecutor {
             }
 
             // Process is still alive, no need to ask about the status.
-            if (!isDone && process.isAlive()) {
+            if (result == null && process.isAlive()) {
                 return false;
             }
 
@@ -420,10 +414,6 @@ public class TestExecutor {
                 throw new IllegalStateException("VM had already published a result.");
             }
             result = r;
-        }
-
-        public synchronized void recordDone() {
-            isDone = true;
         }
     }
 
