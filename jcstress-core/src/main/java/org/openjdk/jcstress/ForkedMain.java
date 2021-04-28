@@ -26,6 +26,7 @@ package org.openjdk.jcstress;
 
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.link.BinaryLinkClient;
+import org.openjdk.jcstress.os.AffinitySupport;
 import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
 /**
@@ -47,7 +48,7 @@ public class ForkedMain {
         }
 
         String host = args[0];
-        int port = Integer.valueOf(args[1]);
+        int port = Integer.parseInt(args[1]);
         String token = args[2];
 
         BinaryLinkClient link = new BinaryLinkClient(host, port);
@@ -57,6 +58,8 @@ public class ForkedMain {
         while ((config = link.nextJob(token)) != null) {
             executor.run(config);
         }
+
+        link.done(token);
     }
 
 

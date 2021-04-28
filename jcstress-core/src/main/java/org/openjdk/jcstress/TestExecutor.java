@@ -55,8 +55,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class TestExecutor {
 
-    private static final int SPIN_WAIT_DELAY_MS = 100;
-
     static final AtomicInteger ID = new AtomicInteger();
 
     private final BinaryLinkServer server;
@@ -65,12 +63,14 @@ public class TestExecutor {
     private final Scheduler scheduler;
 
     private final Map<String, VM> vmByToken;
+    private final Object notifyLock;
 
     public TestExecutor(Verbosity verbosity, TestResultCollector sink, Scheduler scheduler) throws IOException {
         this.verbosity = verbosity;
         this.sink = sink;
         this.vmByToken = new ConcurrentHashMap<>();
         this.scheduler = scheduler;
+        this.notifyLock = new Object();
 
         server = new BinaryLinkServer(new ServerListener() {
             @Override
@@ -82,7 +82,30 @@ public class TestExecutor {
             public void onResult(String token, TestResult result) {
                 vmByToken.get(token).recordResult(result);
             }
+
+            @Override
+            public void onDone(String token) {
+                vmByToken.get(token).recordDone();
+                notifyChanged();
+            }
         });
+    }
+
+    private void awaitNotification() {
+        synchronized (notifyLock) {
+            try {
+                // Wait one second and then unblock for extra safety
+                notifyLock.wait(1000);
+            } catch (InterruptedException e) {
+                // Do nothing
+            }
+        }
+    }
+
+    private void notifyChanged() {
+        synchronized (notifyLock) {
+            notifyLock.notify();
+        }
     }
 
     public void runAll(List<TestConfig> configs) {
@@ -105,22 +128,14 @@ public class TestExecutor {
 
             // Wait until any VM finishes before rescheduling
             while (!processReadyVMs()) {
-                try {
-                    Thread.sleep(SPIN_WAIT_DELAY_MS);
-                } catch (InterruptedException e) {
-                    // do nothing
-                }
+                awaitNotification();
             }
         }
 
         // Wait until all threads are done, which means everything got processed
         while (!vmByToken.isEmpty()) {
             while (!processReadyVMs()) {
-                try {
-                    Thread.sleep(SPIN_WAIT_DELAY_MS);
-                } catch (InterruptedException e) {
-                    // do nothing
-                }
+                awaitNotification();
             }
         }
 
@@ -152,6 +167,7 @@ public class TestExecutor {
         private boolean processed;
         private IOException pendingException;
         private TestResult result;
+        private boolean isDone;
 
         public VM(String host, int port, String token, TestConfig task, CPUMap cpuMap) {
             this.host = host;
@@ -323,11 +339,11 @@ public class TestExecutor {
             return getTask();
         }
 
-        public TestConfig getTask() {
+        public synchronized TestConfig getTask() {
             return task;
         }
 
-        public boolean checkCompleted(TestResultCollector sink) {
+        public synchronized boolean checkCompleted(TestResultCollector sink) {
             // There is a pending exception that terminated the target VM.
             if (pendingException != null) {
                 result = new TestResult(task, Status.VM_ERROR);
@@ -337,7 +353,7 @@ public class TestExecutor {
             }
 
             // Process is still alive, no need to ask about the status.
-            if (process.isAlive()) {
+            if (!isDone && process.isAlive()) {
                 return false;
             }
 
@@ -378,11 +394,15 @@ public class TestExecutor {
             return true;
         }
 
-        public void recordResult(TestResult r) {
+        public synchronized void recordResult(TestResult r) {
             if (result != null) {
                 throw new IllegalStateException("VM had already published a result.");
             }
             result = r;
+        }
+
+        public synchronized void recordDone() {
+            isDone = true;
         }
     }
 

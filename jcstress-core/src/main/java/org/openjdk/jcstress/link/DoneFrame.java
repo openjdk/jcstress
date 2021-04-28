@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,15 +24,18 @@
  */
 package org.openjdk.jcstress.link;
 
-import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.infra.runners.TestConfig;
+import java.io.Serializable;
 
-public interface ServerListener {
+class DoneFrame implements Serializable {
+    private static final long serialVersionUID = -4528163874292325861L;
 
-    TestConfig onJobRequest(String token);
+    private final String token;
 
-    void onResult(String token, TestResult result);
+    public DoneFrame(String token) {
+        this.token = token;
+    }
 
-    void onDone(String token);
-
+    public String getToken() {
+        return token;
+    }
 }
