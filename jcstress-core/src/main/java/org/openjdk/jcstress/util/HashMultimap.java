@@ -49,11 +49,7 @@
 package org.openjdk.jcstress.util;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class HashMultimap<K, V> implements Multimap<K, V>, Serializable {
 
@@ -85,6 +81,11 @@ public class HashMultimap<K, V> implements Multimap<K, V>, Serializable {
     }
 
     @Override
+    public boolean containsKey(K key) {
+        return map.containsKey(key);
+    }
+
+    @Override
     public void clear() {
         map.clear();
     }
@@ -111,5 +112,20 @@ public class HashMultimap<K, V> implements Multimap<K, V>, Serializable {
     @Override
     public void remove(K key) {
         map.remove(key);
+    }
+
+    @Override
+    public V removeLast(K key) {
+        Collection<V> vs = map.get(key);
+        if (!vs.isEmpty()) {
+            List<V> list = (List<V>) vs;
+            V v = list.remove(list.size() - 1);
+            if (list.isEmpty()) {
+                map.remove(key);
+            }
+            return v;
+        } else {
+            return null;
+        }
     }
 }

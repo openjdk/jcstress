@@ -97,4 +97,7 @@ public interface Multimap<K, V> {
 
     void remove(K key);
 
+    V removeLast(K key);
+
+    boolean containsKey(K key);
 }
