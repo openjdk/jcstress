@@ -34,6 +34,7 @@ import org.openjdk.jcstress.vm.DeoptMode;
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 public class TestConfig implements Serializable {
@@ -84,11 +85,11 @@ public class TestConfig implements Serializable {
         strideCap = StrideCap.NONE;
     }
 
-    public void adjustStrides(Consumer<Integer> tryAllocate) {
+    public void adjustStrides(FootprintEstimator estimator) {
         int count = 1;
         int succCount = count;
         while (true) {
-            StrideCap cap = tryWith(tryAllocate, count);
+            StrideCap cap = tryWith(estimator, count);
             if (cap != StrideCap.NONE) {
                 strideCap = cap;
                 break;
@@ -98,7 +99,7 @@ public class TestConfig implements Serializable {
             succCount = count;
 
             // do not go over the maxStride
-            if (succCount > maxStride) {
+            if (succCount >= maxStride) {
                 succCount = maxStride;
                 break;
             }
@@ -110,30 +111,30 @@ public class TestConfig implements Serializable {
         minStride = Math.min(minStride, succCount);
     }
 
-    private StrideCap tryWith(Consumer<Integer> tryAllocate, int count) {
-        final int TRIES = 10;
-        for (int tries = 0; tries < TRIES; tries++) {
-            long startFoot = AllocProfileSupport.getAllocatedBytes();
-            long startTime = System.nanoTime();
-            try {
-                tryAllocate.accept(count);
-                long usedTime = System.nanoTime() - startTime;
-                long footprint = AllocProfileSupport.getAllocatedBytes() - startFoot;
+    public interface FootprintEstimator {
+        void runWith(int size, long[] counters);
+    }
 
-                if (footprint > maxFootprintMB * 1024 * 1024) {
-                    // blown the footprint estimate
-                    return StrideCap.FOOTPRINT;
-                }
+    private StrideCap tryWith(FootprintEstimator estimator, int count) {
+        try {
+            long[] cnts = new long[2];
+            estimator.runWith(count, cnts);
+            long footprint = cnts[0];
+            long usedTime = cnts[1];
 
-                if (TimeUnit.NANOSECONDS.toMillis(usedTime) > time) {
-                    // blown the time estimate
-                    return StrideCap.TIME;
-                }
-
-            } catch (OutOfMemoryError err) {
-                // blown the heap size
+            if (footprint > maxFootprintMB * 1024 * 1024) {
+                // blown the footprint estimate
                 return StrideCap.FOOTPRINT;
             }
+
+            if (TimeUnit.NANOSECONDS.toMillis(usedTime) > time) {
+                // blown the time estimate
+                return StrideCap.TIME;
+            }
+
+        } catch (OutOfMemoryError err) {
+            // blown the heap size
+            return StrideCap.FOOTPRINT;
         }
         return StrideCap.NONE;
     }
