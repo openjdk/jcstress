@@ -75,24 +75,24 @@ public class ForkedMain {
             }
         });
 
-        TestResultCollector sink = result -> link.addResult(token, result);
         TestConfig config = link.nextJob(token);
+
+        TestResult result;
 
         try {
             Class<?> aClass = Class.forName(config.generatedRunnerName);
-            Constructor<?> cnstr = aClass.getConstructor(TestConfig.class, TestResultCollector.class, ExecutorService.class);
-            Runner<?> o = (Runner<?>) cnstr.newInstance(config, sink, pool);
-            o.run();
+            Constructor<?> cnstr = aClass.getConstructor(TestConfig.class, ExecutorService.class);
+            Runner<?> o = (Runner<?>) cnstr.newInstance(config, pool);
+            result = o.run();
         } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
-            TestResult result = new TestResult(config, Status.API_MISMATCH);
+            result = new TestResult(config, Status.API_MISMATCH);
             result.addMessage(StringUtils.getStacktrace(e));
-            link.addResult(token, result);
         } catch (Throwable ex) {
-            TestResult result = new TestResult(config, Status.TEST_ERROR);
+            result = new TestResult(config, Status.TEST_ERROR);
             result.addMessage(StringUtils.getStacktrace(ex));
-            link.addResult(token, result);
         }
 
+        link.addResult(token, result);
         link.done(token);
     }
 
