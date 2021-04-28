@@ -24,10 +24,20 @@
  */
 package org.openjdk.jcstress;
 
+import org.openjdk.jcstress.infra.Status;
+import org.openjdk.jcstress.infra.collectors.TestResult;
+import org.openjdk.jcstress.infra.collectors.TestResultCollector;
+import org.openjdk.jcstress.infra.runners.Runner;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.link.BinaryLinkClient;
-import org.openjdk.jcstress.os.AffinitySupport;
+import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.vm.WhiteBoxSupport;
+
+import java.lang.reflect.Constructor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Entry point for the forked VM run.
@@ -52,16 +62,38 @@ public class ForkedMain {
         String token = args[2];
 
         BinaryLinkClient link = new BinaryLinkClient(host, port);
-        EmbeddedExecutor executor = new EmbeddedExecutor(result -> link.addResult(token, result));
 
-        TestConfig config;
-        while ((config = link.nextJob(token)) != null) {
-            executor.run(config);
+        ExecutorService pool = Executors.newCachedThreadPool(new ThreadFactory() {
+            private final AtomicInteger id = new AtomicInteger();
+
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r);
+                t.setName("jcstress-worker-" + id.incrementAndGet());
+                t.setDaemon(true);
+                return t;
+            }
+        });
+
+        TestResultCollector sink = result -> link.addResult(token, result);
+        TestConfig config = link.nextJob(token);
+
+        try {
+            Class<?> aClass = Class.forName(config.generatedRunnerName);
+            Constructor<?> cnstr = aClass.getConstructor(TestConfig.class, TestResultCollector.class, ExecutorService.class);
+            Runner<?> o = (Runner<?>) cnstr.newInstance(config, sink, pool);
+            o.run();
+        } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
+            TestResult result = new TestResult(config, Status.API_MISMATCH);
+            result.addMessage(StringUtils.getStacktrace(e));
+            link.addResult(token, result);
+        } catch (Throwable ex) {
+            TestResult result = new TestResult(config, Status.TEST_ERROR);
+            result.addMessage(StringUtils.getStacktrace(ex));
+            link.addResult(token, result);
         }
 
         link.done(token);
     }
-
-
 
 }
