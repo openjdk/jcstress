@@ -198,32 +198,33 @@ public class Options {
 
         this.spinStyle = orDefault(set.valueOf(spinStyle), SpinLoopStyle.THREAD_SPIN_WAIT);
 
+        this.time = 1000;
+        this.iters = 5;
+        this.forks = 1;
+        this.minStride = 10;
+        this.maxStride = 10000;
+        this.deoptMode = DeoptMode.ALL;
+
         mode = orDefault(modeStr.value(set), "default");
         if (this.mode.equalsIgnoreCase("sanity")) {
-            this.time = 1;
+            this.time = 0;
             this.iters = 1;
             this.forks = 1;
-            this.minStride = 10;
-            this.maxStride = 10;
+            this.minStride = 1;
+            this.maxStride = 1;
             this.deoptMode = DeoptMode.NONE;
         } else
         if (this.mode.equalsIgnoreCase("quick")) {
             this.time = 200;
-            this.iters = 5;
-            this.forks = 1;
         } else
         if (this.mode.equalsIgnoreCase("default")) {
-            this.time = 1000;
-            this.iters = 5;
-            this.forks = 1;
+            // Nothing changed.
         } else
         if (this.mode.equalsIgnoreCase("tough")) {
-            this.time = 1000;
             this.iters = 10;
             this.forks = 10;
         } else
         if (this.mode.equalsIgnoreCase("stress")) {
-            this.time = 1000;
             this.iters = 50;
             this.forks = 10;
         } else {
@@ -237,10 +238,10 @@ public class Options {
         this.time = orDefault(set.valueOf(time), this.time);
         this.iters = orDefault(set.valueOf(iters), this.iters);
         this.forks = orDefault(set.valueOf(forks), this.forks);
-        this.deoptMode = orDefault(set.valueOf(deoptMode), DeoptMode.ALL);
+        this.deoptMode = orDefault(set.valueOf(deoptMode), this.deoptMode);
+        this.minStride = orDefault(set.valueOf(minStride), this.minStride);
+        this.maxStride = orDefault(set.valueOf(maxStride), this.maxStride);
 
-        this.minStride = orDefault(set.valueOf(minStride), 10);
-        this.maxStride = orDefault(set.valueOf(maxStride), 10000);
         this.heapPerFork = orDefault(set.valueOf(heapPerFork), 256);
 
         this.jvmArgs = processArgs(optJvmArgs, set);
