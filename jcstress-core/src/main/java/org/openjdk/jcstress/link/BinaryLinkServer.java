@@ -128,6 +128,10 @@ public final class BinaryLinkServer {
                             ResultsFrame rf = (ResultsFrame) obj;
                             listener.onResult(rf.getToken(), rf.getRes());
                             oos.writeObject(new OkResponseFrame());
+                        } else if (obj instanceof DoneFrame) {
+                            String tkn = ((DoneFrame) obj).getToken();
+                            listener.onDone(tkn);
+                            oos.writeObject(new OkResponseFrame());
                         } else {
                             // should always reply something
                             oos.writeObject(new WTFWasThatFrame());

@@ -82,4 +82,12 @@ public final class BinaryLinkClient {
             throw new IllegalStateException(e);
         }
     }
+
+    public void done(String token) {
+        try {
+            requestResponse(new DoneFrame(token));
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 }
