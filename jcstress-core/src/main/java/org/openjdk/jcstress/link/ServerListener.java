@@ -33,6 +33,4 @@ public interface ServerListener {
 
     void onResult(String token, TestResult result);
 
-    void onDone(String token);
-
 }

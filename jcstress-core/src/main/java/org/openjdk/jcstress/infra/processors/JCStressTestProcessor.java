@@ -27,6 +27,7 @@ package org.openjdk.jcstress.infra.processors;
 import com.sun.source.tree.*;
 import com.sun.source.util.Trees;
 import org.openjdk.jcstress.annotations.*;
+import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.*;
 import org.openjdk.jcstress.os.AffinitySupport;
@@ -330,8 +331,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    " + r + "[] gr;");
         pw.println();
 
-        pw.println("    public " + className + "(TestConfig config, TestResultCollector collector, ExecutorService pool) {");
-        pw.println("        super(config, collector, pool, \"" + getQualifiedName(info.getTest()) + "\");");
+        pw.println("    public " + className + "(TestConfig config, ExecutorService pool) {");
+        pw.println("        super(config, pool, \"" + getQualifiedName(info.getTest()) + "\");");
         pw.println("    }");
         pw.println();
 
@@ -415,7 +416,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
 
         pw.println("    @Override");
-        pw.println("    public Counter<" + r + "> internalRun() {");
+        pw.println("    public Collection<Future<Counter<" + r + ">>> internalRun() {");
         if (!isStateItself) {
             pw.println("        test = new " + t + "();");
         }
@@ -452,17 +453,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
         pw.println("        control.isStopped = true;");
         pw.println();
-        pw.println("        waitFor(results);");
-        pw.println();
-        pw.println("        Counter<" + r + "> counter = new Counter<>();");
-        pw.println("        for (Future<Counter<" + r + ">> f : results) {");
-        pw.println("            try {");
-        pw.println("                counter.merge(f.get());");
-        pw.println("            } catch (Throwable e) {");
-        pw.println("                throw new IllegalStateException(e);");
-        pw.println("            }");
-        pw.println("        }");
-        pw.println("        return counter;");
+        pw.println("        return results;");
         pw.println("    }");
         pw.println();
 
@@ -749,13 +740,13 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("public class " + generatedName + " extends Runner<" + generatedName + ".Outcome> {");
         pw.println();
 
-        pw.println("    public " + generatedName + "(TestConfig config, TestResultCollector collector, ExecutorService pool) {");
-        pw.println("        super(config, collector, pool, \"" + getQualifiedName(info.getTest()) + "\");");
+        pw.println("    public " + generatedName + "(TestConfig config, ExecutorService pool) {");
+        pw.println("        super(config, pool, \"" + getQualifiedName(info.getTest()) + "\");");
         pw.println("    }");
         pw.println();
 
         pw.println("    @Override");
-        pw.println("    public void run() {");
+        pw.println("    public TestResult run() {");
         pw.println("        Counter<Outcome> results = new Counter<>();");
         pw.println();
         pw.println("        try {");
@@ -773,7 +764,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("                System.exit(0);");
         pw.println("            }");
         pw.println("        }");
-        pw.println("        dump(results);");
+        pw.println("        return dump(results);");
         pw.println("    }");
         pw.println();
         pw.println("    @Override");
@@ -782,7 +773,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    }");
         pw.println();
         pw.println("    @Override");
-        pw.println("    public Counter<Outcome> internalRun() {");
+        pw.println("    public Collection<Future<Counter<Outcome>>> internalRun() {");
         pw.println("        throw new UnsupportedOperationException();");
         pw.println("    }");
         pw.println();
@@ -934,7 +925,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         Class<?>[] imports = new Class<?>[] {
                 ArrayList.class, Arrays.class, Collection.class,
                 ExecutorService.class, Future.class, TimeUnit.class,
-                TestConfig.class, TestResultCollector.class,
+                TestConfig.class, TestResult.class,
                 Runner.class, WorkerSync.class, Counter.class,
                 WhiteBoxSupport.class, ExecutionException.class,
                 Callable.class, Collections.class, List.class,

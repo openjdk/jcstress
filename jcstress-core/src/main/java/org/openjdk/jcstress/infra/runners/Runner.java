@@ -49,14 +49,12 @@ public abstract class Runner<R> {
     protected static final int MIN_TIMEOUT_MS = 30*1000;
 
     protected final Control control;
-    protected final TestResultCollector collector;
     protected final ExecutorService pool;
     protected final String testName;
     protected final TestConfig config;
     protected final List<String> messages;
 
-    public Runner(TestConfig config, TestResultCollector collector, ExecutorService pool, String testName) {
-        this.collector = collector;
+    public Runner(TestConfig config, ExecutorService pool, String testName) {
         this.pool = pool;
         this.testName = testName;
         this.control = new Control();
@@ -68,18 +66,16 @@ public abstract class Runner<R> {
      * Run the test.
      * This method blocks until test is complete
      */
-    public void run() {
-        @SuppressWarnings("unchecked")
-        Counter<R>[] results = (Counter<R>[]) new Counter[config.iters + 1];
+    public TestResult run() {
+        Counter<R> result = new Counter<>();
 
         try {
-            results[0] = sanityCheck();
+            Counter<R> cnt = sanityCheck();
+            result.merge(cnt);
         } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
-            dumpFailure(Status.API_MISMATCH, "Test sanity check failed, skipping", e);
-            return;
+            return dumpFailure(Status.API_MISMATCH, "Test sanity check failed, skipping", e);
         } catch (Throwable e) {
-            dumpFailure(Status.CHECK_TEST_ERROR, "Check test failed", e);
-            return;
+            return dumpFailure(Status.CHECK_TEST_ERROR, "Check test failed", e);
         }
 
         try {
@@ -88,10 +84,39 @@ public abstract class Runner<R> {
             // gracefully "handle"
         }
 
-        for (int c = 1; c <= config.iters; c++) {
-            results[c] = internalRun();
+        for (int c = 0; c < config.iters; c++) {
+            Collection<Future<Counter<R>>> futures = internalRun();
+
+            long startTime = System.nanoTime();
+            boolean allStopped = false;
+            while (!allStopped) {
+                allStopped = true;
+                for (Future<Counter<R>> t : futures) {
+                    try {
+                        t.get(1, TimeUnit.SECONDS);
+                    } catch (TimeoutException e) {
+                        allStopped = false;
+                    } catch (ExecutionException | InterruptedException e) {
+                        return dumpFailure(Status.TEST_ERROR, "Unrecoverable error while running", e.getCause());
+                    }
+                }
+
+                long timeSpent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
+                if (timeSpent > Math.max(10*config.time, MIN_TIMEOUT_MS)) {
+                    return dumpFailure(Status.TIMEOUT_ERROR, "Timeout waiting for tasks to complete: " + timeSpent + " ms");
+                }
+            }
+
+            for (Future<Counter<R>> t : futures) {
+                try {
+                    result.merge(t.get());
+                } catch (InterruptedException | ExecutionException e) {
+                    // Cannot happen anymore.
+                }
+            }
         }
-        dump(results);
+
+        return dump(result);
     }
 
     private TestResult prepareResult(Status status) {
@@ -103,64 +128,28 @@ public abstract class Runner<R> {
         return result;
     }
 
-    protected void dumpFailure(Status status, String message) {
+    protected TestResult dumpFailure(Status status, String message) {
         messages.add(message);
-        TestResult result = prepareResult(status);
-        collector.add(result);
+        return prepareResult(status);
     }
 
-    protected void dumpFailure(Status status, String message, Throwable aux) {
+    protected TestResult dumpFailure(Status status, String message, Throwable aux) {
         messages.add(message);
         TestResult result = prepareResult(status);
         result.addMessage(StringUtils.getStacktrace(aux));
-        collector.add(result);
+        return result;
     }
 
-    protected void dump(Counter<R> cnt) {
+    protected TestResult dump(Counter<R> cnt) {
         TestResult result = prepareResult(Status.NORMAL);
         for (R e : cnt.elementSet()) {
              result.addState(String.valueOf(e), cnt.count(e));
         }
-        collector.add(result);
-    }
-
-    protected void dump(Counter<R>[] results) {
-        TestResult result = prepareResult(Status.NORMAL);
-        for (Counter<R> cnt : results) {
-            for (R e : cnt.elementSet()) {
-                result.addState(String.valueOf(e), cnt.count(e));
-            }
-        }
-        collector.add(result);
+        return result;
     }
 
     public abstract Counter<R> sanityCheck() throws Throwable;
 
-    public abstract Counter<R> internalRun();
+    public abstract Collection<Future<Counter<R>>> internalRun();
 
-    protected <T> void waitFor(Collection<Future<T>> tasks) {
-        long startTime = System.nanoTime();
-        boolean allStopped = false;
-        while (!allStopped) {
-            allStopped = true;
-            for (Future<?> t : tasks) {
-                try {
-                    t.get(1, TimeUnit.SECONDS);
-                } catch (TimeoutException e) {
-                    allStopped = false;
-                } catch (ExecutionException e) {
-                    dumpFailure(Status.TEST_ERROR, "Unrecoverable error while running", e.getCause());
-                    return;
-                } catch (InterruptedException e) {
-                    return;
-                }
-            }
-
-            long timeSpent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
-            if (timeSpent > Math.max(10*config.time, MIN_TIMEOUT_MS)) {
-                dumpFailure(Status.TIMEOUT_ERROR, "Timeout waiting for tasks to complete: " + timeSpent + " ms");
-                return;
-            }
-        }
-    }
 }

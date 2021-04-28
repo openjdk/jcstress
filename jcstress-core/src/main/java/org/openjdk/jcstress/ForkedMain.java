@@ -24,10 +24,19 @@
  */
 package org.openjdk.jcstress;
 
+import org.openjdk.jcstress.infra.Status;
+import org.openjdk.jcstress.infra.collectors.TestResult;
+import org.openjdk.jcstress.infra.runners.Runner;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.link.BinaryLinkClient;
-import org.openjdk.jcstress.os.AffinitySupport;
+import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.vm.WhiteBoxSupport;
+
+import java.lang.reflect.Constructor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Entry point for the forked VM run.
@@ -52,16 +61,37 @@ public class ForkedMain {
         String token = args[2];
 
         BinaryLinkClient link = new BinaryLinkClient(host, port);
-        EmbeddedExecutor executor = new EmbeddedExecutor(result -> link.addResult(token, result));
 
-        TestConfig config;
-        while ((config = link.nextJob(token)) != null) {
-            executor.run(config);
+        ExecutorService pool = Executors.newCachedThreadPool(new ThreadFactory() {
+            private final AtomicInteger id = new AtomicInteger();
+
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r);
+                t.setName("jcstress-worker-" + id.incrementAndGet());
+                t.setDaemon(true);
+                return t;
+            }
+        });
+
+        TestConfig config = link.nextJob(token);
+
+        TestResult result;
+
+        try {
+            Class<?> aClass = Class.forName(config.generatedRunnerName);
+            Constructor<?> cnstr = aClass.getConstructor(TestConfig.class, ExecutorService.class);
+            Runner<?> o = (Runner<?>) cnstr.newInstance(config, pool);
+            result = o.run();
+        } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
+            result = new TestResult(config, Status.API_MISMATCH);
+            result.addMessage(StringUtils.getStacktrace(e));
+        } catch (Throwable ex) {
+            result = new TestResult(config, Status.TEST_ERROR);
+            result.addMessage(StringUtils.getStacktrace(ex));
         }
 
-        link.done(token);
+        link.doneResult(token, result);
     }
-
-
 
 }
