@@ -37,7 +37,6 @@ public class Scheduler {
     private final Topology topology;
     private final BitSet availableCores;
     private int currentUse;
-    private final Set<SchedulingClass> failedClasses;
     private final PackageRecord[] freeMapPackage;
 
     public Scheduler(Topology t, int max) {
@@ -47,7 +46,6 @@ public class Scheduler {
         availableCPUs.set(0, topology.totalThreads());
         availableCores = new BitSet(topology.totalCores());
         availableCores.set(0, topology.totalCores());
-        failedClasses = new HashSet<>();
         freeMapPackage = new PackageRecord[topology.packagesPerSystem()];
         for (int p = 0; p < freeMapPackage.length; p++) {
             freeMapPackage[p] = new PackageRecord(-1, -1);
@@ -56,14 +54,8 @@ public class Scheduler {
     }
 
     public synchronized CPUMap tryAcquire(SchedulingClass scl) {
-        if (failedClasses.contains(scl)) {
-            // Already known to fail in current CPU population.
-            return null;
-        }
-
         if (currentUse + scl.numActors() > maxUse) {
             // Over the limit, break out.
-            failedClasses.add(scl);
             return null;
         }
 
@@ -83,10 +75,6 @@ public class Scheduler {
                 break;
             default:
                 throw new IllegalStateException("Unhandled mode");
-        }
-
-        if (cpuMap == null) {
-            failedClasses.add(scl);
         }
 
         recomputeFreeMaps();
@@ -327,8 +315,6 @@ public class Scheduler {
         }
 
         recomputeFreeMaps();
-
-        failedClasses.clear();
 
         checkInvariants("After release");
     }

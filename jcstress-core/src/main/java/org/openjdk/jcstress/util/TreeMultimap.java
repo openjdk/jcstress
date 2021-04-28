@@ -49,11 +49,7 @@
 package org.openjdk.jcstress.util;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class TreeMultimap<K, V> implements Multimap<K, V>, Serializable {
 
@@ -111,5 +107,15 @@ public class TreeMultimap<K, V> implements Multimap<K, V>, Serializable {
     @Override
     public void remove(K key) {
         map.remove(key);
+    }
+
+    @Override
+    public V removeLast(K key) {
+        throw new IllegalStateException("Not implemented");
+    }
+
+    @Override
+    public boolean containsKey(K key) {
+        return map.containsKey(key);
     }
 }

@@ -24,6 +24,7 @@
  */
 package org.openjdk.jcstress.infra.collectors;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +45,7 @@ public class SerializedBufferCollector implements TestResultCollector {
 
     public SerializedBufferCollector(TestResultCollector dst) {
         sink = dst;
-        results = new LinkedBlockingQueue<>();
+        results = new ArrayBlockingQueue<>(1024);
         processor = new Thread(this::work);
         processor.setName(SerializedBufferCollector.class.getName() + " processor thread");
         processor.setDaemon(true);
@@ -78,6 +79,10 @@ public class SerializedBufferCollector implements TestResultCollector {
 
     @Override
     public void add(TestResult result) {
-        results.add(result);
+        try {
+            results.put(result);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

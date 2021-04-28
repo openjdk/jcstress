@@ -32,10 +32,9 @@ import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.WorkerSync;
 import org.openjdk.jcstress.link.BinaryLinkServer;
 import org.openjdk.jcstress.link.ServerListener;
-import org.openjdk.jcstress.os.AffinityMode;
-import org.openjdk.jcstress.os.CPUMap;
-import org.openjdk.jcstress.os.OSSupport;
-import org.openjdk.jcstress.os.Scheduler;
+import org.openjdk.jcstress.os.*;
+import org.openjdk.jcstress.util.HashMultimap;
+import org.openjdk.jcstress.util.Multimap;
 import org.openjdk.jcstress.vm.CompileMode;
 import org.openjdk.jcstress.vm.VMSupport;
 
@@ -109,22 +108,44 @@ public class TestExecutor {
     }
 
     public void runAll(List<TestConfig> configs) {
-        while (!configs.isEmpty()) {
-            List<TestConfig> leftover = new ArrayList<>();
+        // Build the scheduling classes maps
+        Multimap<SchedulingClass, TestConfig> byScl = new HashMultimap<>();
+        List<SchedulingClass> scls = new ArrayList<>();
+
+        {
+            Set<SchedulingClass> uniqueScls = new HashSet<>();
+
             for (TestConfig cfg : configs) {
-                CPUMap cpuMap = scheduler.tryAcquire(cfg.shClass);
-                if (cpuMap != null) {
+                byScl.put(cfg.getSchedulingClass(), cfg);
+                uniqueScls.add(cfg.getSchedulingClass());
+            }
+
+            // Try the largest scheduling classes first
+            scls.addAll(uniqueScls);
+            Collections.sort(scls, Comparator.comparing(SchedulingClass::numActors).reversed());
+        }
+
+        while (!byScl.isEmpty()) {
+
+            // Roll over the scheduling classes and try to greedily cram most
+            // of the tasks for it. This exits when no scheduling classes can fit
+            // the current state of the machine.
+            for (SchedulingClass scl : scls) {
+                while (byScl.containsKey(scl)) {
+                    CPUMap cpuMap = scheduler.tryAcquire(scl);
+                    if (cpuMap == null) {
+                        // No more scheduling for this class
+                        break;
+                    }
+
+                    TestConfig cfg = byScl.removeLast(scl);
                     cfg.setCPUMap(cpuMap);
                     String token = "fork-token-" + ID.incrementAndGet();
                     VM vm = new VM(server.getHost(), server.getPort(), token, cfg, cpuMap);
                     vmByToken.put(token, vm);
                     vm.start();
-                } else {
-                    leftover.add(cfg);
                 }
             }
-
-            configs = leftover;
 
             // Wait until any VM finishes before rescheduling
             while (!processReadyVMs()) {
