@@ -114,42 +114,30 @@ public final class BinaryLinkServer {
         }
 
         private void acceptAndProcess() {
-            Socket socket = null;
-            try {
-                socket = server.accept();
-
-                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-                Object obj = ois.readObject();
-
-                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-
-                if (obj instanceof JobRequestFrame) {
-                    String tkn = ((JobRequestFrame) obj).getToken();
-                    TestConfig cfg = listener.onJobRequest(tkn);
-                    oos.writeObject(new JobResponseFrame(cfg));
-                } else if (obj instanceof ResultsFrame) {
-                    ResultsFrame rf = (ResultsFrame) obj;
-                    listener.onResult(rf.getToken(), rf.getRes());
-                    oos.writeObject(new OkResponseFrame());
-                } else {
-                    // should always reply something
-                    oos.writeObject(new WTFWasThatFrame());
+            try (Socket socket = server.accept()) {
+                try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
+                     ObjectInputStream ois = new ObjectInputStream(bis)) {
+                    Object obj = ois.readObject();
+                    try (BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
+                         ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+                        if (obj instanceof JobRequestFrame) {
+                            String tkn = ((JobRequestFrame) obj).getToken();
+                            TestConfig cfg = listener.onJobRequest(tkn);
+                            oos.writeObject(new JobResponseFrame(cfg));
+                        } else if (obj instanceof ResultsFrame) {
+                            ResultsFrame rf = (ResultsFrame) obj;
+                            listener.onResult(rf.getToken(), rf.getRes());
+                            oos.writeObject(new OkResponseFrame());
+                        } else {
+                            // should always reply something
+                            oos.writeObject(new WTFWasThatFrame());
+                        }
+                    }
                 }
-
-                oos.close();
-                ois.close();
             } catch (EOFException e) {
                 // ignore
             } catch (Exception e) {
                 // ignore, the exit code would be non-zero, and TestExecutor would handle it.
-            } finally {
-                if (socket != null) {
-                    try {
-                        socket.close();
-                    } catch (IOException e) {
-                        // do nothing
-                    }
-                }
             }
         }
 

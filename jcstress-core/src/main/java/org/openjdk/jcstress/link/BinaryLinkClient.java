@@ -38,7 +38,7 @@ public final class BinaryLinkClient {
     private final String hostName;
     private final int hostPort;
 
-    public BinaryLinkClient(String hostName, int hostPort) throws IOException {
+    public BinaryLinkClient(String hostName, int hostPort) {
         this.hostName = hostName;
         this.hostPort = hostPort;
         this.lock = new Object();
@@ -46,33 +46,27 @@ public final class BinaryLinkClient {
 
     private Object requestResponse(Object frame) throws IOException {
         synchronized (lock) {
-            Socket socket = null;
-            try {
-                socket = new Socket(hostName, hostPort);
+            try (Socket socket = new Socket(hostName, hostPort)) {
                 socket.setKeepAlive(true);
                 socket.setSoTimeout(LINK_TIMEOUT_MS);
 
-                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-                oos.writeObject(frame);
-                oos.flush();
+                try (BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
+                     ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+                    oos.writeObject(frame);
+                    oos.flush();
 
-                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-                Object o = ois.readObject();
-
-                oos.close();
-                ois.close();
-                return o;
-            } catch (ClassNotFoundException e) {
-                throw new IOException(e);
-            } finally {
-                if (socket != null) {
-                    socket.close();
+                    try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
+                         ObjectInputStream ois = new ObjectInputStream(bis)) {
+                        return ois.readObject();
+                    } catch (ClassNotFoundException e) {
+                        throw new IOException(e);
+                    }
                 }
             }
         }
     }
 
-    public TestConfig nextJob(String token) throws IOException, ClassNotFoundException {
+    public TestConfig nextJob(String token) throws IOException {
         Object reply = requestResponse(new JobRequestFrame(token));
         if (reply instanceof JobResponseFrame) {
             return ((JobResponseFrame) reply).getConfig();
