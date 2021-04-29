@@ -66,14 +66,32 @@ public class LinuxProcfsTopologyTest extends AbstractTopologyTest {
     }
 
     @Test
-    public void test_Saved_4() throws IOException, TopologyParseException {
+    public void test_Saved_4() throws IOException {
         String s = FileUtils.copyFileToTemp("/topology/cpuinfo-4.txt", "jcstress", "test");
-        LinuxProcfsTopology topo = new LinuxProcfsTopology(s);
+
+        try {
+            new LinuxProcfsTopology(s);
+            Assert.fail("Should have failed");
+        } catch (TopologyParseException topo) {
+            // Should fail
+        }
     }
 
     @Test
     public void test_Saved_5() throws IOException {
         String s = FileUtils.copyFileToTemp("/topology/cpuinfo-5.txt", "jcstress", "test");
+
+        try {
+            new LinuxProcfsTopology(s);
+            Assert.fail("Should have failed");
+        } catch (TopologyParseException topo) {
+            // Should fail
+        }
+    }
+
+    @Test
+    public void test_Saved_6() throws IOException {
+        String s = FileUtils.copyFileToTemp("/topology/cpuinfo-6.txt", "jcstress", "test");
 
         try {
             new LinuxProcfsTopology(s);
