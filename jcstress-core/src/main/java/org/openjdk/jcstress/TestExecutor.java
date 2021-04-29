@@ -33,13 +33,11 @@ import org.openjdk.jcstress.infra.runners.WorkerSync;
 import org.openjdk.jcstress.link.BinaryLinkServer;
 import org.openjdk.jcstress.link.ServerListener;
 import org.openjdk.jcstress.os.*;
-import org.openjdk.jcstress.util.HashMultimap;
-import org.openjdk.jcstress.util.Multimap;
+import org.openjdk.jcstress.util.*;
 import org.openjdk.jcstress.vm.CompileMode;
 import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -174,15 +172,15 @@ public class TestExecutor {
         private final String host;
         private final int port;
         private final String token;
-        private final File stdout;
-        private final File stderr;
-        private final File compilerDirectives;
+        private File compilerDirectives;
         private final TestConfig task;
         private final CPUMap cpuMap;
         private Process process;
         private boolean processed;
         private IOException pendingException;
         private TestResult result;
+        private InputStreamCollector errCollector;
+        private InputStreamCollector outCollector;
 
         public VM(String host, int port, String token, TestConfig task, CPUMap cpuMap) {
             this.host = host;
@@ -190,25 +188,21 @@ public class TestExecutor {
             this.token = token;
             this.cpuMap = cpuMap;
             this.task = task;
-            try {
-                this.stdout = File.createTempFile("jcstress", "stdout");
-                this.stderr = File.createTempFile("jcstress", "stderr");
-                this.compilerDirectives = File.createTempFile("jcstress", "directives");
-
-                if (VMSupport.compilerDirectivesAvailable()) {
+            if (VMSupport.compilerDirectivesAvailable()) {
+                try {
                     generateDirectives();
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
                 }
-
-                // Register these files for removal in case we terminate through the uncommon path
-                this.stdout.deleteOnExit();
-                this.stderr.deleteOnExit();
-                this.compilerDirectives.deleteOnExit();
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
             }
         }
 
         void generateDirectives() throws IOException {
+            compilerDirectives = File.createTempFile("jcstress", "directives");
+
+            // Register these files for removal in case we terminate through the uncommon path
+            compilerDirectives.deleteOnExit();
+
             PrintWriter pw = new PrintWriter(compilerDirectives);
             pw.println("[");
 
@@ -338,9 +332,17 @@ public class TestExecutor {
                 command.add(token);
 
                 ProcessBuilder pb = new ProcessBuilder(command);
-                pb.redirectOutput(stdout);
-                pb.redirectError(stderr);
                 process = pb.start();
+
+                // start the stream drainers and read the streams into memory;
+                // makes little sense to write them to files, since we would be
+                // reading them back soon anyway
+                errCollector = new InputStreamCollector(process.getErrorStream());
+                outCollector = new InputStreamCollector(process.getInputStream());
+
+                errCollector.start();
+                outCollector.start();
+
             } catch (IOException ex) {
                 pendingException = ex;
             }
@@ -376,26 +378,15 @@ public class TestExecutor {
             try {
                 int ecode = process.waitFor();
 
-                List<String> out = new ArrayList<>();
-                try {
-                    out.addAll(Files.readAllLines(stdout.toPath()));
-                } catch (IOException e) {
-                    out.add("Failed to read stdout: " + e.getMessage());
-                }
-
-                List<String> err = new ArrayList<>();
-                try {
-                    err.addAll(Files.readAllLines(stderr.toPath()));
-                } catch (IOException e) {
-                    err.add("Failed to read stderr: " + e.getMessage());
-                }
+                outCollector.join();
+                errCollector.join();
 
                 if (ecode != 0) {
                     result = new TestResult(task, Status.VM_ERROR);
                     result.addMessage("Failed with error code " + ecode);
                 }
-                result.addVMOuts(out);
-                result.addVMErrs(err);
+                result.addVMOuts(outCollector.getOutput());
+                result.addVMErrs(errCollector.getOutput());
                 sink.add(result);
             } catch (InterruptedException ex) {
                 result = new TestResult(task, Status.VM_ERROR);
@@ -403,8 +394,9 @@ public class TestExecutor {
                 sink.add(result);
             } finally {
                 // The process is definitely dead, remove the temporary files.
-                stdout.delete();
-                stderr.delete();
+                if (compilerDirectives != null) {
+                    compilerDirectives.delete();
+                }
             }
             return true;
         }
