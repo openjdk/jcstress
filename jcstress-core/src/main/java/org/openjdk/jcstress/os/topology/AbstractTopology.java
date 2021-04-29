@@ -65,15 +65,37 @@ public abstract class AbstractTopology implements Topology {
 
         packages.add(packageId);
         cores.add(coreId);
+
         if (!threads.add(threadId)) {
             throw new TopologyParseException("Duplicate thread ID: " + threadId);
         }
 
+        if (coreToPackage.containsKey(coreId)) {
+            if (!coreToPackage.get(coreId).equals(packageId)) {
+                throw new TopologyParseException("Core belongs to different packages: " + coreId);
+            }
+        } else {
+            coreToPackage.put(coreId, packageId);
+        }
+
+        if (threadToPackage.containsKey(threadId)) {
+            if (!threadToPackage.get(threadId).equals(packageId)) {
+                throw new TopologyParseException("Thread belongs to different packages: " + packageId);
+            }
+        } else {
+            threadToPackage.put(threadId, packageId);
+        }
+
+        if (threadToCore.containsKey(threadId)) {
+            if (!threadToCore.get(threadId).equals(coreId)) {
+                throw new TopologyParseException("Thread belongs to different cores: " + threadId);
+            }
+        } else {
+            threadToCore.put(threadId, coreId);
+        }
+
         packageToCore.put(packageId, coreId);
         coreToThread.put(coreId, threadId);
-        coreToPackage.put(coreId, packageId);
-        threadToPackage.put(threadId, packageId);
-        threadToCore.put(threadId, coreId);
     }
 
     protected void renumberCores() {
