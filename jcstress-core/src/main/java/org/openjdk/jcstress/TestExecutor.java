@@ -371,6 +371,9 @@ public class TestExecutor {
                 // basic Java line
                 command.addAll(VMSupport.getJavaInvokeLine());
 
+                // additional flags from OS support
+                command.addAll(OSSupport.getJavaInvokeArguments());
+
                 // jvm args
                 command.addAll(task.jvmArgs);
 

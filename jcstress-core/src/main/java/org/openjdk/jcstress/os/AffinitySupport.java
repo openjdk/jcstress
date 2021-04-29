@@ -27,8 +27,8 @@ package org.openjdk.jcstress.os;
 import com.sun.jna.*;
 import org.openjdk.jcstress.vm.VMSupport;
 
-import java.util.Collections;
-import java.util.List;
+import java.io.File;
+import java.util.*;
 
 public class AffinitySupport {
 
@@ -48,9 +48,39 @@ public class AffinitySupport {
         }
     }
 
+    public static List<String> prepare() {
+        if (VMSupport.isLinux()) {
+            return Linux.prepare();
+        } else {
+            throw new IllegalStateException("Not implemented");
+        }
+    }
+
+    public static void tryInit() {
+        if (VMSupport.isLinux()) {
+            Linux.tryInit();
+        }
+    }
+
     static class Linux {
         private static volatile CLibrary INSTANCE;
         private static boolean BIND_TRIED;
+
+        /*                                            q
+           Unpacks the libraries, and replies additional options for forked VMs.
+         */
+        public static List<String> prepare() {
+            System.setProperty("jnidispatch.preserve", "true");
+            Native.load("c", CLibrary.class);
+
+            return Arrays.asList(
+                    "-Djna.nounpack=true",    // Should not unpack itself, but use predefined path
+                    "-Djna.nosys=true",       // Should load from explicit path
+                    "-Djna.noclasspath=true", // Should load from explicit path
+                    "-Djna.boot.library.path=" + new File(System.getProperty("jnidispatch.path")).getParent(),
+                    "-Djna.platform.library.path=" + System.getProperty("jna.platform.library.path")
+            );
+        }
 
         public static void tryInit() {
             if (INSTANCE == null) {
@@ -79,41 +109,29 @@ public class AffinitySupport {
 
                 tryInit();
 
-                final cpu_set_t new_cpuset = new cpu_set_t();
-                new_cpuset.set(0);
-                final cpu_set_t old_cpuset = new cpu_set_t();
-
-                get(old_cpuset);
-                set(new_cpuset);
-                set(old_cpuset);
+                cpu_set_t cs = new cpu_set_t();
+                get(cs);
+                set(cs);
 
                 BIND_TRIED = true;
             }
         }
 
         private static void get(cpu_set_t cpuset) {
-            try {
-                if (INSTANCE.sched_getaffinity(0, cpu_set_t.SIZE_OF, cpuset) != 0) {
-                    throw new IllegalStateException("Failed: " + Native.getLastError());
-                }
-            } catch (LastErrorException e) {
+            if (INSTANCE.sched_getaffinity(0, cpu_set_t.SIZE_OF, cpuset) != 0) {
                 throw new IllegalStateException("Failed: " + Native.getLastError());
             }
         }
 
         private static void set(cpu_set_t cpuset) {
-            try {
-                if (INSTANCE.sched_setaffinity(0, cpu_set_t.SIZE_OF, cpuset) != 0) {
-                    throw new IllegalStateException("Failed: " + Native.getLastError());
-                }
-            } catch (LastErrorException e) {
+            if (INSTANCE.sched_setaffinity(0, cpu_set_t.SIZE_OF, cpuset) != 0) {
                 throw new IllegalStateException("Failed: " + Native.getLastError());
             }
         }
 
         interface CLibrary extends Library {
-            int sched_getaffinity(int pid, int size, cpu_set_t cpuset) throws LastErrorException;
-            int sched_setaffinity(int pid, int size, cpu_set_t cpuset) throws LastErrorException;
+            int sched_getaffinity(int pid, int size, cpu_set_t cpuset);
+            int sched_setaffinity(int pid, int size, cpu_set_t cpuset);
         }
 
         public static class cpu_set_t extends Structure {

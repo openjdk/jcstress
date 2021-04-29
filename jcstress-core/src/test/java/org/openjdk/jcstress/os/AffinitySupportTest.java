@@ -13,6 +13,11 @@ public class AffinitySupportTest {
     }
 
     @Test
+    public void prepare() {
+        AffinitySupport.prepare();
+    }
+
+    @Test
     public void tryBind() {
         AffinitySupport.tryBind();
     }
