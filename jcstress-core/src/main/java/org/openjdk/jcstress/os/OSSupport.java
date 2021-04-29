@@ -59,7 +59,7 @@ public class OSSupport {
             System.out.printf("----- %s %s%n", "[OK]", "Trying to set per-thread affinity with syscalls");
             AFFINITY_SUPPORT_AVAILABLE = true;
         } catch (Throwable e) {
-            System.out.printf("----- %s %s%n", "[FAILED]", "Trying to set per-thread affinity with syscalls");
+            System.out.printf("----- %s %s%n", "[N/A]", "Trying to set per-thread affinity with syscalls");
             System.out.println(e.getMessage());
             AFFINITY_SUPPORT_AVAILABLE = false;
         }
@@ -73,7 +73,7 @@ public class OSSupport {
             System.out.printf("----- %s %s%n", "[OK]", label);
             return true;
         } catch (VMSupportException ex) {
-            System.out.printf("----- %s %s%n", "[FAILED]", label);
+            System.out.printf("----- %s %s%n", "[N/A]", label);
             System.out.println(ex.getMessage());
             return false;
         }

@@ -258,7 +258,7 @@ public class VMSupport {
             System.out.printf("----- %s %s%n", "[OK]", label);
             return true;
         } catch (VMSupportException ex) {
-            System.out.printf("----- %s %s%n", "[FAILED]", label);
+            System.out.printf("----- %s %s%n", "[N/A]", label);
             System.out.println(ex.getMessage());
             return false;
         }
