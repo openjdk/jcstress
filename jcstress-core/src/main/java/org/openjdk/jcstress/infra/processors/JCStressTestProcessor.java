@@ -28,10 +28,10 @@ import com.sun.source.tree.*;
 import com.sun.source.util.Trees;
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.runners.*;
 import org.openjdk.jcstress.os.AffinitySupport;
 import org.openjdk.jcstress.util.*;
+import org.openjdk.jcstress.vm.AllocProfileSupport;
 import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -375,17 +375,17 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("        } catch (ExecutionException e) {");
             pw.println("            throw e.getCause();");
             pw.println("        }");
-
         }
         pw.println("        counter.record(r);");
         pw.println("    }");
         pw.println();
 
         pw.println("    private void sanityCheck_Footprints(Counter<" + r + "> counter) throws Throwable {");
-        pw.println("        config.adjustStrides(size -> {");
+        pw.println("        config.adjustStrides((size, cnts) -> {");
+        pw.println("            long time1 = System.nanoTime();");
+        pw.println("            long alloc1 = AllocProfileSupport.getAllocatedBytes();");
         pw.println("            " + s + "[] ls = new " + s + "[size];");
         pw.println("            " + r + "[] lr = new " + r + "[size];");
-        pw.println("            workerSync = new WorkerSync(false, " + actorsCount + ", config.spinLoopStyle);");
 
         if (!isStateItself) {
             pw.println("            final " + t + " t = new " + t + "();");
@@ -396,21 +396,56 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("                " + r + " r = new " + r + "();");
         pw.println("                lr[c] = r;");
         pw.println("                ls[c] = s;");
-        for (ExecutableElement el : info.getActors()) {
-            pw.print("                ");
-            if (isStateItself) {
-                emitMethod(pw, el, "s." + el.getSimpleName(), "s", "r", false);
-            } else {
-                emitMethod(pw, el, "t." + el.getSimpleName(), "s", "r", false);
-            }
-            pw.println(";");
-        }
-        if (info.getArbiter() != null) {
-            pw.print("                ");
-            emitMethod(pw, info.getArbiter(), (isStateItself ? "s." : "t.") + info.getArbiter().getSimpleName(), "s", "r", true);
-        }
-        pw.println("                counter.record(r);");
         pw.println("            }");
+
+        pw.println("            Collection<Future<Long>> res = new ArrayList<>();");
+        for (ExecutableElement el : info.getActors()) {
+            pw.println("            res.add(pool.submit(() -> {");
+            pw.println("                long a1 = AllocProfileSupport.getAllocatedBytes();");
+            pw.println("                for (int c = 0; c < size; c++) {");
+            pw.print("                    ");
+            emitMethod(pw, el, (isStateItself ? "ls[c]." : "t.") + el.getSimpleName(), "ls[c]", "lr[c]", false);
+            pw.println(";");
+            pw.println("                }");
+            pw.println("                long a2 = AllocProfileSupport.getAllocatedBytes();");
+            pw.println("                return a2 - a1;");
+            pw.println("            }));");
+        }
+
+        pw.println("            for (Future<Long> f : res) {");
+        pw.println("                try {");
+        pw.println("                    long a = f.get();");
+        pw.println("                    cnts[0] += a;");
+        pw.println("                } catch (Throwable e) {");
+        pw.println("                    // Should not happen, checked in API check");
+        pw.println("                }");
+        pw.println("            }");
+
+        if (info.getArbiter() != null) {
+            pw.println("            try {");
+            pw.println("                long a = pool.submit(() -> {");
+            pw.println("                    long a1 = AllocProfileSupport.getAllocatedBytes();");
+            pw.println("                    for (int c = 0; c < size; c++) {");
+            pw.print("                        ");
+            emitMethod(pw, info.getArbiter(), (isStateItself ? "ls[c]." : "t.") + info.getArbiter().getSimpleName(), "ls[c]", "lr[c]", false);
+            pw.println(";");
+            pw.println("                    }");
+            pw.println("                    long a2 = AllocProfileSupport.getAllocatedBytes();");
+            pw.println("                    return a2 - a1;");
+            pw.println("                }).get();");
+            pw.println("                cnts[0] += a;");
+            pw.println("            } catch (Throwable e) {");
+            pw.println("                // Should not happen, checked in API check");
+            pw.println("            }");
+        }
+
+        pw.println("            for (int c = 0; c < size; c++) {");
+        pw.println("                counter.record(lr[c]);");
+        pw.println("            }");
+        pw.println("            long time2 = System.nanoTime();");
+        pw.println("            long alloc2 = AllocProfileSupport.getAllocatedBytes();");
+        pw.println("            cnts[0] += alloc2 - alloc1;");
+        pw.println("            cnts[1] += time2 - time1;");
         pw.println("        });");
         pw.println("    }");
         pw.println();
@@ -929,7 +964,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 Runner.class, WorkerSync.class, Counter.class,
                 WhiteBoxSupport.class, ExecutionException.class,
                 Callable.class, Collections.class, List.class,
-                AffinitySupport.class
+                AffinitySupport.class, AllocProfileSupport.class
         };
 
         for (Class<?> c : imports) {

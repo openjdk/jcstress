@@ -58,8 +58,17 @@ public class AllocProfileSupport {
             }
 
             ALLOC_MX_BEAN = bean;
-            ALLOC_MX_BEAN_GETTER = internalIntf.getMethod("getThreadAllocatedBytes", long[].class);
-            getAllocatedBytes(bean.getAllThreadIds());
+            ALLOC_MX_BEAN_GETTER = internalIntf.getMethod("getThreadAllocatedBytes", long.class);
+
+            // Warm up until the difference drops to zero
+            long last = -1;
+            for (int t = 0; t < 10; t++) {
+                if (last == -1) {
+                    last = getAllocatedBytes();
+                }
+                long cur = getAllocatedBytes();
+                if ((cur - last) == 0) break;
+            }
 
             return true;
         } catch (Throwable e) {
@@ -69,19 +78,14 @@ public class AllocProfileSupport {
     }
 
     public static long getAllocatedBytes() {
-        long[] threadIds = {Thread.currentThread().getId()};
-        return getAllocatedBytes(threadIds)[0];
-    }
-
-    private static long[] getAllocatedBytes(long[] threadIds) {
         if (ALLOC_AVAILABLE) {
             try {
-                return (long[]) ALLOC_MX_BEAN_GETTER.invoke(ALLOC_MX_BEAN, (Object) threadIds);
+                return (long) ALLOC_MX_BEAN_GETTER.invoke(ALLOC_MX_BEAN, Thread.currentThread().getId());
             } catch (InvocationTargetException | IllegalAccessException e) {
                 throw new IllegalStateException(e);
             }
         } else {
-            return new long[threadIds.length];
+            return 0;
         }
     }
 
