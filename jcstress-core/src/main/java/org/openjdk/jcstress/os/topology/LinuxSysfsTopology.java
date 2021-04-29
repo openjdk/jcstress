@@ -91,11 +91,12 @@ public class LinuxSysfsTopology extends AbstractTopology {
             return Integer.compare(l1.size(), l2.size());
         });
 
+        // Renumber packages here
         Map<List<Integer>, Integer> knownPackage = new HashMap<>();
-        int pIdx = 0;
+        int packageCount = 0;
         for (List<Integer> cg : coreGroups) {
             if (!knownPackage.containsKey(cg)) {
-                knownPackage.put(cg, pIdx++);
+                knownPackage.put(cg, packageCount++);
             }
         }
 
@@ -116,7 +117,7 @@ public class LinuxSysfsTopology extends AbstractTopology {
                         }
                         packageId = knownPackage.get(list);
                     }
-                    add(packageId, coreId, threadId);
+                    add(packageId, packageId*packageCount + coreId, threadId);
                     found = true;
                 }
             }

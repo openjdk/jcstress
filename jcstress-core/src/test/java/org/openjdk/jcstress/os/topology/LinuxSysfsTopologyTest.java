@@ -140,7 +140,7 @@ public class LinuxSysfsTopologyTest extends AbstractTopologyTest {
 
         for (int t = 0; t < topo.totalThreads(); t++) {
             Assert.assertEquals(t, topo.threadToPackage(t));
-            Assert.assertEquals(1, topo.threadToCore(t));
+            Assert.assertEquals(t, topo.threadToCore(t));
         }
 
         checkGenericInvariants(topo);

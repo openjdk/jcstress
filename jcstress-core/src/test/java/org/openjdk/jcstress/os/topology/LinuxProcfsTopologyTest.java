@@ -66,9 +66,15 @@ public class LinuxProcfsTopologyTest extends AbstractTopologyTest {
     }
 
     @Test
-    public void test_Saved_4() throws IOException, TopologyParseException {
+    public void test_Saved_4() throws IOException {
         String s = FileUtils.copyFileToTemp("/topology/cpuinfo-4.txt", "jcstress", "test");
-        LinuxProcfsTopology topo = new LinuxProcfsTopology(s);
+
+        try {
+            new LinuxProcfsTopology(s);
+            Assert.fail("Should have failed");
+        } catch (TopologyParseException topo) {
+            // Should fail
+        }
     }
 
     @Test
@@ -84,22 +90,15 @@ public class LinuxProcfsTopologyTest extends AbstractTopologyTest {
     }
 
     @Test
-    public void test_Saved_6() throws IOException, TopologyParseException {
+    public void test_Saved_6() throws IOException {
         String s = FileUtils.copyFileToTemp("/topology/cpuinfo-6.txt", "jcstress", "test");
-        LinuxProcfsTopology topo = new LinuxProcfsTopology(s);
 
-        Assert.assertEquals(2, topo.packagesPerSystem());
-        Assert.assertEquals(1, topo.coresPerPackage());
-        Assert.assertEquals(1, topo.threadsPerCore());
-        Assert.assertEquals(2, topo.totalCores());
-        Assert.assertEquals(2, topo.totalThreads());
-
-        for (int t = 0; t < topo.totalThreads(); t++) {
-            Assert.assertEquals(t, topo.threadToPackage(t));
-            Assert.assertEquals(1, topo.threadToCore(t));
+        try {
+            new LinuxProcfsTopology(s);
+            Assert.fail("Should have failed");
+        } catch (TopologyParseException topo) {
+            // Should fail
         }
-
-        checkGenericInvariants(topo);
     }
 
 }
