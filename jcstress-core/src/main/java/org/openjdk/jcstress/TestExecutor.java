@@ -96,7 +96,7 @@ public class TestExecutor {
 
     private void notifyChanged() {
         synchronized (notifyLock) {
-            notifyLock.notify();
+            notifyLock.notifyAll();
         }
     }
 
@@ -384,6 +384,10 @@ public class TestExecutor {
                 if (ecode != 0) {
                     result = new TestResult(task, Status.VM_ERROR);
                     result.addMessage("Failed with error code " + ecode);
+                }
+                if (result == null) {
+                    result = new TestResult(task, Status.VM_ERROR);
+                    result.addMessage("Harness error, no result generated");
                 }
                 result.addVMOuts(outCollector.getOutput());
                 result.addVMErrs(errCollector.getOutput());
