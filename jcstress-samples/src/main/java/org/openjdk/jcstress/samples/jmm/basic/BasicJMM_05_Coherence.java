@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Red Hat Inc.
+ * Copyright (c) 2016, 2021, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,20 +22,25 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples;
+package org.openjdk.jcstress.samples.jmm.basic;
 
-import org.openjdk.jcstress.annotations.*;
+import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
+import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
-
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
-import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
+import static org.openjdk.jcstress.annotations.Expect.*;
 
-public class JMMSample_03_Coherence {
+public class BasicJMM_05_Coherence {
+
+    /*
+        How to run this test:
+            $ java -jar jcstress-samples/target/jcstress.jar -t BasicJMM_05_Coherence[.SubTestName]
+     */
 
     /*
       ----------------------------------------------------------------------------------------------------------
@@ -45,13 +50,11 @@ public class JMMSample_03_Coherence {
         the order of independent reads is undefined. That includes reads of the *same*
         variable!
 
-              [OK] org.openjdk.jcstress.samples.JMMSample_03_Coherence.SameRead
-            (JVM args: [-server])
-          Observed state   Occurrences              Expectation  Interpretation
-                    0, 0     4,593,916               ACCEPTABLE  Doing both reads early.
-                    0, 1         2,507               ACCEPTABLE  Doing first read early, not surprising.
-                    1, 0        48,132   ACCEPTABLE_INTERESTING  First read seen racy value early, and the second one did ...
-                    1, 1    88,146,175               ACCEPTABLE  Doing both reads late.
+          RESULT      SAMPLES     FREQ       EXPECT  DESCRIPTION
+            0, 0   14,577,607    6.96%   Acceptable  Doing both reads early.
+            0, 1       24,942    0.01%   Acceptable  Doing first read early, not surprising.
+            1, 0        6,376   <0.01%  Interesting  First read seen racy value early, and the second one did ...
+            1, 1  194,792,419   93.02%   Acceptable  Doing both reads late.
     */
 
     @JCStressTest
@@ -102,13 +105,11 @@ public class JMMSample_03_Coherence {
         variable to be observed in a total order (that implies that _observers_ are
         also ordered). Java "volatile" assumes this property.
 
-              [OK] org.openjdk.jcstress.samples.JMMSample_03_Coherence.SameVolatileRead
-            (JVM args: [-server])
-          Observed state   Occurrences   Expectation  Interpretation
-                    0, 0    66,401,704    ACCEPTABLE  Doing both reads early.
-                    0, 1       102,587    ACCEPTABLE  Doing first read early, not surprising.
-                    1, 0             0     FORBIDDEN  Violates coherence.
-                    1, 1    15,507,759    ACCEPTABLE  Doing both reads late.
+          RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
+            0, 0  114,696,597   30.95%  Acceptable  Doing both reads early.
+            0, 1    2,126,717    0.57%  Acceptable  Doing first read early, not surprising.
+            1, 0            0    0.00%   Forbidden  Violates coherence.
+            1, 1  253,704,430   68.47%  Acceptable  Doing both reads late.
      */
 
     @JCStressTest
@@ -150,13 +151,11 @@ public class JMMSample_03_Coherence {
 
         VarHandles "opaque" mode also provide coherency.
 
-               [OK] org.openjdk.jcstress.samples.JMMSample_03_Coherence.SameOpaqueRead
-            (JVM args: [-server])
-          Observed state   Occurrences   Expectation  Interpretation
-                    0, 0     5,857,995    ACCEPTABLE  Doing both reads early.
-                    0, 1        55,082    ACCEPTABLE  Doing first read early, not surprising.
-                    1, 0             0     FORBIDDEN  Violates coherence.
-                    1, 1   114,114,673    ACCEPTABLE  Doing both reads late.
+          RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
+            0, 0   22,265,880    6.07%  Acceptable  Doing both reads early.
+            0, 1      147,500    0.04%  Acceptable  Doing first read early, not surprising.
+            1, 0            0    0.00%   Forbidden  Violates coherence.
+            1, 1  344,427,964   93.89%  Acceptable  Doing both reads late.
      */
 
     @JCStressTest
@@ -202,22 +201,5 @@ public class JMMSample_03_Coherence {
             r.r2 = (int) VH.getOpaque(h2);
         }
     }
-
-    /*
-      ----------------------------------------------------------------------------------------------------------
-
-        Conclusion: coherency is something that is assumed intuitively. However, under the
-        data race (= in the absence of synchronization) the absence of coherence for plain
-        accesses may lead to surprising results.
-
-        Are reads/writes coherent?
-
-          plain:                           no
-          volatile:                       YES
-          VH (plain):                      no
-          VH (opaque):                    YES
-          VH (acq/rel):                   YES
-          VH (volatile):                  YES
-     */
 
 }

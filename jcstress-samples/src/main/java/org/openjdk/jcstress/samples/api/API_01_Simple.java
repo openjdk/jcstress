@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Red Hat Inc.
+ * Copyright (c) 2016, 2021, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,10 +22,15 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples;
+package org.openjdk.jcstress.samples.api;
 
-import org.openjdk.jcstress.annotations.*;
+import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
+import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
+
+import static org.openjdk.jcstress.annotations.Expect.*;
 
 /*
     This is our first concurrency test. It is deliberately simplistic to show
@@ -41,28 +46,42 @@ import org.openjdk.jcstress.infra.results.II_Result;
     would tell us something about the concurrent behavior. For example, running
     this test would yield:
 
-          [OK] o.o.j.t.JCStressSample_01_Simple
-        (JVM args: [-server])
-      Observed state   Occurrences   Expectation  Interpretation
-                1, 1    54,734,140    ACCEPTABLE  Both threads came up with the same value: atomicity failure.
-                1, 2    47,037,891    ACCEPTABLE  actor1 incremented, then actor2.
-                2, 1    53,204,629    ACCEPTABLE  actor2 incremented, then actor1.
+        .......... [OK] org.openjdk.jcstress.samples.api.APISample_01_Simple
+
+          Scheduling class:
+            actor1: package group 0, core group 0
+            actor2: package group 0, core group 0
+
+          CPU allocation:
+            actor1: CPU #3, package #0, core #3
+            actor2: CPU #35, package #0, core #3
+
+          Compilation: split
+            actor1: C2
+            actor2: C2
+
+          JVM args: []
+
+          RESULT      SAMPLES    FREQ       EXPECT  DESCRIPTION
+            1, 1   46,946,789   10.1%  Interesting  Both actors came up with the same value: atomicity failure.
+            1, 2  110,240,149   23.8%   Acceptable  actor1 incremented, then actor2.
+            2, 1  306,529,420   66.1%   Acceptable  actor2 incremented, then actor1.
 
      How to run this test:
-       $ java -jar jcstress-samples/target/jcstress.jar -t JCStress_APISample_01_Simple
+       $ java -jar jcstress-samples/target/jcstress.jar -t APISample_01
  */
 
 // Mark the class as JCStress test.
 @JCStressTest
 
 // These are the test outcomes.
-@Outcome(id = "1, 1", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: atomicity failure.")
-@Outcome(id = "1, 2", expect = Expect.ACCEPTABLE, desc = "actor1 incremented, then actor2.")
-@Outcome(id = "2, 1", expect = Expect.ACCEPTABLE, desc = "actor2 incremented, then actor1.")
+@Outcome(id = "1, 1", expect = ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: atomicity failure.")
+@Outcome(id = "1, 2", expect = ACCEPTABLE, desc = "actor1 incremented, then actor2.")
+@Outcome(id = "2, 1", expect = ACCEPTABLE, desc = "actor2 incremented, then actor1.")
 
 // This is a state object
 @State
-public class APISample_01_Simple {
+public class API_01_Simple {
 
     int v;
 

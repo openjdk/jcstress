@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Red Hat Inc.
+ * Copyright (c) 2016, 2021, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples;
+package org.openjdk.jcstress.samples.high;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.LL_Result;
@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static org.openjdk.jcstress.annotations.Expect.*;
 
-public class ConcurrencySample_02_ConcurrentHashMap {
+public class Concurrency_01_CHM {
 
     /*
       ----------------------------------------------------------------------------------------------------------
@@ -94,13 +94,11 @@ public class ConcurrencySample_02_ConcurrentHashMap {
 
         Broken Multimap is broken, it contains a race.
 
-              [OK] org.openjdk.jcstress.samples.ConcurrencySample_02_ConcurrentHashMap.BrokenMultimap
-            (JVM args: [-server])
-          Observed state   Occurrences              Expectation  Interpretation
-                Bar, Baz     5,635,469               ACCEPTABLE  Both updates.
-               Bar, null     1,691,183   ACCEPTABLE_INTERESTING  One update lost.
-                Baz, Bar     5,821,971               ACCEPTABLE  Both updates.
-               Baz, null     1,690,007   ACCEPTABLE_INTERESTING  One update lost.
+             RESULT      SAMPLES     FREQ       EXPECT  DESCRIPTION
+           Bar, Baz  110,869,386   42.56%   Acceptable  Both updates.
+          Bar, null   20,165,976    7.74%  Interesting  One update lost.
+           Baz, Bar  109,309,826   41.96%   Acceptable  Both updates.
+          Baz, null   20,153,756    7.74%  Interesting  One update lost.
      */
 
     @JCStressTest
@@ -130,13 +128,11 @@ public class ConcurrencySample_02_ConcurrentHashMap {
 
         putIfAbsent-style multimap does atomic updates.
 
-              [OK] org.openjdk.jcstress.samples.ConcurrencySample_02_ConcurrentHashMap.CorrectMultimap
-            (JVM args: [-server])
-          Observed state   Occurrences   Expectation  Interpretation
-                Bar, Baz     6,948,547    ACCEPTABLE  Both updates.
-               Bar, null             0     FORBIDDEN  One update lost.
-                Baz, Bar     7,360,653    ACCEPTABLE  Both updates.
-               Baz, null             0     FORBIDDEN  One update lost.
+             RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
+           Bar, Baz  125,206,656   50.51%  Acceptable  Both updates.
+          Bar, null            0    0.00%   Forbidden  One update lost.
+           Baz, Bar  122,666,368   49.49%  Acceptable  Both updates.
+          Baz, null            0    0.00%   Forbidden  One update lost.
      */
 
 
@@ -163,20 +159,16 @@ public class ConcurrencySample_02_ConcurrentHashMap {
     }
 
 
-
-
     /*
        ----------------------------------------------------------------------------------------------------------
 
         computeIfAbsent-style multimap does atomic updates.
 
-              [OK] org.openjdk.jcstress.samples.ConcurrencySample_02_ConcurrentHashMap.CorrectJDK8Multimap
-            (JVM args: [-server])
-          Observed state   Occurrences   Expectation  Interpretation
-                Bar, Baz     6,250,933    ACCEPTABLE  Both updates.
-               Bar, null             0     FORBIDDEN  One update lost.
-                Baz, Bar     6,412,677    ACCEPTABLE  Both updates.
-               Baz, null             0     FORBIDDEN  One update lost.
+             RESULT     SAMPLES     FREQ      EXPECT  DESCRIPTION
+           Bar, Baz  97,992,669   49.72%  Acceptable  Both updates.
+          Bar, null           0    0.00%   Forbidden  One update lost.
+           Baz, Bar  99,110,435   50.28%  Acceptable  Both updates.
+          Baz, null           0    0.00%   Forbidden  One update lost.
      */
 
     @JCStressTest

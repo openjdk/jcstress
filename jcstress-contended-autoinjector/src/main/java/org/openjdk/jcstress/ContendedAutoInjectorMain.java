@@ -51,10 +51,15 @@ public class ContendedAutoInjectorMain {
                     if (path.toString().endsWith("class")) {
                         byte[] origBytes = Files.readAllBytes(path);
 
-                        if (parseAnnotations(origBytes)) {
-                            System.out.println("Processing " + rootPath.relativize(path));
-                            final byte[] newBytes = retransform(origBytes);
-                            Files.write(path, newBytes);
+                        try {
+                            if (parseAnnotations(origBytes)) {
+                                System.out.println("Processing " + rootPath.relativize(path));
+                                final byte[] newBytes = retransform(origBytes);
+                                Files.write(path, newBytes);
+                            }
+                        } catch (IllegalArgumentException iae) {
+                            System.err.println("Error processing: " + rootPath.relativize(path) + ": ");
+                            iae.printStackTrace();
                         }
                     }
                     return FileVisitResult.CONTINUE;
@@ -90,11 +95,11 @@ public class ContendedAutoInjectorMain {
 
     static class ClassNameTracker extends ClassVisitor  {
         public ClassNameTracker() {
-            super(Opcodes.ASM6);
+            super(Opcodes.ASM9);
         }
 
         public ClassNameTracker(ClassWriter cw) {
-            super(Opcodes.ASM6, cw);
+            super(Opcodes.ASM9, cw);
         }
 
         protected String className;
@@ -185,7 +190,7 @@ public class ContendedAutoInjectorMain {
         private final String fieldName;
 
         public FieldEnumerator(FieldVisitor fieldVisitor, String className, String fieldName) {
-            super(Opcodes.ASM6, fieldVisitor);
+            super(Opcodes.ASM9, fieldVisitor);
             this.className = className;
             this.fieldName = fieldName;
         }

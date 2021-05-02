@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Red Hat Inc.
+ * Copyright (c) 2021, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,44 +22,61 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples;
+package org.openjdk.jcstress.tests.oota;
 
 import org.openjdk.jcstress.annotations.*;
+import org.openjdk.jcstress.infra.results.III_Result;
 import org.openjdk.jcstress.infra.results.II_Result;
-
-/*
-    JCStress also allows to put the descriptions and references right at the test.
-    This helps to identify the goal for the test, as well as the discussions about
-    the behavior in question.
-
-   How to run this test:
-      $ java -jar jcstress-samples/target/jcstress.jar -t JCStress_APISample_06_Descriptions
- */
+import org.openjdk.jcstress.infra.results.I_Result;
 
 @JCStressTest
-
-// Optional test description
-@Description("Sample Hello World test")
-
-// Optional references. @Ref is repeatable.
-@Ref("http://openjdk.java.net/projects/code-tools/jcstress/")
-
-@Outcome(id = "1, 1", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: atomicity failure.")
-@Outcome(id = "1, 2", expect = Expect.ACCEPTABLE, desc = "actor1 incremented, then actor2.")
-@Outcome(id = "2, 1", expect = Expect.ACCEPTABLE, desc = "actor2 incremented, then actor1.")
+@Outcome(id = ".*, 0, 0", expect = Expect.ACCEPTABLE, desc = "Nothing to see here")
+@Outcome(id = ".*, 0, 1", expect = Expect.ACCEPTABLE, desc = "Nothing to see here")
+@Outcome(id = "1, 1, 1",  expect = Expect.ACCEPTABLE_INTERESTING, desc = "Out of thin air")
+@Outcome(                 expect = Expect.ACCEPTABLE_INTERESTING, desc = "Interesting?")
 @State
-public class APISample_06_Descriptions {
+public class Sevcik_03_RoachMotel {
 
-    int v;
+    int x;
+    int y;
+    int z;
+
+    private final Object m = new Object();
 
     @Actor
-    public void actor1(II_Result r) {
-        r.r1 = ++v;
+    public void thread1() {
+        synchronized (m) {
+            x = 2;
+        }
     }
 
     @Actor
-    public void actor2(II_Result r) {
-        r.r2 = ++v;
+    public void thread2() {
+        synchronized (m) {
+            x = 1;
+        }
+    }
+
+    @Actor
+    public void thread3(III_Result r) {
+        int t1 = x;
+        synchronized (m) {
+            int t2 = z;
+            if (t1 == 2) {
+                y = 1;
+            } else {
+                y = t2;
+            }
+            r.r2 = t2;
+        }
+        r.r1 = t1;
+    }
+
+    @Actor
+    public void thread4(III_Result r) {
+        int t3 = y;
+        z = t3;
+        r.r3 = t3;
     }
 
 }

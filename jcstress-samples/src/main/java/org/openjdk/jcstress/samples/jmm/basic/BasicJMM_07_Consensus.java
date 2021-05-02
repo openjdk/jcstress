@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Red Hat Inc.
+ * Copyright (c) 2016, 2021, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples;
+package org.openjdk.jcstress.samples.jmm.basic;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
@@ -35,7 +35,12 @@ import java.lang.invoke.VarHandle;
 
 import static org.openjdk.jcstress.annotations.Expect.*;
 
-public class JMMSample_05_TotalOrder {
+public class BasicJMM_07_Consensus {
+
+    /*
+        How to run this test:
+            $ java -jar jcstress-samples/target/jcstress.jar -t BasicJMM_07_Consensus[.SubTestName]
+     */
 
     /*
       ----------------------------------------------------------------------------------------------------------
@@ -48,18 +53,17 @@ public class JMMSample_05_TotalOrder {
         The most famous example that needs total order of operation is Dekker
         idiom, the building block of Dekker lock.
 
-              [OK] org.openjdk.jcstress.samples.JMMSample_05_TotalOrder.PlainDekker
-            (JVM args: [-server])
-          Observed state   Occurrences              Expectation  Interpretation
-                    0, 0    12,006,499   ACCEPTABLE_INTERESTING  Violates sequential consistency
-                    0, 1    53,849,842               ACCEPTABLE  Trivial under sequential consistency
-                    1, 0    39,405,818               ACCEPTABLE  Trivial under sequential consistency
-                    1, 1            21               ACCEPTABLE  Trivial under sequential consistency
+        x86_64:
+          RESULT        SAMPLES     FREQ       EXPECT  DESCRIPTION
+            0, 0    349,652,433    6.29%  Interesting  Violates sequential consistency
+            0, 1  2,566,329,748   46.14%   Acceptable  Trivial under sequential consistency
+            1, 0  2,640,017,118   47.47%   Acceptable  Trivial under sequential consistency
+            1, 1      5,522,365    0.10%   Acceptable  Trivial under sequential consistency
     */
 
     @JCStressTest
-    @Outcome(id = {"0, 1", "1, 0", "1, 1"}, expect = ACCEPTABLE, desc = "Trivial under sequential consistency")
-    @Outcome(id = "0, 0",                   expect = ACCEPTABLE_INTERESTING,  desc = "Violates sequential consistency")
+    @Outcome(id = {"0, 1", "1, 0", "1, 1"}, expect = ACCEPTABLE,             desc = "Trivial under sequential consistency")
+    @Outcome(id = "0, 0",                   expect = ACCEPTABLE_INTERESTING, desc = "Violates sequential consistency")
     @State
     public static class PlainDekker {
         int x;
@@ -85,13 +89,11 @@ public class JMMSample_05_TotalOrder {
         and thus require the results to be consistent with the case when reads/writes
         form a total order.
 
-              [OK] org.openjdk.jcstress.samples.JMMSample_05_TotalOrder.VolatileDekker
-            (JVM args: [-server])
-          Observed state   Occurrences   Expectation  Interpretation
-                    0, 0             0     FORBIDDEN  Violates sequential consistency
-                    0, 1    52,228,833    ACCEPTABLE  Trivial under sequential consistency
-                    1, 0    60,725,076    ACCEPTABLE  Trivial under sequential consistency
-                    1, 1       313,541    ACCEPTABLE  Trivial under sequential consistency
+          RESULT        SAMPLES     FREQ      EXPECT  DESCRIPTION
+            0, 0              0    0.00%   Forbidden  Violates sequential consistency
+            0, 1  1,016,018,128   44.40%  Acceptable  Trivial under sequential consistency
+            1, 0  1,068,127,239   46.68%  Acceptable  Trivial under sequential consistency
+            1, 1    204,027,177    8.92%  Acceptable  Trivial under sequential consistency
      */
 
     @JCStressTest
@@ -121,13 +123,11 @@ public class JMMSample_05_TotalOrder {
         VarHandles acquire and release modes are too weak to achieve the required effect.
         VarHandles opaque mode is also too weak.
 
-              [OK] org.openjdk.jcstress.samples.JMMSample_05_TotalOrder.AcqRelDekker
-            (JVM args: [-server])
-          Observed state   Occurrences              Expectation  Interpretation
-                    0, 0    13,708,261   ACCEPTABLE_INTERESTING  Violates sequential consistency
-                    0, 1    36,033,448               ACCEPTABLE  Trivial under sequential consistency
-                    1, 0    27,158,587               ACCEPTABLE  Trivial under sequential consistency
-                    1, 1        70,204               ACCEPTABLE  Trivial under sequential consistency
+          RESULT        SAMPLES     FREQ       EXPECT  DESCRIPTION
+            0, 0    256,068,354    6.18%  Interesting  Violates sequential consistency
+            0, 1  1,907,567,721   46.01%   Acceptable  Trivial under sequential consistency
+            1, 0  1,975,159,576   47.64%   Acceptable  Trivial under sequential consistency
+            1, 1      7,025,533    0.17%   Acceptable  Trivial under sequential consistency
      */
 
     @JCStressTest
@@ -162,22 +162,5 @@ public class JMMSample_05_TotalOrder {
             r.r2 = (int) VH_X.getAcquire(this);
         }
     }
-
-
-    /*
-      ----------------------------------------------------------------------------------------------------------
-
-        Conclusion: total order is only available for volatiles. Anything else is weaker and does not
-        give totality.
-
-        Do inter-thread reads/writes form total order consistent with program order?
-
-          plain:                           no
-          volatile:                       yes
-          VH (plain):                      no
-          VH (opaque):                     no
-          VH (acq/rel):                    no
-          VH (volatile):                  yes
-     */
 
 }
