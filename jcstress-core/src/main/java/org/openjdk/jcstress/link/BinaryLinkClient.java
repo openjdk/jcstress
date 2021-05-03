@@ -26,7 +26,6 @@ package org.openjdk.jcstress.link;
 
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
-import org.openjdk.jcstress.infra.runners.TestConfig;
 
 import java.io.*;
 import java.net.Socket;

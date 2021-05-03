@@ -35,14 +35,7 @@ public class ForkedTestConfig implements Serializable {
     public final int maxFootprintMB;
     public int minStride;
     public int maxStride;
-    public transient StrideCap strideCap;
     public int[] actorMap;
-
-    public enum StrideCap {
-        NONE,
-        FOOTPRINT,
-        TIME,
-    }
 
     public ForkedTestConfig(TestConfig cfg) {
         spinLoopStyle = cfg.spinLoopStyle;
@@ -51,7 +44,7 @@ public class ForkedTestConfig implements Serializable {
         generatedRunnerName = cfg.generatedRunnerName;
         maxFootprintMB = cfg.maxFootprintMB;
         minStride = cfg.minStride;
-        maxStride = cfg.minStride;
+        maxStride = cfg.maxStride;
         actorMap = cfg.cpuMap.actorMap();
     }
 
@@ -59,9 +52,7 @@ public class ForkedTestConfig implements Serializable {
         int count = 1;
         int succCount = count;
         while (true) {
-            StrideCap cap = tryWith(estimator, count);
-            if (cap != StrideCap.NONE) {
-                strideCap = cap;
+            if (!tryWith(estimator, count)) {
                 break;
             }
 
@@ -85,7 +76,7 @@ public class ForkedTestConfig implements Serializable {
         void runWith(int size, long[] counters);
     }
 
-    private StrideCap tryWith(FootprintEstimator estimator, int count) {
+    private boolean tryWith(FootprintEstimator estimator, int count) {
         try {
             long[] cnts = new long[2];
             estimator.runWith(count, cnts);
@@ -94,19 +85,19 @@ public class ForkedTestConfig implements Serializable {
 
             if (footprint > maxFootprintMB * 1024 * 1024) {
                 // blown the footprint estimate
-                return StrideCap.FOOTPRINT;
+                return false;
             }
 
             if (TimeUnit.NANOSECONDS.toMillis(usedTime) > time) {
                 // blown the time estimate
-                return StrideCap.TIME;
+                return false;
             }
 
         } catch (OutOfMemoryError err) {
             // blown the heap size
-            return StrideCap.FOOTPRINT;
+            return false;
         }
-        return StrideCap.NONE;
+        return true;
     }
 
 }
