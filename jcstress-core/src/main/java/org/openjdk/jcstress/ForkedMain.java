@@ -30,7 +30,6 @@ import org.openjdk.jcstress.infra.runners.Runner;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.link.BinaryLinkClient;
 import org.openjdk.jcstress.util.StringUtils;
-import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
 import java.lang.reflect.Constructor;
 import java.util.concurrent.ExecutorService;
@@ -46,12 +45,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ForkedMain {
 
     public static void main(String[] args) throws Exception {
-        try {
-            WhiteBoxSupport.initSafely();
-        } catch (NoClassDefFoundError e) {
-            // expected on JDK 7 and lower, parent should have printed the message for user
-        }
-
         if (args.length < 3) {
             throw new IllegalStateException("Expected three arguments");
         }

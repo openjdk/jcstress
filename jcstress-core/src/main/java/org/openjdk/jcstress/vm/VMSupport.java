@@ -155,22 +155,6 @@ public class VMSupport {
                 "-XX:-RestrictContended"
         );
 
-        try {
-            String whiteBoxJarName = FileUtils.copyFileToTemp("/whitebox-api.jar", "whitebox", ".jar");
-            detect("Unlocking Whitebox API for online de-optimization: all methods",
-                    DeoptAllTestMain.class,
-                    GLOBAL_JVM_FLAGS,
-                    "-XX:+WhiteBoxAPI", "-Xbootclasspath/a:" + whiteBoxJarName
-            );
-            detect("Unlocking Whitebox API for online de-optimization: selected methods",
-                    DeoptMethodTestMain.class,
-                    GLOBAL_JVM_FLAGS,
-                    "-XX:+WhiteBoxAPI", "-Xbootclasspath/a:" + whiteBoxJarName
-            );
-        } catch (IOException e) {
-            throw new IllegalStateException("Fatal error: WhiteBoxAPI JAR problems.", e);
-        }
-
         detect("Unlocking debug information for non-safepoints",
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,

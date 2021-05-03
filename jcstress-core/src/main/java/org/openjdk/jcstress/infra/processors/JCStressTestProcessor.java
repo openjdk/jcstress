@@ -32,7 +32,6 @@ import org.openjdk.jcstress.infra.runners.*;
 import org.openjdk.jcstress.os.AffinitySupport;
 import org.openjdk.jcstress.util.*;
 import org.openjdk.jcstress.vm.AllocProfileSupport;
-import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -784,12 +783,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    public TestResult run() {");
         pw.println("        Counter<Outcome> results = new Counter<>();");
         pw.println();
-        pw.println("        try {");
-        pw.println("            WhiteBoxSupport.tryDeopt(config.deoptMode);");
-        pw.println("        } catch (NoClassDefFoundError err) {");
-        pw.println("            // gracefully \"handle\"");
-        pw.println("        }");
-        pw.println();
         pw.println("        for (int c = 0; c < config.iters; c++) {");
         pw.println("            run(results);");
         pw.println();
@@ -962,7 +955,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 ExecutorService.class, Future.class, TimeUnit.class,
                 TestConfig.class, TestResult.class,
                 Runner.class, WorkerSync.class, Counter.class,
-                WhiteBoxSupport.class, ExecutionException.class,
+                ExecutionException.class,
                 Callable.class, Collections.class, List.class,
                 AffinitySupport.class, AllocProfileSupport.class
         };
