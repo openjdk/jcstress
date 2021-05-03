@@ -32,35 +32,27 @@ import java.net.Socket;
 
 public final class BinaryLinkClient {
 
-    private static final int LINK_TIMEOUT_MS = Integer.getInteger("jcstress.link.timeoutMs", 30 * 1000);
-
-    private final Object lock;
     private final String hostName;
     private final int hostPort;
 
     public BinaryLinkClient(String hostName, int hostPort) {
         this.hostName = hostName;
         this.hostPort = hostPort;
-        this.lock = new Object();
     }
 
     private Object requestResponse(Object frame) throws IOException {
-        synchronized (lock) {
-            try (Socket socket = new Socket(hostName, hostPort)) {
-                socket.setKeepAlive(true);
-                socket.setSoTimeout(LINK_TIMEOUT_MS);
+        try (Socket socket = new Socket(hostName, hostPort)) {
+            socket.setTcpNoDelay(true);
+            try (BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
+                 ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+                oos.writeObject(frame);
+                oos.flush();
 
-                try (BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
-                     ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-                    oos.writeObject(frame);
-                    oos.flush();
-
-                    try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
-                         ObjectInputStream ois = new ObjectInputStream(bis)) {
-                        return ois.readObject();
-                    } catch (ClassNotFoundException e) {
-                        throw new IOException(e);
-                    }
+                try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
+                     ObjectInputStream ois = new ObjectInputStream(bis)) {
+                    return ois.readObject();
+                } catch (ClassNotFoundException e) {
+                    throw new IOException(e);
                 }
             }
         }
