@@ -28,6 +28,7 @@ import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.processors.JCStressTestProcessor;
+import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.WorkerSync;
 import org.openjdk.jcstress.link.BinaryLinkServer;
@@ -71,7 +72,7 @@ public class TestExecutor {
 
         server = new BinaryLinkServer(new ServerListener() {
             @Override
-            public TestConfig onJobRequest(String token) {
+            public ForkedTestConfig onJobRequest(String token) {
                 return vmByToken.get(token).jobRequest();
             }
 
@@ -348,23 +349,20 @@ public class TestExecutor {
             }
         }
 
-        public synchronized TestConfig jobRequest() {
+        public synchronized ForkedTestConfig jobRequest() {
             if (processed) {
                 return null;
             }
             processed = true;
-            return getTask();
-        }
-
-        public synchronized TestConfig getTask() {
-            return task;
+            return new ForkedTestConfig(task);
         }
 
         public synchronized boolean checkCompleted(TestResultCollector sink) {
             // There is a pending exception that terminated the target VM.
             if (pendingException != null) {
-                result = new TestResult(task, Status.VM_ERROR);
+                result = new TestResult(Status.VM_ERROR);
                 result.addMessage(pendingException.getMessage());
+                result.setConfig(task);
                 sink.add(result);
                 return true;
             }
@@ -382,19 +380,21 @@ public class TestExecutor {
                 errCollector.join();
 
                 if (ecode != 0) {
-                    result = new TestResult(task, Status.VM_ERROR);
+                    result = new TestResult(Status.VM_ERROR);
                     result.addMessage("Failed with error code " + ecode);
                 }
                 if (result == null) {
-                    result = new TestResult(task, Status.VM_ERROR);
+                    result = new TestResult(Status.VM_ERROR);
                     result.addMessage("Harness error, no result generated");
                 }
                 result.addVMOuts(outCollector.getOutput());
                 result.addVMErrs(errCollector.getOutput());
+                result.setConfig(task);
                 sink.add(result);
             } catch (InterruptedException ex) {
-                result = new TestResult(task, Status.VM_ERROR);
+                result = new TestResult(Status.VM_ERROR);
                 result.addMessage(ex.getMessage());
+                result.setConfig(task);
                 sink.add(result);
             } finally {
                 // The process is definitely dead, remove the temporary files.

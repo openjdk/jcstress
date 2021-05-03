@@ -24,6 +24,7 @@
  */
 package org.openjdk.jcstress.link;
 
+import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 
 import java.io.Serializable;
@@ -31,13 +32,13 @@ import java.io.Serializable;
 class JobResponseFrame implements Serializable {
     private static final long serialVersionUID = 2082214387637725282L;
 
-    private final TestConfig config;
+    private final ForkedTestConfig config;
 
-    public JobResponseFrame(TestConfig config) {
+    public JobResponseFrame(ForkedTestConfig config) {
         this.config = config;
     }
 
-    public TestConfig getConfig() {
+    public ForkedTestConfig getConfig() {
         return config;
     }
 }

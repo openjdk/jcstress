@@ -25,6 +25,7 @@
 package org.openjdk.jcstress.link;
 
 import org.openjdk.jcstress.infra.collectors.TestResult;
+import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 
 import java.io.*;
@@ -66,7 +67,7 @@ public final class BinaryLinkClient {
         }
     }
 
-    public TestConfig nextJob(String token) throws IOException {
+    public ForkedTestConfig nextJob(String token) throws IOException {
         Object reply = requestResponse(new JobRequestFrame(token));
         if (reply instanceof JobResponseFrame) {
             return ((JobResponseFrame) reply).getConfig();

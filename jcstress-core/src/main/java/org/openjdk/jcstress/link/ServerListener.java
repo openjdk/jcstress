@@ -25,11 +25,12 @@
 package org.openjdk.jcstress.link;
 
 import org.openjdk.jcstress.infra.collectors.TestResult;
+import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 
 public interface ServerListener {
 
-    TestConfig onJobRequest(String token);
+    ForkedTestConfig onJobRequest(String token);
 
     void onResult(String token, TestResult result);
 
