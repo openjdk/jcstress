@@ -109,25 +109,4 @@ public class ForkedTestConfig implements Serializable {
         return StrideCap.NONE;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ForkedTestConfig that = (ForkedTestConfig) o;
-
-        if (!generatedRunnerName.equals(that.generatedRunnerName)) return false;
-        if (spinLoopStyle != that.spinLoopStyle) return false;
-        if (minStride != that.minStride) return false;
-        if (maxStride != that.maxStride) return false;
-        if (time != that.time) return false;
-        if (iters != that.iters) return false;
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return generatedRunnerName.hashCode();
-    }
-
 }
