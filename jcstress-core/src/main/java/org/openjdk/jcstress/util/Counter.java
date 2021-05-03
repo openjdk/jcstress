@@ -212,4 +212,18 @@ public final class Counter<R> implements Serializable {
         return res;
     }
 
+    public long totalCount() {
+        long s = 0;
+        for (long c : counts) {
+            s += c;
+        }
+        return s;
+    }
+
+    public boolean isEmpty() {
+        for (long c : counts) {
+            if (c > 0) return false;
+        }
+        return true;
+    }
 }

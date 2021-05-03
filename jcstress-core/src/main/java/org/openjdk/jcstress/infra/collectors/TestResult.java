@@ -28,6 +28,7 @@ import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.grading.ReportUtils;
 import org.openjdk.jcstress.infra.grading.TestGrading;
 import org.openjdk.jcstress.infra.runners.TestConfig;
+import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.Environment;
 import org.openjdk.jcstress.util.HashMultiset;
 import org.openjdk.jcstress.util.Multiset;
@@ -44,7 +45,7 @@ public class TestResult implements Serializable {
 
     private final TestConfig config;
     private final Status status;
-    private final Multiset<String> states;
+    private final Counter<String> states;
     private volatile Environment env;
     private final List<String> messages;
     private final List<String> vmOut;
@@ -53,14 +54,14 @@ public class TestResult implements Serializable {
     public TestResult(TestConfig config, Status status) {
         this.config = config;
         this.status = status;
-        this.states = new HashMultiset<>();
+        this.states = new Counter<>();
         this.messages = new ArrayList<>();
         this.vmOut = new ArrayList<>();
         this.vmErr = new ArrayList<>();
     }
 
     public void addState(String result, long count) {
-        states.add(result, count);
+        states.record(result, count);
     }
 
     public void addMessage(String msg) {
@@ -125,7 +126,7 @@ public class TestResult implements Serializable {
     }
 
     public long getTotalCount() {
-        return states.size();
+        return states.totalCount();
     }
 
     public long getCount(String s) {
@@ -133,7 +134,7 @@ public class TestResult implements Serializable {
     }
 
     public Collection<String> getStateKeys() {
-        return states.keys();
+        return states.elementSet();
     }
 
     public TestConfig getConfig() {
