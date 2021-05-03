@@ -28,6 +28,11 @@ import org.openjdk.jcstress.infra.runners.TestConfig;
 
 import java.io.*;
 import java.net.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Accepts the binary data from the forked VM and pushes it to parent VM
@@ -42,8 +47,10 @@ public final class BinaryLinkServer {
 
     private final ServerSocket server;
     private final InetAddress listenAddress;
-    private final Handler handler;
+    private final Acceptor acceptor;
     private final ServerListener listener;
+
+    private final ExecutorService handlers;
 
     public BinaryLinkServer(ServerListener listener) throws IOException {
         this.listener = listener;
@@ -52,8 +59,20 @@ public final class BinaryLinkServer {
         server = new ServerSocket(LINK_PORT, 50, listenAddress);
         server.setSoTimeout(LINK_TIMEOUT_MS);
 
-        handler = new Handler(server);
-        handler.start();
+        handlers = Executors.newCachedThreadPool(new ThreadFactory() {
+            private final AtomicInteger id = new AtomicInteger();
+
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r);
+                t.setName("jcstress-link-server-" + id.incrementAndGet());
+                t.setDaemon(true);
+                return t;
+            }
+        });
+
+        acceptor = new Acceptor(server);
+        acceptor.start();
     }
 
     private InetAddress getListenAddress() {
@@ -72,7 +91,7 @@ public final class BinaryLinkServer {
 
     public void terminate() {
         // set interrupt flag
-        handler.interrupt();
+        acceptor.interrupt();
 
         // all existing Handlers blocked on accept() should exit now
         try {
@@ -81,13 +100,19 @@ public final class BinaryLinkServer {
             // do nothing
         }
 
-        // wait for handler to join
+        // wait for acceptor to join
         try {
-            handler.join();
+            acceptor.join();
         } catch (InterruptedException e) {
             // do nothing
         }
 
+        handlers.shutdown();
+        try {
+            handlers.awaitTermination(1, TimeUnit.HOURS);
+        } catch (InterruptedException e) {
+            // do nothing
+        }
     }
 
     public String getHost() {
@@ -99,45 +124,47 @@ public final class BinaryLinkServer {
         return server.getLocalPort();
     }
 
-    private final class Handler extends Thread {
+    private void handle(Socket socket) {
+        try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
+             ObjectInputStream ois = new ObjectInputStream(bis)) {
+            Object obj = ois.readObject();
+            try (BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
+                 ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+                if (obj instanceof JobRequestFrame) {
+                    String tkn = ((JobRequestFrame) obj).getToken();
+                    TestConfig cfg = listener.onJobRequest(tkn);
+                    oos.writeObject(cfg);
+                } else if (obj instanceof ResultsFrame) {
+                    ResultsFrame rf = (ResultsFrame) obj;
+                    listener.onResult(rf.getToken(), rf.getRes());
+                    oos.writeObject(new OkResponseFrame());
+                } else {
+                    // should always reply something
+                    oos.writeObject(new OkResponseFrame());
+                }
+            }
+            socket.close();
+        } catch (IOException | ClassNotFoundException e) {
+            // Do nothing
+        }
+    }
+
+    private final class Acceptor extends Thread {
         private final ServerSocket server;
 
-        public Handler(ServerSocket server) {
+        public Acceptor(ServerSocket server) {
             this.server = server;
         }
 
         @Override
         public void run() {
             while (!Thread.interrupted()) {
-                acceptAndProcess();
-            }
-        }
-
-        private void acceptAndProcess() {
-            try (Socket socket = server.accept()) {
-                try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
-                     ObjectInputStream ois = new ObjectInputStream(bis)) {
-                    Object obj = ois.readObject();
-                    try (BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
-                         ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-                        if (obj instanceof JobRequestFrame) {
-                            String tkn = ((JobRequestFrame) obj).getToken();
-                            TestConfig cfg = listener.onJobRequest(tkn);
-                            oos.writeObject(cfg);
-                        } else if (obj instanceof ResultsFrame) {
-                            ResultsFrame rf = (ResultsFrame) obj;
-                            listener.onResult(rf.getToken(), rf.getRes());
-                            oos.writeObject(new OkResponseFrame());
-                        } else {
-                            // should always reply something
-                            oos.writeObject(new OkResponseFrame());
-                        }
-                    }
+                try {
+                    Socket socket = server.accept();
+                    handlers.submit(() -> handle(socket));
+                } catch (Exception e) {
+                    // ignore, the exit code would be non-zero, and TestExecutor would handle it.
                 }
-            } catch (EOFException e) {
-                // ignore
-            } catch (Exception e) {
-                // ignore, the exit code would be non-zero, and TestExecutor would handle it.
             }
         }
 
