@@ -43,25 +43,32 @@ public final class BinaryLinkClient {
     private Object requestResponse(Object frame) throws IOException {
         long time1 = System.nanoTime();
         try (Socket socket = new Socket(hostName, hostPort)) {
-            socket.setTcpNoDelay(true);
             long time2 = System.nanoTime();
 
-            try (BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
-                 ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
                 oos.writeObject(frame);
                 oos.flush();
+            }
+            byte[] outW = bos.toByteArray();
 
-                long time3 = System.nanoTime();
+            long time3 = System.nanoTime();
+
+            try (OutputStream os = socket.getOutputStream()) {
+                os.write(outW);
+                long time4 = System.nanoTime();
 
                 try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
                      ObjectInputStream ois = new ObjectInputStream(bis)) {
                     final Object o = ois.readObject();
 
-                    long time4 = System.nanoTime();
+                    long time5 = System.nanoTime();
 
+                    System.out.println("Connected to " + hostName + ":" + hostPort);
                     System.out.println("Connect time: " + (time2 - time1)/1000 + " us");
-                    System.out.println("Write time: " + (time3 - time2)/1000 + " us");
-                    System.out.println("Read time: " + (time4 - time3)/1000 + " us");
+                    System.out.println("Serialization time: " + (time3 - time2)/1000 + " us");
+                    System.out.println("Write time: " + (time4 - time3)/1000 + " us");
+                    System.out.println("Read time: " + (time5 - time4)/1000 + " us");
 
                     return o;
                 } catch (ClassNotFoundException e) {
@@ -73,6 +80,12 @@ public final class BinaryLinkClient {
 
     public TestConfig jobRequest(String token) throws IOException {
         Object reply = requestResponse(new JobRequestFrame(token));
+        if (reply instanceof TestConfig) {
+//            return (TestConfig) reply;
+        } else {
+            throw new IllegalStateException("Got the erroneous reply: " + reply);
+        }
+        reply = requestResponse(new JobRequestFrame(token));
         if (reply instanceof TestConfig) {
             return (TestConfig) reply;
         } else {

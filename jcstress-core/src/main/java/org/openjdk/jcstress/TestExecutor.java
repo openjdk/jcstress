@@ -350,13 +350,9 @@ public class TestExecutor {
 
         public synchronized TestConfig jobRequest() {
             if (processed) {
-                return null;
+                return task;
             }
             processed = true;
-            return getTask();
-        }
-
-        public synchronized TestConfig getTask() {
             return task;
         }
 
