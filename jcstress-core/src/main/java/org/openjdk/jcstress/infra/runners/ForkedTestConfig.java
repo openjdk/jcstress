@@ -24,32 +24,19 @@
  */
 package org.openjdk.jcstress.infra.runners;
 
-import org.openjdk.jcstress.Options;
-import org.openjdk.jcstress.infra.TestInfo;
-import org.openjdk.jcstress.os.CPUMap;
-import org.openjdk.jcstress.os.SchedulingClass;
-
 import java.io.Serializable;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ForkedTestConfig implements Serializable {
     public final SpinLoopStyle spinLoopStyle;
     public final int time;
     public final int iters;
-    public final int threads;
-    public final String name;
     public final String generatedRunnerName;
     public final int maxFootprintMB;
-    public final int compileMode;
     public int minStride;
     public int maxStride;
-    public StrideCap strideCap;
-    public CPUMap cpuMap;
-
-    public void setCPUMap(CPUMap cpuMap) {
-        this.cpuMap = cpuMap;
-    }
+    public transient StrideCap strideCap;
+    public int[] actorMap;
 
     public enum StrideCap {
         NONE,
@@ -61,28 +48,11 @@ public class ForkedTestConfig implements Serializable {
         spinLoopStyle = cfg.spinLoopStyle;
         time = cfg.time;
         iters = cfg.iters;
-        threads = cfg.threads;
-        name = cfg.name;
         generatedRunnerName = cfg.generatedRunnerName;
         maxFootprintMB = cfg.maxFootprintMB;
-        compileMode = cfg.compileMode;
         minStride = cfg.minStride;
         maxStride = cfg.minStride;
-        cpuMap = cfg.cpuMap;
-    }
-
-    public ForkedTestConfig(Options opts, TestInfo info, int compileMode) {
-        time = opts.getTime();
-        minStride = opts.getMinStride();
-        maxStride = opts.getMaxStride();
-        iters = opts.getIterations();
-        spinLoopStyle = opts.getSpinStyle();
-        maxFootprintMB = opts.getMaxFootprintMb();
-        threads = info.threads();
-        name = info.name();
-        generatedRunnerName = info.generatedRunner();
-        this.compileMode = compileMode;
-        strideCap = StrideCap.NONE;
+        actorMap = cfg.cpuMap.actorMap();
     }
 
     public void adjustStrides(FootprintEstimator estimator) {
@@ -139,10 +109,6 @@ public class ForkedTestConfig implements Serializable {
         return StrideCap.NONE;
     }
 
-    public int getCompileMode() {
-        return compileMode;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -150,20 +116,18 @@ public class ForkedTestConfig implements Serializable {
 
         ForkedTestConfig that = (ForkedTestConfig) o;
 
-        if (!name.equals(that.name)) return false;
+        if (!generatedRunnerName.equals(that.generatedRunnerName)) return false;
         if (spinLoopStyle != that.spinLoopStyle) return false;
         if (minStride != that.minStride) return false;
         if (maxStride != that.maxStride) return false;
         if (time != that.time) return false;
         if (iters != that.iters) return false;
-        if (threads != that.threads) return false;
-        if (compileMode != that.compileMode) return false;
         return true;
     }
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return generatedRunnerName.hashCode();
     }
 
 }
