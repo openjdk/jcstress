@@ -27,7 +27,6 @@ package org.openjdk.jcstress.infra.runners;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 public class ForkedTestConfig {
@@ -102,10 +101,6 @@ public class ForkedTestConfig {
 
         maxStride = Math.min(maxStride, succCount);
         minStride = Math.min(minStride, succCount);
-    }
-
-    public interface FootprintEstimator {
-        void runWith(int size, long[] counters);
     }
 
     private boolean tryWith(FootprintEstimator estimator, int count) {
