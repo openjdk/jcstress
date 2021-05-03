@@ -28,20 +28,15 @@ import org.openjdk.jcstress.os.SchedulingClass;
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.os.CPUMap;
-import org.openjdk.jcstress.vm.AllocProfileSupport;
-import org.openjdk.jcstress.vm.DeoptMode;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 
 public class TestConfig implements Serializable {
     public final SpinLoopStyle spinLoopStyle;
     public final int time;
     public final int iters;
-    public final DeoptMode deoptMode;
     public final int threads;
     public final String name;
     public final String generatedRunnerName;
@@ -74,7 +69,6 @@ public class TestConfig implements Serializable {
         maxStride = opts.getMaxStride();
         iters = opts.getIterations();
         spinLoopStyle = opts.getSpinStyle();
-        deoptMode = opts.deoptMode();
         maxFootprintMB = opts.getMaxFootprintMb();
         threads = info.threads();
         name = info.name();
@@ -160,7 +154,6 @@ public class TestConfig implements Serializable {
         if (maxStride != that.maxStride) return false;
         if (time != that.time) return false;
         if (iters != that.iters) return false;
-        if (deoptMode != that.deoptMode) return false;
         if (threads != that.threads) return false;
         if (compileMode != that.compileMode) return false;
         if (!jvmArgs.equals(that.jvmArgs)) return false;

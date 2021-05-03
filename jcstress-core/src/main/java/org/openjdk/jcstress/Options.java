@@ -32,7 +32,6 @@ import org.openjdk.jcstress.infra.runners.SpinLoopStyle;
 import org.openjdk.jcstress.os.AffinityMode;
 import org.openjdk.jcstress.util.OptionFormatter;
 import org.openjdk.jcstress.util.StringUtils;
-import org.openjdk.jcstress.vm.DeoptMode;
 import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.IOException;
@@ -61,7 +60,6 @@ public class Options {
     private String mode;
     private SpinLoopStyle spinStyle;
     private String resultFile;
-    private DeoptMode deoptMode;
     private List<String> jvmArgs;
     private List<String> jvmArgsPrepend;
     private boolean splitCompilation;
@@ -120,10 +118,6 @@ public class Options {
 
         OptionSpec<String> modeStr = parser.accepts("m", "Test mode preset: sanity, quick, default, tough, stress.")
                 .withRequiredArg().ofType(String.class).describedAs("mode");
-
-        OptionSpec<DeoptMode> deoptMode = parser.accepts("deoptMode", "De-optimization mode, happens before each test. " +
-                "NONE = No deoptimization. METHOD = Deoptimize org.openjdk.jcstress.*. ALL = Deoptimize everything.")
-                .withRequiredArg().ofType(DeoptMode.class).describedAs("mode");
 
         OptionSpec<String> optJvmArgs = parser.accepts("jvmArgs", "Use given JVM arguments. This disables JVM flags auto-detection, " +
                 "and runs only the single JVM mode. Either a single space-separated option line, or multiple options are accepted. " +
@@ -203,7 +197,6 @@ public class Options {
         this.forks = 1;
         this.minStride = 10;
         this.maxStride = 10000;
-        this.deoptMode = DeoptMode.ALL;
 
         mode = orDefault(modeStr.value(set), "default");
         if (this.mode.equalsIgnoreCase("sanity")) {
@@ -212,7 +205,6 @@ public class Options {
             this.forks = 1;
             this.minStride = 1;
             this.maxStride = 1;
-            this.deoptMode = DeoptMode.NONE;
         } else
         if (this.mode.equalsIgnoreCase("quick")) {
             this.time = 200;
@@ -238,7 +230,6 @@ public class Options {
         this.time = orDefault(set.valueOf(time), this.time);
         this.iters = orDefault(set.valueOf(iters), this.iters);
         this.forks = orDefault(set.valueOf(forks), this.forks);
-        this.deoptMode = orDefault(set.valueOf(deoptMode), this.deoptMode);
         this.minStride = orDefault(set.valueOf(minStride), this.minStride);
         this.maxStride = orDefault(set.valueOf(maxStride), this.maxStride);
 
@@ -287,10 +278,6 @@ public class Options {
         out.printf("  Solo stride size will be autobalanced within [%d, %d] elements, but taking no more than %d Mb.%n", getMinStride(), getMaxStride(), getMaxFootprintMb());
 
         out.println();
-    }
-
-    public DeoptMode deoptMode() {
-        return deoptMode;
     }
 
     public int getMinStride() {

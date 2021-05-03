@@ -29,7 +29,6 @@ import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.StringUtils;
-import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,12 +75,6 @@ public abstract class Runner<R> {
             return dumpFailure(Status.API_MISMATCH, "Test sanity check failed, skipping", e);
         } catch (Throwable e) {
             return dumpFailure(Status.CHECK_TEST_ERROR, "Check test failed", e);
-        }
-
-        try {
-            WhiteBoxSupport.tryDeopt(config.deoptMode);
-        } catch (NoClassDefFoundError err) {
-            // gracefully "handle"
         }
 
         for (int c = 0; c < config.iters; c++) {
