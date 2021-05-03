@@ -58,21 +58,17 @@ public final class BinaryLinkClient {
         }
     }
 
-    public TestConfig nextJob(String token) throws IOException {
+    public TestConfig jobRequest(String token) throws IOException {
         Object reply = requestResponse(new JobRequestFrame(token));
-        if (reply instanceof JobResponseFrame) {
-            return ((JobResponseFrame) reply).getConfig();
+        if (reply instanceof TestConfig) {
+            return (TestConfig) reply;
         } else {
             throw new IllegalStateException("Got the erroneous reply: " + reply);
         }
     }
 
-    public void doneResult(String token, TestResult result) {
-        try {
-            requestResponse(new ResultsFrame(token, result));
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
+    public void doneResult(String token, TestResult result) throws IOException {
+        requestResponse(new ResultsFrame(token, result));
     }
 
 }

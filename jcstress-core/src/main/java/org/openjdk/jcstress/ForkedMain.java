@@ -74,7 +74,7 @@ public class ForkedMain {
             }
         });
 
-        TestConfig config = link.nextJob(token);
+        TestConfig config = link.jobRequest(token);
 
         TestResult result;
 

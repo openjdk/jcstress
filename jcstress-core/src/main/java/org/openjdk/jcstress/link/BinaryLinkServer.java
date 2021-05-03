@@ -123,14 +123,14 @@ public final class BinaryLinkServer {
                         if (obj instanceof JobRequestFrame) {
                             String tkn = ((JobRequestFrame) obj).getToken();
                             TestConfig cfg = listener.onJobRequest(tkn);
-                            oos.writeObject(new JobResponseFrame(cfg));
+                            oos.writeObject(cfg);
                         } else if (obj instanceof ResultsFrame) {
                             ResultsFrame rf = (ResultsFrame) obj;
                             listener.onResult(rf.getToken(), rf.getRes());
                             oos.writeObject(new OkResponseFrame());
                         } else {
                             // should always reply something
-                            oos.writeObject(new WTFWasThatFrame());
+                            oos.writeObject(new OkResponseFrame());
                         }
                     }
                 }
