@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,20 +24,31 @@
  */
 package org.openjdk.jcstress.link;
 
-import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
-import java.io.Serializable;
+class Protocol {
 
-class JobResponseFrame implements Serializable {
-    private static final long serialVersionUID = 2082214387637725282L;
+    static final byte TAG_JOBREQUEST = 1;
+    static final byte TAG_TESTCONFIG = 2;
+    static final byte TAG_RESULTS = 3;
+    static final byte TAG_OK = 4;
+    static final byte TAG_FAILED = 5;
 
-    private final ForkedTestConfig config;
-
-    public JobResponseFrame(ForkedTestConfig config) {
-        this.config = config;
+    static int readTag(DataInputStream dis) throws IOException {
+        return dis.read();
     }
 
-    public ForkedTestConfig getConfig() {
-        return config;
+    static void writeTag(DataOutputStream dos, byte tag) throws IOException {
+        dos.write(tag);
+    }
+
+    static int readToken(DataInputStream dis) throws IOException {
+        return dis.readInt();
+    }
+
+    static void writeToken(DataOutputStream dos, int token) throws IOException {
+        dos.writeInt(token);
     }
 }

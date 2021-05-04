@@ -34,52 +34,53 @@ public final class BinaryLinkClient {
 
     private static final int LINK_TIMEOUT_MS = Integer.getInteger("jcstress.link.timeoutMs", 30 * 1000);
 
-    private final Object lock;
     private final String hostName;
     private final int hostPort;
 
     public BinaryLinkClient(String hostName, int hostPort) {
         this.hostName = hostName;
         this.hostPort = hostPort;
-        this.lock = new Object();
     }
 
-    private Object requestResponse(Object frame) throws IOException {
-        synchronized (lock) {
-            try (Socket socket = new Socket(hostName, hostPort)) {
-                socket.setKeepAlive(true);
-                socket.setSoTimeout(LINK_TIMEOUT_MS);
+    public ForkedTestConfig jobRequest(int token) throws IOException {
+        try (Socket socket = new Socket(hostName, hostPort)) {
+            socket.setSoTimeout(LINK_TIMEOUT_MS);
+            try (OutputStream os = socket.getOutputStream();
+                 DataOutputStream dos = new DataOutputStream(os)) {
+                Protocol.writeTag(dos, Protocol.TAG_JOBREQUEST);
+                Protocol.writeToken(dos, token);
+                dos.flush();
 
-                try (BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
-                     ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-                    oos.writeObject(frame);
-                    oos.flush();
-
-                    try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
-                         ObjectInputStream ois = new ObjectInputStream(bis)) {
-                        return ois.readObject();
-                    } catch (ClassNotFoundException e) {
-                        throw new IOException(e);
+                try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
+                     DataInputStream dis = new DataInputStream(bis)) {
+                    int tag = Protocol.readTag(dis);
+                    if (tag != Protocol.TAG_TESTCONFIG) {
+                        throw new IllegalStateException("Unexpected tag");
                     }
+                    return new ForkedTestConfig(dis);
                 }
             }
         }
     }
 
-    public ForkedTestConfig nextJob(String token) throws IOException {
-        Object reply = requestResponse(new JobRequestFrame(token));
-        if (reply instanceof JobResponseFrame) {
-            return ((JobResponseFrame) reply).getConfig();
-        } else {
-            throw new IllegalStateException("Got the erroneous reply: " + reply);
-        }
-    }
+    public void doneResult(int token, TestResult result) throws IOException {
+        try (Socket socket = new Socket(hostName, hostPort)) {
+            socket.setSoTimeout(LINK_TIMEOUT_MS);
+            try (OutputStream os = socket.getOutputStream();
+                 DataOutputStream dos = new DataOutputStream(os)) {
+                Protocol.writeTag(dos, Protocol.TAG_RESULTS);
+                Protocol.writeToken(dos, token);
+                result.write(dos);
+                dos.flush();
 
-    public void doneResult(String token, TestResult result) {
-        try {
-            requestResponse(new ResultsFrame(token, result));
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
+                try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
+                     DataInputStream dis = new DataInputStream(bis)) {
+                    int tag = Protocol.readTag(dis);
+                    if (tag != Protocol.TAG_OK) {
+                        throw new IllegalStateException("Unexpected tag");
+                    }
+                }
+            }
         }
     }
 

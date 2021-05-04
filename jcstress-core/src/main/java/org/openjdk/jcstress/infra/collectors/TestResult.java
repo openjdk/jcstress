@@ -31,6 +31,9 @@ import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.Environment;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,6 +58,49 @@ public class TestResult implements Serializable {
         this.messages = new ArrayList<>();
         this.vmOut = new ArrayList<>();
         this.vmErr = new ArrayList<>();
+    }
+
+    public TestResult(DataInputStream dis) throws IOException {
+        status = Status.values()[dis.readInt()];
+        states = new Counter<>(dis);
+        messages = new ArrayList<>();
+        {
+            int len = dis.readInt();
+            for (int c = 0; c < len; c++) {
+                messages.add(dis.readUTF());
+            }
+        }
+        vmOut = new ArrayList<>();
+        {
+            int len = dis.readInt();
+            for (int c = 0; c < len; c++) {
+                vmOut.add(dis.readUTF());
+            }
+        }
+        vmErr = new ArrayList<>();
+        {
+            int len = dis.readInt();
+            for (int c = 0; c < len; c++) {
+                vmErr.add(dis.readUTF());
+            }
+        }
+    }
+
+    public void write(DataOutputStream dos) throws IOException {
+        dos.writeInt(status.ordinal());
+        states.write(dos);
+        dos.writeInt(messages.size());
+        for (String s : messages) {
+            dos.writeUTF(s);
+        }
+        dos.writeInt(vmOut.size());
+        for (String s : vmOut) {
+            dos.writeUTF(s);
+        }
+        dos.writeInt(vmErr.size());
+        for (String s : vmErr) {
+            dos.writeUTF(s);
+        }
     }
 
     public void setConfig(TestConfig config) {

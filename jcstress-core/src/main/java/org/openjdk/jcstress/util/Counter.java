@@ -71,6 +71,27 @@ public final class Counter<R> implements Serializable {
         this.keyCount = 0;
     }
 
+    public Counter(DataInputStream dis) throws IOException {
+        init();
+        int len = dis.readInt();
+        for (int c = 0; c < len; c++) {
+            @SuppressWarnings("unchecked")
+            R key = (R) dis.readUTF();
+            long count = dis.readLong();
+            record(key, count);
+        }
+    }
+
+    public void write(DataOutputStream dos) throws IOException {
+        dos.writeInt(keyCount);
+        for (int c = 0; c < keys.length; c++) {
+            if (keys[c] != null) {
+                dos.writeUTF(keys[c].toString());
+                dos.writeLong(counts[c]);
+            }
+        }
+    }
+
     /**
      * Records the result.
      * The result can mutate after the record() is finished.
@@ -221,31 +242,6 @@ public final class Counter<R> implements Serializable {
             if (c > 0) return false;
         }
         return true;
-    }
-
-    private void readObject(ObjectInputStream is) throws IOException, ClassNotFoundException {
-        init();
-        int len = is.readInt();
-        for (int c = 0; c < len; c++) {
-            @SuppressWarnings("unchecked")
-            R key = (R) is.readObject();
-            long count = is.readLong();
-            record(key, count);
-        }
-    }
-
-    private void readObjectNoData() throws ObjectStreamException {
-        init();
-    }
-
-    private void writeObject(ObjectOutputStream os) throws IOException {
-        os.writeInt(keyCount);
-        for (int c = 0; c < keys.length; c++) {
-            if (keys[c] != null) {
-                os.writeObject(keys[c]);
-                os.writeLong(counts[c]);
-            }
-        }
     }
 
 }

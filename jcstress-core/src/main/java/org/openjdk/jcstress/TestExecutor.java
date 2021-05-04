@@ -60,7 +60,7 @@ public class TestExecutor {
     private final TestResultCollector sink;
     private final Scheduler scheduler;
 
-    private final Map<String, VM> vmByToken;
+    private final Map<Integer, VM> vmByToken;
     private final Object notifyLock;
 
     public TestExecutor(Verbosity verbosity, TestResultCollector sink, Scheduler scheduler) throws IOException {
@@ -72,12 +72,12 @@ public class TestExecutor {
 
         server = new BinaryLinkServer(new ServerListener() {
             @Override
-            public ForkedTestConfig onJobRequest(String token) {
+            public ForkedTestConfig onJobRequest(int token) {
                 return vmByToken.get(token).jobRequest();
             }
 
             @Override
-            public void onResult(String token, TestResult result) {
+            public void onResult(int token, TestResult result) {
                 vmByToken.get(token).recordResult(result);
                 notifyChanged();
             }
@@ -134,7 +134,7 @@ public class TestExecutor {
 
                     TestConfig cfg = byScl.removeLast(scl);
                     cfg.setCPUMap(cpuMap);
-                    String token = "fork-token-" + ID.incrementAndGet();
+                    int token = ID.incrementAndGet();
                     VM vm = new VM(server.getHost(), server.getPort(), token, cfg, cpuMap);
                     vmByToken.put(token, vm);
                     vm.start();
@@ -172,7 +172,7 @@ public class TestExecutor {
     private class VM {
         private final String host;
         private final int port;
-        private final String token;
+        private final int token;
         private File compilerDirectives;
         private final TestConfig task;
         private final CPUMap cpuMap;
@@ -183,7 +183,7 @@ public class TestExecutor {
         private InputStreamCollector errCollector;
         private InputStreamCollector outCollector;
 
-        public VM(String host, int port, String token, TestConfig task, CPUMap cpuMap) {
+        public VM(String host, int port, int token, TestConfig task, CPUMap cpuMap) {
             this.host = host;
             this.port = port;
             this.token = token;
@@ -330,7 +330,7 @@ public class TestExecutor {
                 command.add(String.valueOf(port));
 
                 // which config should the forked VM pull?
-                command.add(token);
+                command.add(String.valueOf(token));
 
                 ProcessBuilder pb = new ProcessBuilder(command);
                 process = pb.start();

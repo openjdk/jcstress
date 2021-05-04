@@ -24,6 +24,7 @@
  */
 package org.openjdk.jcstress.link;
 
+import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 
 import java.io.*;
@@ -87,7 +88,6 @@ public final class BinaryLinkServer {
         } catch (InterruptedException e) {
             // do nothing
         }
-
     }
 
     public String getHost() {
@@ -114,33 +114,37 @@ public final class BinaryLinkServer {
         }
 
         private void acceptAndProcess() {
-            try (Socket socket = server.accept()) {
-                try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
-                     ObjectInputStream ois = new ObjectInputStream(bis)) {
-                    Object obj = ois.readObject();
-                    try (BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
-                         ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-                        if (obj instanceof JobRequestFrame) {
-                            String tkn = ((JobRequestFrame) obj).getToken();
-                            ForkedTestConfig cfg = listener.onJobRequest(tkn);
-                            oos.writeObject(new JobResponseFrame(cfg));
-                        } else if (obj instanceof ResultsFrame) {
-                            ResultsFrame rf = (ResultsFrame) obj;
-                            listener.onResult(rf.getToken(), rf.getRes());
-                            oos.writeObject(new OkResponseFrame());
-                        } else {
-                            // should always reply something
-                            oos.writeObject(new WTFWasThatFrame());
+            try (Socket socket = server.accept();
+                 BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
+                 DataInputStream dis = new DataInputStream(bis)) {
+                int tag = Protocol.readTag(dis);
+                int token = Protocol.readToken(dis);
+                try (BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
+                     DataOutputStream dos = new DataOutputStream(bos)) {
+                    switch (tag) {
+                        case Protocol.TAG_JOBREQUEST: {
+                            ForkedTestConfig ftc = listener.onJobRequest(token);
+                            Protocol.writeTag(dos, Protocol.TAG_TESTCONFIG);
+                            ftc.write(dos);
+                            break;
+                        }
+                        case Protocol.TAG_RESULTS: {
+                            TestResult tr = new TestResult(dis);
+                            listener.onResult(token, tr);
+                            Protocol.writeTag(dos, Protocol.TAG_OK);
+                            break;
+                        }
+                        default: {
+                            Protocol.writeTag(dos, Protocol.TAG_FAILED);
+                            break;
                         }
                     }
+                    dos.flush();
                 }
-            } catch (EOFException e) {
-                // ignore
-            } catch (Exception e) {
+            } catch (IOException e) {
                 // ignore, the exit code would be non-zero, and TestExecutor would handle it.
             }
         }
-
     }
 
 }
