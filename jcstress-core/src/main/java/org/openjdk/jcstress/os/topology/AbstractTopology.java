@@ -51,44 +51,49 @@ public abstract class AbstractTopology implements Topology {
     private boolean finished;
 
     protected void add(int packageId, int coreId, int threadId) throws TopologyParseException {
+        String triplet = "P" + packageId + ", C" + coreId + ", T" + threadId;
+
         if (packageId == -1) {
-            throw new TopologyParseException("Package is not initialized: " + packageId);
+            throw new TopologyParseException("Package is not initialized: " + triplet);
         }
 
         if (coreId == -1) {
-            throw new TopologyParseException("Core is not initialized: " + coreId);
+            throw new TopologyParseException("Core is not initialized: " + triplet);
         }
 
         if (threadId == -1) {
-            throw new TopologyParseException("Thread is not initialized: " + threadId);
+            throw new TopologyParseException("Thread is not initialized: " + triplet);
         }
 
         packages.add(packageId);
         cores.add(coreId);
 
         if (!threads.add(threadId)) {
-            throw new TopologyParseException("Duplicate thread ID: " + threadId);
+            throw new TopologyParseException("Duplicate thread ID: " + triplet);
         }
 
         if (coreToPackage.containsKey(coreId)) {
-            if (!coreToPackage.get(coreId).equals(packageId)) {
-                throw new TopologyParseException("Core belongs to different packages: " + coreId);
+            Integer ex = coreToPackage.get(coreId);
+            if (!ex.equals(packageId)) {
+                throw new TopologyParseException("Core belongs to different packages: " + triplet + ", " + ex);
             }
         } else {
             coreToPackage.put(coreId, packageId);
         }
 
         if (threadToPackage.containsKey(threadId)) {
-            if (!threadToPackage.get(threadId).equals(packageId)) {
-                throw new TopologyParseException("Thread belongs to different packages: " + packageId);
+            Integer ex = threadToPackage.get(threadId);
+            if (!ex.equals(packageId)) {
+                throw new TopologyParseException("Thread belongs to different packages: " + triplet + ", " + ex);
             }
         } else {
             threadToPackage.put(threadId, packageId);
         }
 
         if (threadToCore.containsKey(threadId)) {
-            if (!threadToCore.get(threadId).equals(coreId)) {
-                throw new TopologyParseException("Thread belongs to different cores: " + threadId);
+            Integer ex = threadToCore.get(threadId);
+            if (!ex.equals(coreId)) {
+                throw new TopologyParseException("Thread belongs to different cores: " + triplet + ", " + ex);
             }
         } else {
             threadToCore.put(threadId, coreId);

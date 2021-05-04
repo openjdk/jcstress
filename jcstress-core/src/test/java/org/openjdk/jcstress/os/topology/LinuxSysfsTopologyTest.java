@@ -151,15 +151,15 @@ public class LinuxSysfsTopologyTest extends AbstractTopologyTest {
         FileSystem fs = parse("/topology/sysfs-7.txt");
         LinuxSysfsTopology topo = new LinuxSysfsTopology(fs.getPath(""));
 
-        Assert.assertEquals(2,  topo.packagesPerSystem());
-        Assert.assertEquals(1, topo.coresPerPackage());
-        Assert.assertEquals(1,  topo.threadsPerCore());
-        Assert.assertEquals(2, topo.totalCores());
-        Assert.assertEquals(2, topo.totalThreads());
+        Assert.assertEquals(2, topo.packagesPerSystem());
+        Assert.assertEquals(4, topo.coresPerPackage());
+        Assert.assertEquals(1, topo.threadsPerCore());
+        Assert.assertEquals(8, topo.totalCores());
+        Assert.assertEquals(8, topo.totalThreads());
 
         for (int t = 0; t < topo.totalThreads(); t++) {
-            Assert.assertEquals(t, topo.threadToPackage(t));
-            Assert.assertEquals(t, topo.threadToCore(t));
+            Assert.assertEquals(t % 2, topo.threadToPackage(t));
+            Assert.assertEquals((t % 2) * 4 + (t / 2), topo.threadToCore(t));
         }
 
         checkGenericInvariants(topo);
