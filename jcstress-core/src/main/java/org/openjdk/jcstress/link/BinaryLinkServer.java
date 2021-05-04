@@ -128,24 +128,25 @@ public final class BinaryLinkServer {
     private void handle(Socket socket) {
         try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
              DataInputStream dis = new DataInputStream(bis)) {
-            int tag = dis.read();
-            int token = dis.readInt();
+            int tag = Protocol.readTag(dis);
+            int token = Protocol.readToken(dis);
             try (BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
                  DataOutputStream dos = new DataOutputStream(bos)) {
                 switch (tag) {
                     case Protocol.TAG_JOBREQUEST: {
                         ForkedTestConfig ftc = listener.onJobRequest(token);
+                        Protocol.writeTag(dos, Protocol.TAG_TESTCONFIG);
                         ftc.write(dos);
                         break;
                     }
                     case Protocol.TAG_RESULTS: {
                         TestResult tr = new TestResult(dis);
                         listener.onResult(token, tr);
-                        dos.write(Protocol.TAG_OK);
+                        Protocol.writeTag(dos, Protocol.TAG_OK);
                         break;
                     }
                     default: {
-                        dos.write(Protocol.TAG_FAILED);
+                        Protocol.writeTag(dos, Protocol.TAG_FAILED);
                         break;
                     }
                 }

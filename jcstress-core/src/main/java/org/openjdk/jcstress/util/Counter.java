@@ -61,6 +61,16 @@ public final class Counter<R> implements Serializable {
         init();
     }
 
+    private void init() {
+        length = INITIAL_CAPACITY;
+
+        @SuppressWarnings("unchecked")
+        R[] table = (R[]) new Object[length];
+        this.keys = table;
+        this.counts = new long[length];
+        this.keyCount = 0;
+    }
+
     public Counter(DataInputStream dis) throws IOException {
         init();
         int len = dis.readInt();
@@ -72,14 +82,14 @@ public final class Counter<R> implements Serializable {
         }
     }
 
-    private void init() {
-        length = INITIAL_CAPACITY;
-
-        @SuppressWarnings("unchecked")
-        R[] table = (R[]) new Object[length];
-        this.keys = table;
-        this.counts = new long[length];
-        this.keyCount = 0;
+    public void write(DataOutputStream dos) throws IOException {
+        dos.writeInt(keyCount);
+        for (int c = 0; c < keys.length; c++) {
+            if (keys[c] != null) {
+                dos.writeUTF(keys[c].toString());
+                dos.writeLong(counts[c]);
+            }
+        }
     }
 
     /**
@@ -234,38 +244,4 @@ public final class Counter<R> implements Serializable {
         return true;
     }
 
-    private void readObject(ObjectInputStream is) throws IOException, ClassNotFoundException {
-        init();
-        int len = is.readInt();
-        for (int c = 0; c < len; c++) {
-            @SuppressWarnings("unchecked")
-            R key = (R) is.readObject();
-            long count = is.readLong();
-            record(key, count);
-        }
-    }
-
-    private void readObjectNoData() throws ObjectStreamException {
-        init();
-    }
-
-    private void writeObject(ObjectOutputStream os) throws IOException {
-        os.writeInt(keyCount);
-        for (int c = 0; c < keys.length; c++) {
-            if (keys[c] != null) {
-                os.writeObject(keys[c]);
-                os.writeLong(counts[c]);
-            }
-        }
-    }
-
-    public void write(DataOutputStream dos) throws IOException {
-        dos.writeInt(keyCount);
-        for (int c = 0; c < keys.length; c++) {
-            if (keys[c] != null) {
-                dos.writeUTF(keys[c].toString());
-                dos.writeLong(counts[c]);
-            }
-        }
-    }
 }

@@ -24,11 +24,31 @@
  */
 package org.openjdk.jcstress.link;
 
-public class Protocol {
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
-    public static final byte TAG_JOBREQUEST = 1;
-    public static final byte TAG_TESTCONFIG = 2;
-    public static final byte TAG_RESULTS = 3;
-    public static final byte TAG_OK = 4;
-    public static final byte TAG_FAILED = 5;
+class Protocol {
+
+    static final byte TAG_JOBREQUEST = 1;
+    static final byte TAG_TESTCONFIG = 2;
+    static final byte TAG_RESULTS = 3;
+    static final byte TAG_OK = 4;
+    static final byte TAG_FAILED = 5;
+
+    static int readTag(DataInputStream dis) throws IOException {
+        return dis.read();
+    }
+
+    static void writeTag(DataOutputStream dos, byte tag) throws IOException {
+        dos.write(tag);
+    }
+
+    static int readToken(DataInputStream dis) throws IOException {
+        return dis.readInt();
+    }
+
+    static void writeToken(DataOutputStream dos, int token) throws IOException {
+        dos.writeInt(token);
+    }
 }

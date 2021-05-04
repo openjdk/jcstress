@@ -44,12 +44,16 @@ public final class BinaryLinkClient {
         try (Socket socket = new Socket(hostName, hostPort)) {
             try (OutputStream os = socket.getOutputStream();
                  DataOutputStream dos = new DataOutputStream(os)) {
-                dos.write(Protocol.TAG_JOBREQUEST);
-                dos.writeInt(token);
+                Protocol.writeTag(dos, Protocol.TAG_JOBREQUEST);
+                Protocol.writeToken(dos, token);
                 dos.flush();
 
                 try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
                      DataInputStream dis = new DataInputStream(bis)) {
+                    int tag = Protocol.readTag(dis);
+                    if (tag != Protocol.TAG_TESTCONFIG) {
+                        throw new IllegalStateException("Unexpected tag");
+                    }
                     return new ForkedTestConfig(dis);
                 }
             }
@@ -60,16 +64,16 @@ public final class BinaryLinkClient {
         try (Socket socket = new Socket(hostName, hostPort)) {
             try (OutputStream os = socket.getOutputStream();
                  DataOutputStream dos = new DataOutputStream(os)) {
-                dos.write(Protocol.TAG_RESULTS);
-                dos.writeInt(token);
+                Protocol.writeTag(dos, Protocol.TAG_RESULTS);
+                Protocol.writeToken(dos, token);
                 result.write(dos);
                 dos.flush();
 
                 try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
                      DataInputStream dis = new DataInputStream(bis)) {
-                    int tag = dis.read();
+                    int tag = Protocol.readTag(dis);
                     if (tag != Protocol.TAG_OK) {
-                        throw new IllegalStateException("Not OK");
+                        throw new IllegalStateException("Unexpected tag");
                     }
                 }
             }
