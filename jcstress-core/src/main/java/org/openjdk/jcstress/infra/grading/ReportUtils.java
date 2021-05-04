@@ -138,7 +138,7 @@ public class ReportUtils {
         }
         pw.println();
 
-        if (r.hasSamples()) {
+        if (!r.isEmpty()) {
             int idLen = "Observed state".length();
             int occLen = "Occurrences".length();
             int expectLen = "Expectation".length();

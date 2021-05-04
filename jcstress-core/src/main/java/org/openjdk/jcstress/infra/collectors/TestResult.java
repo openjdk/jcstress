@@ -145,7 +145,7 @@ public class TestResult implements Serializable {
         return TestGrading.grade(this);
     }
 
-    public boolean hasSamples() {
-        return !states.isEmpty();
+    public boolean isEmpty() {
+        return states.isEmpty();
     }
 }
