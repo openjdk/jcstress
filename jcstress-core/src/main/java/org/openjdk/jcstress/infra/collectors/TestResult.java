@@ -30,8 +30,6 @@ import org.openjdk.jcstress.infra.grading.TestGrading;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.Environment;
-import org.openjdk.jcstress.util.HashMultiset;
-import org.openjdk.jcstress.util.Multiset;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -150,5 +148,13 @@ public class TestResult implements Serializable {
 
     public boolean isEmpty() {
         return states.isEmpty();
+    }
+
+    public Counter<String> getCounter() {
+        return states;
+    }
+
+    public void addState(Counter<String> other) {
+        states.merge(other);
     }
 }
