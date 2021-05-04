@@ -40,90 +40,37 @@ public final class BinaryLinkClient {
         this.hostPort = hostPort;
     }
 
-    private Object requestResponse(Object frame) throws IOException {
-        long time1 = System.nanoTime();
-        try (Socket socket = new Socket(hostName, hostPort)) {
-            long time2 = System.nanoTime();
-            long time3 = System.nanoTime();
-
-            try (OutputStream os = socket.getOutputStream()) {
-                os.write(Protocol.TAG_JOBREQUEST);
-                os.flush();
-
-                long time4 = System.nanoTime();
-
-                try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
-                     ObjectInputStream ois = new ObjectInputStream(bis)) {
-                    final Object o = ois.readObject();
-
-                    long time5 = System.nanoTime();
-
-                    System.out.println("Connected to " + hostName + ":" + hostPort);
-                    System.out.println("Connect time: " + (time2 - time1)/1000 + " us");
-                    System.out.println("Serialization time: " + (time3 - time2)/1000 + " us");
-                    System.out.println("Write time: " + (time4 - time3)/1000 + " us");
-                    System.out.println("Read time: " + (time5 - time4)/1000 + " us");
-
-                    return o;
-                } catch (ClassNotFoundException e) {
-                    throw new IOException(e);
-                }
-            }
-        }
-    }
-
     public ForkedTestConfig jobRequest(int token) throws IOException {
-        long time1 = System.nanoTime();
         try (Socket socket = new Socket(hostName, hostPort)) {
-            long time2 = System.nanoTime();
             try (OutputStream os = socket.getOutputStream();
                  DataOutputStream dos = new DataOutputStream(os)) {
                 dos.write(Protocol.TAG_JOBREQUEST);
-                dos.write(token);
+                dos.writeInt(token);
                 dos.flush();
-
-                long time3 = System.nanoTime();
 
                 try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
                      DataInputStream dis = new DataInputStream(bis)) {
-                    ForkedTestConfig ftc = new ForkedTestConfig(dis);
-
-                    long time4 = System.nanoTime();
-
-                    System.out.println("Connected to " + hostName + ":" + hostPort);
-                    System.out.println("Connect time: " + (time2 - time1)/1000 + " us");
-                    System.out.println("Write time: " + (time3 - time2)/1000 + " us");
-                    System.out.println("Read time: " + (time4 - time3)/1000 + " us");
-
-                    return ftc;
+                    return new ForkedTestConfig(dis);
                 }
             }
         }
     }
 
     public void doneResult(int token, TestResult result) throws IOException {
-        long time1 = System.nanoTime();
         try (Socket socket = new Socket(hostName, hostPort)) {
-            long time2 = System.nanoTime();
             try (OutputStream os = socket.getOutputStream();
                  DataOutputStream dos = new DataOutputStream(os)) {
                 dos.write(Protocol.TAG_RESULTS);
-                dos.write(token);
+                dos.writeInt(token);
                 result.write(dos);
                 dos.flush();
 
-                long time3 = System.nanoTime();
-
                 try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
                      DataInputStream dis = new DataInputStream(bis)) {
-                    dis.readInt();
-
-                    long time4 = System.nanoTime();
-
-                    System.out.println("Connected to " + hostName + ":" + hostPort);
-                    System.out.println("Connect time: " + (time2 - time1)/1000 + " us");
-                    System.out.println("Write time: " + (time3 - time2)/1000 + " us");
-                    System.out.println("Read time: " + (time4 - time3)/1000 + " us");
+                    int tag = dis.read();
+                    if (tag != Protocol.TAG_OK) {
+                        throw new IllegalStateException("Not OK");
+                    }
                 }
             }
         }

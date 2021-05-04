@@ -61,6 +61,17 @@ public final class Counter<R> implements Serializable {
         init();
     }
 
+    public Counter(DataInputStream dis) throws IOException {
+        init();
+        int len = dis.readInt();
+        for (int c = 0; c < len; c++) {
+            @SuppressWarnings("unchecked")
+            R key = (R) dis.readUTF();
+            long count = dis.readLong();
+            record(key, count);
+        }
+    }
+
     private void init() {
         length = INITIAL_CAPACITY;
 
@@ -248,4 +259,13 @@ public final class Counter<R> implements Serializable {
         }
     }
 
+    public void write(DataOutputStream dos) throws IOException {
+        dos.writeInt(keyCount);
+        for (int c = 0; c < keys.length; c++) {
+            if (keys[c] != null) {
+                dos.writeUTF(keys[c].toString());
+                dos.writeLong(counts[c]);
+            }
+        }
+    }
 }

@@ -128,7 +128,7 @@ public final class BinaryLinkServer {
     private void handle(Socket socket) {
         try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
              DataInputStream dis = new DataInputStream(bis)) {
-            int tag = dis.readInt();
+            int tag = dis.read();
             int token = dis.readInt();
             try (BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
                  DataOutputStream dos = new DataOutputStream(bos)) {
@@ -141,18 +141,18 @@ public final class BinaryLinkServer {
                     case Protocol.TAG_RESULTS: {
                         TestResult tr = new TestResult(dis);
                         listener.onResult(token, tr);
-                        dos.writeInt(Protocol.TAG_OK);
+                        dos.write(Protocol.TAG_OK);
                         break;
                     }
                     default: {
-                        dos.writeInt(Protocol.TAG_FAILED);
+                        dos.write(Protocol.TAG_FAILED);
                         break;
                     }
                 }
                 dos.flush();
             }
             socket.close();
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
             // Do nothing
         }
     }
