@@ -43,7 +43,7 @@ import java.util.List;
  */
 public class TestResult implements Serializable {
 
-    private final TestConfig config;
+    private TestConfig config;
     private final Status status;
     private final Counter<String> states;
     private volatile Environment env;
@@ -51,13 +51,16 @@ public class TestResult implements Serializable {
     private final List<String> vmOut;
     private final List<String> vmErr;
 
-    public TestResult(TestConfig config, Status status) {
-        this.config = config;
+    public TestResult(Status status) {
         this.status = status;
         this.states = new Counter<>();
         this.messages = new ArrayList<>();
         this.vmOut = new ArrayList<>();
         this.vmErr = new ArrayList<>();
+    }
+
+    public void setConfig(TestConfig config) {
+        this.config = config;
     }
 
     public void addState(String result, long count) {

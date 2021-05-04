@@ -330,7 +330,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    " + r + "[] gr;");
         pw.println();
 
-        pw.println("    public " + className + "(TestConfig config, ExecutorService pool) {");
+        pw.println("    public " + className + "(ForkedTestConfig config, ExecutorService pool) {");
         pw.println("        super(config, pool, \"" + getQualifiedName(info.getTest()) + "\");");
         pw.println("    }");
         pw.println();
@@ -567,7 +567,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println();
             pw.println("    private Counter<" + r + "> " + TASK_LOOP_PREFIX + a.getSimpleName() + "() {");
             pw.println("        Counter<" + r + "> counter = new Counter<>();");
-            pw.println("        AffinitySupport.bind(config.cpuMap.actorMap()[" + n + "]);");
+            pw.println("        AffinitySupport.bind(config.actorMap[" + n + "]);");
             pw.println("        while (true) {");
             pw.println("            WorkerSync sync = workerSync;");
             pw.println("            if (sync.stopped) {");
@@ -774,7 +774,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("public class " + generatedName + " extends Runner<" + generatedName + ".Outcome> {");
         pw.println();
 
-        pw.println("    public " + generatedName + "(TestConfig config, ExecutorService pool) {");
+        pw.println("    public " + generatedName + "(ForkedTestConfig config, ExecutorService pool) {");
         pw.println("        super(config, pool, \"" + getQualifiedName(info.getTest()) + "\");");
         pw.println("    }");
         pw.println();
@@ -953,7 +953,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         Class<?>[] imports = new Class<?>[] {
                 ArrayList.class, Arrays.class, Collection.class,
                 ExecutorService.class, Future.class, TimeUnit.class,
-                TestConfig.class, TestResult.class,
+                ForkedTestConfig.class, TestResult.class,
                 Runner.class, WorkerSync.class, Counter.class,
                 ExecutionException.class,
                 Callable.class, Collections.class, List.class,

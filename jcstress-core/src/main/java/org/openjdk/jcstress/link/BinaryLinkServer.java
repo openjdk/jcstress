@@ -24,7 +24,7 @@
  */
 package org.openjdk.jcstress.link;
 
-import org.openjdk.jcstress.infra.runners.TestConfig;
+import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 
 import java.io.*;
 import java.net.*;
@@ -122,7 +122,7 @@ public final class BinaryLinkServer {
                          ObjectOutputStream oos = new ObjectOutputStream(bos)) {
                         if (obj instanceof JobRequestFrame) {
                             String tkn = ((JobRequestFrame) obj).getToken();
-                            TestConfig cfg = listener.onJobRequest(tkn);
+                            ForkedTestConfig cfg = listener.onJobRequest(tkn);
                             oos.writeObject(new JobResponseFrame(cfg));
                         } else if (obj instanceof ResultsFrame) {
                             ResultsFrame rf = (ResultsFrame) obj;

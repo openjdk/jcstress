@@ -31,7 +31,6 @@ import org.openjdk.jcstress.os.CPUMap;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class TestConfig implements Serializable {
     public final SpinLoopStyle spinLoopStyle;
@@ -48,17 +47,10 @@ public class TestConfig implements Serializable {
     public final SchedulingClass shClass;
     public int minStride;
     public int maxStride;
-    public StrideCap strideCap;
     public CPUMap cpuMap;
 
     public void setCPUMap(CPUMap cpuMap) {
         this.cpuMap = cpuMap;
-    }
-
-    public enum StrideCap {
-        NONE,
-        FOOTPRINT,
-        TIME,
     }
 
     public TestConfig(Options opts, TestInfo info, int forkId, List<String> jvmArgs, int compileMode, SchedulingClass scl) {
@@ -76,61 +68,6 @@ public class TestConfig implements Serializable {
         actorNames = info.actorNames();
         this.compileMode = compileMode;
         shClass = scl;
-        strideCap = StrideCap.NONE;
-    }
-
-    public void adjustStrides(FootprintEstimator estimator) {
-        int count = 1;
-        int succCount = count;
-        while (true) {
-            StrideCap cap = tryWith(estimator, count);
-            if (cap != StrideCap.NONE) {
-                strideCap = cap;
-                break;
-            }
-
-            // success!
-            succCount = count;
-
-            // do not go over the maxStride
-            if (succCount >= maxStride) {
-                succCount = maxStride;
-                break;
-            }
-
-            count *= 2;
-        }
-
-        maxStride = Math.min(maxStride, succCount);
-        minStride = Math.min(minStride, succCount);
-    }
-
-    public interface FootprintEstimator {
-        void runWith(int size, long[] counters);
-    }
-
-    private StrideCap tryWith(FootprintEstimator estimator, int count) {
-        try {
-            long[] cnts = new long[2];
-            estimator.runWith(count, cnts);
-            long footprint = cnts[0];
-            long usedTime = cnts[1];
-
-            if (footprint > maxFootprintMB * 1024 * 1024) {
-                // blown the footprint estimate
-                return StrideCap.FOOTPRINT;
-            }
-
-            if (TimeUnit.NANOSECONDS.toMillis(usedTime) > time) {
-                // blown the time estimate
-                return StrideCap.TIME;
-            }
-
-        } catch (OutOfMemoryError err) {
-            // blown the heap size
-            return StrideCap.FOOTPRINT;
-        }
-        return StrideCap.NONE;
     }
 
     public int getCompileMode() {

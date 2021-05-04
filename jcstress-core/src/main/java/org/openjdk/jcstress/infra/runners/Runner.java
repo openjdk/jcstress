@@ -26,7 +26,6 @@ package org.openjdk.jcstress.infra.runners;
 
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.StringUtils;
 
@@ -50,10 +49,10 @@ public abstract class Runner<R> {
     protected final Control control;
     protected final ExecutorService pool;
     protected final String testName;
-    protected final TestConfig config;
+    protected final ForkedTestConfig config;
     protected final List<String> messages;
 
-    public Runner(TestConfig config, ExecutorService pool, String testName) {
+    public Runner(ForkedTestConfig config, ExecutorService pool, String testName) {
         this.pool = pool;
         this.testName = testName;
         this.control = new Control();
@@ -113,7 +112,7 @@ public abstract class Runner<R> {
     }
 
     private TestResult prepareResult(Status status) {
-        TestResult result = new TestResult(config, status);
+        TestResult result = new TestResult(status);
         for (String msg : messages) {
             result.addMessage(msg);
         }
