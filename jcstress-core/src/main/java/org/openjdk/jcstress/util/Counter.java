@@ -24,12 +24,7 @@
  */
 package org.openjdk.jcstress.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -63,16 +58,17 @@ public final class Counter<R> implements Serializable {
     private int keyCount;
 
     public Counter() {
-        this(INITIAL_CAPACITY);
+        init();
     }
 
-    public Counter(int len) {
-        length = len;
+    private void init() {
+        length = INITIAL_CAPACITY;
 
         @SuppressWarnings("unchecked")
-        R[] table = (R[]) new Object[len];
+        R[] table = (R[]) new Object[length];
         this.keys = table;
-        this.counts = new long[len];
+        this.counts = new long[length];
+        this.keyCount = 0;
     }
 
     /**
@@ -210,6 +206,46 @@ public final class Counter<R> implements Serializable {
             }
         }
         return res;
+    }
+
+    public long totalCount() {
+        long s = 0;
+        for (long c : counts) {
+            s += c;
+        }
+        return s;
+    }
+
+    public boolean isEmpty() {
+        for (long c : counts) {
+            if (c > 0) return false;
+        }
+        return true;
+    }
+
+    private void readObject(ObjectInputStream is) throws IOException, ClassNotFoundException {
+        init();
+        int len = is.readInt();
+        for (int c = 0; c < len; c++) {
+            @SuppressWarnings("unchecked")
+            R key = (R) is.readObject();
+            long count = is.readLong();
+            record(key, count);
+        }
+    }
+
+    private void readObjectNoData() throws ObjectStreamException {
+        init();
+    }
+
+    private void writeObject(ObjectOutputStream os) throws IOException {
+        os.writeInt(keyCount);
+        for (int c = 0; c < keys.length; c++) {
+            if (keys[c] != null) {
+                os.writeObject(keys[c]);
+                os.writeLong(counts[c]);
+            }
+        }
     }
 
 }

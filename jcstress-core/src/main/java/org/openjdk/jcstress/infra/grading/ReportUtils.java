@@ -82,21 +82,18 @@ public class ReportUtils {
     }
 
     private static TestResult merged(TestConfig config, Collection<TestResult> mergeable) {
-        Multiset<String> stateCounts = new HashMultiset<>();
+        Counter<String> counter = new Counter<>();
 
         List<String> messages = new ArrayList<>();
-
         List<String> vmOuts = new ArrayList<>();
         List<String> vmErrs = new ArrayList<>();
 
         Status status = Status.NORMAL;
         Environment env = null;
         for (TestResult r : mergeable) {
-            status = status.combine(r.status());
-            for (String s : r.getStateKeys()) {
-                stateCounts.add(s, r.getCount(s));
-            }
             env = r.getEnv();
+            status = status.combine(r.status());
+            counter.merge(r.getCounter());
             messages.addAll(r.getMessages());
             vmOuts.addAll(r.getVmOut());
             vmErrs.addAll(r.getVmErr());
@@ -104,17 +101,9 @@ public class ReportUtils {
 
         TestResult root = new TestResult(status);
         root.setConfig(config);
-
-        for (String s : stateCounts.keys()) {
-            root.addState(s, stateCounts.count(s));
-        }
-
         root.setEnv(env);
-
-        for (String data : messages) {
-            root.addMessage(data);
-        }
-
+        root.addState(counter);
+        root.addMessages(messages);
         root.addVMOuts(vmOuts);
         root.addVMErrs(vmErrs);
 
@@ -139,7 +128,7 @@ public class ReportUtils {
         }
         pw.println();
 
-        if (r.hasSamples()) {
+        if (!r.isEmpty()) {
             int idLen = "Observed state".length();
             int occLen = "Occurrences".length();
             int expectLen = "Expectation".length();

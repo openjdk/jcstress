@@ -3,6 +3,8 @@ package org.openjdk.jcstress.util;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.*;
+
 public class CounterTest {
 
     @Test
@@ -48,6 +50,31 @@ public class CounterTest {
         }
 
         Assert.assertEquals(1000, cnt.elementSet().size());
+    }
+
+    @Test
+    public void testSerial_1() throws IOException, ClassNotFoundException {
+        Counter<String> cnt = new Counter<>();
+        for (int c = 0; c < 1000; c++) {
+            cnt.record("Foo" + c, c);
+        }
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+            oos.writeObject(cnt);
+        }
+
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(baos.toByteArray());
+             ObjectInputStream ois = new ObjectInputStream(bis)) {
+            @SuppressWarnings("unchecked")
+            Counter<String> desCnt = (Counter<String>) ois.readObject();
+
+            for (int c = 0; c < 1000; c++) {
+                Assert.assertEquals(c, desCnt.count("Foo" + c));
+            }
+
+            Assert.assertEquals(1000, desCnt.elementSet().size());
+        }
     }
 
 }
