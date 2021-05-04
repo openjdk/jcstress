@@ -28,9 +28,8 @@ import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.grading.ReportUtils;
 import org.openjdk.jcstress.infra.grading.TestGrading;
 import org.openjdk.jcstress.infra.runners.TestConfig;
+import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.Environment;
-import org.openjdk.jcstress.util.HashMultiset;
-import org.openjdk.jcstress.util.Multiset;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -46,7 +45,7 @@ public class TestResult implements Serializable {
 
     private TestConfig config;
     private final Status status;
-    private final Multiset<String> states;
+    private final Counter<String> states;
     private volatile Environment env;
     private final List<String> messages;
     private final List<String> vmOut;
@@ -54,7 +53,7 @@ public class TestResult implements Serializable {
 
     public TestResult(Status status) {
         this.status = status;
-        this.states = new HashMultiset<>();
+        this.states = new Counter<>();
         this.messages = new ArrayList<>();
         this.vmOut = new ArrayList<>();
         this.vmErr = new ArrayList<>();
@@ -69,7 +68,7 @@ public class TestResult implements Serializable {
     }
 
     public void addState(String result, long count) {
-        states.add(result, count);
+        states.record(result, count);
     }
 
     public void addMessage(String msg) {
@@ -134,7 +133,7 @@ public class TestResult implements Serializable {
     }
 
     public long getTotalCount() {
-        return states.size();
+        return states.totalCount();
     }
 
     public long getCount(String s) {
@@ -142,7 +141,7 @@ public class TestResult implements Serializable {
     }
 
     public Collection<String> getStateKeys() {
-        return states.keys();
+        return states.elementSet();
     }
 
     public TestConfig getConfig() {
@@ -153,7 +152,15 @@ public class TestResult implements Serializable {
         return TestGrading.grade(this);
     }
 
-    public boolean hasSamples() {
-        return !states.isEmpty();
+    public boolean isEmpty() {
+        return states.isEmpty();
+    }
+
+    public Counter<String> getCounter() {
+        return states;
+    }
+
+    public void addState(Counter<String> other) {
+        states.merge(other);
     }
 }
