@@ -32,6 +32,8 @@ import org.openjdk.jcstress.util.Environment;
 import org.openjdk.jcstress.util.HashMultiset;
 import org.openjdk.jcstress.util.Multiset;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,6 +58,10 @@ public class TestResult implements Serializable {
         this.messages = new ArrayList<>();
         this.vmOut = new ArrayList<>();
         this.vmErr = new ArrayList<>();
+    }
+
+    public void write(DataOutputStream dos) throws IOException {
+        dos.writeInt(status.ordinal());
     }
 
     public void setConfig(TestConfig config) {

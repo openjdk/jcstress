@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,17 +24,11 @@
  */
 package org.openjdk.jcstress.link;
 
-import java.io.Serializable;
+public class Protocol {
 
-class JobRequestFrame implements Serializable {
-    private static final long serialVersionUID = 2082214387637725282L;
-    private final String token;
-
-    public JobRequestFrame(String token) {
-        this.token = token;
-    }
-
-    public String getToken() {
-        return token;
-    }
+    public static final byte TAG_JOBREQUEST = 1;
+    public static final byte TAG_TESTCONFIG = 2;
+    public static final byte TAG_RESULTS = 3;
+    public static final byte TAG_OK = 4;
+    public static final byte TAG_FAILED = 5;
 }

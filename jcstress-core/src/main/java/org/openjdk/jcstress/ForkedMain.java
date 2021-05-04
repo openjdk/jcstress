@@ -51,7 +51,7 @@ public class ForkedMain {
 
         String host = args[0];
         int port = Integer.parseInt(args[1]);
-        String token = args[2];
+        int token = Integer.parseInt(args[2]);
 
         BinaryLinkClient link = new BinaryLinkClient(host, port);
 

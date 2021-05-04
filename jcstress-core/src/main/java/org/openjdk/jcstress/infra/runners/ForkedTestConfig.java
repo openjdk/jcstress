@@ -24,10 +24,13 @@
  */
 package org.openjdk.jcstress.infra.runners;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
-public class ForkedTestConfig implements Serializable {
+public class ForkedTestConfig {
     public final SpinLoopStyle spinLoopStyle;
     public final int time;
     public final int iters;
@@ -46,6 +49,35 @@ public class ForkedTestConfig implements Serializable {
         minStride = cfg.minStride;
         maxStride = cfg.maxStride;
         actorMap = cfg.cpuMap.actorMap();
+    }
+
+    public ForkedTestConfig(DataInputStream dis) throws IOException {
+        spinLoopStyle = SpinLoopStyle.values()[dis.readInt()];
+        time = dis.readInt();
+        iters = dis.readInt();
+        generatedRunnerName = dis.readUTF();
+        maxFootprintMB = dis.readInt();
+        minStride = dis.readInt();
+        maxStride = dis.readInt();
+        int len = dis.readInt();
+        actorMap = new int[len];
+        for (int c = 0; c < len; c++) {
+            actorMap[c] = dis.readInt();
+        }
+    }
+
+    public void write(DataOutputStream dos) throws IOException {
+        dos.writeInt(spinLoopStyle.ordinal());
+        dos.writeInt(time);
+        dos.writeInt(iters);
+        dos.writeUTF(generatedRunnerName);
+        dos.writeInt(maxFootprintMB);
+        dos.writeInt(minStride);
+        dos.writeInt(maxStride);
+        dos.writeInt(actorMap.length);
+        for (int am : actorMap) {
+            dos.writeInt(am);
+        }
     }
 
     public void adjustStrides(FootprintEstimator estimator) {

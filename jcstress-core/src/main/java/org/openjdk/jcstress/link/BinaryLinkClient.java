@@ -44,18 +44,12 @@ public final class BinaryLinkClient {
         long time1 = System.nanoTime();
         try (Socket socket = new Socket(hostName, hostPort)) {
             long time2 = System.nanoTime();
-
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-                oos.writeObject(frame);
-                oos.flush();
-            }
-            byte[] outW = bos.toByteArray();
-
             long time3 = System.nanoTime();
 
             try (OutputStream os = socket.getOutputStream()) {
-                os.write(outW);
+                os.write(Protocol.TAG_JOBREQUEST);
+                os.flush();
+
                 long time4 = System.nanoTime();
 
                 try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
@@ -78,23 +72,61 @@ public final class BinaryLinkClient {
         }
     }
 
-    public ForkedTestConfig jobRequest(String token) throws IOException {
-        Object reply = requestResponse(new JobRequestFrame(token));
-        if (reply instanceof ForkedTestConfig) {
-//            return (TestConfig) reply;
-        } else {
-            throw new IllegalStateException("Got the erroneous reply: " + reply);
-        }
-        reply = requestResponse(new JobRequestFrame(token));
-        if (reply instanceof ForkedTestConfig) {
-            return (ForkedTestConfig) reply;
-        } else {
-            throw new IllegalStateException("Got the erroneous reply: " + reply);
+    public ForkedTestConfig jobRequest(int token) throws IOException {
+        long time1 = System.nanoTime();
+        try (Socket socket = new Socket(hostName, hostPort)) {
+            long time2 = System.nanoTime();
+            try (OutputStream os = socket.getOutputStream();
+                 DataOutputStream dos = new DataOutputStream(os)) {
+                dos.write(Protocol.TAG_JOBREQUEST);
+                dos.write(token);
+                dos.flush();
+
+                long time3 = System.nanoTime();
+
+                try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
+                     DataInputStream dis = new DataInputStream(bis)) {
+                    ForkedTestConfig ftc = new ForkedTestConfig(dis);
+
+                    long time4 = System.nanoTime();
+
+                    System.out.println("Connected to " + hostName + ":" + hostPort);
+                    System.out.println("Connect time: " + (time2 - time1)/1000 + " us");
+                    System.out.println("Write time: " + (time3 - time2)/1000 + " us");
+                    System.out.println("Read time: " + (time4 - time3)/1000 + " us");
+
+                    return ftc;
+                }
+            }
         }
     }
 
-    public void doneResult(String token, TestResult result) throws IOException {
-        requestResponse(new ResultsFrame(token, result));
+    public void doneResult(int token, TestResult result) throws IOException {
+        long time1 = System.nanoTime();
+        try (Socket socket = new Socket(hostName, hostPort)) {
+            long time2 = System.nanoTime();
+            try (OutputStream os = socket.getOutputStream();
+                 DataOutputStream dos = new DataOutputStream(os)) {
+                dos.write(Protocol.TAG_RESULTS);
+                dos.write(token);
+                result.write(dos);
+                dos.flush();
+
+                long time3 = System.nanoTime();
+
+                try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
+                     DataInputStream dis = new DataInputStream(bis)) {
+                    dis.readInt();
+
+                    long time4 = System.nanoTime();
+
+                    System.out.println("Connected to " + hostName + ":" + hostPort);
+                    System.out.println("Connect time: " + (time2 - time1)/1000 + " us");
+                    System.out.println("Write time: " + (time3 - time2)/1000 + " us");
+                    System.out.println("Read time: " + (time4 - time3)/1000 + " us");
+                }
+            }
+        }
     }
 
 }

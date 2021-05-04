@@ -24,6 +24,7 @@
  */
 package org.openjdk.jcstress.link;
 
+import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 
 import java.io.*;
@@ -126,22 +127,29 @@ public final class BinaryLinkServer {
 
     private void handle(Socket socket) {
         try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
-             ObjectInputStream ois = new ObjectInputStream(bis)) {
-            Object obj = ois.readObject();
+             DataInputStream dis = new DataInputStream(bis)) {
+            int tag = dis.readInt();
+            int token = dis.readInt();
             try (BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
-                 ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-                if (obj instanceof JobRequestFrame) {
-                    String tkn = ((JobRequestFrame) obj).getToken();
-                    ForkedTestConfig cfg = listener.onJobRequest(tkn);
-                    oos.writeObject(cfg);
-                } else if (obj instanceof ResultsFrame) {
-                    ResultsFrame rf = (ResultsFrame) obj;
-                    listener.onResult(rf.getToken(), rf.getRes());
-                    oos.writeObject(new OkResponseFrame());
-                } else {
-                    // should always reply something
-                    oos.writeObject(new OkResponseFrame());
+                 DataOutputStream dos = new DataOutputStream(bos)) {
+                switch (tag) {
+                    case Protocol.TAG_JOBREQUEST: {
+                        ForkedTestConfig ftc = listener.onJobRequest(token);
+                        ftc.write(dos);
+                        break;
+                    }
+                    case Protocol.TAG_RESULTS: {
+                        TestResult tr = new TestResult(dis);
+                        listener.onResult(token, tr);
+                        dos.writeInt(Protocol.TAG_OK);
+                        break;
+                    }
+                    default: {
+                        dos.writeInt(Protocol.TAG_FAILED);
+                        break;
+                    }
                 }
+                dos.flush();
             }
             socket.close();
         } catch (IOException | ClassNotFoundException e) {

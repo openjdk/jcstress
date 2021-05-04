@@ -29,8 +29,8 @@ import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 
 public interface ServerListener {
 
-    ForkedTestConfig onJobRequest(String token);
+    ForkedTestConfig onJobRequest(int token);
 
-    void onResult(String token, TestResult result);
+    void onResult(int token, TestResult result);
 
 }
