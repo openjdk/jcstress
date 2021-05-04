@@ -51,6 +51,7 @@ public abstract class Runner<R> {
     protected final String testName;
     protected final ForkedTestConfig config;
     protected final List<String> messages;
+    protected volatile boolean forceExit;
 
     public Runner(ForkedTestConfig config, ExecutorService pool, String testName) {
         this.pool = pool;
@@ -138,6 +139,10 @@ public abstract class Runner<R> {
              result.addState(String.valueOf(e), cnt.count(e));
         }
         return result;
+    }
+
+    public boolean forceExit() {
+        return forceExit;
     }
 
     public abstract Counter<R> sanityCheck() throws Throwable;
