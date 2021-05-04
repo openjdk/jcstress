@@ -1,9 +1,6 @@
 package org.openjdk.jcstress.os.topology;
 
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.openjdk.jcstress.util.FileUtils;
 import org.openjdk.jcstress.vm.VMSupport;
 
@@ -17,8 +14,8 @@ public class LinuxProcfsTopologyTest extends AbstractTopologyTest {
     }
 
     @Test
+    @Ignore // Comment this to test that current environment is parsable.
     public void test_Current() throws TopologyParseException {
-        // Verifies the current is parsable
         new LinuxProcfsTopology();
     }
 
