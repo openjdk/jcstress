@@ -101,4 +101,16 @@ public class LinuxProcfsTopologyTest extends AbstractTopologyTest {
         }
     }
 
+    @Test
+    public void test_Saved_7() throws IOException {
+        String s = FileUtils.copyFileToTemp("/topology/cpuinfo-7.txt", "jcstress", "test");
+
+        try {
+            new LinuxProcfsTopology(s);
+            Assert.fail("Should have failed");
+        } catch (TopologyParseException topo) {
+            // Should fail
+        }
+    }
+
 }
