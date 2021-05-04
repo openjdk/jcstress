@@ -146,6 +146,25 @@ public class LinuxSysfsTopologyTest extends AbstractTopologyTest {
         checkGenericInvariants(topo);
     }
 
+    @Test
+    public void test_Saved_7() throws TopologyParseException, IOException {
+        FileSystem fs = parse("/topology/sysfs-7.txt");
+        LinuxSysfsTopology topo = new LinuxSysfsTopology(fs.getPath(""));
+
+        Assert.assertEquals(2, topo.packagesPerSystem());
+        Assert.assertEquals(4, topo.coresPerPackage());
+        Assert.assertEquals(1, topo.threadsPerCore());
+        Assert.assertEquals(8, topo.totalCores());
+        Assert.assertEquals(8, topo.totalThreads());
+
+        for (int t = 0; t < topo.totalThreads(); t++) {
+            Assert.assertEquals(t % 2, topo.threadToPackage(t));
+            Assert.assertEquals((t % 2) * 4 + (t / 2), topo.threadToCore(t));
+        }
+
+        checkGenericInvariants(topo);
+    }
+
     private FileSystem parse(String resource) throws IOException {
         FileSystem fs = Jimfs.newFileSystem(Configuration.unix());
         try (InputStream is = LinuxSysfsTopologyTest.class.getResourceAsStream(resource);

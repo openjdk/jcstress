@@ -63,9 +63,23 @@ public class LinuxSysfsTopology extends AbstractTopology {
     public LinuxSysfsTopology(Path root) throws TopologyParseException {
         this.root = root;
 
-        List<List<Integer>> coreGroups = new ArrayList<>();
+        // Parse the number of available CPUs
+        int cpuCount = 0;
+        try (DirectoryStream<Path> ds = Files.newDirectoryStream(root)) {
+            for (Path d : ds) {
+                if (!Files.isDirectory(d.resolve("topology"))) continue;
+
+                String basename = d.getFileName().toString();
+                if (basename.matches("cpu[0-9]+")) {
+                    cpuCount++;
+                }
+            }
+        } catch (Exception e) {
+            // Nothing to do
+        }
 
         // Parse the package groups
+        List<List<Integer>> coreGroups = new ArrayList<>();
         try (DirectoryStream<Path> ds = Files.newDirectoryStream(root)) {
             for (Path d : ds) {
                 if (!Files.isDirectory(d.resolve("topology"))) continue;
@@ -117,7 +131,7 @@ public class LinuxSysfsTopology extends AbstractTopology {
                         }
                         packageId = knownPackage.get(list);
                     }
-                    add(packageId, packageId*packageCount + coreId, threadId);
+                    add(packageId, packageId*cpuCount + coreId, threadId);
                     found = true;
                 }
             }
