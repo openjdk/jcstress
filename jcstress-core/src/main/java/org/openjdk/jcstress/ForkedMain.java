@@ -26,8 +26,8 @@ package org.openjdk.jcstress;
 
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
+import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 import org.openjdk.jcstress.infra.runners.Runner;
-import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.link.BinaryLinkClient;
 import org.openjdk.jcstress.util.StringUtils;
 
@@ -67,20 +67,20 @@ public class ForkedMain {
             }
         });
 
-        TestConfig config = link.nextJob(token);
+        ForkedTestConfig config = link.nextJob(token);
 
         TestResult result;
 
         try {
             Class<?> aClass = Class.forName(config.generatedRunnerName);
-            Constructor<?> cnstr = aClass.getConstructor(TestConfig.class, ExecutorService.class);
+            Constructor<?> cnstr = aClass.getConstructor(ForkedTestConfig.class, ExecutorService.class);
             Runner<?> o = (Runner<?>) cnstr.newInstance(config, pool);
             result = o.run();
         } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
-            result = new TestResult(config, Status.API_MISMATCH);
+            result = new TestResult(Status.API_MISMATCH);
             result.addMessage(StringUtils.getStacktrace(e));
         } catch (Throwable ex) {
-            result = new TestResult(config, Status.TEST_ERROR);
+            result = new TestResult(Status.TEST_ERROR);
             result.addMessage(StringUtils.getStacktrace(ex));
         }
 
