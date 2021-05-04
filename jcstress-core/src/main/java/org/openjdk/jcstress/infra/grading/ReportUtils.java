@@ -102,7 +102,8 @@ public class ReportUtils {
             vmErrs.addAll(r.getVmErr());
         }
 
-        TestResult root = new TestResult(config, status);
+        TestResult root = new TestResult(status);
+        root.setConfig(config);
 
         for (String s : stateCounts.keys()) {
             root.addState(s, stateCounts.count(s));

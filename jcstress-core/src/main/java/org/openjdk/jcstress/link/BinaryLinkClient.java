@@ -25,7 +25,7 @@
 package org.openjdk.jcstress.link;
 
 import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.infra.runners.TestConfig;
+import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 
 import java.io.*;
 import java.net.Socket;
@@ -78,16 +78,16 @@ public final class BinaryLinkClient {
         }
     }
 
-    public TestConfig jobRequest(String token) throws IOException {
+    public ForkedTestConfig jobRequest(String token) throws IOException {
         Object reply = requestResponse(new JobRequestFrame(token));
-        if (reply instanceof TestConfig) {
+        if (reply instanceof ForkedTestConfig) {
 //            return (TestConfig) reply;
         } else {
             throw new IllegalStateException("Got the erroneous reply: " + reply);
         }
         reply = requestResponse(new JobRequestFrame(token));
-        if (reply instanceof TestConfig) {
-            return (TestConfig) reply;
+        if (reply instanceof ForkedTestConfig) {
+            return (ForkedTestConfig) reply;
         } else {
             throw new IllegalStateException("Got the erroneous reply: " + reply);
         }

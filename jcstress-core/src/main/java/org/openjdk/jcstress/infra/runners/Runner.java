@@ -26,10 +26,8 @@ package org.openjdk.jcstress.infra.runners;
 
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.StringUtils;
-import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,10 +49,11 @@ public abstract class Runner<R> {
     protected final Control control;
     protected final ExecutorService pool;
     protected final String testName;
-    protected final TestConfig config;
+    protected final ForkedTestConfig config;
     protected final List<String> messages;
+    protected volatile boolean forceExit;
 
-    public Runner(TestConfig config, ExecutorService pool, String testName) {
+    public Runner(ForkedTestConfig config, ExecutorService pool, String testName) {
         this.pool = pool;
         this.testName = testName;
         this.control = new Control();
@@ -76,12 +75,6 @@ public abstract class Runner<R> {
             return dumpFailure(Status.API_MISMATCH, "Test sanity check failed, skipping", e);
         } catch (Throwable e) {
             return dumpFailure(Status.CHECK_TEST_ERROR, "Check test failed", e);
-        }
-
-        try {
-            WhiteBoxSupport.tryDeopt(config.deoptMode);
-        } catch (NoClassDefFoundError err) {
-            // gracefully "handle"
         }
 
         for (int c = 0; c < config.iters; c++) {
@@ -120,7 +113,7 @@ public abstract class Runner<R> {
     }
 
     private TestResult prepareResult(Status status) {
-        TestResult result = new TestResult(config, status);
+        TestResult result = new TestResult(status);
         for (String msg : messages) {
             result.addMessage(msg);
         }
@@ -146,6 +139,10 @@ public abstract class Runner<R> {
              result.addState(String.valueOf(e), cnt.count(e));
         }
         return result;
+    }
+
+    public boolean forceExit() {
+        return forceExit;
     }
 
     public abstract Counter<R> sanityCheck() throws Throwable;

@@ -32,7 +32,6 @@ import org.openjdk.jcstress.infra.runners.*;
 import org.openjdk.jcstress.os.AffinitySupport;
 import org.openjdk.jcstress.util.*;
 import org.openjdk.jcstress.vm.AllocProfileSupport;
-import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -331,7 +330,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    " + r + "[] gr;");
         pw.println();
 
-        pw.println("    public " + className + "(TestConfig config, ExecutorService pool) {");
+        pw.println("    public " + className + "(ForkedTestConfig config, ExecutorService pool) {");
         pw.println("        super(config, pool, \"" + getQualifiedName(info.getTest()) + "\");");
         pw.println("    }");
         pw.println();
@@ -568,7 +567,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println();
             pw.println("    private Counter<" + r + "> " + TASK_LOOP_PREFIX + a.getSimpleName() + "() {");
             pw.println("        Counter<" + r + "> counter = new Counter<>();");
-            pw.println("        AffinitySupport.bind(config.cpuMap.actorMap()[" + n + "]);");
+            pw.println("        AffinitySupport.bind(config.actorMap[" + n + "]);");
             pw.println("        while (true) {");
             pw.println("            WorkerSync sync = workerSync;");
             pw.println("            if (sync.stopped) {");
@@ -775,7 +774,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("public class " + generatedName + " extends Runner<" + generatedName + ".Outcome> {");
         pw.println();
 
-        pw.println("    public " + generatedName + "(TestConfig config, ExecutorService pool) {");
+        pw.println("    public " + generatedName + "(ForkedTestConfig config, ExecutorService pool) {");
         pw.println("        super(config, pool, \"" + getQualifiedName(info.getTest()) + "\");");
         pw.println("    }");
         pw.println();
@@ -784,21 +783,15 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    public TestResult run() {");
         pw.println("        Counter<Outcome> results = new Counter<>();");
         pw.println();
-        pw.println("        try {");
-        pw.println("            WhiteBoxSupport.tryDeopt(config.deoptMode);");
-        pw.println("        } catch (NoClassDefFoundError err) {");
-        pw.println("            // gracefully \"handle\"");
-        pw.println("        }");
-        pw.println();
         pw.println("        for (int c = 0; c < config.iters; c++) {");
         pw.println("            run(results);");
         pw.println();
         pw.println("            if (results.count(Outcome.STALE) > 0) {");
-        pw.println("                messages.add(\"Have stale threads, forcing VM to exit for proper cleanup.\");");
-        pw.println("                dump(results);");
-        pw.println("                System.exit(0);");
+        pw.println("                forceExit = true;");
+        pw.println("                break;");
         pw.println("            }");
         pw.println("        }");
+        pw.println();
         pw.println("        return dump(results);");
         pw.println("    }");
         pw.println();
@@ -960,9 +953,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
         Class<?>[] imports = new Class<?>[] {
                 ArrayList.class, Arrays.class, Collection.class,
                 ExecutorService.class, Future.class, TimeUnit.class,
-                TestConfig.class, TestResult.class,
+                ForkedTestConfig.class, TestResult.class,
                 Runner.class, WorkerSync.class, Counter.class,
-                WhiteBoxSupport.class, ExecutionException.class,
+                ExecutionException.class,
                 Callable.class, Collections.class, List.class,
                 AffinitySupport.class, AllocProfileSupport.class
         };

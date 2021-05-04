@@ -26,11 +26,10 @@ package org.openjdk.jcstress;
 
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
+import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 import org.openjdk.jcstress.infra.runners.Runner;
-import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.link.BinaryLinkClient;
 import org.openjdk.jcstress.util.StringUtils;
-import org.openjdk.jcstress.vm.WhiteBoxSupport;
 
 import java.lang.reflect.Constructor;
 import java.util.concurrent.ExecutorService;
@@ -46,12 +45,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ForkedMain {
 
     public static void main(String[] args) throws Exception {
-        try {
-            WhiteBoxSupport.initSafely();
-        } catch (NoClassDefFoundError e) {
-            // expected on JDK 7 and lower, parent should have printed the message for user
-        }
-
         if (args.length < 3) {
             throw new IllegalStateException("Expected three arguments");
         }
@@ -74,24 +67,34 @@ public class ForkedMain {
             }
         });
 
-        TestConfig config = link.jobRequest(token);
+        ForkedTestConfig config = link.jobRequest(token);
 
         TestResult result;
+        boolean forceExit = false;
 
         try {
             Class<?> aClass = Class.forName(config.generatedRunnerName);
-            Constructor<?> cnstr = aClass.getConstructor(TestConfig.class, ExecutorService.class);
+            Constructor<?> cnstr = aClass.getConstructor(ForkedTestConfig.class, ExecutorService.class);
             Runner<?> o = (Runner<?>) cnstr.newInstance(config, pool);
             result = o.run();
+            forceExit = o.forceExit();
         } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
-            result = new TestResult(config, Status.API_MISMATCH);
+            result = new TestResult(Status.API_MISMATCH);
             result.addMessage(StringUtils.getStacktrace(e));
         } catch (Throwable ex) {
-            result = new TestResult(config, Status.TEST_ERROR);
+            result = new TestResult(Status.TEST_ERROR);
             result.addMessage(StringUtils.getStacktrace(ex));
         }
 
+        if (forceExit) {
+            result.addMessage("Have stale threads, forcing VM to exit for proper cleanup.");
+        }
+
         link.doneResult(token, result);
+
+        if (forceExit) {
+            System.exit(0);
+        }
     }
 
 }
