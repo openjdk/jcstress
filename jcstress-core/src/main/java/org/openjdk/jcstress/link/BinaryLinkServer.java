@@ -29,11 +29,6 @@ import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 
 import java.io.*;
 import java.net.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Accepts the binary data from the forked VM and pushes it to parent VM
@@ -48,10 +43,8 @@ public final class BinaryLinkServer {
 
     private final ServerSocket server;
     private final InetAddress listenAddress;
-    private final Acceptor acceptor;
+    private final Handler handler;
     private final ServerListener listener;
-
-    private final ExecutorService handlers;
 
     public BinaryLinkServer(ServerListener listener) throws IOException {
         this.listener = listener;
@@ -60,20 +53,8 @@ public final class BinaryLinkServer {
         server = new ServerSocket(LINK_PORT, 50, listenAddress);
         server.setSoTimeout(LINK_TIMEOUT_MS);
 
-        handlers = Executors.newCachedThreadPool(new ThreadFactory() {
-            private final AtomicInteger id = new AtomicInteger();
-
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread t = new Thread(r);
-                t.setName("jcstress-link-server-" + id.incrementAndGet());
-                t.setDaemon(true);
-                return t;
-            }
-        });
-
-        acceptor = new Acceptor(server);
-        acceptor.start();
+        handler = new Handler(server);
+        handler.start();
     }
 
     private InetAddress getListenAddress() {
@@ -92,7 +73,7 @@ public final class BinaryLinkServer {
 
     public void terminate() {
         // set interrupt flag
-        acceptor.interrupt();
+        handler.interrupt();
 
         // all existing Handlers blocked on accept() should exit now
         try {
@@ -101,16 +82,9 @@ public final class BinaryLinkServer {
             // do nothing
         }
 
-        // wait for acceptor to join
+        // wait for handler to join
         try {
-            acceptor.join();
-        } catch (InterruptedException e) {
-            // do nothing
-        }
-
-        handlers.shutdown();
-        try {
-            handlers.awaitTermination(1, TimeUnit.HOURS);
+            handler.join();
         } catch (InterruptedException e) {
             // do nothing
         }
@@ -125,58 +99,52 @@ public final class BinaryLinkServer {
         return server.getLocalPort();
     }
 
-    private void handle(Socket socket) {
-        try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
-             DataInputStream dis = new DataInputStream(bis)) {
-            int tag = Protocol.readTag(dis);
-            int token = Protocol.readToken(dis);
-            try (BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
-                 DataOutputStream dos = new DataOutputStream(bos)) {
-                switch (tag) {
-                    case Protocol.TAG_JOBREQUEST: {
-                        ForkedTestConfig ftc = listener.onJobRequest(token);
-                        Protocol.writeTag(dos, Protocol.TAG_TESTCONFIG);
-                        ftc.write(dos);
-                        break;
-                    }
-                    case Protocol.TAG_RESULTS: {
-                        TestResult tr = new TestResult(dis);
-                        listener.onResult(token, tr);
-                        Protocol.writeTag(dos, Protocol.TAG_OK);
-                        break;
-                    }
-                    default: {
-                        Protocol.writeTag(dos, Protocol.TAG_FAILED);
-                        break;
-                    }
-                }
-                dos.flush();
-            }
-            socket.close();
-        } catch (IOException e) {
-            // Do nothing
-        }
-    }
-
-    private final class Acceptor extends Thread {
+    private final class Handler extends Thread {
         private final ServerSocket server;
 
-        public Acceptor(ServerSocket server) {
+        public Handler(ServerSocket server) {
             this.server = server;
         }
 
         @Override
         public void run() {
             while (!Thread.interrupted()) {
-                try {
-                    Socket socket = server.accept();
-                    handlers.submit(() -> handle(socket));
-                } catch (Exception e) {
-                    // ignore, the exit code would be non-zero, and TestExecutor would handle it.
-                }
+                acceptAndProcess();
             }
         }
 
+        private void acceptAndProcess() {
+            try (Socket socket = server.accept();
+                 BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
+                 DataInputStream dis = new DataInputStream(bis)) {
+                int tag = Protocol.readTag(dis);
+                int token = Protocol.readToken(dis);
+                try (BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
+                     DataOutputStream dos = new DataOutputStream(bos)) {
+                    switch (tag) {
+                        case Protocol.TAG_JOBREQUEST: {
+                            ForkedTestConfig ftc = listener.onJobRequest(token);
+                            Protocol.writeTag(dos, Protocol.TAG_TESTCONFIG);
+                            ftc.write(dos);
+                            break;
+                        }
+                        case Protocol.TAG_RESULTS: {
+                            TestResult tr = new TestResult(dis);
+                            listener.onResult(token, tr);
+                            Protocol.writeTag(dos, Protocol.TAG_OK);
+                            break;
+                        }
+                        default: {
+                            Protocol.writeTag(dos, Protocol.TAG_FAILED);
+                            break;
+                        }
+                    }
+                    dos.flush();
+                }
+            } catch (IOException e) {
+                // ignore, the exit code would be non-zero, and TestExecutor would handle it.
+            }
+        }
     }
 
 }
