@@ -351,7 +351,7 @@ public class TestExecutor {
 
         public synchronized ForkedTestConfig jobRequest() {
             if (processed) {
-                return new ForkedTestConfig(task);
+                return null;
             }
             processed = true;
             return new ForkedTestConfig(task);

@@ -32,6 +32,8 @@ import java.net.Socket;
 
 public final class BinaryLinkClient {
 
+    private static final int LINK_TIMEOUT_MS = Integer.getInteger("jcstress.link.timeoutMs", 30 * 1000);
+
     private final String hostName;
     private final int hostPort;
 
@@ -42,6 +44,7 @@ public final class BinaryLinkClient {
 
     public ForkedTestConfig jobRequest(int token) throws IOException {
         try (Socket socket = new Socket(hostName, hostPort)) {
+            socket.setSoTimeout(LINK_TIMEOUT_MS);
             try (OutputStream os = socket.getOutputStream();
                  DataOutputStream dos = new DataOutputStream(os)) {
                 Protocol.writeTag(dos, Protocol.TAG_JOBREQUEST);
@@ -62,6 +65,7 @@ public final class BinaryLinkClient {
 
     public void doneResult(int token, TestResult result) throws IOException {
         try (Socket socket = new Socket(hostName, hostPort)) {
+            socket.setSoTimeout(LINK_TIMEOUT_MS);
             try (OutputStream os = socket.getOutputStream();
                  DataOutputStream dos = new DataOutputStream(os)) {
                 Protocol.writeTag(dos, Protocol.TAG_RESULTS);
