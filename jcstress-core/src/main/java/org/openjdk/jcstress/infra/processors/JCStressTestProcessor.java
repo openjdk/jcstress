@@ -787,11 +787,11 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("            run(results);");
         pw.println();
         pw.println("            if (results.count(Outcome.STALE) > 0) {");
-        pw.println("                messages.add(\"Have stale threads, forcing VM to exit for proper cleanup.\");");
-        pw.println("                dump(results);");
-        pw.println("                System.exit(0);");
+        pw.println("                forceExit = true;");
+        pw.println("                break;");
         pw.println("            }");
         pw.println("        }");
+        pw.println();
         pw.println("        return dump(results);");
         pw.println("    }");
         pw.println();

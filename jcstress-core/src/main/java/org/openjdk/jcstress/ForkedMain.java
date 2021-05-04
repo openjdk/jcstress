@@ -70,12 +70,14 @@ public class ForkedMain {
         ForkedTestConfig config = link.nextJob(token);
 
         TestResult result;
+        boolean forceExit = false;
 
         try {
             Class<?> aClass = Class.forName(config.generatedRunnerName);
             Constructor<?> cnstr = aClass.getConstructor(ForkedTestConfig.class, ExecutorService.class);
             Runner<?> o = (Runner<?>) cnstr.newInstance(config, pool);
             result = o.run();
+            forceExit = o.forceExit();
         } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
             result = new TestResult(Status.API_MISMATCH);
             result.addMessage(StringUtils.getStacktrace(e));
@@ -84,7 +86,15 @@ public class ForkedMain {
             result.addMessage(StringUtils.getStacktrace(ex));
         }
 
+        if (forceExit) {
+            result.addMessage("Have stale threads, forcing VM to exit for proper cleanup.");
+        }
+
         link.doneResult(token, result);
+
+        if (forceExit) {
+            System.exit(0);
+        }
     }
 
 }
