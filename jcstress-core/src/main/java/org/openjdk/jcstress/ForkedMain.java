@@ -29,6 +29,7 @@ import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 import org.openjdk.jcstress.infra.runners.Runner;
 import org.openjdk.jcstress.link.BinaryLinkClient;
+import org.openjdk.jcstress.os.AffinitySupport;
 import org.openjdk.jcstress.util.StringUtils;
 
 import java.lang.reflect.Constructor;
@@ -49,23 +50,19 @@ public class ForkedMain {
             throw new IllegalStateException("Expected three arguments");
         }
 
+        ExecutorService pool = Executors.newCachedThreadPool(new MyThreadFactory());
+
+        // Pre-initialize the affinity support and threads, so that workers
+        // do not have to do this on critical paths during the execution.
+        // This also runs when the rest of the infrastructure starts up.
+        pool.submit(new WarmupAffinityTask());
+        pool.submit(new EmptyTask());
+
         String host = args[0];
         int port = Integer.parseInt(args[1]);
         int token = Integer.parseInt(args[2]);
 
         BinaryLinkClient link = new BinaryLinkClient(host, port);
-
-        ExecutorService pool = Executors.newCachedThreadPool(new ThreadFactory() {
-            private final AtomicInteger id = new AtomicInteger();
-
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread t = new Thread(r);
-                t.setName("jcstress-worker-" + id.incrementAndGet());
-                t.setDaemon(true);
-                return t;
-            }
-        });
 
         ForkedTestConfig config = link.jobRequest(token);
 
@@ -97,4 +94,33 @@ public class ForkedMain {
         }
     }
 
+    private static class MyThreadFactory implements ThreadFactory {
+        private final AtomicInteger id = new AtomicInteger();
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r);
+            t.setName("jcstress-worker-" + id.incrementAndGet());
+            t.setDaemon(true);
+            return t;
+        }
+    }
+
+    private static class WarmupAffinityTask implements Runnable {
+        @Override
+        public void run() {
+            try {
+                AffinitySupport.tryBind();
+            } catch (Exception e) {
+                // Do not care
+            }
+        }
+    }
+
+    private static class EmptyTask implements Runnable {
+        @Override
+        public void run() {
+            // Do nothing
+        }
+    }
 }
