@@ -30,8 +30,6 @@ import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -48,17 +46,13 @@ public abstract class Runner<R> {
 
     protected final Control control;
     protected final ExecutorService pool;
-    protected final String testName;
     protected final ForkedTestConfig config;
-    protected final List<String> messages;
     protected volatile boolean forceExit;
 
-    public Runner(ForkedTestConfig config, ExecutorService pool, String testName) {
+    public Runner(ForkedTestConfig config, ExecutorService pool) {
         this.pool = pool;
-        this.testName = testName;
         this.control = new Control();
         this.config = config;
-        this.messages = new ArrayList<>();
     }
 
     /**
@@ -69,8 +63,7 @@ public abstract class Runner<R> {
         Counter<R> result = new Counter<>();
 
         try {
-            Counter<R> cnt = sanityCheck();
-            result.merge(cnt);
+            sanityCheck(result);
         } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
             return dumpFailure(Status.API_MISMATCH, "Test sanity check failed, skipping", e);
         } catch (Throwable e) {
@@ -78,17 +71,16 @@ public abstract class Runner<R> {
         }
 
         for (int c = 0; c < config.iters; c++) {
-            Collection<Future<Counter<R>>> futures = internalRun();
+            ArrayList<Future<Counter<R>>> futures = internalRun();
 
             long startTime = System.nanoTime();
-            boolean allStopped = false;
-            while (!allStopped) {
-                allStopped = true;
+            do {
+                ArrayList<Future<Counter<R>>> leftovers = new ArrayList<>();
                 for (Future<Counter<R>> t : futures) {
                     try {
-                        t.get(1, TimeUnit.SECONDS);
+                        result.merge(t.get(1, TimeUnit.SECONDS));
                     } catch (TimeoutException e) {
-                        allStopped = false;
+                        leftovers.add(t);
                     } catch (ExecutionException | InterruptedException e) {
                         return dumpFailure(Status.TEST_ERROR, "Unrecoverable error while running", e.getCause());
                     }
@@ -96,57 +88,44 @@ public abstract class Runner<R> {
 
                 long timeSpent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
                 if (timeSpent > Math.max(10*config.time, MIN_TIMEOUT_MS)) {
+                    forceExit = true;
                     return dumpFailure(Status.TIMEOUT_ERROR, "Timeout waiting for tasks to complete: " + timeSpent + " ms");
                 }
-            }
 
-            for (Future<Counter<R>> t : futures) {
-                try {
-                    result.merge(t.get());
-                } catch (InterruptedException | ExecutionException e) {
-                    // Cannot happen anymore.
-                }
-            }
+                futures = leftovers;
+            } while (!futures.isEmpty());
         }
 
         return dump(result);
     }
 
-    private TestResult prepareResult(Status status) {
-        TestResult result = new TestResult(status);
-        for (String msg : messages) {
-            result.addMessage(msg);
-        }
-        messages.clear();
-        return result;
-    }
-
     protected TestResult dumpFailure(Status status, String message) {
-        messages.add(message);
-        return prepareResult(status);
+        TestResult r = new TestResult(status);
+        r.addMessage(message);
+        return r;
     }
 
     protected TestResult dumpFailure(Status status, String message, Throwable aux) {
-        messages.add(message);
-        TestResult result = prepareResult(status);
-        result.addMessage(StringUtils.getStacktrace(aux));
-        return result;
+        TestResult r = new TestResult(status);
+        r.addMessage(message);
+        r.addMessage(StringUtils.getStacktrace(aux));
+        return r;
     }
 
     protected TestResult dump(Counter<R> cnt) {
-        TestResult result = prepareResult(Status.NORMAL);
+        TestResult r = new TestResult(Status.NORMAL);
         for (R e : cnt.elementSet()) {
-             result.addState(String.valueOf(e), cnt.count(e));
+             r.addState(String.valueOf(e), cnt.count(e));
         }
-        return result;
+        return r;
     }
 
     public boolean forceExit() {
         return forceExit;
     }
 
-    public abstract Counter<R> sanityCheck() throws Throwable;
+    public abstract void sanityCheck(Counter<R> counter) throws Throwable;
 
-    public abstract Collection<Future<Counter<R>>> internalRun();
+    public abstract ArrayList<Future<Counter<R>>> internalRun();
 
 }
