@@ -28,15 +28,12 @@ import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 import org.openjdk.jcstress.infra.runners.Runner;
+import org.openjdk.jcstress.infra.runners.VoidThread;
 import org.openjdk.jcstress.link.BinaryLinkClient;
 import org.openjdk.jcstress.os.AffinitySupport;
 import org.openjdk.jcstress.util.StringUtils;
 
 import java.lang.reflect.Constructor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Entry point for the forked VM run.
@@ -50,13 +47,10 @@ public class ForkedMain {
             throw new IllegalStateException("Expected three arguments");
         }
 
-        ExecutorService pool = Executors.newCachedThreadPool(new MyThreadFactory());
-
         // Pre-initialize the affinity support and threads, so that workers
         // do not have to do this on critical paths during the execution.
         // This also runs when the rest of the infrastructure starts up.
-        pool.submit(new WarmupAffinityTask());
-        pool.submit(new EmptyTask());
+        new WarmupAffinityTask().start();
 
         String host = args[0];
         int port = Integer.parseInt(args[1]);
@@ -71,8 +65,8 @@ public class ForkedMain {
 
         try {
             Class<?> aClass = Class.forName(config.generatedRunnerName);
-            Constructor<?> cnstr = aClass.getConstructor(ForkedTestConfig.class, ExecutorService.class);
-            Runner<?> o = (Runner<?>) cnstr.newInstance(config, pool);
+            Constructor<?> cnstr = aClass.getConstructor(ForkedTestConfig.class);
+            Runner<?> o = (Runner<?>) cnstr.newInstance(config);
             result = o.run();
             forceExit = o.forceExit();
         } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
@@ -94,21 +88,9 @@ public class ForkedMain {
         }
     }
 
-    private static class MyThreadFactory implements ThreadFactory {
-        private final AtomicInteger id = new AtomicInteger();
-
+    private static class WarmupAffinityTask extends VoidThread {
         @Override
-        public Thread newThread(Runnable r) {
-            Thread t = new Thread(r);
-            t.setName("jcstress-worker-" + id.incrementAndGet());
-            t.setDaemon(true);
-            return t;
-        }
-    }
-
-    private static class WarmupAffinityTask implements Runnable {
-        @Override
-        public void run() {
+        protected void internalRun() {
             try {
                 AffinitySupport.tryBind();
             } catch (Exception e) {
@@ -117,10 +99,4 @@ public class ForkedMain {
         }
     }
 
-    private static class EmptyTask implements Runnable {
-        @Override
-        public void run() {
-            // Do nothing
-        }
-    }
 }

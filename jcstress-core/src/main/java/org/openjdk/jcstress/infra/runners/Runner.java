@@ -45,12 +45,10 @@ public abstract class Runner<R> {
     protected static final int MIN_TIMEOUT_MS = 30*1000;
 
     protected final Control control;
-    protected final ExecutorService pool;
     protected final ForkedTestConfig config;
     protected volatile boolean forceExit;
 
-    public Runner(ForkedTestConfig config, ExecutorService pool) {
-        this.pool = pool;
+    public Runner(ForkedTestConfig config) {
         this.control = new Control();
         this.config = config;
     }
@@ -71,17 +69,25 @@ public abstract class Runner<R> {
         }
 
         for (int c = 0; c < config.iters; c++) {
-            ArrayList<Future<Counter<R>>> futures = internalRun();
+            ArrayList<CounterThread<R>> workers = internalRun();
 
             long startTime = System.nanoTime();
             do {
-                ArrayList<Future<Counter<R>>> leftovers = new ArrayList<>();
-                for (Future<Counter<R>> t : futures) {
+                ArrayList<CounterThread<R>> leftovers = new ArrayList<>();
+                for (CounterThread<R> t : workers) {
                     try {
-                        result.merge(t.get(1, TimeUnit.SECONDS));
-                    } catch (TimeoutException e) {
-                        leftovers.add(t);
-                    } catch (ExecutionException | InterruptedException e) {
+                        t.join(1000);
+
+                        if (t.throwable() != null) {
+                            return dumpFailure(Status.TEST_ERROR, "Unrecoverable error while running", t.throwable());
+                        }
+                        Counter<R> res = t.result();
+                        if (res != null) {
+                            result.merge(res);
+                        } else {
+                            leftovers.add(t);
+                        }
+                    } catch (InterruptedException e) {
                         return dumpFailure(Status.TEST_ERROR, "Unrecoverable error while running", e.getCause());
                     }
                 }
@@ -92,8 +98,8 @@ public abstract class Runner<R> {
                     return dumpFailure(Status.TIMEOUT_ERROR, "Timeout waiting for tasks to complete: " + timeSpent + " ms");
                 }
 
-                futures = leftovers;
-            } while (!futures.isEmpty());
+                workers = leftovers;
+            } while (!workers.isEmpty());
         }
 
         return dump(result);
@@ -126,6 +132,6 @@ public abstract class Runner<R> {
 
     public abstract void sanityCheck(Counter<R> counter) throws Throwable;
 
-    public abstract ArrayList<Future<Counter<R>>> internalRun();
+    public abstract ArrayList<CounterThread<R>> internalRun();
 
 }
