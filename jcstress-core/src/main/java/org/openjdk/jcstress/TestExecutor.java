@@ -63,7 +63,11 @@ public class TestExecutor {
     private final Map<Integer, VM> vmByToken;
     private final Object notifyLock;
 
+    private final AtomicInteger jvmsStarting;
     private final AtomicInteger jvmsRunning;
+    private final AtomicInteger jvmsFinishing;
+
+    private final ExecutorService supportTasks;
 
     public TestExecutor(Verbosity verbosity, TestResultCollector sink, Scheduler scheduler) throws IOException {
         this.verbosity = verbosity;
@@ -85,7 +89,21 @@ public class TestExecutor {
             }
         });
 
+        this.jvmsStarting = new AtomicInteger();
         this.jvmsRunning = new AtomicInteger();
+        this.jvmsFinishing = new AtomicInteger();
+
+        this.supportTasks = Executors.newCachedThreadPool(new ThreadFactory() {
+            private final AtomicInteger id = new AtomicInteger();
+
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r);
+                t.setName("jcstress-vm-support-" + id.incrementAndGet());
+                t.setDaemon(true);
+                return t;
+            }
+        });
     }
 
     private void awaitNotification() {
@@ -141,7 +159,7 @@ public class TestExecutor {
                     int token = ID.incrementAndGet();
                     VM vm = new VM(server.getHost(), server.getPort(), token, cfg, cpuMap);
                     vmByToken.put(token, vm);
-                    vm.start();
+                    supportTasks.submit(vm::start);
                 }
             }
 
@@ -158,13 +176,21 @@ public class TestExecutor {
             }
         }
 
+        supportTasks.shutdown();
+        try {
+            supportTasks.awaitTermination(1, TimeUnit.HOURS);
+        } catch (InterruptedException e) {
+            // Do nothing
+        }
+
         server.terminate();
     }
 
     private boolean processReadyVMs() {
         boolean reclaimed = false;
         for (VM vm : vmByToken.values()) {
-            if (vm.checkCompleted(sink)) {
+            if (vm.checkCompleted()) {
+                supportTasks.submit(() -> vm.finish(sink));
                 vmByToken.remove(vm.token, vm);
                 scheduler.release(vm.cpuMap);
                 reclaimed = true;
@@ -181,8 +207,16 @@ public class TestExecutor {
         return scheduler.getSystemCpus();
     }
 
+    public int getJVMsStarting() {
+        return jvmsStarting.get();
+    }
+
     public int getJVMsRunning() {
         return jvmsRunning.get();
+    }
+
+    public int getJVMsFinishing() {
+        return jvmsFinishing.get();
     }
 
     private class VM {
@@ -196,8 +230,9 @@ public class TestExecutor {
         private boolean processed;
         private IOException pendingException;
         private TestResult result;
-        private InputStreamCollector errCollector;
-        private InputStreamCollector outCollector;
+        private Future<List<String>> errs;
+        private Future<List<String>> outs;
+        private boolean isStarted;
 
         public VM(String host, int port, int token, TestConfig task, CPUMap cpuMap) {
             this.host = host;
@@ -205,13 +240,6 @@ public class TestExecutor {
             this.token = token;
             this.cpuMap = cpuMap;
             this.task = task;
-            if (VMSupport.compilerDirectivesAvailable()) {
-                try {
-                    generateDirectives();
-                } catch (IOException e) {
-                    throw new IllegalStateException(e);
-                }
-            }
         }
 
         void generateDirectives() throws IOException {
@@ -320,7 +348,17 @@ public class TestExecutor {
             pw.close();
         }
 
-        void start() {
+        synchronized void start() {
+            jvmsStarting.incrementAndGet();
+
+            if (VMSupport.compilerDirectivesAvailable()) {
+                try {
+                    generateDirectives();
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+
             try {
                 List<String> command = new ArrayList<>();
 
@@ -354,20 +392,18 @@ public class TestExecutor {
                 ProcessBuilder pb = new ProcessBuilder(command);
                 process = pb.start();
 
-                jvmsRunning.incrementAndGet();
-
                 // start the stream drainers and read the streams into memory;
                 // makes little sense to write them to files, since we would be
                 // reading them back soon anyway
-                errCollector = new InputStreamCollector(process.getErrorStream());
-                outCollector = new InputStreamCollector(process.getInputStream());
-
-                errCollector.start();
-                outCollector.start();
+                errs = supportTasks.submit(new InputStreamCollector(process.getErrorStream()));
+                outs = supportTasks.submit(new InputStreamCollector(process.getInputStream()));
 
             } catch (IOException ex) {
                 pendingException = ex;
             }
+            isStarted = true;
+            jvmsStarting.decrementAndGet();
+            jvmsRunning.incrementAndGet();
         }
 
         public synchronized ForkedTestConfig jobRequest() {
@@ -378,13 +414,14 @@ public class TestExecutor {
             return new ForkedTestConfig(task);
         }
 
-        public synchronized boolean checkCompleted(TestResultCollector sink) {
+        public synchronized boolean checkCompleted() {
+            // Not yet started
+            if (!isStarted) {
+                return false;
+            }
+
             // There is a pending exception that terminated the target VM.
             if (pendingException != null) {
-                result = new TestResult(Status.VM_ERROR);
-                result.addMessage(pendingException.getMessage());
-                result.setConfig(task);
-                sink.add(result);
                 return true;
             }
 
@@ -393,14 +430,29 @@ public class TestExecutor {
                 return false;
             }
 
+            return true;
+        }
+
+        public synchronized void finish(TestResultCollector sink) {
+            jvmsRunning.decrementAndGet();
+            jvmsFinishing.incrementAndGet();
+
+            if (!checkCompleted()) {
+                throw new IllegalStateException("Should be completed");
+            }
+
+            // There is a pending exception that terminated the target VM.
+            if (pendingException != null) {
+                result = new TestResult(Status.VM_ERROR);
+                result.addMessage(pendingException.getMessage());
+                result.setConfig(task);
+                sink.add(result);
+                return;
+            }
+
             // Try to poll the exit code, and fail if it's not zero.
             try {
                 int ecode = process.waitFor();
-
-                jvmsRunning.decrementAndGet();
-
-                outCollector.join();
-                errCollector.join();
 
                 if (ecode != 0) {
                     result = new TestResult(Status.VM_ERROR);
@@ -410,11 +462,11 @@ public class TestExecutor {
                     result = new TestResult(Status.VM_ERROR);
                     result.addMessage("Harness error, no result generated");
                 }
-                result.addVMOuts(outCollector.getOutput());
-                result.addVMErrs(errCollector.getOutput());
+                result.addVMOuts(outs.get());
+                result.addVMErrs(errs.get());
                 result.setConfig(task);
                 sink.add(result);
-            } catch (InterruptedException ex) {
+            } catch (InterruptedException | ExecutionException ex) {
                 result = new TestResult(Status.VM_ERROR);
                 result.addMessage(ex.getMessage());
                 result.setConfig(task);
@@ -425,7 +477,8 @@ public class TestExecutor {
                     compilerDirectives.delete();
                 }
             }
-            return true;
+
+            jvmsFinishing.decrementAndGet();
         }
 
         public synchronized void recordResult(TestResult r) {

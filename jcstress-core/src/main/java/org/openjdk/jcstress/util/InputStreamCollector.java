@@ -25,13 +25,11 @@
 package org.openjdk.jcstress.util;
 
 import java.io.*;
-import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.Callable;
 
-public class InputStreamCollector extends Thread {
+public class InputStreamCollector implements Callable<List<String>> {
 
     private final InputStream in;
     private final List<String> list;
@@ -41,7 +39,7 @@ public class InputStreamCollector extends Thread {
         this.list = new ArrayList<>();
     }
 
-    public void run() {
+    public List<String> call() {
         try (InputStreamReader isr = new InputStreamReader(in);
              BufferedReader br = new BufferedReader(isr)) {
             String line;
@@ -51,9 +49,6 @@ public class InputStreamCollector extends Thread {
         } catch (IOException e) {
             // Do nothing.
         }
-    }
-
-    public List<String> getOutput() {
         return list;
     }
 
