@@ -330,8 +330,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    " + r + "[] gr;");
         pw.println();
 
-        pw.println("    public " + className + "(ForkedTestConfig config, ExecutorService pool) {");
-        pw.println("        super(config, pool);");
+        pw.println("    public " + className + "(ForkedTestConfig config) {");
+        pw.println("        super(config);");
         pw.println("    }");
         pw.println();
 
@@ -351,33 +351,28 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         for (int a = 0; a < actorsCount; a++) {
             ExecutableElement el = info.getActors().get(a);
-            pw.println("        Future<?> a" + a + " = pool.submit(new Callable<Object>() { public Object call() {");
+            pw.println("        VoidThread a" + a + " = new VoidThread() { protected void internalRun() {");
             pw.print("            ");
             emitMethod(pw, el, (isStateItself ? "s." : "t.") + el.getSimpleName(), "s", "r", false);
             pw.println(";");
-            pw.println("            return null;");
-            pw.println("        }});");
+            pw.println("        }};");
         }
 
         for (int a = 0; a < actorsCount; a++) {
-            pw.println("        try {");
-            pw.println("            a" + a + ".get();");
-            pw.println("        } catch (ExecutionException e) {");
-            pw.println("            throw e.getCause();");
+            pw.println("        a" + a + ".start();");
+        }
+
+        for (int a = 0; a < actorsCount; a++) {
+            pw.println("        a" + a + ".join();");
+            pw.println("        if (a" + a + ".throwable() != null) {");
+            pw.println("            throw a" + a + ".throwable();");
             pw.println("        }");
         }
 
         if (info.getArbiter() != null) {
-            pw.println("        try {");
-            pw.println("            pool.submit(new Callable<Object>() { public Object call() {");
-            pw.print("                ");
+            pw.print("            ");
             emitMethod(pw, info.getArbiter(), (isStateItself ? "s." : "t.") + info.getArbiter().getSimpleName(), "s", "r", false);
             pw.println(";");
-            pw.println("                return null;");
-            pw.println("            }}).get();");
-            pw.println("        } catch (ExecutionException e) {");
-            pw.println("            throw e.getCause();");
-            pw.println("        }");
         }
         pw.println("        counter.record(r);");
         pw.println("    }");
@@ -404,7 +399,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         for (int a = 0; a < actorsCount; a++) {
             ExecutableElement el = info.getActors().get(a);
-            pw.println("            Future<Long> a" + a + " = pool.submit(new Callable<Long>() { public Long call() {");
+            pw.println("            LongThread a" + a + " = new LongThread() { public long internalRun() {");
             pw.println("                long a1 = AllocProfileSupport.getAllocatedBytes();");
             pw.println("                for (int c = 0; c < size; c++) {");
             pw.print("                    ");
@@ -413,32 +408,26 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("                }");
             pw.println("                long a2 = AllocProfileSupport.getAllocatedBytes();");
             pw.println("                return a2 - a1;");
-            pw.println("            }});");
+            pw.println("            }};");
+        }
+
+        for (int a = 0; a < actorsCount; a++) {
+            pw.println("            a" + a + ".start();");
         }
 
         for (int a = 0; a < actorsCount; a++) {
             pw.println("            try {");
-            pw.println("                cnts[0] += a" + a + ".get();");
-            pw.println("            } catch (Throwable e) {");
-            pw.println("                // Should not happen, checked in API check");
+            pw.println("                a" + a + ".join();");
+            pw.println("                cnts[0] += a" + a + ".result();");
+            pw.println("            } catch (InterruptedException e) {");
             pw.println("            }");
         }
 
         if (info.getArbiter() != null) {
-            pw.println("            try {");
-            pw.println("                long a = pool.submit(new Callable<Long>() { public Long call() {");
-            pw.println("                    long a1 = AllocProfileSupport.getAllocatedBytes();");
-            pw.println("                    for (int c = 0; c < size; c++) {");
-            pw.print("                        ");
+            pw.println("            for (int c = 0; c < size; c++) {");
+            pw.print("                ");
             emitMethod(pw, info.getArbiter(), (isStateItself ? "ls[c]." : "t.") + info.getArbiter().getSimpleName(), "ls[c]", "lr[c]", false);
             pw.println(";");
-            pw.println("                    }");
-            pw.println("                    long a2 = AllocProfileSupport.getAllocatedBytes();");
-            pw.println("                    return a2 - a1;");
-            pw.println("                }}).get();");
-            pw.println("                cnts[0] += a;");
-            pw.println("            } catch (Throwable e) {");
-            pw.println("                // Should not happen, checked in API check");
             pw.println("            }");
         }
 
@@ -454,7 +443,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
 
         pw.println("    @Override");
-        pw.println("    public ArrayList<Future<Counter<" + r + ">>> internalRun() {");
+        pw.println("    public ArrayList<CounterThread<" + r + ">> internalRun() {");
         if (!isStateItself) {
             pw.println("        test = new " + t + "();");
         }
@@ -468,12 +457,16 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
         pw.println("        control.isStopped = false;");
         pw.println();
-        pw.println("        ArrayList<Future<Counter<" + r + ">>> results = new ArrayList<>(" + actorsCount + ");");
+        pw.println("        ArrayList<CounterThread<" + r + ">> threads = new ArrayList<>(" + actorsCount + ");");
         for (ExecutableElement a : info.getActors()) {
-            pw.println("        results.add(pool.submit(new Callable<Counter<" + r + ">>() { public Counter<" + r + "> call() {");
+            pw.println("        threads.add(new CounterThread<" + r + ">() { public Counter<" + r + "> internalRun() {");
             pw.println("            return " + TASK_LOOP_PREFIX + a.getSimpleName() + "();");
-            pw.println("        }}));");
+            pw.println("        }});");
         }
+        pw.println();
+        pw.println("        for (CounterThread t : threads) {");
+        pw.println("            t.start();");
+        pw.println("        }");
         pw.println();
         pw.println("        if (config.time > 0) {");
         pw.println("            try {");
@@ -484,7 +477,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
         pw.println("        control.isStopped = true;");
         pw.println();
-        pw.println("        return results;");
+        pw.println("        return threads;");
         pw.println("    }");
         pw.println();
 
@@ -771,8 +764,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("public class " + generatedName + " extends Runner<" + generatedName + ".Outcome> {");
         pw.println();
 
-        pw.println("    public " + generatedName + "(ForkedTestConfig config, ExecutorService pool) {");
-        pw.println("        super(config, pool);");
+        pw.println("    public " + generatedName + "(ForkedTestConfig config) {");
+        pw.println("        super(config);");
         pw.println("    }");
         pw.println();
 
@@ -798,7 +791,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    }");
         pw.println();
         pw.println("    @Override");
-        pw.println("    public ArrayList<Future<Counter<Outcome>>> internalRun() {");
+        pw.println("    public ArrayList<CounterThread<Outcome>> internalRun() {");
         pw.println("        throw new UnsupportedOperationException();");
         pw.println("    }");
         pw.println();
@@ -949,13 +942,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
     private void printImports(PrintWriter pw, TestInfo info) {
         Class<?>[] imports = new Class<?>[] {
                 ArrayList.class, Arrays.class,
-                ExecutorService.class, Future.class, TimeUnit.class,
+                TimeUnit.class,
                 ForkedTestConfig.class, TestResult.class,
                 Runner.class, WorkerSync.class, Counter.class,
-                ExecutionException.class,
-                Callable.class,
                 AffinitySupport.class, AllocProfileSupport.class,
                 FootprintEstimator.class,
+                VoidThread.class, LongThread.class, CounterThread.class
         };
 
         for (Class<?> c : imports) {
