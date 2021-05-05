@@ -26,7 +26,7 @@ package org.openjdk.jcstress.infra.runners;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class AbstractThread extends Thread {
+public abstract class AbstractThread extends Thread {
     private static final AtomicInteger ID = new AtomicInteger();
 
     protected volatile Throwable throwable;
@@ -35,6 +35,9 @@ public class AbstractThread extends Thread {
         setDaemon(true);
         setName("jcstress-worker-" + ID.incrementAndGet());
     }
+
+    @Override
+    public abstract void run();
 
     public Throwable throwable() { return throwable; }
 
