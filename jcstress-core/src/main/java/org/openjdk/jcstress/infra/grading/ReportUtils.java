@@ -159,7 +159,7 @@ public class ReportUtils {
             freqLen += 2;
             expectLen += 2;
 
-            pw.printf("%" + idLen + "s%" + samplesLen + "s%" + (freqLen+1) + "s%" + expectLen + "s  %-" + descLen + "s%n",
+            pw.printf("%" + idLen + "s%" + samplesLen + "s%" + freqLen + "s%" + expectLen + "s  %-" + descLen + "s%n",
                     headResult, headSamples, headFreq, headExpect, headDesc);
 
             TestGrading grade = r.grading();
@@ -173,10 +173,10 @@ public class ReportUtils {
             }
 
             for (GradingResult gradeRes : grade.gradingResults) {
-                pw.printf("%" + idLen + "s%," + samplesLen + "d%" + freqLen + ".2f%%%" + expectLen + "s  %-" + descLen + "s%n",
+                pw.printf("%" + idLen + "s%," + samplesLen + "d%" + freqLen + "s%" + expectLen + "s  %-" + descLen + "s%n",
                         StringUtils.cutoff(gradeRes.id, idLen),
                         gradeRes.count,
-                        gradeRes.count * 100.0 / totalSamples,
+                        StringUtils.percent(gradeRes.count, totalSamples, 1),
                         gradeRes.expect,
                         StringUtils.cutoff(gradeRes.description, descLen));
             }
