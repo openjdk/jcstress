@@ -25,6 +25,7 @@
 package org.openjdk.jcstress.infra.grading;
 
 import org.openjdk.jcstress.Options;
+import org.openjdk.jcstress.TestExecutor;
 import org.openjdk.jcstress.Verbosity;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
@@ -61,6 +62,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private long failed;
     private long softErrors;
     private long hardErrors;
+    private TestExecutor executor;
 
     public ConsoleReportPrinter(Options opts, PrintWriter pw, long expectedForks) {
         this.output = pw;
@@ -143,9 +145,13 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
     private void printStatusLine() {
         long currentTime = System.nanoTime();
-        String line = String.format("(ETA: %10s) (Sample Rate: %s) (Results: %d planned; %d passed, %d failed, %d soft errs, %d hard errs) ",
+        final int actorCpus = executor.getActorCpus();
+        final int systemCpus = executor.getSystemCpus();
+        String line = String.format("(ETA: %10s) (Sample Rate: %s) (JVMs: %d running) (CPUs: %d actor, %d system, %d total) (Results: %d planned; %d passed, %d failed, %d soft errs, %d hard errs)",
                 computeETA(),
                 computeSpeed(),
+                executor.getJVMsRunning(),
+                actorCpus, systemCpus, actorCpus + systemCpus,
                 expectedResults, passed, failed, softErrors, hardErrors
         );
         progressLen = line.length();
@@ -182,19 +188,19 @@ public class ConsoleReportPrinter implements TestResultCollector {
         final long G = 1000*M;
         final long T = 1000*G;
 
-        if (v > 10*T) {
+        if (v > T) {
             return String.format("%3.2f T/sec", v / T);
         }
 
-        if (v > 10*G) {
+        if (v > G) {
             return String.format("%3.2f G/sec", v / G);
         }
 
-        if (v > 10*M) {
+        if (v > M) {
             return String.format("%3.2f M/sec", v / M);
         }
 
-        if (v > 10*K) {
+        if (v > K) {
             return String.format("%3.2f K/sec", v / K);
         }
 
@@ -231,4 +237,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
         }
     }
 
+    public void setExecutor(TestExecutor executor) {
+        this.executor = executor;
+    }
 }

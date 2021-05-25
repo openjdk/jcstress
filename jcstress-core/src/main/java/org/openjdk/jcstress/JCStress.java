@@ -92,6 +92,8 @@ public class JCStress {
         SerializedBufferCollector sink = new SerializedBufferCollector(mux);
 
         TestExecutor executor = new TestExecutor(opts.verbosity(), sink, scheduler);
+        printer.setExecutor(executor);
+
         executor.runAll(configs);
 
         sink.close();

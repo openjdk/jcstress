@@ -100,20 +100,20 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 for (TestInfo test : tests) {
                     TestLineWriter wl = new TestLineWriter();
 
-                    wl.put(test.getTest().getQualifiedName());
+                    wl.put(test.getTest().getQualifiedName().toString());
                     wl.put(test.getGeneratedName());
                     wl.put(test.getDescription());
                     List<ExecutableElement> actors = test.getActors();
                     wl.put(actors.size());
                     for (ExecutableElement actor : actors) {
-                        wl.put(actor.getSimpleName());
+                        wl.put(actor.getSimpleName().toString());
                     }
                     wl.put(test.isRequiresFork());
 
                     wl.put(test.cases().size());
 
                     for (Outcome c : test.cases()) {
-                        wl.put(c.expect());
+                        wl.put(c.expect().ordinal());
                         wl.put(c.desc());
                         wl.put(c.id().length);
                         for (String id : c.id()) {

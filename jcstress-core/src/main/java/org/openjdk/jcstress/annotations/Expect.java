@@ -32,20 +32,32 @@ public enum Expect {
     /**
      * Acceptable result. Acceptable results are not required to be present.
      */
-    ACCEPTABLE,
+    ACCEPTABLE("Acceptable"),
 
     /**
      * Same as {@link #ACCEPTABLE}, but this result will be highlighted in reports.
      */
-    ACCEPTABLE_INTERESTING,
+    ACCEPTABLE_INTERESTING("Interesting"),
 
     /**
      * Forbidden result. Should never be present.
      */
-    FORBIDDEN,
+    FORBIDDEN("Forbidden"),
 
     /**
      * Internal expectation: no grading. Do not use.
      */
-    UNKNOWN,
+    UNKNOWN("Unknown"),
+    ;
+
+    private final String desc;
+
+    Expect(String desc) {
+        this.desc = desc;
+    }
+
+    @Override
+    public String toString() {
+        return desc;
+    }
 }

@@ -167,4 +167,14 @@ public class StringUtils {
         }
         return r;
     }
+
+    public static String percent(long v, long total, int prec) {
+        double p = v * 100.0 / total;
+        double limit = Math.pow(0.1, prec);
+        if (p < limit) {
+            return String.format("<%." + prec + "f%%", limit);
+        } else {
+            return String.format("%." + prec + "f%%", p);
+        }
+    }
 }

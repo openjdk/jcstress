@@ -33,7 +33,7 @@ public class TestLineWriter {
         line.append("JCTEST");
     }
 
-    public void put(Object value) {
+    public void put(String value) {
         String s = String.valueOf(value);
         line.append(s.length());
         line.append("S");

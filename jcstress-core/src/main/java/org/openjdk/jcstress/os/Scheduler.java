@@ -36,7 +36,8 @@ public class Scheduler {
     private final int maxUse;
     private final Topology topology;
     private final BitSet availableCores;
-    private int currentUse;
+    private int currentActorUse;
+    private int currentSystemUse;
     private final PackageRecord[] freeMapPackage;
 
     public Scheduler(Topology t, int max) {
@@ -54,7 +55,7 @@ public class Scheduler {
     }
 
     public synchronized CPUMap tryAcquire(SchedulingClass scl) {
-        if (currentUse + scl.numActors() > maxUse) {
+        if (currentActorUse + scl.numActors() > maxUse) {
             // Over the limit, break out.
             return null;
         }
@@ -153,7 +154,7 @@ public class Scheduler {
                 if (availableCPUs.get(thread)) {
                     availableCPUs.set(thread, false);
                     actorMap[aIdx] = thread;
-                    currentUse++;
+                    currentActorUse++;
                     break;
                 }
             }
@@ -167,7 +168,7 @@ public class Scheduler {
                 if (availableCPUs.get(thread)) {
                     availableCPUs.set(thread, false);
                     system[systemCnt++] = thread;
-                    currentUse++;
+                    currentSystemUse++;
                 }
             }
         }
@@ -230,7 +231,7 @@ public class Scheduler {
                 }
                 availableCPUs.set(thread, false);
                 system[systemCnt++] = thread;
-                currentUse++;
+                currentSystemUse++;
             }
         }
 
@@ -279,8 +280,9 @@ public class Scheduler {
             }
         }
 
-        if (use != currentUse) {
-            throw new IllegalStateException(when + ": CPU use counts are inconsistent, counter = " + currentUse + ", actually taken = " + use);
+        final int expected = currentActorUse + currentSystemUse;
+        if (use != expected) {
+            throw new IllegalStateException(when + ": CPU use counts are inconsistent, counter = " + expected + ", actually taken = " + use);
         }
 
         for (int p = 0; p < topology.packagesPerSystem(); p++) {
@@ -305,13 +307,13 @@ public class Scheduler {
             if (c != -1) {
                 availableCPUs.set(c, true);
                 availableCores.set(topology.threadToCore(c), true);
-                currentUse--;
+                currentActorUse--;
             }
         }
         for (int c : cpuMap.systemMap()) {
             availableCPUs.set(c, true);
             availableCores.set(topology.threadToCore(c), true);
-            currentUse--;
+            currentSystemUse--;
         }
 
         recomputeFreeMaps();
@@ -332,6 +334,14 @@ public class Scheduler {
         }
 
         Arrays.sort(freeMapPackage);
+    }
+
+    public int getActorCpus() {
+        return currentActorUse;
+    }
+
+    public int getSystemCpus() {
+        return currentSystemUse;
     }
 
     private static class PackageRecord implements Comparable<PackageRecord> {
