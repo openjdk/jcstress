@@ -44,11 +44,12 @@ public class TestList {
 
     private static Map<String, TestInfo> getTests() {
         if (tests == null) {
+            Expect[] expectValues = Expect.values();
             Map<String, TestInfo> m = new HashMap<>();
-            InputStream stream = null;
-            try {
-                stream = TestList.class.getResourceAsStream(LIST);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+
+            try (InputStream stream = TestList.class.getResourceAsStream(LIST);
+                 InputStreamReader isr = new InputStreamReader(stream);
+                 BufferedReader reader = new BufferedReader(isr)) {
 
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -72,8 +73,8 @@ public class TestList {
                         m.put(name, testInfo);
 
                         for (int c = 0; c < caseCount; c++) {
-                            Expect expect  = Expect.valueOf(read.nextString());
-                            String desc    = read.nextString();
+                            Expect expect = expectValues[read.nextInt()];
+                            String desc = read.nextString();
                             int stateCount = read.nextInt();
                             for (int s = 0; s < stateCount; s++) {
                                 String regex = read.nextString();
@@ -90,15 +91,8 @@ public class TestList {
                 }
             } catch (IOException e) {
                 throw new IllegalStateException("Fatal error", e);
-            } finally {
-                if (stream != null) {
-                    try {
-                        stream.close();
-                    } catch (IOException e) {
-                        // swallow
-                    }
-                }
             }
+            // swallow
             tests = m;
         }
         return tests;

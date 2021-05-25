@@ -182,19 +182,19 @@ public class ConsoleReportPrinter implements TestResultCollector {
         final long G = 1000*M;
         final long T = 1000*G;
 
-        if (v > 10*T) {
+        if (v > T) {
             return String.format("%3.2f T/sec", v / T);
         }
 
-        if (v > 10*G) {
+        if (v > G) {
             return String.format("%3.2f G/sec", v / G);
         }
 
-        if (v > 10*M) {
+        if (v > M) {
             return String.format("%3.2f M/sec", v / M);
         }
 
-        if (v > 10*K) {
+        if (v > K) {
             return String.format("%3.2f K/sec", v / K);
         }
 

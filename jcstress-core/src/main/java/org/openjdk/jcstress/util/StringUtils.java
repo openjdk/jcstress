@@ -167,4 +167,12 @@ public class StringUtils {
         }
         return r;
     }
+
+    public static String repeat(String s, int count) {
+        StringBuilder sb = new StringBuilder();
+        for (int c = 0; c < count; c++) {
+            sb.append(s);
+        }
+        return sb.toString();
+    }
 }

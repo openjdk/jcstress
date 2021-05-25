@@ -129,9 +129,14 @@ public class ReportUtils {
         pw.println();
 
         if (!r.isEmpty()) {
-            int idLen = "Observed state".length();
-            int occLen = "Occurrences".length();
-            int expectLen = "Expectation".length();
+            final String headResult = "RESULT";
+            final String headSamples = "SAMPLES";
+            final String headExpect = "EXPECT";
+            final String headDesc = "DESCRIPTION";
+
+            int idLen = headResult.length();
+            int occLen = headSamples.length();
+            int expectLen = headExpect.length();
             int descLen = 60;
 
             for (String s : r.getStateKeys()) {
@@ -151,10 +156,11 @@ public class ReportUtils {
             occLen += 2;
             expectLen += 2;
 
-            pw.printf("%" + idLen + "s %" + occLen + "s %" + expectLen + "s  %-" + descLen + "s%n", "Observed state", "Occurrences", "Expectation", "Interpretation");
+            pw.printf("  %" + idLen + "s  %" + occLen + "s  %" + expectLen + "s  %-" + descLen + "s%n",
+                    headResult, headSamples, headExpect, headDesc);
 
             for (GradingResult gradeRes : r.grading().gradingResults) {
-                pw.printf("%" + idLen + "s %," + occLen + "d %" + expectLen + "s  %-" + descLen + "s%n",
+                pw.printf("  %" + idLen + "s  %," + occLen + "d  %" + expectLen + "s  %-" + descLen + "s%n",
                         StringUtils.cutoff(gradeRes.id, idLen),
                         gradeRes.count,
                         gradeRes.expect,
