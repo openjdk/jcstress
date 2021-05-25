@@ -63,6 +63,8 @@ public class TestExecutor {
     private final Map<Integer, VM> vmByToken;
     private final Object notifyLock;
 
+    private final AtomicInteger cntRunning;
+
     public TestExecutor(Verbosity verbosity, TestResultCollector sink, Scheduler scheduler) throws IOException {
         this.verbosity = verbosity;
         this.sink = sink;
@@ -82,6 +84,12 @@ public class TestExecutor {
                 notifyChanged();
             }
         });
+
+        this.cntRunning = new AtomicInteger();
+    }
+
+    public int getJVMsRunning() {
+        return cntRunning.get();
     }
 
     private void awaitNotification() {
@@ -167,6 +175,14 @@ public class TestExecutor {
             }
         }
         return reclaimed;
+    }
+
+    public int getActorCpus() {
+        return scheduler.getActorCpus();
+    }
+
+    public int getSystemCpus() {
+        return scheduler.getSystemCpus();
     }
 
     private class VM {
@@ -335,6 +351,8 @@ public class TestExecutor {
                 ProcessBuilder pb = new ProcessBuilder(command);
                 process = pb.start();
 
+                cntRunning.incrementAndGet();
+
                 // start the stream drainers and read the streams into memory;
                 // makes little sense to write them to files, since we would be
                 // reading them back soon anyway
@@ -375,6 +393,8 @@ public class TestExecutor {
             // Try to poll the exit code, and fail if it's not zero.
             try {
                 int ecode = process.waitFor();
+
+                cntRunning.decrementAndGet();
 
                 outCollector.join();
                 errCollector.join();
