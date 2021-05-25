@@ -131,17 +131,19 @@ public class ReportUtils {
         if (!r.isEmpty()) {
             final String headResult = "RESULT";
             final String headSamples = "SAMPLES";
+            final String headFreq = "FREQ";
             final String headExpect = "EXPECT";
             final String headDesc = "DESCRIPTION";
 
             int idLen = headResult.length();
-            int occLen = headSamples.length();
+            int samplesLen = headSamples.length();
+            int freqLen = Math.max(6, headFreq.length());
             int expectLen = headExpect.length();
             int descLen = 60;
 
             for (String s : r.getStateKeys()) {
                 idLen = Math.max(idLen, s.length());
-                occLen = Math.max(occLen, String.format("%,d", r.getCount(s)).length());
+                samplesLen = Math.max(samplesLen, String.format("%,d", r.getCount(s)).length());
                 expectLen = Math.max(expectLen, Expect.UNKNOWN.toString().length());
             }
 
@@ -153,16 +155,28 @@ public class ReportUtils {
             expectLen = Math.max(expectLen, test.unmatched().expect().toString().length());
 
             idLen += 2;
-            occLen += 2;
+            samplesLen += 2;
+            freqLen += 2;
             expectLen += 2;
 
-            pw.printf("  %" + idLen + "s  %" + occLen + "s  %" + expectLen + "s  %-" + descLen + "s%n",
-                    headResult, headSamples, headExpect, headDesc);
+            pw.printf("%" + idLen + "s%" + samplesLen + "s%" + (freqLen+1) + "s%" + expectLen + "s  %-" + descLen + "s%n",
+                    headResult, headSamples, headFreq, headExpect, headDesc);
 
-            for (GradingResult gradeRes : r.grading().gradingResults) {
-                pw.printf("  %" + idLen + "s  %," + occLen + "d  %" + expectLen + "s  %-" + descLen + "s%n",
+            TestGrading grade = r.grading();
+            long totalSamples = 0;
+            for (GradingResult gradeRes : grade.gradingResults) {
+                totalSamples += gradeRes.count;
+            }
+
+            if (totalSamples == 0) {
+                totalSamples = 1;
+            }
+
+            for (GradingResult gradeRes : grade.gradingResults) {
+                pw.printf("%" + idLen + "s%," + samplesLen + "d%" + freqLen + ".2f%%%" + expectLen + "s  %-" + descLen + "s%n",
                         StringUtils.cutoff(gradeRes.id, idLen),
                         gradeRes.count,
+                        gradeRes.count * 100.0 / totalSamples,
                         gradeRes.expect,
                         StringUtils.cutoff(gradeRes.description, descLen));
             }
