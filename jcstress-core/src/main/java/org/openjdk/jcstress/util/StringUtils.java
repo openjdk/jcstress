@@ -168,14 +168,6 @@ public class StringUtils {
         return r;
     }
 
-    public static String repeat(String s, int count) {
-        StringBuilder sb = new StringBuilder();
-        for (int c = 0; c < count; c++) {
-            sb.append(s);
-        }
-        return sb.toString();
-    }
-
     public static String percent(long v, long total, int prec) {
         double p = v * 100.0 / total;
         double limit = Math.pow(0.1, prec);
