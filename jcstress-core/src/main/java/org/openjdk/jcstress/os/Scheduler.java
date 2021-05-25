@@ -280,8 +280,9 @@ public class Scheduler {
             }
         }
 
-        if (use != currentActorUse) {
-            throw new IllegalStateException(when + ": CPU use counts are inconsistent, counter = " + currentActorUse + ", actually taken = " + use);
+        final int expected = currentActorUse + currentSystemUse;
+        if (use != expected) {
+            throw new IllegalStateException(when + ": CPU use counts are inconsistent, counter = " + expected + ", actually taken = " + use);
         }
 
         for (int p = 0; p < topology.packagesPerSystem(); p++) {
