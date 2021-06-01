@@ -56,7 +56,7 @@ public class AffinitySupport {
             if (INSTANCE == null) {
                 synchronized (Linux.class) {
                     if (INSTANCE == null) {
-                        INSTANCE = Native.loadLibrary("c", CLibrary.class);
+                        INSTANCE = Native.load("c", CLibrary.class);
                     }
                 }
             }
