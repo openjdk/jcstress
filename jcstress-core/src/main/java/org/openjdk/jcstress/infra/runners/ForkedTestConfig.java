@@ -24,6 +24,8 @@
  */
 package org.openjdk.jcstress.infra.runners;
 
+import org.openjdk.jcstress.os.AffinityMode;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -37,6 +39,7 @@ public class ForkedTestConfig {
     public final int maxFootprintMB;
     public int minStride;
     public int maxStride;
+    public boolean localAffinity;
     public int[] actorMap;
 
     public ForkedTestConfig(TestConfig cfg) {
@@ -47,6 +50,7 @@ public class ForkedTestConfig {
         maxFootprintMB = cfg.maxFootprintMB;
         minStride = cfg.minStride;
         maxStride = cfg.maxStride;
+        localAffinity = cfg.shClass.mode() == AffinityMode.LOCAL;
         actorMap = cfg.cpuMap.actorMap();
     }
 
@@ -58,6 +62,7 @@ public class ForkedTestConfig {
         maxFootprintMB = dis.readInt();
         minStride = dis.readInt();
         maxStride = dis.readInt();
+        localAffinity = dis.readBoolean();
         int len = dis.readInt();
         actorMap = new int[len];
         for (int c = 0; c < len; c++) {
@@ -73,6 +78,7 @@ public class ForkedTestConfig {
         dos.writeInt(maxFootprintMB);
         dos.writeInt(minStride);
         dos.writeInt(maxStride);
+        dos.writeBoolean(localAffinity);
         dos.writeInt(actorMap.length);
         for (int am : actorMap) {
             dos.writeInt(am);

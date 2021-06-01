@@ -47,14 +47,18 @@ public class ForkedMain {
             throw new IllegalStateException("Expected three arguments");
         }
 
-        // Pre-initialize the affinity support and threads, so that workers
-        // do not have to do this on critical paths during the execution.
-        // This also runs when the rest of the infrastructure starts up.
-        new WarmupAffinityTask().start();
+        boolean initLocalAffinity = Boolean.parseBoolean(args[0]);
 
-        String host = args[0];
-        int port = Integer.parseInt(args[1]);
-        int token = Integer.parseInt(args[2]);
+        if (initLocalAffinity) {
+            // Pre-initialize the affinity support and threads, so that workers
+            // do not have to do this on critical paths during the execution.
+            // This also runs when the rest of the infrastructure starts up.
+            new WarmupAffinityTask().start();
+        }
+
+        String host = args[1];
+        int port = Integer.parseInt(args[2]);
+        int token = Integer.parseInt(args[3]);
 
         BinaryLinkClient link = new BinaryLinkClient(host, port);
 
