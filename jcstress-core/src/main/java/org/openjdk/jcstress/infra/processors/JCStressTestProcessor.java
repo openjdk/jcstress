@@ -569,7 +569,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println();
             pw.println("    private Counter<" + r + "> " + TASK_LOOP_PREFIX + a.getSimpleName() + "() {");
             pw.println("        Counter<" + r + "> counter = new Counter<>();");
-            pw.println("        if (config.localAffinity) AffinitySupport.bind(config.actorMap[" + n + "]);");
+            pw.println("        if (config.localAffinity) AffinitySupport.bind(config.localAffinityMap[" + n + "]);");
             pw.println("        while (true) {");
             pw.println("            WorkerSync sync = workerSync;");
             pw.println("            if (sync.stopped) {");
