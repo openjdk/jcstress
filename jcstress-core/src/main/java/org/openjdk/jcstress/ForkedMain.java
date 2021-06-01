@@ -32,6 +32,7 @@ import org.openjdk.jcstress.infra.runners.VoidThread;
 import org.openjdk.jcstress.link.BinaryLinkClient;
 import org.openjdk.jcstress.os.AffinitySupport;
 import org.openjdk.jcstress.util.StringUtils;
+import org.openjdk.jcstress.vm.AllocProfileSupport;
 
 import java.lang.reflect.Constructor;
 
@@ -46,6 +47,10 @@ public class ForkedMain {
         if (args.length < 3) {
             throw new IllegalStateException("Expected three arguments");
         }
+
+        // Pre-initialize the allocation profiling support, so that infrastructure
+        // code does not have to do this on critical path during the execution.
+        new WarmupAllocProfileTask().start();
 
         boolean initLocalAffinity = Boolean.parseBoolean(args[0]);
 
@@ -97,6 +102,17 @@ public class ForkedMain {
         protected void internalRun() {
             try {
                 AffinitySupport.tryBind();
+            } catch (Exception e) {
+                // Do not care
+            }
+        }
+    }
+
+    private static class WarmupAllocProfileTask extends VoidThread {
+        @Override
+        protected void internalRun() {
+            try {
+                AllocProfileSupport.getAllocatedBytes();
             } catch (Exception e) {
                 // Do not care
             }
