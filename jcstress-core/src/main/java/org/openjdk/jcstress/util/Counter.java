@@ -24,6 +24,8 @@
  */
 package org.openjdk.jcstress.util;
 
+import org.openjdk.jcstress.infra.Copyable;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -136,7 +138,7 @@ public final class Counter<R> implements Serializable {
 
         // completely new key, insert, and exit
         keyCount++;
-        keys[idx] = decouple(result);
+        keys[idx] = copyOf(result);
         counts[idx] = count;
     }
 
@@ -194,7 +196,21 @@ public final class Counter<R> implements Serializable {
         return 0L;
     }
 
-    private static <T> T decouple(T result) {
+    private static <T> T copyOf(T result) {
+        // Known immutable
+        if (result instanceof String) {
+            return result;
+        }
+
+        // Special class that knows how to copy itself
+        if (result instanceof Copyable) {
+            Object copy = ((Copyable) result).copy();
+            @SuppressWarnings("unchecked")
+            final T tCopy = (T) copy;
+            return tCopy;
+        }
+
+        // Generic copying...
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(bos);
