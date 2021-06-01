@@ -457,6 +457,18 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
         pw.println("        control.isStopped = false;");
         pw.println();
+
+        // Initialize affinity before starting the timing measurement, so that init time
+        // does not eat up into the test run time.
+        pw.println("        if (config.localAffinity) {");
+        pw.println("            try {");
+        pw.println("                AffinitySupport.tryBind();");
+        pw.println("            } catch (Exception e) {");
+        pw.println("                // Do not care");
+        pw.println("            }");
+        pw.println("        }");
+        pw.println();
+
         pw.println("        ArrayList<CounterThread<" + r + ">> threads = new ArrayList<>(" + actorsCount + ");");
         for (ExecutableElement a : info.getActors()) {
             pw.println("        threads.add(new CounterThread<" + r + ">() { public Counter<" + r + "> internalRun() {");
@@ -557,7 +569,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println();
             pw.println("    private Counter<" + r + "> " + TASK_LOOP_PREFIX + a.getSimpleName() + "() {");
             pw.println("        Counter<" + r + "> counter = new Counter<>();");
-            pw.println("        AffinitySupport.bind(config.actorMap[" + n + "]);");
+            pw.println("        if (config.localAffinity) AffinitySupport.bind(config.localAffinityMap[" + n + "]);");
             pw.println("        while (true) {");
             pw.println("            WorkerSync sync = workerSync;");
             pw.println("            if (sync.stopped) {");

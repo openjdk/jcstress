@@ -342,6 +342,9 @@ public class TestExecutor {
 
                 command.add(ForkedMain.class.getName());
 
+                // notify the forked VM whether we want the local affinity initialized
+                command.add(Boolean.toString(task.shClass.mode() == AffinityMode.LOCAL));
+
                 command.add(host);
                 command.add(String.valueOf(port));
 

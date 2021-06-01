@@ -33,11 +33,6 @@ import java.util.List;
 public class AffinitySupport {
 
     public static void bind(int cpu) {
-        if (cpu == -1) {
-            // Special case: no need to affine.
-            return;
-        }
-
         if (VMSupport.isLinux()) {
             Linux.bind(cpu);
         } else {
@@ -55,6 +50,7 @@ public class AffinitySupport {
 
     static class Linux {
         private static volatile CLibrary INSTANCE;
+        private static boolean BIND_TRIED;
 
         public static void tryInit() {
             if (INSTANCE == null) {
@@ -76,15 +72,23 @@ public class AffinitySupport {
         }
 
         public static void tryBind() {
-            tryInit();
+            if (BIND_TRIED) return;
 
-            final cpu_set_t new_cpuset = new cpu_set_t();
-            new_cpuset.set(0);
-            final cpu_set_t old_cpuset = new cpu_set_t();
+            synchronized (Linux.class) {
+                if (BIND_TRIED) return;
 
-            get(old_cpuset);
-            set(new_cpuset);
-            set(old_cpuset);
+                tryInit();
+
+                final cpu_set_t new_cpuset = new cpu_set_t();
+                new_cpuset.set(0);
+                final cpu_set_t old_cpuset = new cpu_set_t();
+
+                get(old_cpuset);
+                set(new_cpuset);
+                set(old_cpuset);
+
+                BIND_TRIED = true;
+            }
         }
 
         private static void get(cpu_set_t cpuset) {

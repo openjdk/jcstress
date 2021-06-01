@@ -24,6 +24,8 @@
  */
 package org.openjdk.jcstress.infra.runners;
 
+import org.openjdk.jcstress.os.AffinityMode;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -37,7 +39,8 @@ public class ForkedTestConfig {
     public final int maxFootprintMB;
     public int minStride;
     public int maxStride;
-    public int[] actorMap;
+    public boolean localAffinity;
+    public int[] localAffinityMap;
 
     public ForkedTestConfig(TestConfig cfg) {
         spinLoopStyle = cfg.spinLoopStyle;
@@ -47,7 +50,10 @@ public class ForkedTestConfig {
         maxFootprintMB = cfg.maxFootprintMB;
         minStride = cfg.minStride;
         maxStride = cfg.maxStride;
-        actorMap = cfg.cpuMap.actorMap();
+        localAffinity = cfg.shClass.mode() == AffinityMode.LOCAL;
+        if (localAffinity) {
+            localAffinityMap = cfg.cpuMap.actorMap();
+        }
     }
 
     public ForkedTestConfig(DataInputStream dis) throws IOException {
@@ -58,10 +64,13 @@ public class ForkedTestConfig {
         maxFootprintMB = dis.readInt();
         minStride = dis.readInt();
         maxStride = dis.readInt();
-        int len = dis.readInt();
-        actorMap = new int[len];
-        for (int c = 0; c < len; c++) {
-            actorMap[c] = dis.readInt();
+        localAffinity = dis.readBoolean();
+        if (localAffinity) {
+            int len = dis.readInt();
+            localAffinityMap = new int[len];
+            for (int c = 0; c < len; c++) {
+                localAffinityMap[c] = dis.readInt();
+            }
         }
     }
 
@@ -73,9 +82,12 @@ public class ForkedTestConfig {
         dos.writeInt(maxFootprintMB);
         dos.writeInt(minStride);
         dos.writeInt(maxStride);
-        dos.writeInt(actorMap.length);
-        for (int am : actorMap) {
-            dos.writeInt(am);
+        dos.writeBoolean(localAffinity);
+        if (localAffinity) {
+            dos.writeInt(localAffinityMap.length);
+            for (int am : localAffinityMap) {
+                dos.writeInt(am);
+            }
         }
     }
 
