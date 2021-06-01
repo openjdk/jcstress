@@ -41,6 +41,7 @@ public class ResultGenerator {
     }
 
     public String generateResult(Class<?>... args) {
+        boolean allPrimitive = true;
         String name = "";
         for (Class k : args) {
             if (k.isPrimitive()) {
@@ -54,6 +55,7 @@ public class ResultGenerator {
                 if (k == double.class)  name += "D";
             } else {
                 name += "L";
+                allPrimitive = false;
             }
         }
         name += "_Result";
@@ -74,11 +76,15 @@ public class ResultGenerator {
 
         pw.println("package org.openjdk.jcstress.infra.results;");
         pw.println("");
-        pw.println("import java.io.Serializable;");
+        if (allPrimitive) {
+            pw.println("import org.openjdk.jcstress.infra.Copyable;");
+        } else {
+            pw.println("import java.io.Serializable;");
+        }
         pw.println("import org.openjdk.jcstress.annotations.Result;");
         pw.println("");
         pw.println("@Result");
-        pw.println("public final class " + name + " implements Serializable {");
+        pw.println("public final class " + name + " implements " + (allPrimitive ? "Copyable" : "Serializable" ) + " {");
 
         {
             int n = 1;
@@ -158,10 +164,10 @@ public class ResultGenerator {
 
         pw.println("        return true;");
         pw.println("    }");
+        pw.println();
 
         pw.println("    public String toString() {");
         pw.print("        return \"\" + ");
-
         {
             int n = 1;
             for (Class k : args) {
@@ -172,8 +178,18 @@ public class ResultGenerator {
             }
             pw.println(";");
         }
-
         pw.println("    }");
+        pw.println();
+
+        if (allPrimitive) {
+            pw.println("    public Object copy() {");
+            pw.println("        " + name + " copy = new " + name + "();");
+            for (int n = 1; n <= args.length; n++) {
+                pw.println("        copy.r" + n + " = r" + n + ";");
+            }
+            pw.println("        return copy;");
+            pw.println("    }");
+        }
 
         pw.println("}");
         pw.close();
