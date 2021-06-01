@@ -24,8 +24,15 @@
  */
 package org.openjdk.jcstress.infra;
 
+/**
+ * Marks the class as directly copyable.
+ */
 public interface Copyable {
 
+    /**
+     * Produce the distinct copy of the object and all of its references.
+     * @return object copy
+     */
     Object copy();
 
 }
