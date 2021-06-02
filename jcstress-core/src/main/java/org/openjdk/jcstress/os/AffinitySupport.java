@@ -66,18 +66,25 @@ public class AffinitySupport {
         private static volatile CLibrary INSTANCE;
         private static boolean BIND_TRIED;
 
-        /*                                            q
+        /*
            Unpacks the libraries, and replies additional options for forked VMs.
          */
         public static List<String> prepare() {
             System.setProperty("jnidispatch.preserve", "true");
             Native.load("c", CLibrary.class);
 
+            File file = new File(System.getProperty("jnidispatch.path"));
+            String bootLibraryPath = file.getParent();
+
+            // Need to rename the file to the proper name, otherwise JNA would not discover it
+            File proper = new File(bootLibraryPath + '/' + System.mapLibraryName("jnidispatch"));
+            file.renameTo(proper);
+
             return Arrays.asList(
                     "-Djna.nounpack=true",    // Should not unpack itself, but use predefined path
                     "-Djna.nosys=true",       // Should load from explicit path
                     "-Djna.noclasspath=true", // Should load from explicit path
-                    "-Djna.boot.library.path=" + new File(System.getProperty("jnidispatch.path")).getParent(),
+                    "-Djna.boot.library.path=" + bootLibraryPath,
                     "-Djna.platform.library.path=" + System.getProperty("jna.platform.library.path")
             );
         }

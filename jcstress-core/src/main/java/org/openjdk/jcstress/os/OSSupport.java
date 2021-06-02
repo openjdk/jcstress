@@ -25,6 +25,7 @@
 package org.openjdk.jcstress.os;
 
 import org.openjdk.jcstress.util.InputStreamDrainer;
+import org.openjdk.jcstress.vm.VMSupport;
 import org.openjdk.jcstress.vm.VMSupportException;
 
 import java.io.ByteArrayOutputStream;
@@ -55,8 +56,14 @@ public class OSSupport {
                 "taskset", "-c", "0");
 
         try {
+            // Prepare and dump affinity support collaterals
             AFFINITY_ADDITIONAL_OPTIONS = AffinitySupport.prepare();
-            AffinitySupport.tryBind();
+
+            // Test the unpacked mode works...
+            List<String> test = new ArrayList<>(AFFINITY_ADDITIONAL_OPTIONS);
+            test.add(AffinitySupportTestMain.class.getCanonicalName());
+            VMSupport.tryWith(test.toArray(new String[0]));
+
             System.out.printf("----- %s %s%n", "[OK]", "Trying to set per-thread affinity with syscalls");
             AFFINITY_SUPPORT_AVAILABLE = true;
         } catch (Throwable e) {
