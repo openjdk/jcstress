@@ -29,14 +29,14 @@ import org.openjdk.jcstress.vm.VMSupportException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class OSSupport {
 
     private static volatile boolean TASKSET_AVAILABLE;
+    private static List<String> AFFINITY_ADDITIONAL_OPTIONS;
+
     public static boolean taskSetAvailable() {
         return TASKSET_AVAILABLE;
     }
@@ -55,6 +55,7 @@ public class OSSupport {
                 "taskset", "-c", "0");
 
         try {
+            AFFINITY_ADDITIONAL_OPTIONS = AffinitySupport.prepare();
             AffinitySupport.tryBind();
             System.out.printf("----- %s %s%n", "[OK]", "Trying to set per-thread affinity with syscalls");
             AFFINITY_SUPPORT_AVAILABLE = true;
@@ -65,6 +66,14 @@ public class OSSupport {
         }
 
         System.out.println();
+    }
+
+    public static Collection<? extends String> getJavaInvokeArguments() {
+        if (AFFINITY_SUPPORT_AVAILABLE) {
+            return AFFINITY_ADDITIONAL_OPTIONS;
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private static boolean detectCommand(String label, String... opts) {
