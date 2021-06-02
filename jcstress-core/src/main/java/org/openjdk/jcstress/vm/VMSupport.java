@@ -86,6 +86,12 @@ public class VMSupport {
                 "-XX:+UnlockDiagnosticVMOptions"
         );
 
+        detect("Disabling performance data collection",
+                SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
+                "-XX:-UsePerfData"
+        );
+
         C1_AVAILABLE = detect("Checking for C1 availability",
                 SimpleTestMain.class,
                 null,
