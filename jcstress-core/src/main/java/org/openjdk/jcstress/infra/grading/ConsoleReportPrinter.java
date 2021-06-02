@@ -147,7 +147,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
         long currentTime = System.nanoTime();
         final int actorCpus = executor.getActorCpus();
         final int systemCpus = executor.getSystemCpus();
-        String line = String.format("(ETA: %10s) (Sample Rate: %s) (JVMs: %d start, %d run, %d finish) (CPUs: %d actor, %d system, %d total) (Results: %d planned; %d passed, %d failed, %d soft errs, %d hard errs)",
+        String line = String.format("(ETA: %10s) (Sample Rate: %s) (JVMs: %d start, %d active, %d finish) (CPUs: %d actor, %d system, %d total) (Results: %d planned; %d passed, %d failed, %d soft errs, %d hard errs)",
                 computeETA(),
                 computeSpeed(),
                 executor.getJVMsStarting(), executor.getJVMsRunning(), executor.getJVMsFinishing(),
