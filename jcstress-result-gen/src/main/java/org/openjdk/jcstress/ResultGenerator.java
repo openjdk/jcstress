@@ -125,7 +125,7 @@ public class ResultGenerator {
                     pw.print("(int) (r" + n + ")");
                 } else
                 {
-                    pw.print("0");
+                    pw.print("(r" + n + " == null ? 0 : r" + n + ".hashCode())");
                 }
 
                 if (n > 1) {
@@ -151,12 +151,12 @@ public class ResultGenerator {
                 if (k == boolean.class || k == byte.class || k == short.class || k == char.class
                         || k == int.class || k == long.class) {
                     pw.println("        if (r" + n + " != that.r" + n + ") return false;");
-                }
-                if (k == double.class) {
+                } else if (k == double.class) {
                     pw.println("        if (Double.compare(r" + n + ", that.r" + n + ") != 0) return false;");
-                }
-                if (k == float.class) {
+                } else if (k == float.class) {
                     pw.println("        if (Float.compare(r" + n + ", that.r" + n + ") != 0) return false;");
+                } else {
+                    pw.println("        if (!objEquals(r" + n + ", that.r" + n + ")) return false;");
                 }
                 n++;
             }
@@ -188,6 +188,12 @@ public class ResultGenerator {
                 pw.println("        copy.r" + n + " = r" + n + ";");
             }
             pw.println("        return copy;");
+            pw.println("    }");
+        }
+
+        if (!allPrimitive) {
+            pw.println("    private static boolean objEquals(Object a, Object b) {");
+            pw.println("        return a == b || a != null && a.equals(b);");
             pw.println("    }");
         }
 
