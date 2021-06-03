@@ -113,24 +113,29 @@ questions.
                     </executions>
                 </plugin>
                 <plugin>
-                    <groupId>com.mycila.maven-license-plugin</groupId>
-                    <artifactId>maven-license-plugin</artifactId>
-                    <version>1.10.b1</version>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>4.1</version>
+                    <configuration>
+                        <licenseSets>
+                            <licenseSet>
+                                <header>file:///${project.basedir}/../src/license/gpl_cpe/header.txt</header>
+                                <excludes>
+                                    <exclude>**/README</exclude>
+                                    <exclude>src/test/resources/**</exclude>
+                                    <exclude>src/main/resources/**</exclude>
+                                </excludes>
+                            </licenseSet>
+                        </licenseSets>
+                        <skipExistingHeaders>true</skipExistingHeaders>
+                        <strictCheck>true</strictCheck>
+                    </configuration>
                     <executions>
                         <execution>
                             <goals>
                                 <goal>format</goal>
                             </goals>
                             <phase>process-sources</phase>
-                            <configuration>
-                                <header>file:///${project.basedir}/../src/license/gpl_cpe/header.txt</header>
-                                <skipExistingHeaders>true</skipExistingHeaders>
-                                <strictCheck>true</strictCheck>
-                                <basedir>${project.basedir}/src/main/</basedir>
-                                <mapping>
-                                    <java>PHP</java>
-                                </mapping>
-                            </configuration>
                         </execution>
                     </executions>
                 </plugin>
