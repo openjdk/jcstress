@@ -71,6 +71,11 @@ questions.
     <dependencies>
         <dependency>
             <groupId>org.openjdk.jcstress</groupId>
+            <artifactId>jcstress-samples</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jcstress</groupId>
             <artifactId>jcstress-tests-custom</artifactId>
             <version>${project.version}</version>
         </dependency>
