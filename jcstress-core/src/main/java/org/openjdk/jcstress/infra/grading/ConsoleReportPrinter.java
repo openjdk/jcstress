@@ -173,7 +173,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
         String l4 = String.format("(Results: %d planned; %d passed, %d failed, %d soft errs, %d hard errs)",
                 expectedResults, passed, failed, softErrors, hardErrors);
 
-        if (progressAnsi) {
+        if (!progressInteractive || progressAnsi) {
             progressLen[0] = l0.length();
             progressLen[1] = l1.length();
             progressLen[2] = l2.length();
