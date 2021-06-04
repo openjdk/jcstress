@@ -29,8 +29,13 @@ import org.openjdk.jcstress.TestExecutor;
 import org.openjdk.jcstress.Verbosity;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
+import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -55,8 +60,12 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private final long printIntervalMs;
     private long lastPrint;
 
+    private static final int PROGRESS_COMPONENTS = 5;
     private final boolean progressInteractive;
-    private int progressLen;
+    private final boolean progressAnsi;
+    private boolean progressFirstLine;
+    private final int[] progressLen;
+    private final DateTimeFormatter fmt;
 
     private long passed;
     private long failed;
@@ -68,9 +77,14 @@ public class ConsoleReportPrinter implements TestResultCollector {
         this.output = pw;
         this.expectedResults = expectedForks;
         verbosity = opts.verbosity();
-        progressLen = 1;
+        progressLen = new int[PROGRESS_COMPONENTS];
+        Arrays.fill(progressLen, 1);
 
+        progressFirstLine = true;
         progressInteractive = (System.console() != null);
+        progressAnsi = VMSupport.isLinux();
+        fmt = DateTimeFormatter.ofPattern("E, yyyy-MM-dd HH:mm:ss");
+
         output.println("  Attached the " + (progressInteractive ? "interactive console" : "non-interactive output stream") + ".");
 
         printIntervalMs = (PRINT_INTERVAL_MS != null) ?
@@ -147,15 +161,35 @@ public class ConsoleReportPrinter implements TestResultCollector {
         long currentTime = System.nanoTime();
         final int actorCpus = executor.getActorCpus();
         final int systemCpus = executor.getSystemCpus();
-        String line = String.format("(ETA: %10s) (Sample Rate: %s) (JVMs: %d start, %d active, %d finish) (CPUs: %d actor, %d system, %d total) (Results: %d planned; %d passed, %d failed, %d soft errs, %d hard errs)",
-                computeETA(),
-                computeSpeed(),
-                executor.getJVMsStarting(), executor.getJVMsRunning(), executor.getJVMsFinishing(),
-                actorCpus, systemCpus, actorCpus + systemCpus,
-                expectedResults, passed, failed, softErrors, hardErrors
-        );
-        progressLen = line.length();
-        output.print(line);
+
+        String l0 = String.format("(ETA: %s)",
+                computeETA());
+        String l1 = String.format("(Sampling Rate: %s)",
+                computeSpeed());
+        String l2 = String.format("(JVMs: %d starting, %d running, %d finishing)",
+                executor.getJVMsStarting(), executor.getJVMsRunning(), executor.getJVMsFinishing());
+        String l3 = String.format("(CPUs: %d actor, %d system, %d total)",
+                actorCpus, systemCpus, actorCpus + systemCpus);
+        String l4 = String.format("(Results: %d planned; %d passed, %d failed, %d soft errs, %d hard errs)",
+                expectedResults, passed, failed, softErrors, hardErrors);
+
+        if (!progressInteractive || progressAnsi) {
+            progressLen[0] = l0.length();
+            progressLen[1] = l1.length();
+            progressLen[2] = l2.length();
+            progressLen[3] = l3.length();
+            progressLen[4] = l4.length();
+
+            output.println(l0);
+            output.println(l1);
+            output.println(l2);
+            output.println(l3);
+            output.println(l4);
+        } else {
+            output.printf("%s %s %s %s %s", l0, l1, l2, l3, l4);
+            progressLen[0] = l0.length() + l1.length() + l2.length() + l3.length() + l4.length() + 4;
+        }
+
         if (!progressInteractive) {
             output.println();
         }
@@ -165,8 +199,18 @@ public class ConsoleReportPrinter implements TestResultCollector {
     }
 
     private void clearStatusLine() {
+        if (progressFirstLine) {
+            progressFirstLine = false;
+            return;
+        }
         if (progressInteractive) {
-            output.printf("\r%" + progressLen + "s\r", "");
+            if (progressAnsi) {
+                for (int i = progressLen.length - 1; i >= 0; i--) {
+                    output.printf("\033[F%" + progressLen[i] + "s\r", "");
+                }
+            } else {
+                output.printf("\r%" + progressLen[0] + "s\r", "");
+            }
         }
     }
 
@@ -216,7 +260,9 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
         long nsToGo = (long)(timeSpent * (1.0 * (expectedResults - 1) / resultsGot - 1));
         if (nsToGo > 0) {
-            String result = "";
+            LocalDateTime ldt = LocalDateTime.now().plus(nsToGo, ChronoUnit.NANOS);
+
+            String result = "in ";
             long days = TimeUnit.NANOSECONDS.toDays(nsToGo);
             if (days > 0) {
                 result += days + "d+";
@@ -231,6 +277,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
             long seconds = TimeUnit.NANOSECONDS.toSeconds(nsToGo);
 
             result += String.format("%02d:%02d:%02d", hours, minutes, seconds);
+            result += "; at " + ldt.format(fmt);
             return result;
         } else {
             return "now";

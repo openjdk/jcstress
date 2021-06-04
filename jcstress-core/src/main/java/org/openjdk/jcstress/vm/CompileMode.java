@@ -97,7 +97,7 @@ public class CompileMode {
 
     public static String description(int mode, List<String> actorNames) {
         if (mode == UNIFIED) {
-            return "unified across all actors";
+            return "unified across all actors" + System.lineSeparator();
         }
 
         StringBuilder sb = new StringBuilder();

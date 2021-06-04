@@ -103,8 +103,6 @@ public class JCStress {
 
         out.println();
         out.println();
-        out.println("RUN COMPLETE.");
-        out.println();
 
         parseResults();
     }
@@ -138,16 +136,8 @@ public class JCStress {
         drc.close();
 
         new TextReportPrinter(opts, collector).work();
-        new HTMLReportPrinter(opts, collector).work();
-
-        out.println();
-        out.println("HTML report was generated. Look at " + opts.getResultDest() + "index.html for the complete run results.");
-        out.println();
-
-        out.println("Will throw any pending exceptions at this point.");
+        new HTMLReportPrinter(opts, collector, out).work();
         new ExceptionReportPrinter(collector).work();
-
-        out.println("Done.");
     }
 
     private SortedSet<Integer> computeActorCounts(Set<String> tests) {

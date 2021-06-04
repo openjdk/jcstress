@@ -64,52 +64,43 @@ public class TextReportPrinter {
                 .thenComparing(t -> t.getConfig().jvmArgs.toString()));
 
         pw.println("RUN RESULTS:");
-        pw.println("------------------------------------------------------------------------------------------------------------------------");
-        pw.println();
 
         printXTests(byConfig,
-                "INTERESTING tests",
-                "Some interesting behaviors observed. This is for the plain curiosity.",
+                "Interesting tests",
                 r -> r.status() == Status.NORMAL && r.grading().hasInteresting,
-                true
+                verbosity.printAllTests()
         );
 
         printXTests(byConfig,
-                "FAILED tests",
-                "Strong asserts were violated. Correct implementations should have no assert failures here.",
+                "Failed tests",
                 r -> r.status() == Status.NORMAL && !r.grading().isPassed,
-                true
+                verbosity.printAllTests()
         );
 
         printXTests(byConfig,
-                "ERROR tests",
-                "Tests break for some reason, other than failing the assert. Correct implementations should have none.",
+                "Error tests",
                 r -> r.status() != Status.NORMAL && r.status() != Status.API_MISMATCH,
-                true
+                verbosity.printAllTests()
         );
 
         printXTests(byConfig,
                 "All remaining tests",
-                "Tests that do not fall into any of the previous categories.",
                 r -> !emittedTests.contains(r),
                 verbosity.printAllTests());
 
-        pw.println("------------------------------------------------------------------------------------------------------------------------");
+        pw.println();
     }
 
     private void printXTests(List<TestResult> list,
                              String header,
-                             String subHeader,
                              Predicate<TestResult> predicate,
                              boolean emitDetails) {
 
-        pw.println("*** " + header);
-        pw.println("  " + subHeader);
-        pw.println();
-        pw.println("  " + list.stream().filter(predicate).count() + " matching test results. " + (!emitDetails ? " Use -v to print them." : ""));
-        pw.println();
+        final long count = list.stream().filter(predicate).count();
+        pw.println("  " + header + ": " + (count > 0 ? count + " matching test results." + (!emitDetails ? " Use -v to print them." : "") : "No matches."));
 
         if (emitDetails) {
+            pw.println();
             boolean emitted = false;
             for (TestResult result : list) {
                 if (predicate.test(result)) {
