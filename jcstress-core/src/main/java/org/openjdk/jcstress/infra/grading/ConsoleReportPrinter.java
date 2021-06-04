@@ -32,13 +32,10 @@ import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -214,7 +211,6 @@ public class ConsoleReportPrinter implements TestResultCollector {
             } else {
                 output.printf("\r%" + progressLen[0] + "s\r", "");
             }
-
         }
     }
 
