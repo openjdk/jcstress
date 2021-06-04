@@ -37,6 +37,7 @@ import org.openjdk.jcstress.util.*;
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.*;
 import java.util.List;
@@ -53,10 +54,12 @@ public class HTMLReportPrinter {
     private final InProcessCollector collector;
     private int cellStyle = 1;
 
-    public HTMLReportPrinter(Options opts, InProcessCollector collector) {
+    public HTMLReportPrinter(Options opts, InProcessCollector collector, PrintStream out) {
         this.collector = collector;
         this.resultDir = opts.getResultDest();
-        new File(resultDir).mkdirs();
+        File dir = new File(resultDir);
+        dir.mkdirs();
+        out.println("  HTML report generated at " + dir.getAbsolutePath() + File.separator + "index.html");
     }
 
     public void work() throws FileNotFoundException {

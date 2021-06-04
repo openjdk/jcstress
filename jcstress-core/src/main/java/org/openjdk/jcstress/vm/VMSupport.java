@@ -394,11 +394,11 @@ public class VMSupport {
     }
 
     public static boolean isWindows() {
-        return System.getProperty("os.name").contains("indows");
+        return System.getProperty("os.name").toLowerCase().contains("win");
     }
 
     public static boolean isLinux() {
-        return System.getProperty("os.name").contains("Linux");
+        return System.getProperty("os.name").toLowerCase().contains("linux");
     }
 
     public static List<Config> getAvailableVMConfigs() {
