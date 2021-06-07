@@ -58,32 +58,30 @@ public class TextReportPrinter {
     public void work() {
         emittedTests.clear();
 
-        List<TestResult> byConfig = ReportUtils.mergedByName(collector.getTestResults());
-        Collections.sort(byConfig, Comparator
-                .comparing(TestResult::getName)
-                .thenComparing(t -> t.getConfig().jvmArgs.toString()));
+        List<TestResult> byName = ReportUtils.mergedByName(collector.getTestResults());
+        Collections.sort(byName, Comparator.comparing(TestResult::getName));
 
         pw.println("RUN RESULTS:");
 
-        printXTests(byConfig,
+        printXTests(byName,
                 "Interesting tests",
                 r -> r.status() == Status.NORMAL && r.grading().hasInteresting,
                 true
         );
 
-        printXTests(byConfig,
+        printXTests(byName,
                 "Failed tests",
                 r -> r.status() == Status.NORMAL && !r.grading().isPassed,
                 true
         );
 
-        printXTests(byConfig,
+        printXTests(byName,
                 "Error tests",
                 r -> r.status() != Status.NORMAL && r.status() != Status.API_MISMATCH,
                 true
         );
 
-        printXTests(byConfig,
+        printXTests(byName,
                 "All remaining tests",
                 r -> !emittedTests.contains(r),
                 verbosity.printAllTests());
