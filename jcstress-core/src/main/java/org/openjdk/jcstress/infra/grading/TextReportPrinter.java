@@ -58,7 +58,7 @@ public class TextReportPrinter {
     public void work() {
         emittedTests.clear();
 
-        List<TestResult> byConfig = ReportUtils.mergedByConfig(collector.getTestResults());
+        List<TestResult> byConfig = ReportUtils.mergedByName(collector.getTestResults());
         Collections.sort(byConfig, Comparator
                 .comparing(TestResult::getName)
                 .thenComparing(t -> t.getConfig().jvmArgs.toString()));
@@ -68,19 +68,19 @@ public class TextReportPrinter {
         printXTests(byConfig,
                 "Interesting tests",
                 r -> r.status() == Status.NORMAL && r.grading().hasInteresting,
-                verbosity.printAllTests()
+                true
         );
 
         printXTests(byConfig,
                 "Failed tests",
                 r -> r.status() == Status.NORMAL && !r.grading().isPassed,
-                verbosity.printAllTests()
+                true
         );
 
         printXTests(byConfig,
                 "Error tests",
                 r -> r.status() != Status.NORMAL && r.status() != Status.API_MISMATCH,
-                verbosity.printAllTests()
+                true
         );
 
         printXTests(byConfig,
@@ -116,7 +116,7 @@ public class TextReportPrinter {
 
     public void emitTest(TestResult result) {
         emittedTests.add(result);
-        ReportUtils.printResult(pw, result, false);
+        ReportUtils.printResult(pw, result, true);
     }
 
 }
