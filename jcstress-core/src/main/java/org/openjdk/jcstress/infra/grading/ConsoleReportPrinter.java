@@ -149,7 +149,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
             if (!progressInteractive) {
                 output.println();
             }
-            ReportUtils.printResult(output, r, true);
+            ReportUtils.printResult(output, r, false);
         }
 
         if (shouldPrintStatusLine) {

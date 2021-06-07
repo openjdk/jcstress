@@ -110,20 +110,22 @@ public class ReportUtils {
         return root;
     }
 
-    public static void printResult(PrintWriter pw, TestResult r, boolean inProgress) {
+    public static void printResult(PrintWriter pw, TestResult r, boolean finalResults) {
         TestConfig config = r.getConfig();
 
         String label = StringUtils.leftPadDash("[" + ReportUtils.statusToLabel(r) + "]", 15);
         String testName = StringUtils.chunkName(r.getName());
         pw.printf("%15s %s%n", label, testName);
         pw.println();
-        pw.format("  Scheduling class:%n");
-        pw.println(SchedulingClass.description(config.getSchedulingClass(), config.actorNames));
-        pw.format("  CPU allocation:%n");
-        pw.println(CPUMap.description(config.cpuMap, config.actorNames));
-        pw.format("  Compilation: %s%n", CompileMode.description(config.getCompileMode(), config.actorNames));
-        pw.format("  JVM args: %s%n", config.jvmArgs);
-        if (inProgress) {
+        if (finalResults) {
+            pw.println("  Results across all configurations:");
+        } else {
+            pw.format("  Scheduling class:%n");
+            pw.println(SchedulingClass.description(config.getSchedulingClass(), config.actorNames));
+            pw.format("  CPU allocation:%n");
+            pw.println(CPUMap.description(config.cpuMap, config.actorNames));
+            pw.format("  Compilation: %s%n", CompileMode.description(config.getCompileMode(), config.actorNames));
+            pw.format("  JVM args: %s%n", config.jvmArgs);
             pw.format("  Fork: #%d%n", config.forkId + 1);
         }
         pw.println();
