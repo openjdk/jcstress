@@ -576,9 +576,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("                return counter;");
             pw.println("            }");
             pw.println("            sync.preRun();");
-            pw.println("            for (int e = 0; e < 10; e++) {");
-            pw.println("                int start = gs.length * e / 10;");
-            pw.println("                int end = gs.length * (e + 1) / 10;");
+            pw.println("            for (int e = 0; e < 256; e++) {");
+            pw.println("                int start = gs.length * e / 256;");
+            pw.println("                int end = gs.length * (e + 1) / 256;");
             pw.println("                " + RUN_LOOP_PREFIX + a.getSimpleName() + "(gs, gr, start, end);");
             pw.println("                sync.waitEpoch((e+1)*" + actorsCount + ");");
             pw.println("            }");
