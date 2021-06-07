@@ -31,7 +31,6 @@ import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
 import org.openjdk.jcstress.util.UnsafeHolder;
-import sun.misc.Contended;
 
 /**
  * Tests if acquire-release fences induce proper happens-before.
@@ -51,8 +50,6 @@ import sun.misc.Contended;
 public class FencedAcquireReleaseTest {
 
     int x;
-
-    @Contended
     int y; // acq/rel var
 
     @Actor

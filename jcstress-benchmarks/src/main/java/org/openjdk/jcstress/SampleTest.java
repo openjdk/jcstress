@@ -36,12 +36,7 @@ import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 @State
 public class SampleTest {
 
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
     int a;
-
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
     int b;
 
     @Actor

@@ -29,8 +29,9 @@ questions.
 
     <parent>
         <groupId>org.openjdk.jcstress</groupId>
-        <artifactId>jcstress-parent</artifactId>
+        <artifactId>jcstress-test-base</artifactId>
         <version>0.13-SNAPSHOT</version>
+        <relativePath>../jcstress-test-base</relativePath>
     </parent>
 
     <artifactId>jcstress-tests-custom</artifactId>
@@ -69,14 +70,10 @@ questions.
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>jcstress-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
 </project>

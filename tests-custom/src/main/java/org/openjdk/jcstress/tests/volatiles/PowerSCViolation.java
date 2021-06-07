@@ -34,12 +34,7 @@ import org.openjdk.jcstress.infra.results.IIII_Result;
 @State
 public class PowerSCViolation {
 
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
     volatile int x;
-
-    @sun.misc.Contended
-    @jdk.internal.vm.annotation.Contended
     volatile int y;
 
     @Actor
