@@ -37,8 +37,7 @@ public class ForkedTestConfig {
     public final int iters;
     public final String generatedRunnerName;
     public final int maxFootprintMB;
-    public int minStride;
-    public int maxStride;
+    public int stride;
     public boolean localAffinity;
     public int[] localAffinityMap;
 
@@ -48,8 +47,7 @@ public class ForkedTestConfig {
         iters = cfg.iters;
         generatedRunnerName = cfg.generatedRunnerName;
         maxFootprintMB = cfg.maxFootprintMB;
-        minStride = cfg.minStride;
-        maxStride = cfg.maxStride;
+        stride = cfg.stride;
         localAffinity = cfg.shClass.mode() == AffinityMode.LOCAL;
         if (localAffinity) {
             localAffinityMap = cfg.cpuMap.actorMap();
@@ -62,8 +60,7 @@ public class ForkedTestConfig {
         iters = dis.readInt();
         generatedRunnerName = dis.readUTF();
         maxFootprintMB = dis.readInt();
-        minStride = dis.readInt();
-        maxStride = dis.readInt();
+        stride = dis.readInt();
         localAffinity = dis.readBoolean();
         if (localAffinity) {
             int len = dis.readInt();
@@ -80,8 +77,7 @@ public class ForkedTestConfig {
         dos.writeInt(iters);
         dos.writeUTF(generatedRunnerName);
         dos.writeInt(maxFootprintMB);
-        dos.writeInt(minStride);
-        dos.writeInt(maxStride);
+        dos.writeInt(stride);
         dos.writeBoolean(localAffinity);
         if (localAffinity) {
             dos.writeInt(localAffinityMap.length);
@@ -94,25 +90,19 @@ public class ForkedTestConfig {
     public void adjustStrides(FootprintEstimator estimator) {
         int count = 1;
         int succCount = count;
-        while (true) {
-            if (!tryWith(estimator, count)) {
-                break;
-            }
-
+        while (tryWith(estimator, count)) {
             // success!
             succCount = count;
 
-            // do not go over the maxStride
-            if (succCount >= maxStride) {
-                succCount = maxStride;
-                break;
+            // do not go over the stride
+            if (succCount >= stride) {
+                return;
             }
 
             count *= 2;
         }
 
-        maxStride = Math.min(maxStride, succCount);
-        minStride = Math.min(minStride, succCount);
+        stride = succCount;
     }
 
     private boolean tryWith(FootprintEstimator estimator, int count) {

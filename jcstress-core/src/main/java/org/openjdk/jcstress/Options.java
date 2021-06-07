@@ -47,7 +47,7 @@ import java.util.*;
 public class Options {
     private String resultDir;
     private String testFilter;
-    private int minStride, maxStride;
+    private int stride;
     private int time;
     private int iters;
     private final String[] args;
@@ -85,7 +85,7 @@ public class Options {
         OptionSpec<String> testFilter = parser.accepts("t", "Regexp selector for tests.")
                 .withRequiredArg().ofType(String.class).describedAs("regexp");
 
-        OptionSpec<Integer> minStride = parser.accepts("minStride", "Minimum internal stride size. Larger value decreases " +
+        OptionSpec<Integer> stride = parser.accepts("stride", "Internal stride size. Larger value decreases " +
                 "the synchronization overhead, but also reduces accuracy.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
@@ -195,16 +195,14 @@ public class Options {
         this.time = 1000;
         this.iters = 5;
         this.forks = 1;
-        this.minStride = 10;
-        this.maxStride = 10000;
+        this.stride = 10000;
 
         mode = orDefault(modeStr.value(set), "default");
         if (this.mode.equalsIgnoreCase("sanity")) {
             this.time = 0;
             this.iters = 1;
             this.forks = 1;
-            this.minStride = 1;
-            this.maxStride = 1;
+            this.stride = 1;
         } else
         if (this.mode.equalsIgnoreCase("quick")) {
             this.time = 200;
@@ -230,8 +228,7 @@ public class Options {
         this.time = orDefault(set.valueOf(time), this.time);
         this.iters = orDefault(set.valueOf(iters), this.iters);
         this.forks = orDefault(set.valueOf(forks), this.forks);
-        this.minStride = orDefault(set.valueOf(minStride), this.minStride);
-        this.maxStride = orDefault(set.valueOf(maxStride), this.maxStride);
+        this.stride = orDefault(set.valueOf(stride), this.stride);
 
         this.heapPerFork = orDefault(set.valueOf(heapPerFork), 256);
 
@@ -275,17 +272,13 @@ public class Options {
         out.printf("  Writing the test results to \"%s\"%n", resultFile);
         out.printf("  Parsing results to \"%s\"%n", resultDir);
         out.printf("  Running each test matching \"%s\" for %d forks, %d iterations, %d ms each%n", getTestFilter(), getForks(), getIterations(), getTime());
-        out.printf("  Solo stride size will be autobalanced within [%d, %d] elements, but taking no more than %d Mb.%n", getMinStride(), getMaxStride(), getMaxFootprintMb());
+        out.printf("  Stride size: %d elements, but taking no more than %d Mb.%n", getStride(), getMaxFootprintMb());
 
         out.println();
     }
 
-    public int getMinStride() {
-        return minStride;
-    }
-
-    public int getMaxStride() {
-        return maxStride;
+    public int getStride() {
+        return stride;
     }
 
     public String getResultDest() {

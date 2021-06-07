@@ -38,13 +38,10 @@ public class WorkerSync {
     public final boolean stopped;
     public final SpinLoopStyle spinStyle;
 
-    public volatile boolean updateStride;
-    private volatile int notStarted;
     private volatile int notConsumed;
     private volatile int notUpdated;
     private volatile int epoch;
 
-    static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_STARTED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notStarted");
     static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_CONSUMED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notConsumed");
     static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_UPDATED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notUpdated");
     static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_EPOCH = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "epoch");
@@ -52,26 +49,11 @@ public class WorkerSync {
     public WorkerSync(boolean stopped, int expectedWorkers, SpinLoopStyle spinStyle) {
         this.stopped = stopped;
         this.spinStyle = spinStyle;
-        this.notStarted = expectedWorkers;
         this.notConsumed = expectedWorkers;
         this.notUpdated = expectedWorkers;
     }
 
-    public void preRun() {
-        // Do not need to rendezvous the workers: first iteration would
-        // probably lack any rendezvous, but all subsequent ones would
-        // rendezvous during postUpdate().
-
-        // Notify that we have started
-        UPDATER_NOT_STARTED.decrementAndGet(this);
-    }
-
     public void waitEpoch(int expectedEpoch) {
-        // If any thread lags behind, then we need to update our stride
-        if (!updateStride && notStarted > 0) {
-            updateStride = true;
-        }
-
         // Notify that we are finished
         UPDATER_EPOCH.incrementAndGet(this);
 

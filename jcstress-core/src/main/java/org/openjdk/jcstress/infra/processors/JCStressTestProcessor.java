@@ -447,9 +447,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
         if (!isStateItself) {
             pw.println("        test = new " + t + "();");
         }
-        pw.println("        gs = new " + s + "[config.minStride];");
-        pw.println("        gr = new " + r + "[config.minStride];");
-        pw.println("        for (int c = 0; c < config.minStride; c++) {");
+        pw.println("        gs = new " + s + "[config.stride];");
+        pw.println("        gr = new " + r + "[config.stride];");
+        pw.println("        for (int c = 0; c < config.stride; c++) {");
         pw.println("            gs[c] = new " + s + "();");
         pw.println("            gr[c] = new " + r + "();");
         pw.println("        }");
@@ -496,9 +496,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    private void " + AUX_PREFIX + "consume(Counter<" + r + "> cnt, int a) {");
         pw.println("        " + s + "[] ls = gs;");
         pw.println("        " + r + "[] lr = gr;");
-        pw.println("        int len = ls.length;");
-        pw.println("        int left = a * len / " + actorsCount + ";");
-        pw.println("        int right = (a + 1) * len / " + actorsCount + ";");
+        pw.println("        int left = a * config.stride / " + actorsCount + ";");
+        pw.println("        int right = (a + 1) * config.stride / " + actorsCount + ";");
         pw.println("        for (int c = left; c < right; c++) {");
         pw.println("            " + r + " r = lr[c];");
         pw.println("            " + s + " s = ls[c];");
@@ -538,28 +537,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    }");
         pw.println();
 
-        pw.println("    private void " + AUX_PREFIX + "update(WorkerSync sync) {");
-        pw.println("        " + s + "[] ls = gs;");
-        pw.println("        " + r + "[] lr = gr;");
-        pw.println("        int len = ls.length;");
-        pw.println();
-        pw.println("        int newLen = sync.updateStride ? Math.max(config.minStride, Math.min(len * 2, config.maxStride)) : len;");
-        pw.println();
-        pw.println("        if (newLen > len) {");
-        pw.println("            ls = Arrays.copyOf(ls, newLen);");
-        pw.println("            lr = Arrays.copyOf(lr, newLen);");
-        pw.println("            for (int c = len; c < newLen; c++) {");
-        pw.println("                ls[c] = new " + s + "();");
-        pw.println("                lr[c] = new " + r + "();");
-        pw.println("            }");
-        pw.println("            gs = ls;");
-        pw.println("            gr = lr;");
-        pw.println("         }");
-        pw.println();
-        pw.println("        workerSync = new WorkerSync(control.isStopped, " + actorsCount + ", config.spinLoopStyle);");
-        pw.println("    }");
-        pw.println();
-
         for (String type : new String[] { "int", "short", "byte", "char", "long", "float", "double", "Object" }) {
             pw.println("    private void " + AUX_PREFIX + "sink(" + type + " v) {};");
         }
@@ -575,17 +552,17 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("            if (sync.stopped) {");
             pw.println("                return counter;");
             pw.println("            }");
-            pw.println("            sync.preRun();");
-            pw.println("            for (int e = 0; e < 256; e++) {");
-            pw.println("                int start = gs.length * e / 256;");
-            pw.println("                int end = gs.length * (e + 1) / 256;");
+            pw.println("            int len = config.stride;");
+            pw.println("            for (int e = 0; e <= 128; e++) {");
+            pw.println("                int start = len * e >> 7;");
+            pw.println("                int end = Math.min(len, len * (e + 1) >> 7);");
             pw.println("                " + RUN_LOOP_PREFIX + a.getSimpleName() + "(gs, gr, start, end);");
-            pw.println("                sync.waitEpoch((e+1)*" + actorsCount + ");");
+            pw.println("                sync.waitEpoch((e + 1)*" + actorsCount + ");");
             pw.println("            }");
 
             pw.println("            " + AUX_PREFIX + "consume(counter, " + n + ");");
             pw.println("            if (sync.tryStartUpdate()) {");
-            pw.println("                " + AUX_PREFIX + "update(sync);");
+            pw.println("                workerSync = new WorkerSync(control.isStopped, " + actorsCount + ", config.spinLoopStyle);");
             pw.println("            }");
             pw.println("            sync.postUpdate();");
             pw.println("        }");
@@ -597,7 +574,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
             }
             pw.println("        " + s + "[] ls = gs;");
             pw.println("        " + r + "[] lr = gr;");
-            pw.println("        int size = ls.length;");
             pw.println("        for (int c = start; c < end; c++) {");
 
             // Try to access both state and result fields early. This will help
