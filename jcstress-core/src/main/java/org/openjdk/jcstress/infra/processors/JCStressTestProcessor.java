@@ -576,8 +576,13 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("                return counter;");
             pw.println("            }");
             pw.println("            sync.preRun();");
-            pw.println("            " + RUN_LOOP_PREFIX + a.getSimpleName() + "(gs, gr);");
-            pw.println("            sync.postRun();");
+            pw.println("            for (int e = 0; e < 10; e++) {");
+            pw.println("                int start = gs.length * e / 10;");
+            pw.println("                int end = gs.length * (e + 1) / 10;");
+            pw.println("                " + RUN_LOOP_PREFIX + a.getSimpleName() + "(gs, gr, start, end);");
+            pw.println("                sync.waitEpoch((e+1)*" + actorsCount + ");");
+            pw.println("            }");
+
             pw.println("            " + AUX_PREFIX + "consume(counter, " + n + ");");
             pw.println("            if (sync.tryStartUpdate()) {");
             pw.println("                " + AUX_PREFIX + "update(sync);");
@@ -586,14 +591,14 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("        }");
             pw.println("    }");
             pw.println();
-            pw.println("    private void " + RUN_LOOP_PREFIX + a.getSimpleName() + "(" + s + "[] gs, " + r + "[] gr) {");
+            pw.println("    private void " + RUN_LOOP_PREFIX + a.getSimpleName() + "(" + s + "[] gs, " + r + "[] gr, int start, int end) {");
             if (!isStateItself) {
                 pw.println("        " + t + " lt = test;");
             }
             pw.println("        " + s + "[] ls = gs;");
             pw.println("        " + r + "[] lr = gr;");
             pw.println("        int size = ls.length;");
-            pw.println("        for (int c = 0; c < size; c++) {");
+            pw.println("        for (int c = start; c < end; c++) {");
 
             // Try to access both state and result fields early. This will help
             // compiler to avoid null-pointer checks in the workload, which will
