@@ -379,7 +379,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
 
         pw.println("    private void sanityCheck_Footprints(Counter<" + r + "> counter) throws Throwable {");
-        pw.println("        config.adjustStrides(new FootprintEstimator() {");
+        pw.println("        config.adjustEpoch(new FootprintEstimator() {");
         pw.println("          public void runWith(int size, long[] cnts) {");
         pw.println("            long time1 = System.nanoTime();");
         pw.println("            long alloc1 = AllocProfileSupport.getAllocatedBytes();");
@@ -554,10 +554,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("            }");
             pw.println("            int len = config.epoch;");
             pw.println("            int stride = config.stride;");
-            pw.println("            for (int start = 0, int ch = 1; start < len; start += stride, ch++) {");
+            pw.println("            int check = 0;");
+            pw.println("            for (int start = 0; start < len; start += stride) {");
             pw.println("                int end = Math.min(len, start + stride);");
             pw.println("                " + RUN_LOOP_PREFIX + a.getSimpleName() + "(gs, gr, start, end);");
-            pw.println("                sync.waitCheckpoint(ch * " + actorsCount + ");");
+            pw.println("                check += " + actorsCount + ";");
+            pw.println("                sync.waitCheckpoint(check);");
             pw.println("            }");
             pw.println("            " + AUX_PREFIX + "consume(counter, " + n + ");");
             pw.println("            if (sync.tryStartUpdate()) {");
