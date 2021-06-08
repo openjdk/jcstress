@@ -553,13 +553,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("                return counter;");
             pw.println("            }");
             pw.println("            int len = config.epoch;");
-            pw.println("            for (int e = 0; e <= 128; e++) {");
-            pw.println("                int start = len * e >> 7;");
-            pw.println("                int end = Math.min(len, len * (e + 1) >> 7);");
+            pw.println("            int stride = config.stride;");
+            pw.println("            for (int start = 0, int ch = 1; start < len; start += stride, ch++) {");
+            pw.println("                int end = Math.min(len, start + stride);");
             pw.println("                " + RUN_LOOP_PREFIX + a.getSimpleName() + "(gs, gr, start, end);");
-            pw.println("                sync.waitStride((e + 1)*" + actorsCount + ");");
+            pw.println("                sync.waitCheckpoint(ch * " + actorsCount + ");");
             pw.println("            }");
-
             pw.println("            " + AUX_PREFIX + "consume(counter, " + n + ");");
             pw.println("            if (sync.tryStartUpdate()) {");
             pw.println("                workerSync = new WorkerSync(control.isStopped, " + actorsCount + ", config.spinLoopStyle);");

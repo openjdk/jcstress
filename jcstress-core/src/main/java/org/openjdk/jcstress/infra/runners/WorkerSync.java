@@ -40,11 +40,11 @@ public class WorkerSync {
 
     private volatile int notConsumed;
     private volatile int notUpdated;
-    private volatile int stride;
+    private volatile int checkpoint;
 
     static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_CONSUMED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notConsumed");
     static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_UPDATED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notUpdated");
-    static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_STRIDE = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "stride");
+    static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_CHECKPOINT = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "checkpoint");
 
     public WorkerSync(boolean stopped, int expectedWorkers, SpinLoopStyle spinStyle) {
         this.stopped = stopped;
@@ -53,22 +53,22 @@ public class WorkerSync {
         this.notUpdated = expectedWorkers;
     }
 
-    public void waitStride(int expectedStride) {
-        // Notify that we are finished
-        UPDATER_STRIDE.incrementAndGet(this);
+    public void waitCheckpoint(int expectedCheckpoint) {
+        // Notify that we have rolled to the checkpoint
+        UPDATER_CHECKPOINT.incrementAndGet(this);
 
         switch (spinStyle) {
             case HARD:
-                while (stride < expectedStride);
+                while (checkpoint < expectedCheckpoint);
                 break;
             case THREAD_YIELD:
-                while (stride < expectedStride) Thread.yield();
+                while (checkpoint < expectedCheckpoint) Thread.yield();
                 break;
             case THREAD_SPIN_WAIT:
-                while (stride < expectedStride) Thread.onSpinWait();
+                while (checkpoint < expectedCheckpoint) Thread.onSpinWait();
                 break;
             case LOCKSUPPORT_PARK_NANOS:
-                while (stride < expectedStride) LockSupport.parkNanos(1);
+                while (checkpoint < expectedCheckpoint) LockSupport.parkNanos(1);
                 break;
             default:
                 throw new IllegalStateException("Unhandled style: " + spinStyle);
