@@ -196,7 +196,7 @@ public class Options {
         this.iters = 5;
         this.forks = 1;
         this.stride = 256;
-        this.epoch = 10000;
+        this.epoch = 10240;
 
         mode = orDefault(modeStr.value(set), "default");
         if (this.mode.equalsIgnoreCase("sanity")) {
