@@ -38,6 +38,7 @@ public class ForkedTestConfig {
     public final String generatedRunnerName;
     public final int maxFootprintMB;
     public int stride;
+    public int epoch;
     public boolean localAffinity;
     public int[] localAffinityMap;
 
@@ -48,6 +49,7 @@ public class ForkedTestConfig {
         generatedRunnerName = cfg.generatedRunnerName;
         maxFootprintMB = cfg.maxFootprintMB;
         stride = cfg.stride;
+        epoch = cfg.epoch;
         localAffinity = cfg.shClass.mode() == AffinityMode.LOCAL;
         if (localAffinity) {
             localAffinityMap = cfg.cpuMap.actorMap();
@@ -61,6 +63,7 @@ public class ForkedTestConfig {
         generatedRunnerName = dis.readUTF();
         maxFootprintMB = dis.readInt();
         stride = dis.readInt();
+        epoch = dis.readInt();
         localAffinity = dis.readBoolean();
         if (localAffinity) {
             int len = dis.readInt();
@@ -78,6 +81,7 @@ public class ForkedTestConfig {
         dos.writeUTF(generatedRunnerName);
         dos.writeInt(maxFootprintMB);
         dos.writeInt(stride);
+        dos.writeInt(epoch);
         dos.writeBoolean(localAffinity);
         if (localAffinity) {
             dos.writeInt(localAffinityMap.length);
@@ -87,7 +91,7 @@ public class ForkedTestConfig {
         }
     }
 
-    public void adjustStrides(FootprintEstimator estimator) {
+    public void adjustEpoch(FootprintEstimator estimator) {
         int count = 1;
         int succCount = count;
         while (tryWith(estimator, count)) {
@@ -95,14 +99,14 @@ public class ForkedTestConfig {
             succCount = count;
 
             // do not go over the stride
-            if (succCount >= stride) {
+            if (succCount >= epoch) {
                 return;
             }
 
             count *= 2;
         }
 
-        stride = succCount;
+        epoch = succCount;
     }
 
     private boolean tryWith(FootprintEstimator estimator, int count) {

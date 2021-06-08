@@ -46,7 +46,7 @@ public class TestConfig implements Serializable {
     public final int compileMode;
     public final SchedulingClass shClass;
     public int stride;
-    public int maxStride;
+    public int epoch;
     public CPUMap cpuMap;
 
     public void setCPUMap(CPUMap cpuMap) {
@@ -58,6 +58,7 @@ public class TestConfig implements Serializable {
         this.jvmArgs = jvmArgs;
         time = opts.getTime();
         stride = opts.getStride();
+        epoch = opts.getEpoch();
         iters = opts.getIterations();
         spinLoopStyle = opts.getSpinStyle();
         maxFootprintMB = opts.getMaxFootprintMb();
@@ -87,7 +88,7 @@ public class TestConfig implements Serializable {
         if (!name.equals(that.name)) return false;
         if (spinLoopStyle != that.spinLoopStyle) return false;
         if (stride != that.stride) return false;
-        if (maxStride != that.maxStride) return false;
+        if (epoch != that.epoch) return false;
         if (time != that.time) return false;
         if (iters != that.iters) return false;
         if (threads != that.threads) return false;

@@ -40,11 +40,11 @@ public class WorkerSync {
 
     private volatile int notConsumed;
     private volatile int notUpdated;
-    private volatile int epoch;
+    private volatile int stride;
 
     static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_CONSUMED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notConsumed");
     static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_UPDATED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notUpdated");
-    static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_EPOCH = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "epoch");
+    static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_STRIDE = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "stride");
 
     public WorkerSync(boolean stopped, int expectedWorkers, SpinLoopStyle spinStyle) {
         this.stopped = stopped;
@@ -53,22 +53,22 @@ public class WorkerSync {
         this.notUpdated = expectedWorkers;
     }
 
-    public void waitEpoch(int expectedEpoch) {
+    public void waitStride(int expectedStride) {
         // Notify that we are finished
-        UPDATER_EPOCH.incrementAndGet(this);
+        UPDATER_STRIDE.incrementAndGet(this);
 
         switch (spinStyle) {
             case HARD:
-                while (epoch < expectedEpoch);
+                while (stride < expectedStride);
                 break;
             case THREAD_YIELD:
-                while (epoch < expectedEpoch) Thread.yield();
+                while (stride < expectedStride) Thread.yield();
                 break;
             case THREAD_SPIN_WAIT:
-                while (epoch < expectedEpoch) Thread.onSpinWait();
+                while (stride < expectedStride) Thread.onSpinWait();
                 break;
             case LOCKSUPPORT_PARK_NANOS:
-                while (epoch < expectedEpoch) LockSupport.parkNanos(1);
+                while (stride < expectedStride) LockSupport.parkNanos(1);
                 break;
             default:
                 throw new IllegalStateException("Unhandled style: " + spinStyle);

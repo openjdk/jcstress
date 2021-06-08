@@ -447,9 +447,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
         if (!isStateItself) {
             pw.println("        test = new " + t + "();");
         }
-        pw.println("        gs = new " + s + "[config.stride];");
-        pw.println("        gr = new " + r + "[config.stride];");
-        pw.println("        for (int c = 0; c < config.stride; c++) {");
+        pw.println("        gs = new " + s + "[config.epoch];");
+        pw.println("        gr = new " + r + "[config.epoch];");
+        pw.println("        for (int c = 0; c < config.epoch; c++) {");
         pw.println("            gs[c] = new " + s + "();");
         pw.println("            gr[c] = new " + r + "();");
         pw.println("        }");
@@ -496,8 +496,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    private void " + AUX_PREFIX + "consume(Counter<" + r + "> cnt, int a) {");
         pw.println("        " + s + "[] ls = gs;");
         pw.println("        " + r + "[] lr = gr;");
-        pw.println("        int left = a * config.stride / " + actorsCount + ";");
-        pw.println("        int right = (a + 1) * config.stride / " + actorsCount + ";");
+        pw.println("        int left = a * config.epoch / " + actorsCount + ";");
+        pw.println("        int right = (a + 1) * config.epoch / " + actorsCount + ";");
         pw.println("        for (int c = left; c < right; c++) {");
         pw.println("            " + r + " r = lr[c];");
         pw.println("            " + s + " s = ls[c];");
@@ -552,12 +552,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("            if (sync.stopped) {");
             pw.println("                return counter;");
             pw.println("            }");
-            pw.println("            int len = config.stride;");
+            pw.println("            int len = config.epoch;");
             pw.println("            for (int e = 0; e <= 128; e++) {");
             pw.println("                int start = len * e >> 7;");
             pw.println("                int end = Math.min(len, len * (e + 1) >> 7);");
             pw.println("                " + RUN_LOOP_PREFIX + a.getSimpleName() + "(gs, gr, start, end);");
-            pw.println("                sync.waitEpoch((e + 1)*" + actorsCount + ");");
+            pw.println("                sync.waitStride((e + 1)*" + actorsCount + ");");
             pw.println("            }");
 
             pw.println("            " + AUX_PREFIX + "consume(counter, " + n + ");");
