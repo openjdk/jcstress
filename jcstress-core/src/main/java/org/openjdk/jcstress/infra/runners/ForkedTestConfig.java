@@ -37,8 +37,8 @@ public class ForkedTestConfig {
     public final int iters;
     public final String generatedRunnerName;
     public final int maxFootprintMB;
-    public int stride;
-    public int epoch;
+    public final int strideSize;
+    public int strideCount;
     public boolean localAffinity;
     public int[] localAffinityMap;
 
@@ -48,8 +48,8 @@ public class ForkedTestConfig {
         iters = cfg.iters;
         generatedRunnerName = cfg.generatedRunnerName;
         maxFootprintMB = cfg.maxFootprintMB;
-        stride = cfg.stride;
-        epoch = cfg.epoch;
+        strideSize = cfg.strideSize;
+        strideCount = cfg.strideCount;
         localAffinity = cfg.shClass.mode() == AffinityMode.LOCAL;
         if (localAffinity) {
             localAffinityMap = cfg.cpuMap.actorMap();
@@ -62,8 +62,8 @@ public class ForkedTestConfig {
         iters = dis.readInt();
         generatedRunnerName = dis.readUTF();
         maxFootprintMB = dis.readInt();
-        stride = dis.readInt();
-        epoch = dis.readInt();
+        strideSize = dis.readInt();
+        strideCount = dis.readInt();
         localAffinity = dis.readBoolean();
         if (localAffinity) {
             int len = dis.readInt();
@@ -80,8 +80,8 @@ public class ForkedTestConfig {
         dos.writeInt(iters);
         dos.writeUTF(generatedRunnerName);
         dos.writeInt(maxFootprintMB);
-        dos.writeInt(stride);
-        dos.writeInt(epoch);
+        dos.writeInt(strideSize);
+        dos.writeInt(strideCount);
         dos.writeBoolean(localAffinity);
         if (localAffinity) {
             dos.writeInt(localAffinityMap.length);
@@ -91,22 +91,22 @@ public class ForkedTestConfig {
         }
     }
 
-    public void adjustEpoch(FootprintEstimator estimator) {
+    public void adjustStrideCount(FootprintEstimator estimator) {
         int count = 1;
         int succCount = count;
         while (tryWith(estimator, count)) {
             // success!
             succCount = count;
 
-            // do not go over the stride
-            if (succCount >= epoch) {
+            // do not go over the max stride count
+            if (succCount >= strideCount) {
                 return;
             }
 
             count *= 2;
         }
 
-        epoch = succCount;
+        strideCount = succCount;
     }
 
     private boolean tryWith(FootprintEstimator estimator, int count) {

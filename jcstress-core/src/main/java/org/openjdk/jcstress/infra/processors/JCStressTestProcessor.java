@@ -379,7 +379,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
 
         pw.println("    private void sanityCheck_Footprints(Counter<" + r + "> counter) throws Throwable {");
-        pw.println("        config.adjustEpoch(new FootprintEstimator() {");
+        pw.println("        config.adjustStrideCount(new FootprintEstimator() {");
         pw.println("          public void runWith(int size, long[] cnts) {");
         pw.println("            long time1 = System.nanoTime();");
         pw.println("            long alloc1 = AllocProfileSupport.getAllocatedBytes();");
@@ -447,9 +447,10 @@ public class JCStressTestProcessor extends AbstractProcessor {
         if (!isStateItself) {
             pw.println("        test = new " + t + "();");
         }
-        pw.println("        gs = new " + s + "[config.epoch];");
-        pw.println("        gr = new " + r + "[config.epoch];");
-        pw.println("        for (int c = 0; c < config.epoch; c++) {");
+        pw.println("        int len = config.strideSize * config.strideCount;");
+        pw.println("        gs = new " + s + "[len];");
+        pw.println("        gr = new " + r + "[len];");
+        pw.println("        for (int c = 0; c < len; c++) {");
         pw.println("            gs[c] = new " + s + "();");
         pw.println("            gr[c] = new " + r + "();");
         pw.println("        }");
@@ -496,8 +497,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    private void " + AUX_PREFIX + "consume(Counter<" + r + "> cnt, int a) {");
         pw.println("        " + s + "[] ls = gs;");
         pw.println("        " + r + "[] lr = gr;");
-        pw.println("        int left = a * config.epoch / " + actorsCount + ";");
-        pw.println("        int right = (a + 1) * config.epoch / " + actorsCount + ";");
+        pw.println("        int len = config.strideSize * config.strideCount;");
+        pw.println("        int left = a * len / " + actorsCount + ";");
+        pw.println("        int right = (a + 1) * len / " + actorsCount + ";");
         pw.println("        for (int c = left; c < right; c++) {");
         pw.println("            " + r + " r = lr[c];");
         pw.println("            " + s + " s = ls[c];");
@@ -545,6 +547,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
         for (ExecutableElement a : info.getActors()) {
             pw.println();
             pw.println("    private Counter<" + r + "> " + TASK_LOOP_PREFIX + a.getSimpleName() + "() {");
+            pw.println("        int len = config.strideSize * config.strideCount;");
+            pw.println("        int stride = config.strideSize;");
             pw.println("        Counter<" + r + "> counter = new Counter<>();");
             pw.println("        if (config.localAffinity) AffinitySupport.bind(config.localAffinityMap[" + n + "]);");
             pw.println("        while (true) {");
@@ -552,12 +556,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("            if (sync.stopped) {");
             pw.println("                return counter;");
             pw.println("            }");
-            pw.println("            int len = config.epoch;");
-            pw.println("            int stride = config.stride;");
             pw.println("            int check = 0;");
             pw.println("            for (int start = 0; start < len; start += stride) {");
-            pw.println("                int end = Math.min(len, start + stride);");
-            pw.println("                " + RUN_LOOP_PREFIX + a.getSimpleName() + "(gs, gr, start, end);");
+            pw.println("                " + RUN_LOOP_PREFIX + a.getSimpleName() + "(gs, gr, start, start + stride);");
             pw.println("                check += " + actorsCount + ";");
             pw.println("                sync.awaitCheckpoint(check);");
             pw.println("            }");

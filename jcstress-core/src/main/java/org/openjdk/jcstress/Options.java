@@ -47,8 +47,8 @@ import java.util.*;
 public class Options {
     private String resultDir;
     private String testFilter;
-    private int stride;
-    private int epoch;
+    private int strideSize;
+    private int strideCount;
     private int time;
     private int iters;
     private final String[] args;
@@ -86,11 +86,12 @@ public class Options {
         OptionSpec<String> testFilter = parser.accepts("t", "Regexp selector for tests.")
                 .withRequiredArg().ofType(String.class).describedAs("regexp");
 
-        OptionSpec<Integer> epoch = parser.accepts("epoch", "Internal epoch size. Larger value increases cache footprint.")
+        OptionSpec<Integer> strideSize = parser.accepts("strideSize", "Internal stride size. Larger value decreases " +
+                "the synchronization overhead, but also reduces the number of collisions.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
-        OptionSpec<Integer> stride = parser.accepts("stride", "Internal stride size. Larger value decreases " +
-                "the synchronization overhead, but also reduces accuracy.")
+        OptionSpec<Integer> strideCount = parser.accepts("strideCount", "Internal stride count per epoch. " +
+                "Larger value increases cache footprint.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
         OptionSpec<Integer> time = parser.accepts("time", "Time to spend in single test iteration. Larger value improves " +
@@ -195,16 +196,16 @@ public class Options {
         this.time = 1000;
         this.iters = 5;
         this.forks = 1;
-        this.stride = 256;
-        this.epoch = 10240;
+        this.strideSize = 256;
+        this.strideCount = 40;
 
         mode = orDefault(modeStr.value(set), "default");
         if (this.mode.equalsIgnoreCase("sanity")) {
             this.time = 0;
             this.iters = 1;
             this.forks = 1;
-            this.stride = 1;
-            this.epoch = 1;
+            this.strideSize = 1;
+            this.strideCount = 1;
         } else
         if (this.mode.equalsIgnoreCase("quick")) {
             this.time = 200;
@@ -230,8 +231,8 @@ public class Options {
         this.time = orDefault(set.valueOf(time), this.time);
         this.iters = orDefault(set.valueOf(iters), this.iters);
         this.forks = orDefault(set.valueOf(forks), this.forks);
-        this.stride = orDefault(set.valueOf(stride), this.stride);
-        this.epoch = orDefault(set.valueOf(epoch), this.epoch);
+        this.strideSize = orDefault(set.valueOf(strideSize), this.strideSize);
+        this.strideCount = orDefault(set.valueOf(strideCount), this.strideCount);
 
         this.heapPerFork = orDefault(set.valueOf(heapPerFork), 256);
 
@@ -278,19 +279,18 @@ public class Options {
         out.printf("    Forks per test: %d%n", getForks());
         out.printf("    Iterations per fork: %d%n", getIterations());
         out.printf("    Time per iteration: %d ms%n", getTime());
-        out.printf("    Epoch size: %d elements, but taking no more than %d Mb%n", getEpoch(), getMaxFootprintMb());
-        out.printf("    Stride size: %d elements%n", getStride());
+        out.printf("    Test stride: %d strides x %d tests, but taking no more than %d Mb%n", getStrideCount(), getStrideSize(), getMaxFootprintMb());
         out.printf("    Test result blob: \"%s\"%n", resultFile);
         out.printf("    Test results: \"%s\"%n", resultDir);
         out.println();
     }
 
-    public int getStride() {
-        return stride;
+    public int getStrideSize() {
+        return strideSize;
     }
 
-    public int getEpoch() {
-        return epoch;
+    public int getStrideCount() {
+        return strideCount;
     }
 
     public String getResultDest() {
