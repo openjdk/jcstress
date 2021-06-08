@@ -53,22 +53,22 @@ public class WorkerSync {
         this.notUpdated = expectedWorkers;
     }
 
-    public void waitCheckpoint(int expectedCheckpoint) {
+    public void awaitCheckpoint(int expected) {
         // Notify that we have rolled to the checkpoint
         UPDATER_CHECKPOINT.incrementAndGet(this);
 
         switch (spinStyle) {
             case HARD:
-                while (checkpoint < expectedCheckpoint);
+                while (checkpoint < expected);
                 break;
             case THREAD_YIELD:
-                while (checkpoint < expectedCheckpoint) Thread.yield();
+                while (checkpoint < expected) Thread.yield();
                 break;
             case THREAD_SPIN_WAIT:
-                while (checkpoint < expectedCheckpoint) Thread.onSpinWait();
+                while (checkpoint < expected) Thread.onSpinWait();
                 break;
             case LOCKSUPPORT_PARK_NANOS:
-                while (checkpoint < expectedCheckpoint) LockSupport.parkNanos(1);
+                while (checkpoint < expected) LockSupport.parkNanos(1);
                 break;
             default:
                 throw new IllegalStateException("Unhandled style: " + spinStyle);

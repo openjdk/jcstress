@@ -559,7 +559,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("                int end = Math.min(len, start + stride);");
             pw.println("                " + RUN_LOOP_PREFIX + a.getSimpleName() + "(gs, gr, start, end);");
             pw.println("                check += " + actorsCount + ";");
-            pw.println("                sync.waitCheckpoint(check);");
+            pw.println("                sync.awaitCheckpoint(check);");
             pw.println("            }");
             pw.println("            " + AUX_PREFIX + "consume(counter, " + n + ");");
             pw.println("            if (sync.tryStartUpdate()) {");
