@@ -45,8 +45,8 @@ public class TestConfig implements Serializable {
     public final List<String> actorNames;
     public final int compileMode;
     public final SchedulingClass shClass;
-    public int minStride;
-    public int maxStride;
+    public final int strideSize;
+    public int strideCount;
     public CPUMap cpuMap;
 
     public void setCPUMap(CPUMap cpuMap) {
@@ -57,8 +57,8 @@ public class TestConfig implements Serializable {
         this.forkId = forkId;
         this.jvmArgs = jvmArgs;
         time = opts.getTime();
-        minStride = opts.getMinStride();
-        maxStride = opts.getMaxStride();
+        strideSize = opts.getStrideSize();
+        strideCount = opts.getStrideCount();
         iters = opts.getIterations();
         spinLoopStyle = opts.getSpinStyle();
         maxFootprintMB = opts.getMaxFootprintMb();
@@ -87,8 +87,8 @@ public class TestConfig implements Serializable {
 
         if (!name.equals(that.name)) return false;
         if (spinLoopStyle != that.spinLoopStyle) return false;
-        if (minStride != that.minStride) return false;
-        if (maxStride != that.maxStride) return false;
+        if (strideSize != that.strideSize) return false;
+        if (strideCount != that.strideCount) return false;
         if (time != that.time) return false;
         if (iters != that.iters) return false;
         if (threads != that.threads) return false;

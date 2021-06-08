@@ -38,56 +38,37 @@ public class WorkerSync {
     public final boolean stopped;
     public final SpinLoopStyle spinStyle;
 
-    public volatile boolean updateStride;
-    private volatile int notStarted;
-    private volatile int notFinished;
     private volatile int notConsumed;
     private volatile int notUpdated;
+    private volatile int checkpoint;
 
-    static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_STARTED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notStarted");
-    static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_FINISHED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notFinished");
     static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_CONSUMED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notConsumed");
     static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_UPDATED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notUpdated");
+    static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_CHECKPOINT = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "checkpoint");
 
     public WorkerSync(boolean stopped, int expectedWorkers, SpinLoopStyle spinStyle) {
         this.stopped = stopped;
         this.spinStyle = spinStyle;
-        this.notStarted = expectedWorkers;
-        this.notFinished = expectedWorkers;
         this.notConsumed = expectedWorkers;
         this.notUpdated = expectedWorkers;
     }
 
-    public void preRun() {
-        // Do not need to rendezvous the workers: first iteration would
-        // probably lack any rendezvous, but all subsequent ones would
-        // rendezvous during postUpdate().
-
-        // Notify that we have started
-        UPDATER_NOT_STARTED.decrementAndGet(this);
-    }
-
-    public void postRun() {
-        // If any thread lags behind, then we need to update our stride
-        if (!updateStride && notStarted > 0) {
-            updateStride = true;
-        }
-
-        // Notify that we are finished
-        UPDATER_NOT_FINISHED.decrementAndGet(this);
+    public void awaitCheckpoint(int expected) {
+        // Notify that we have rolled to the checkpoint
+        UPDATER_CHECKPOINT.incrementAndGet(this);
 
         switch (spinStyle) {
             case HARD:
-                while (notFinished > 0);
+                while (checkpoint < expected);
                 break;
             case THREAD_YIELD:
-                while (notFinished > 0) Thread.yield();
+                while (checkpoint < expected) Thread.yield();
                 break;
             case THREAD_SPIN_WAIT:
-                while (notFinished > 0) Thread.onSpinWait();
+                while (checkpoint < expected) Thread.onSpinWait();
                 break;
             case LOCKSUPPORT_PARK_NANOS:
-                while (notFinished > 0) LockSupport.parkNanos(1);
+                while (checkpoint < expected) LockSupport.parkNanos(1);
                 break;
             default:
                 throw new IllegalStateException("Unhandled style: " + spinStyle);
