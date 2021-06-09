@@ -30,7 +30,6 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
-import sun.misc.Contended;
 
 /**
  * Baseline for FencedAcquireReleaseTest
@@ -50,8 +49,6 @@ import sun.misc.Contended;
 public class UnfencedAcquireReleaseTest {
 
     int x;
-
-    @Contended
     int y; // acq/rel var
 
     @Actor

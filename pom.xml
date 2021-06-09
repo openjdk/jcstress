@@ -327,12 +327,24 @@ questions.
                 <artifactId>jimfs</artifactId>
                 <version>1.2</version>
             </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm</artifactId>
+                <version>9.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-util</artifactId>
+                <version>9.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <modules>
+        <module>jcstress-test-base</module>
         <module>jcstress-test-gen</module>
         <module>jcstress-result-gen</module>
+        <module>jcstress-contended-autoinjector</module>
         <module>jcstress-core</module>
         <module>jcstress-samples</module>
         <module>jcstress-java-test-archetype</module>

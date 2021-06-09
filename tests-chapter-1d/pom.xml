@@ -29,9 +29,11 @@ questions.
 
     <parent>
         <groupId>org.openjdk.jcstress</groupId>
-        <artifactId>jcstress-parent</artifactId>
+        <artifactId>jcstress-test-base</artifactId>
         <version>0.13-SNAPSHOT</version>
+        <relativePath>../jcstress-test-base</relativePath>
     </parent>
+
     <artifactId>jcstress-tests-chapter-1d</artifactId>
     <packaging>jar</packaging>
 
@@ -112,18 +114,4 @@ questions.
             </plugin>
         </plugins>
     </build>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>jcstress-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>jcstress-test-gen</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
 </project>

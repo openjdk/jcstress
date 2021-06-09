@@ -32,7 +32,6 @@ import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
 import org.openjdk.jcstress.util.UnsafeHolder;
-import sun.misc.Contended;
 
 /**
  * Tests if read-after-write using fences preserves SC
@@ -46,10 +45,7 @@ import sun.misc.Contended;
 @State
 public class FencedDekkerTest {
 
-    @Contended
     int a;
-
-    @Contended
     int b;
 
     @Actor

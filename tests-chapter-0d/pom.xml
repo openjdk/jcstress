@@ -29,9 +29,11 @@ questions.
 
     <parent>
         <groupId>org.openjdk.jcstress</groupId>
-        <artifactId>jcstress-parent</artifactId>
+        <artifactId>jcstress-test-base</artifactId>
         <version>0.13-SNAPSHOT</version>
+        <relativePath>../jcstress-test-base</relativePath>
     </parent>
+
     <artifactId>jcstress-tests-chapter-0d</artifactId>
     <packaging>jar</packaging>
 
@@ -42,46 +44,4 @@ questions.
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>jcstress-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>jcstress-test-gen</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
 </project>

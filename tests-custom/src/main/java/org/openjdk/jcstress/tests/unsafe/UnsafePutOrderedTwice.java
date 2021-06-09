@@ -27,7 +27,6 @@ package org.openjdk.jcstress.tests.unsafe;
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.II_Result;
 import org.openjdk.jcstress.util.UnsafeHolder;
-import sun.misc.Contended;
 
 @JCStressTest
 @Description("Tests if Unsafe.putOrderedInt is in-order")
@@ -48,10 +47,7 @@ public class UnsafePutOrderedTwice {
         }
     }
 
-    @Contended
     volatile int lock;
-
-    @Contended
     int top;
 
     @Actor

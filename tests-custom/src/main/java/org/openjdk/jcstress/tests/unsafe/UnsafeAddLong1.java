@@ -32,7 +32,6 @@ import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.JJ_Result;
 import org.openjdk.jcstress.util.UnsafeHolder;
-import sun.misc.Contended;
 
 @JCStressTest
 @Description("Tests if Unsafe.getAndAddLong is racy")
@@ -53,8 +52,6 @@ public class UnsafeAddLong1 {
     }
 
     long x;
-
-    @Contended
     volatile int written;
 
     @Actor
