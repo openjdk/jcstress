@@ -36,7 +36,6 @@ public class ForkedTestConfig {
     public final int time;
     public final int iters;
     public final String generatedRunnerName;
-    public final String name;
     public final int maxFootprintMB;
     public final int strideSize;
     public int strideCount;
@@ -48,7 +47,6 @@ public class ForkedTestConfig {
         time = cfg.time;
         iters = cfg.iters;
         generatedRunnerName = cfg.generatedRunnerName;
-        name = cfg.name;
         maxFootprintMB = cfg.maxFootprintMB;
         strideSize = cfg.strideSize;
         strideCount = cfg.strideCount;
@@ -63,7 +61,6 @@ public class ForkedTestConfig {
         time = dis.readInt();
         iters = dis.readInt();
         generatedRunnerName = dis.readUTF();
-        name = dis.readUTF();
         maxFootprintMB = dis.readInt();
         strideSize = dis.readInt();
         strideCount = dis.readInt();
@@ -82,7 +79,6 @@ public class ForkedTestConfig {
         dos.writeInt(time);
         dos.writeInt(iters);
         dos.writeUTF(generatedRunnerName);
-        dos.writeUTF(name);
         dos.writeInt(maxFootprintMB);
         dos.writeInt(strideSize);
         dos.writeInt(strideCount);

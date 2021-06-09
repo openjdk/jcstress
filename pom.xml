@@ -157,7 +157,6 @@ questions.
                         <shortRevisionLength>16</shortRevisionLength>
                     </configuration>
                 </plugin>
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
