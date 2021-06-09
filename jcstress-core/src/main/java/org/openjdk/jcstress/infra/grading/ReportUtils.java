@@ -139,7 +139,7 @@ public class ReportUtils {
 
             int idLen = headResult.length();
             int samplesLen = headSamples.length();
-            int freqLen = Math.max(6, headFreq.length());
+            int freqLen = Math.max(7, headFreq.length());
             int expectLen = headExpect.length();
             int descLen = 60;
 
@@ -178,7 +178,7 @@ public class ReportUtils {
                 pw.printf("%" + idLen + "s%," + samplesLen + "d%" + freqLen + "s%" + expectLen + "s  %-" + descLen + "s%n",
                         StringUtils.cutoff(gradeRes.id, idLen),
                         gradeRes.count,
-                        StringUtils.percent(gradeRes.count, totalSamples, 1),
+                        StringUtils.percent(gradeRes.count, totalSamples, 2),
                         gradeRes.expect,
                         StringUtils.cutoff(gradeRes.description, descLen));
             }
