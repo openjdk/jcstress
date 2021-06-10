@@ -27,11 +27,11 @@ package org.openjdk.jcstress.util;
 public class UnsafeHolder {
 
     // Unsafe mechanics
-    public static final sun.misc.Unsafe U;
+    public static final sun.misc.Unsafe UNSAFE;
 
     static {
         try {
-            U = getUnsafe();
+            UNSAFE = getUnsafe();
         } catch (Exception e) {
             throw new Error(e);
         }

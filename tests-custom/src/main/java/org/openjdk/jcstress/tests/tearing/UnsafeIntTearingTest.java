@@ -32,9 +32,10 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
-import org.openjdk.jcstress.util.UnsafeHolder;
 
 import java.util.Random;
+
+import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 @JCStressTest
 @Description("Tests the word-tearing guarantees for byte[] via Unsafe.")
@@ -51,8 +52,8 @@ public class UnsafeIntTearingTest {
     public static final int SIZE = 256;
 
     public static final Random RANDOM = new Random();
-    public static final long ARRAY_BASE_OFFSET = UnsafeHolder.U.arrayBaseOffset(byte[].class);
-    public static final long ARRAY_BASE_SCALE = UnsafeHolder.U.arrayIndexScale(byte[].class);
+    public static final long ARRAY_BASE_OFFSET = UNSAFE.arrayBaseOffset(byte[].class);
+    public static final long ARRAY_BASE_SCALE = UNSAFE.arrayIndexScale(byte[].class);
     public static final int COMPONENT_SIZE = 4;
 
     /** Alignment constraint: 4-bytes is default, for integers */
@@ -71,18 +72,18 @@ public class UnsafeIntTearingTest {
 
     @Actor
     public void actor1() {
-        UnsafeHolder.U.putInt(bytes, offset1, 0xAAAAAAAA);
+        UNSAFE.putInt(bytes, offset1, 0xAAAAAAAA);
     }
 
     @Actor
     public void actor2() {
-        UnsafeHolder.U.putInt(bytes, offset2, 0x55555555);
+        UNSAFE.putInt(bytes, offset2, 0x55555555);
     }
 
     @Arbiter
     public void arbiter1(II_Result r) {
-        r.r1 = UnsafeHolder.U.getInt(bytes, offset1);
-        r.r2 = UnsafeHolder.U.getInt(bytes, offset2);
+        r.r1 = UNSAFE.getInt(bytes, offset1);
+        r.r2 = UNSAFE.getInt(bytes, offset2);
     }
 
 }

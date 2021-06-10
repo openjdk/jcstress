@@ -31,7 +31,8 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.JJ_Result;
-import org.openjdk.jcstress.util.UnsafeHolder;
+
+import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 @JCStressTest
 @Description("Tests if Unsafe.getAndAddLong is racy")
@@ -41,11 +42,11 @@ import org.openjdk.jcstress.util.UnsafeHolder;
 @State
 public class UnsafeAddLong1 {
 
-    public static long OFFSET;
+    public static final long OFFSET;
 
     static {
         try {
-            OFFSET = UnsafeHolder.U.objectFieldOffset(UnsafeAddLong1.class.getDeclaredField("x"));
+            OFFSET = UNSAFE.objectFieldOffset(UnsafeAddLong1.class.getDeclaredField("x"));
         } catch (NoSuchFieldException e) {
             throw new IllegalStateException(e);
         }
@@ -56,7 +57,7 @@ public class UnsafeAddLong1 {
 
     @Actor
     public void actor1() {
-        UnsafeHolder.U.getAndAddLong(this, OFFSET, 1L << 1);
+        UNSAFE.getAndAddLong(this, OFFSET, 1L << 1);
         written = 1;
     }
 

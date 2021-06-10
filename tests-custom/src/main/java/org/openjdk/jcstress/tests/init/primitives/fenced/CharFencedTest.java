@@ -30,7 +30,8 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.C_Result;
 import org.openjdk.jcstress.tests.init.Grading_CharShouldSeeFull;
-import org.openjdk.jcstress.util.UnsafeHolder;
+
+import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 @JCStressTest
 @JCStressMeta(Grading_CharShouldSeeFull.class)
@@ -44,7 +45,7 @@ public class CharFencedTest {
 
         public Shell() {
             this.x = 1;
-            UnsafeHolder.U.storeFence();
+            UNSAFE.storeFence();
         }
     }
 

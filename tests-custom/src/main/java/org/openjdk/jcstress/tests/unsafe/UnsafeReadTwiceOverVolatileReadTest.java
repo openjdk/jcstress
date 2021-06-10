@@ -26,7 +26,8 @@ package org.openjdk.jcstress.tests.unsafe;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.III_Result;
-import org.openjdk.jcstress.util.UnsafeHolder;
+
+import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 /**
  * Test if volatile write-read induces happens-before if in between two non-volatile reads.
@@ -46,11 +47,11 @@ import org.openjdk.jcstress.util.UnsafeHolder;
 @State
 public class UnsafeReadTwiceOverVolatileReadTest {
 
-    public static long OFFSET;
+    public static final long OFFSET;
 
     static {
         try {
-            OFFSET = UnsafeHolder.U.objectFieldOffset(UnsafeReadTwiceOverVolatileReadTest.class.getDeclaredField("y"));
+            OFFSET = UNSAFE.objectFieldOffset(UnsafeReadTwiceOverVolatileReadTest.class.getDeclaredField("y"));
         } catch (NoSuchFieldException e) {
             throw new IllegalStateException(e);
         }
@@ -62,13 +63,13 @@ public class UnsafeReadTwiceOverVolatileReadTest {
     @Actor
     public void actor1() {
         x = 1;
-        UnsafeHolder.U.putIntVolatile(this, OFFSET, 1);
+        UNSAFE.putIntVolatile(this, OFFSET, 1);
     }
 
     @Actor
     public void actor2(III_Result r) {
         r.r1 = x;
-        r.r2 = UnsafeHolder.U.getIntVolatile(this, OFFSET);
+        r.r2 = UNSAFE.getIntVolatile(this, OFFSET);
         r.r3 = x;
     }
 

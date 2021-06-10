@@ -30,7 +30,8 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.J_Result;
 import org.openjdk.jcstress.tests.init.Grading_LongShouldSeeFull;
-import org.openjdk.jcstress.util.UnsafeHolder;
+
+import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 @JCStressTest
 @JCStressMeta(Grading_LongShouldSeeFull.class)
@@ -44,7 +45,7 @@ public class LongFencedTest {
 
         public Shell() {
             this.x = 0xFFFFFFFFFFFFFFFFL;
-            UnsafeHolder.U.storeFence();
+            UNSAFE.storeFence();
         }
     }
 

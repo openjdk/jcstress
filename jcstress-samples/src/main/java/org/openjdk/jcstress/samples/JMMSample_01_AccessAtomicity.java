@@ -27,12 +27,13 @@ package org.openjdk.jcstress.samples;
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.I_Result;
 import org.openjdk.jcstress.infra.results.J_Result;
-import org.openjdk.jcstress.util.UnsafeHolder;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ThreadLocalRandom;
+
+import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 public class JMMSample_01_AccessAtomicity {
 
@@ -261,20 +262,20 @@ public class JMMSample_01_AccessAtomicity {
     public static class UnsafeCrossCacheLine {
 
         public static final int SIZE = 256;
-        public static final long ARRAY_BASE_OFFSET = UnsafeHolder.U.arrayBaseOffset(byte[].class);
-        public static final long ARRAY_BASE_SCALE = UnsafeHolder.U.arrayIndexScale(byte[].class);
+        public static final long ARRAY_BASE_OFFSET = UNSAFE.arrayBaseOffset(byte[].class);
+        public static final long ARRAY_BASE_SCALE = UNSAFE.arrayIndexScale(byte[].class);
 
         byte[] ss = new byte[SIZE];
         long off = ARRAY_BASE_OFFSET + ARRAY_BASE_SCALE * ThreadLocalRandom.current().nextInt(SIZE - 4);
 
         @Actor
         public void writer() {
-            UnsafeHolder.U.putInt(ss, off, 0xFFFFFFFF);
+            UNSAFE.putInt(ss, off, 0xFFFFFFFF);
         }
 
         @Actor
         public void reader(I_Result r) {
-            r.r1 = UnsafeHolder.U.getInt(ss, off);
+            r.r1 = UNSAFE.getInt(ss, off);
         }
     }
 
