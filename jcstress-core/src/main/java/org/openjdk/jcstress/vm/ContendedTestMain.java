@@ -26,12 +26,13 @@ package org.openjdk.jcstress.vm;
 
 import org.openjdk.jcstress.annotations.Result;
 import org.openjdk.jcstress.util.Reflections;
-import org.openjdk.jcstress.util.UnsafeHolder;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
+
+import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 public class ContendedTestMain {
 
@@ -86,7 +87,7 @@ public class ContendedTestMain {
 
         FieldDef(Field f) {
             field = f;
-            offset = UnsafeHolder.U.objectFieldOffset(f);
+            offset = UNSAFE.objectFieldOffset(f);
         }
 
         @Override

@@ -30,7 +30,8 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.D_Result;
 import org.openjdk.jcstress.tests.init.Grading_DoubleShouldSeeFull;
-import org.openjdk.jcstress.util.UnsafeHolder;
+
+import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 @JCStressTest
 @JCStressMeta(Grading_DoubleShouldSeeFull.class)
@@ -44,7 +45,7 @@ public class DoubleFencedTest {
 
         public Shell() {
             this.x = Double.longBitsToDouble(0xFFFFFFFFFFFFFFFFL);
-            UnsafeHolder.U.storeFence();
+            UNSAFE.storeFence();
         }
     }
 

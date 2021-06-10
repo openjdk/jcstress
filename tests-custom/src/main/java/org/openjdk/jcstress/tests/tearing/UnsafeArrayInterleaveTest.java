@@ -32,7 +32,8 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.III_Result;
-import org.openjdk.jcstress.util.UnsafeHolder;
+
+import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 @JCStressTest
 @Description("Tests the word-tearing guarantees for byte[] via Unsafe.")
@@ -43,22 +44,22 @@ public class UnsafeArrayInterleaveTest {
     /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
     public static final int SIZE = 256;
 
-    public static final int ARRAY_BASE_OFFSET = UnsafeHolder.U.arrayBaseOffset(byte[].class);
-    public static final int ARRAY_BASE_SCALE = UnsafeHolder.U.arrayIndexScale(byte[].class);
+    public static final int ARRAY_BASE_OFFSET = UNSAFE.arrayBaseOffset(byte[].class);
+    public static final int ARRAY_BASE_SCALE = UNSAFE.arrayIndexScale(byte[].class);
 
     byte[] ss = new byte[SIZE];
 
     @Actor
     public void actor1() {
         for (int i = 0; i < ss.length; i += 2) {
-            UnsafeHolder.U.putByte(ss, (long)(ARRAY_BASE_OFFSET + ARRAY_BASE_SCALE*i), (byte)1);
+            UNSAFE.putByte(ss, (long)(ARRAY_BASE_OFFSET + ARRAY_BASE_SCALE*i), (byte)1);
         }
     }
 
     @Actor
     public void actor2() {
         for (int i = 1; i < ss.length; i += 2) {
-            UnsafeHolder.U.putByte(ss, (long)(ARRAY_BASE_OFFSET + ARRAY_BASE_SCALE*i), (byte)2);
+            UNSAFE.putByte(ss, (long)(ARRAY_BASE_OFFSET + ARRAY_BASE_SCALE*i), (byte)2);
         }
     }
 

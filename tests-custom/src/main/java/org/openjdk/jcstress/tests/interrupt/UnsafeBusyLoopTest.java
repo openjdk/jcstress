@@ -31,7 +31,8 @@ import org.openjdk.jcstress.annotations.Mode;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.Signal;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.util.UnsafeHolder;
+
+import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 @JCStressTest(Mode.Termination)
 @Outcome(id = "TERMINATED", expect = Expect.ACCEPTABLE, desc = "The thread had sucessfully terminated.")
@@ -44,7 +45,7 @@ public class UnsafeBusyLoopTest {
 
     static {
         try {
-            offset = UnsafeHolder.U.objectFieldOffset(UnsafeBusyLoopTest.class.getDeclaredField("isStopped"));
+            offset = UNSAFE.objectFieldOffset(UnsafeBusyLoopTest.class.getDeclaredField("isStopped"));
         } catch (NoSuchFieldException e) {
             throw new IllegalStateException(e);
         }
@@ -52,7 +53,7 @@ public class UnsafeBusyLoopTest {
 
     @Actor
     public void actor1() {
-        while (!UnsafeHolder.U.getBoolean(this, offset)) {
+        while (!UNSAFE.getBoolean(this, offset)) {
             // burn!
         }
     }

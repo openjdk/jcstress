@@ -30,7 +30,8 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.I_Result;
 import org.openjdk.jcstress.tests.init.Grading_IntShouldSeeFull;
-import org.openjdk.jcstress.util.UnsafeHolder;
+
+import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 @JCStressTest
 @JCStressMeta(Grading_IntShouldSeeFull.class)
@@ -44,7 +45,7 @@ public class IntFencedTest {
 
         public Shell() {
             this.x = 0xFFFFFFFF;
-            UnsafeHolder.U.storeFence();
+            UNSAFE.storeFence();
         }
     }
 

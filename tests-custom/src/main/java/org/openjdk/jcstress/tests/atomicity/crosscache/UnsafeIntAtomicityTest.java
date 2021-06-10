@@ -31,9 +31,10 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.BBBB_Result;
-import org.openjdk.jcstress.util.UnsafeHolder;
 
 import java.util.Random;
+
+import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 @JCStressTest
 @Description("Tests if Unsafe breaks the atomicity while doing cross cache-line reads/writes.")
@@ -51,8 +52,8 @@ public class UnsafeIntAtomicityTest {
     public static final int SIZE = 256;
 
     public static final Random RANDOM = new Random();
-    public static final long ARRAY_BASE_OFFSET = UnsafeHolder.U.arrayBaseOffset(byte[].class);
-    public static final long ARRAY_BASE_SCALE = UnsafeHolder.U.arrayIndexScale(byte[].class);
+    public static final long ARRAY_BASE_OFFSET = UNSAFE.arrayBaseOffset(byte[].class);
+    public static final long ARRAY_BASE_SCALE = UNSAFE.arrayIndexScale(byte[].class);
     public static final int COMPONENT_SIZE = 4;
 
     /** Alignment constraint: 4-bytes is default, for integers */
@@ -69,12 +70,12 @@ public class UnsafeIntAtomicityTest {
 
     @Actor
     public void actor1() {
-        UnsafeHolder.U.putInt(bytes, offset, 0xFFFFFFFF);
+        UNSAFE.putInt(bytes, offset, 0xFFFFFFFF);
     }
 
     @Actor
     public void actor2(BBBB_Result r) {
-        int t = UnsafeHolder.U.getInt(bytes, offset);
+        int t = UNSAFE.getInt(bytes, offset);
         r.r1 = (byte) ((t >> 0) & 0xFF);
         r.r2 = (byte) ((t >> 8) & 0xFF);
         r.r3 = (byte) ((t >> 16) & 0xFF);

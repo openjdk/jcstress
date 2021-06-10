@@ -30,7 +30,8 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.III_Result;
-import org.openjdk.jcstress.util.UnsafeHolder;
+
+import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 /**
  * Test if acquire/release forces re-read
@@ -55,7 +56,7 @@ public class FencedReadTwiceTest {
     @Actor
     public void actor1() {
         x = 1;
-        UnsafeHolder.U.storeFence();
+        UNSAFE.storeFence();
         y = 1;
     }
 
@@ -63,7 +64,7 @@ public class FencedReadTwiceTest {
     public void actor2(III_Result r) {
         r.r1 = x;
         r.r2 = y;
-        UnsafeHolder.U.loadFence();
+        UNSAFE.loadFence();
         r.r3 = x;
     }
 

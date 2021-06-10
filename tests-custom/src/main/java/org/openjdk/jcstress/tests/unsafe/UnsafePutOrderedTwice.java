@@ -26,7 +26,8 @@ package org.openjdk.jcstress.tests.unsafe;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.II_Result;
-import org.openjdk.jcstress.util.UnsafeHolder;
+
+import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 @JCStressTest
 @Description("Tests if Unsafe.putOrderedInt is in-order")
@@ -40,8 +41,8 @@ public class UnsafePutOrderedTwice {
 
     static {
         try {
-            OFFSET_LOCK = UnsafeHolder.U.objectFieldOffset(UnsafePutOrderedTwice.class.getDeclaredField("lock"));
-            OFFSET_TOP = UnsafeHolder.U.objectFieldOffset(UnsafePutOrderedTwice.class.getDeclaredField("top"));
+            OFFSET_LOCK = UNSAFE.objectFieldOffset(UnsafePutOrderedTwice.class.getDeclaredField("lock"));
+            OFFSET_TOP = UNSAFE.objectFieldOffset(UnsafePutOrderedTwice.class.getDeclaredField("top"));
         } catch (NoSuchFieldException e) {
             throw new IllegalStateException(e);
         }
@@ -52,8 +53,8 @@ public class UnsafePutOrderedTwice {
 
     @Actor
     public void actor1() {
-        UnsafeHolder.U.putOrderedInt(this, OFFSET_TOP, 1);
-        UnsafeHolder.U.putOrderedInt(this, OFFSET_LOCK, 1);
+        UNSAFE.putOrderedInt(this, OFFSET_TOP, 1);
+        UNSAFE.putOrderedInt(this, OFFSET_LOCK, 1);
     }
 
     @Actor
