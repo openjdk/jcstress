@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Red Hat Inc.
+ * Copyright (c) 2016, 2021, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,42 +22,46 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples;
+package org.openjdk.jcstress.samples.api;
 
 import org.openjdk.jcstress.annotations.*;
+import org.openjdk.jcstress.infra.results.II_Result;
+
+import static org.openjdk.jcstress.annotations.Expect.*;
 
 /*
-    Some concurrency tests are not following the "run continously" pattern. One
-    of interesting test groups is that asserts if the code had terminated after
-    a signal.
-
-    Here, we use a single @Actor that busy-waits on a field, and a @Signal that
-    sets that field. JCStress would start actor, and then deliver the signal.
-    If it exits in reasonable time, it will record "TERMINATED" result, otherwise
-    record "STALE".
+    JCStress also allows to put the descriptions and references right at the test.
+    This helps to identify the goal for the test, as well as the discussions about
+    the behavior in question.
 
     How to run this test:
-       $ java -jar jcstress-samples/target/jcstress.jar -t JCStress_APISample_03_Termination
+       $ java -jar jcstress-samples/target/jcstress.jar -t APISample_06
  */
 
-@JCStressTest(Mode.Termination)
-@Outcome(id = "TERMINATED", expect = Expect.ACCEPTABLE, desc = "Gracefully finished.")
-@Outcome(id = "STALE", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Test hung up.")
+@JCStressTest
+
+// Optional test description
+@Description("Sample Hello World test")
+
+// Optional references. @Ref is repeatable.
+@Ref("http://openjdk.java.net/projects/code-tools/jcstress/")
+
+@Outcome(id = "1, 1", expect = ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: atomicity failure.")
+@Outcome(id = "1, 2", expect = ACCEPTABLE,             desc = "actor1 incremented, then actor2.")
+@Outcome(id = "2, 1", expect = ACCEPTABLE,             desc = "actor2 incremented, then actor1.")
 @State
-public class APISample_03_Termination {
+public class API_06_Descriptions {
 
     int v;
 
     @Actor
-    public void actor1() {
-        while (v == 0) {
-            // spin
-        }
+    public void actor1(II_Result r) {
+        r.r1 = ++v;
     }
 
-    @Signal
-    public void signal() {
-        v = 1;
+    @Actor
+    public void actor2(II_Result r) {
+        r.r2 = ++v;
     }
 
 }

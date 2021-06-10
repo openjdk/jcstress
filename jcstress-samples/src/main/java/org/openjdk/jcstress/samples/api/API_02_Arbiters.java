@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Red Hat Inc.
+ * Copyright (c) 2016, 2021, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,35 +22,37 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples;
+package org.openjdk.jcstress.samples.api;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.I_Result;
 
+import static org.openjdk.jcstress.annotations.Expect.*;
+
 /*
-    Another flavor of the same test as JCStress_APISample_01_Simple is using
-    arbiters. Arbiters run after both actors, and therefore can observe the
-    final result.
+    Another flavor of the same test as APISample_01_Simple is using arbiters.
+    Arbiters run after both actors, and therefore can observe the final result.
 
-    This allows to directly observe the atomicity failure:
-
-          [OK] org.openjdk.jcstress.samples.JCStress_APISample_02_Arbiters
-        (JVM args: [-server])
-      Observed state   Occurrences              Expectation  Interpretation
-                   1       940,359   ACCEPTABLE_INTERESTING  One update lost: atomicity failure.
-                   2   168,950,601               ACCEPTABLE  Actors updated independently.
+    This allows to observe the permanent atomicity failure after both actors
+    finished.
 
     How to run this test:
-       $ java -jar jcstress-samples/target/jcstress.jar -t JCStress_APISample_02_Arbiters
+       $ java -jar jcstress-samples/target/jcstress.jar -t APISample_02_Arbiters
+
+        ...
+
+      RESULT         SAMPLES     FREQ       EXPECT  DESCRIPTION
+           1     888,569,404    6.37%  Interesting  One update lost: atomicity failure.
+           2  13,057,720,260   93.63%   Acceptable  Actors updated independently.
  */
 
 @JCStressTest
 
 // These are the test outcomes.
-@Outcome(id = "1", expect = Expect.ACCEPTABLE_INTERESTING, desc = "One update lost: atomicity failure.")
-@Outcome(id = "2", expect = Expect.ACCEPTABLE, desc = "Actors updated independently.")
+@Outcome(id = "1", expect = ACCEPTABLE_INTERESTING, desc = "One update lost: atomicity failure.")
+@Outcome(id = "2", expect = ACCEPTABLE,             desc = "Actors updated independently.")
 @State
-public class APISample_02_Arbiters {
+public class API_02_Arbiters {
 
     int v;
 

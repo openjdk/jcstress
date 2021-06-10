@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Red Hat Inc.
+ * Copyright (c) 2016, 2021, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,25 +22,45 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples;
+package org.openjdk.jcstress.samples.api;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.II_Result;
 
+import static org.openjdk.jcstress.annotations.Expect.*;
+
 /*
-    It is sometimes convenient to put the tests in the same source file for
-    better comparison. JCStress allows to nest tests like this:
+    In many cases, tests share the outcomes and other metadata. To common them,
+    there is a special @JCStressMeta annotation that says to look up the metadata
+    at another class.
 
     How to run this test:
-       $ java -jar jcstress-samples/target/jcstress.jar -t JCStress_APISample_04_Nesting
+       $ java -jar jcstress-samples/target/jcstress.jar -t APISample_05
+
+        ...
+
+        .......... [OK] org.openjdk.jcstress.samples.api.APISample_05_SharedMetadata.PlainTest
+
+          RESULT      SAMPLES    FREQ       EXPECT  DESCRIPTION
+            1, 1    6,549,293    1.4%  Interesting  Both actors came up with the same value: atomicity failure.
+            1, 2  414,490,076   90.0%   Acceptable  actor1 incremented, then actor2.
+            2, 1   39,540,969    8.6%   Acceptable  actor2 incremented, then actor1.
+
+        .......... [OK] org.openjdk.jcstress.samples.api.APISample_05_SharedMetadata.VolatileTest
+
+          RESULT      SAMPLES    FREQ       EXPECT  DESCRIPTION
+            1, 1   15,718,942    6.1%  Interesting  Both actors came up with the same value: atomicity failure.
+            1, 2  120,855,601   47.2%   Acceptable  actor1 incremented, then actor2.
+            2, 1  119,393,635   46.6%   Acceptable  actor2 incremented, then actor1.
  */
 
-public class APISample_04_Nesting {
+@Outcome(id = "1, 1", expect = ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: atomicity failure.")
+@Outcome(id = "1, 2", expect = ACCEPTABLE,             desc = "actor1 incremented, then actor2.")
+@Outcome(id = "2, 1", expect = ACCEPTABLE,             desc = "actor2 incremented, then actor1.")
+public class API_05_SharedMetadata {
 
     @JCStressTest
-    @Outcome(id = "1, 1", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: atomicity failure.")
-    @Outcome(id = "1, 2", expect = Expect.ACCEPTABLE, desc = "actor1 incremented, then actor2.")
-    @Outcome(id = "2, 1", expect = Expect.ACCEPTABLE, desc = "actor2 incremented, then actor1.")
+    @JCStressMeta(API_05_SharedMetadata.class)
     @State
     public static class PlainTest {
         int v;
@@ -57,9 +77,7 @@ public class APISample_04_Nesting {
     }
 
     @JCStressTest
-    @Outcome(id = "1, 1", expect = Expect.ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: atomicity failure.")
-    @Outcome(id = "1, 2", expect = Expect.ACCEPTABLE, desc = "actor1 incremented, then actor2.")
-    @Outcome(id = "2, 1", expect = Expect.ACCEPTABLE, desc = "actor2 incremented, then actor1.")
+    @JCStressMeta(API_05_SharedMetadata.class)
     @State
     public static class VolatileTest {
         volatile int v;
