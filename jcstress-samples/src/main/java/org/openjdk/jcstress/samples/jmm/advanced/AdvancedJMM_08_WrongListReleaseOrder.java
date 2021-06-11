@@ -39,7 +39,7 @@ import static org.openjdk.jcstress.annotations.Expect.*;
 @State
 @Outcome(id = {"-1", "42"}, expect = ACCEPTABLE,             desc = "Boring")
 @Outcome(id = "0",          expect = ACCEPTABLE_INTERESTING, desc = "Whoa")
-@Outcome(id = "-2",         expect = ACCEPTABLE_INTERESTING, desc = "Whoa-whoa")
+@Outcome(id = {"-2", "-3"}, expect = ACCEPTABLE_INTERESTING, desc = "Whoa-whoa")
 public class AdvancedJMM_08_WrongListReleaseOrder {
 
     /*
@@ -86,9 +86,14 @@ public class AdvancedJMM_08_WrongListReleaseOrder {
                 r.r1 = 0;
             } else {
                 try {
-                    r.r1 = l.get(0);
+                    Integer li = l.get(0);
+                    if (li != null) {
+                        r.r1 = li;
+                    } else {
+                        r.r1 = -2;
+                    }
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    r.r1 = -2;
+                    r.r1 = -3;
                 }
             }
         } else {
