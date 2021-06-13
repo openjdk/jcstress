@@ -60,7 +60,7 @@ public class SampleTestBench {
         String testName = SampleTest.class.getCanonicalName();
         String runnerName = SampleTest_jcstress.class.getCanonicalName();
 
-        TestInfo ti = new TestInfo(testName, runnerName, "", 2, Arrays.asList("a1", "a2"), false);
+        TestInfo ti = new TestInfo(testName, testName, runnerName, "", 2, Arrays.asList("a1", "a2"), false);
         TestConfig cfg = new TestConfig(opts, ti, 1, Collections.emptyList(), CompileMode.UNIFIED, new SchedulingClass(AffinityMode.NONE, 2));
         int[] map = new int[2];
         map[0] = -1;

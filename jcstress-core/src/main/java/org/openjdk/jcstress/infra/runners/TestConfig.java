@@ -38,6 +38,7 @@ public class TestConfig implements Serializable {
     public final int iters;
     public final int threads;
     public final String name;
+    public final String binaryName;
     public final String generatedRunnerName;
     public final List<String> jvmArgs;
     public final int forkId;
@@ -64,6 +65,7 @@ public class TestConfig implements Serializable {
         maxFootprintMB = opts.getMaxFootprintMb();
         threads = info.threads();
         name = info.name();
+        binaryName = info.binaryName();
         generatedRunnerName = info.generatedRunner();
         actorNames = info.actorNames();
         this.compileMode = compileMode;

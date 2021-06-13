@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 
 public class TestInfo {
     private final String name;
+    private final String binaryName;
     private final String description;
     private final String runner;
     private final int threads;
@@ -42,8 +43,9 @@ public class TestInfo {
     private final Collection<String> refs;
     private final List<String> actorNames;
 
-    public TestInfo(String name, String runner, String description, int threads, List<String> actorNames, boolean requiresFork) {
+    public TestInfo(String name, String binaryName, String runner, String description, int threads, List<String> actorNames, boolean requiresFork) {
         this.name = name;
+        this.binaryName = binaryName;
         this.runner = runner;
         this.description = description;
         this.threads = threads;
@@ -77,6 +79,10 @@ public class TestInfo {
 
     public String name() {
         return name;
+    }
+
+    public String binaryName() {
+        return binaryName;
     }
 
     public String description() {

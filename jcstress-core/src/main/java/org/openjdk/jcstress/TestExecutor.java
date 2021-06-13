@@ -296,9 +296,9 @@ public class TestExecutor {
                 // the run loop still runs in compiled mode, running faster. The call to interpreted
                 // method would happen anyway, even though through c2i transition.
                 if (CompileMode.isInt(cm, a)) {
-                    pw.println("    inline: \"-" + task.name + "::" + an + "\",");
+                    pw.println("    inline: \"-" + task.binaryName + "::" + an + "\",");
                 } else {
-                    pw.println("    inline: \"+" + task.name + "::" + an + "\",");
+                    pw.println("    inline: \"+" + task.binaryName + "::" + an + "\",");
                 }
 
                 // Run loop should be compiled with C2? Forbid C1 compilation then.
@@ -333,7 +333,7 @@ public class TestExecutor {
                 // Allow run loop to be compiled with the best compiler available.
                 if (CompileMode.isInt(cm, a)) {
                     pw.println("  {");
-                    pw.println("    match: \"" + task.name + "::" + an + "\",");
+                    pw.println("    match: \"" + task.binaryName + "::" + an + "\",");
                     pw.println("    c1: {");
                     pw.println("      Exclude: true,");
                     pw.println("    },");

@@ -57,6 +57,7 @@ public class TestList {
 
                     if (read.isCorrect()) {
                         String name = read.nextString();
+                        String binaryName = read.nextString();
                         String runner = read.nextString();
                         String description = read.nextString();
 
@@ -69,7 +70,7 @@ public class TestList {
                         boolean requiresFork = read.nextBoolean();
                         int caseCount = read.nextInt();
 
-                        TestInfo testInfo = new TestInfo(name, runner, description, actorCount, actorNames, requiresFork);
+                        TestInfo testInfo = new TestInfo(name, binaryName, runner, description, actorCount, actorNames, requiresFork);
                         m.put(name, testInfo);
 
                         for (int c = 0; c < caseCount; c++) {
