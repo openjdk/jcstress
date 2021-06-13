@@ -38,6 +38,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
 import javax.lang.model.util.ElementFilter;
+import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
@@ -95,12 +96,14 @@ public class JCStressTestProcessor extends AbstractProcessor {
             }
         } else {
             try {
+                Elements elements = processingEnv.getElementUtils();
                 FileObject file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", TestList.LIST.substring(1));
                 PrintWriter writer = new PrintWriter(file.openWriter());
                 for (TestInfo test : tests) {
                     TestLineWriter wl = new TestLineWriter();
 
                     wl.put(test.getTest().getQualifiedName().toString());
+                    wl.put(elements.getBinaryName(test.getTest()).toString());
                     wl.put(test.getGeneratedName());
                     wl.put(test.getDescription());
                     List<ExecutableElement> actors = test.getActors();

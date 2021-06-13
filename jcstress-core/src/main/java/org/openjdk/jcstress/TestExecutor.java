@@ -28,7 +28,9 @@ import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.processors.JCStressTestProcessor;
-import org.openjdk.jcstress.infra.runners.*;
+import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
+import org.openjdk.jcstress.infra.runners.TestConfig;
+import org.openjdk.jcstress.infra.runners.WorkerSync;
 import org.openjdk.jcstress.link.BinaryLinkServer;
 import org.openjdk.jcstress.link.ServerListener;
 import org.openjdk.jcstress.os.*;
@@ -249,39 +251,6 @@ public class TestExecutor {
             PrintWriter pw = new PrintWriter(compilerDirectives);
             pw.println("[");
 
-            // The auxiliary thread roots are not compiled at all, so that calling
-            // actor methods there directly does not enter the compilers at all.
-            pw.println("  {");
-            pw.println("    match: \"" + VoidThread.class.getName() + "::*\",");
-            pw.println("    inline: \"-*::*\",");
-            pw.println("    c1: {");
-            pw.println("      Exclude: true,");
-            pw.println("    },");
-            pw.println("    c2: {");
-            pw.println("      Exclude: true,");
-            pw.println("    },");
-            pw.println("  },");
-            pw.println("  {");
-            pw.println("    match: \"" + LongThread.class.getName() + "::*\",");
-            pw.println("    inline: \"-*::*\",");
-            pw.println("    c1: {");
-            pw.println("      Exclude: true,");
-            pw.println("    },");
-            pw.println("    c2: {");
-            pw.println("      Exclude: true,");
-            pw.println("    },");
-            pw.println("  },");
-            pw.println("  {");
-            pw.println("    match: \"" + CounterThread.class.getName() + "::*\",");
-            pw.println("    inline: \"-*::*\",");
-            pw.println("    c1: {");
-            pw.println("      Exclude: true,");
-            pw.println("    },");
-            pw.println("    c2: {");
-            pw.println("      Exclude: true,");
-            pw.println("    },");
-            pw.println("  },");
-
             // The task loop:
             pw.println("  {");
             pw.println("    match: \"" + task.generatedRunnerName + "::" + JCStressTestProcessor.TASK_LOOP_PREFIX + "*\",");
@@ -327,9 +296,9 @@ public class TestExecutor {
                 // the run loop still runs in compiled mode, running faster. The call to interpreted
                 // method would happen anyway, even though through c2i transition.
                 if (CompileMode.isInt(cm, a)) {
-                    pw.println("    inline: \"-" + task.name + "::" + an + "\",");
+                    pw.println("    inline: \"-" + task.binaryName + "::" + an + "\",");
                 } else {
-                    pw.println("    inline: \"+" + task.name + "::" + an + "\",");
+                    pw.println("    inline: \"+" + task.binaryName + "::" + an + "\",");
                 }
 
                 // Run loop should be compiled with C2? Forbid C1 compilation then.
@@ -364,7 +333,7 @@ public class TestExecutor {
                 // Allow run loop to be compiled with the best compiler available.
                 if (CompileMode.isInt(cm, a)) {
                     pw.println("  {");
-                    pw.println("    match: \"" + task.name + "::" + an + "\",");
+                    pw.println("    match: \"" + task.binaryName + "::" + an + "\",");
                     pw.println("    c1: {");
                     pw.println("      Exclude: true,");
                     pw.println("    },");

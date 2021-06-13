@@ -106,9 +106,6 @@ public class VMSupport {
 
         COMPILERS_AVAILABLE = C1_AVAILABLE || C2_AVAILABLE;
 
-        C1_AVAILABLE = false;
-        C2_AVAILABLE = false;
-
         // Tests are supposed to run in a very tight memory constraints:
         // the test objects are small and reused where possible. The footprint
         // testing machinery would select appropriate stride sizes to fit the heap.
