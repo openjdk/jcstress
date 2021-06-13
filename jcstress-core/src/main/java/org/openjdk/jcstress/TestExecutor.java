@@ -28,9 +28,7 @@ import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.processors.JCStressTestProcessor;
-import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
-import org.openjdk.jcstress.infra.runners.TestConfig;
-import org.openjdk.jcstress.infra.runners.WorkerSync;
+import org.openjdk.jcstress.infra.runners.*;
 import org.openjdk.jcstress.link.BinaryLinkServer;
 import org.openjdk.jcstress.link.ServerListener;
 import org.openjdk.jcstress.os.*;
@@ -250,6 +248,23 @@ public class TestExecutor {
 
             PrintWriter pw = new PrintWriter(compilerDirectives);
             pw.println("[");
+
+            // The worker threads:
+            // Avoid any inlining for worker threads: either wait for task loop
+            // compilation and pick up from there, or avoid inlining the actor method
+            // that might be interpreted.
+            pw.println("  {");
+            pw.println("    match: \"" + VoidThread.class.getName() + "::*\",");
+            pw.println("    inline: \"-*::*\",");
+            pw.println("  },");
+            pw.println("  {");
+            pw.println("    match: \"" + LongThread.class.getName() + "::*\",");
+            pw.println("    inline: \"-*::*\",");
+            pw.println("  },");
+            pw.println("  {");
+            pw.println("    match: \"" + CounterThread.class.getName() + "::*\",");
+            pw.println("    inline: \"-*::*\",");
+            pw.println("  },");
 
             // The task loop:
             pw.println("  {");
