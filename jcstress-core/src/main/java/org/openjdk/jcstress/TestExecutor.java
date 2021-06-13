@@ -28,9 +28,7 @@ import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.infra.processors.JCStressTestProcessor;
-import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
-import org.openjdk.jcstress.infra.runners.TestConfig;
-import org.openjdk.jcstress.infra.runners.WorkerSync;
+import org.openjdk.jcstress.infra.runners.*;
 import org.openjdk.jcstress.link.BinaryLinkServer;
 import org.openjdk.jcstress.link.ServerListener;
 import org.openjdk.jcstress.os.*;
@@ -250,6 +248,39 @@ public class TestExecutor {
 
             PrintWriter pw = new PrintWriter(compilerDirectives);
             pw.println("[");
+
+            // The auxiliary thread roots are not compiled at all, so that calling
+            // actor methods there directly does not enter the compilers at all.
+            pw.println("  {");
+            pw.println("    match: \"" + VoidThread.class.getName() + "::*\",");
+            pw.println("    inline: \"-*::*\",");
+            pw.println("    c1: {");
+            pw.println("      Exclude: true,");
+            pw.println("    },");
+            pw.println("    c2: {");
+            pw.println("      Exclude: true,");
+            pw.println("    },");
+            pw.println("  },");
+            pw.println("  {");
+            pw.println("    match: \"" + LongThread.class.getName() + "::*\",");
+            pw.println("    inline: \"-*::*\",");
+            pw.println("    c1: {");
+            pw.println("      Exclude: true,");
+            pw.println("    },");
+            pw.println("    c2: {");
+            pw.println("      Exclude: true,");
+            pw.println("    },");
+            pw.println("  },");
+            pw.println("  {");
+            pw.println("    match: \"" + CounterThread.class.getName() + "::*\",");
+            pw.println("    inline: \"-*::*\",");
+            pw.println("    c1: {");
+            pw.println("      Exclude: true,");
+            pw.println("    },");
+            pw.println("    c2: {");
+            pw.println("      Exclude: true,");
+            pw.println("    },");
+            pw.println("  },");
 
             // The task loop:
             pw.println("  {");
