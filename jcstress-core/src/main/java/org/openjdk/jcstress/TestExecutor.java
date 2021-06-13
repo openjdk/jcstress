@@ -333,7 +333,7 @@ public class TestExecutor {
                 // Allow run loop to be compiled with the best compiler available.
                 if (CompileMode.isInt(cm, a)) {
                     pw.println("  {");
-                    pw.println("    match: \"+" + task.name + "::" + an + "\",");
+                    pw.println("    match: \"" + task.name + "::" + an + "\",");
                     pw.println("    c1: {");
                     pw.println("      Exclude: true,");
                     pw.println("    },");
