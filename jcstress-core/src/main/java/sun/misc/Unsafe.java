@@ -25,7 +25,6 @@
 package sun.misc;
 
 import java.lang.reflect.Field;
-import java.security.ProtectionDomain;
 
 /**
  * Transitional interface, allows to compile the project against old JDKs.
@@ -155,10 +154,6 @@ public abstract class Unsafe {
     public abstract int addressSize();
 
     public abstract int pageSize();
-
-    public abstract Class<?> defineClass(String name, byte[] b, int off, int len,
-                                       ClassLoader loader,
-                                       ProtectionDomain protectionDomain);
 
     public abstract Class<?> defineClass(String name, byte[] b, int off, int len);
 
