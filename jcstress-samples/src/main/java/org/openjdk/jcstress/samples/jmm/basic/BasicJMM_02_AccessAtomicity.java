@@ -121,7 +121,7 @@ public class BasicJMM_02_AccessAtomicity {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        Recovering the access atomicity is possible with making the field "volatile":
+        Recovering the access atomicity is possible by making the field "volatile":
 
         x86_32:
           RESULT        SAMPLES     FREQ      EXPECT  DESCRIPTION
@@ -194,18 +194,15 @@ public class BasicJMM_02_AccessAtomicity {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        While the spec requirements for field and array element accesses are
-        strict, the implementations of concrete classes may have a relaxed
-        semantics. Take ByteBuffer where we can read the 4-byte integer from
-        an arbitrary offset.
+        While the spec requirements for field and array element accesses are strict, the implementations of
+        concrete classes may have a relaxed semantics. Take ByteBuffer where we can read the 4-byte integer
+        from an arbitrary offset.
 
-        Older ByteBuffer implementations accessed one byte at a time, and that
-        required merging/splitting anything larger than a byte into the individual
-        operations. Of course, there is no access atomicity there by construction.
-        In newer ByteBuffer implementations, the _aligned_ accesses are done with
-        larger instructions that gives back atomicity. Misaligned accesses would
-        still have to do several narrower accesses on machines that don't support
-        misalignments.
+        Older ByteBuffer implementations accessed one byte at a time, and that required merging/splitting
+        anything larger than a byte into the individual operations. Of course, there is no access atomicity
+        there by construction. In newer ByteBuffer implementations, the _aligned_ accesses are done with
+        larger instructions that gives back atomicity. Misaligned accesses would still have to do several
+        narrower accesses on machines that don't support misalignments.
 
         x86_64:
              RESULT      SAMPLES     FREQ       EXPECT  DESCRIPTION
@@ -247,9 +244,9 @@ public class BasicJMM_02_AccessAtomicity {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        However, even if the misaligned accesses is supported by hardware, it would never
-        be guaranteed atomic. For example, reading the value that spans two cache-lines would
-        not be atomic, even if we manage to issue a single instruction for access.
+        However, even if the misaligned accesses is supported by hardware, it would never be guaranteed atomic.
+        For example, reading the value that spans two cache-lines would not be atomic, even if we manage to issue
+        a single instruction for access.
 
         x86_64:
              RESULT      SAMPLES     FREQ       EXPECT  DESCRIPTION

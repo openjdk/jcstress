@@ -61,7 +61,6 @@ public class BasicJMM_01_DataRaces {
                       RESULT        SAMPLES     FREQ      EXPECT  DESCRIPTION
       class java.lang.Object  3,619,439,149   51.74%  Acceptable  Seeing the object, valid class
                         null  3,376,358,355   48.26%  Acceptable  Not seeing the object yet
-
     */
 
     Object o;

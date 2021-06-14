@@ -44,7 +44,7 @@ public class AdvancedJMM_01_SynchronizedBarriers {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_01
+            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_01_SynchronizedBarriers
      */
 
     /*

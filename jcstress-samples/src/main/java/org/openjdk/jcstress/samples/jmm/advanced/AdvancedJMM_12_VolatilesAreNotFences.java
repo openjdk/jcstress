@@ -38,7 +38,7 @@ public class AdvancedJMM_12_VolatilesAreNotFences {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_12_SynchronizedAreNotFences[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_12_VolatilesAreNotFences[.SubTestName]
      */
 
     /*

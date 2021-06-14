@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples.jmm.advanced;
+package org.openjdk.jcstress.samples.jmm.basic;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
@@ -32,10 +32,10 @@ import org.openjdk.jcstress.infra.results.II_Result;
 
 import static org.openjdk.jcstress.annotations.Expect.*;
 
-public class AdvancedJMM_14_BenignRaces {
+public class BasicJMM_09_BenignRaces {
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_14_BenignRaces[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t BasicJMM_09_BenignRaces[.SubTestName]
      */
 
     /*

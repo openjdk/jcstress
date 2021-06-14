@@ -44,7 +44,7 @@ public class AdvancedJMM_08_WrongListReleaseOrder {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_08_WrongListReleaseOrder[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_08_WrongListReleaseOrder
      */
 
     /*

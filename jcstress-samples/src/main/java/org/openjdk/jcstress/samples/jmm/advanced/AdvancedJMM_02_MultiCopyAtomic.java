@@ -36,11 +36,11 @@ import java.lang.invoke.VarHandle;
 import static org.openjdk.jcstress.annotations.Expect.*;
 import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
-public class AdvancedJMM_02_MemorySynchronicity {
+public class AdvancedJMM_02_MultiCopyAtomic {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_02_MemorySynchronicity[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_02_MultiCopyAtomic[.SubTestName]
      */
 
     /*
@@ -81,23 +81,23 @@ public class AdvancedJMM_02_MemorySynchronicity {
 
         But on PPC64 -- that is not a multi-copy atomic architecture -- this test yields:
 
-              RESULT      SAMPLES     FREQ       EXPECT  DESCRIPTION
-          0, 0, 0, 0    8,000,004    0.78%   Acceptable  Boring
-          0, 0, 0, 1    1,464,110    0.14%   Acceptable  Boring
-          0, 0, 1, 0    1,179,814    0.12%   Acceptable  Boring
-          0, 0, 1, 1   41,275,652    4.03%   Acceptable  Boring
-          0, 1, 0, 0    1,038,437    0.10%   Acceptable  Boring
-          0, 1, 0, 1       60,198   <0.01%   Acceptable  Boring
-          0, 1, 1, 0    5,957,811    0.58%   Acceptable  Boring
-          0, 1, 1, 1   19,326,879    1.88%   Acceptable  Boring
-          1, 0, 0, 0      999,321    0.10%   Acceptable  Boring
-          1, 0, 0, 1    6,711,610    0.65%   Acceptable  Boring
-          1, 0, 1, 0       28,752   <0.01%  Interesting  Whoa
-          1, 0, 1, 1   19,428,477    1.89%   Acceptable  Boring
-          1, 1, 0, 0   21,080,890    2.06%   Acceptable  Boring
-          1, 1, 0, 1   17,442,987    1.70%   Acceptable  Boring
-          1, 1, 1, 0   15,403,205    1.50%   Acceptable  Boring
-          1, 1, 1, 1  865,916,157   84.45%   Acceptable  Boring
+              RESULT        SAMPLES     FREQ       EXPECT  DESCRIPTION
+          0, 0, 0, 0     37,176,296    0.64%   Acceptable  Boring
+          0, 0, 0, 1      9,400,698    0.16%   Acceptable  Boring
+          0, 0, 1, 0      7,820,972    0.13%   Acceptable  Boring
+          0, 0, 1, 1    264,268,403    4.54%   Acceptable  Boring
+          0, 1, 0, 0      6,000,722    0.10%   Acceptable  Boring
+          0, 1, 0, 1        285,037   <0.01%   Acceptable  Boring
+          0, 1, 1, 0     33,201,729    0.57%   Acceptable  Boring
+          0, 1, 1, 1    119,718,218    2.05%   Acceptable  Boring
+          1, 0, 0, 0      5,952,891    0.10%   Acceptable  Boring
+          1, 0, 0, 1     42,960,279    0.74%   Acceptable  Boring
+          1, 0, 1, 0        144,597   <0.01%  Interesting  Whoa
+          1, 0, 1, 1    111,705,898    1.92%   Acceptable  Boring
+          1, 1, 0, 0    149,136,163    2.56%   Acceptable  Boring
+          1, 1, 0, 1    108,356,855    1.86%   Acceptable  Boring
+          1, 1, 1, 0    100,533,303    1.73%   Acceptable  Boring
+          1, 1, 1, 1  4,829,074,643   82.89%   Acceptable  Boring
      */
 
     @JCStressTest
@@ -147,27 +147,28 @@ public class AdvancedJMM_02_MemorySynchronicity {
       ----------------------------------------------------------------------------------------------------------
 
         To see why this is not a vanilla memory reordering, we can put fences around the critical accesses.
-        If we follow the "usual" fencing around the seqc
+        If we follow the "usual" fencing around the accesses, it would not help on non-multi-copy-atomic
+        platforms. Even though we stick all accesses in their places, and prevent reads going one over the
+        other, the asynchronous nature of memory updates would manifest on some platforms.
 
-
-PPC64:
-      RESULT      SAMPLES     FREQ       EXPECT  DESCRIPTION
-  0, 0, 0, 0  116,646,109   22.21%   Acceptable  Boring
-  0, 0, 0, 1   19,589,207    3.73%   Acceptable  Boring
-  0, 0, 1, 0   13,989,162    2.66%   Acceptable  Boring
-  0, 0, 1, 1   22,118,188    4.21%   Acceptable  Boring
-  0, 1, 0, 0   16,780,917    3.20%   Acceptable  Boring
-  0, 1, 0, 1       44,960   <0.01%   Acceptable  Boring
-  0, 1, 1, 0   54,578,089   10.39%   Acceptable  Boring
-  0, 1, 1, 1    3,448,588    0.66%   Acceptable  Boring
-  1, 0, 0, 0   15,474,140    2.95%   Acceptable  Boring
-  1, 0, 0, 1   63,265,053   12.05%   Acceptable  Boring
-  1, 0, 1, 0        2,151   <0.01%  Interesting  Whoa
-  1, 0, 1, 1    2,820,992    0.54%   Acceptable  Boring
-  1, 1, 0, 0   33,421,547    6.36%   Acceptable  Boring
-  1, 1, 0, 1   10,101,731    1.92%   Acceptable  Boring
-  1, 1, 1, 0    9,358,080    1.78%   Acceptable  Boring
-  1, 1, 1, 1  143,471,870   27.32%   Acceptable  Boring
+        PPC64:
+              RESULT      SAMPLES     FREQ       EXPECT  DESCRIPTION
+          0, 0, 0, 0  626,124,064   22.51%   Acceptable  Boring
+          0, 0, 0, 1  100,592,056    3.62%   Acceptable  Boring
+          0, 0, 1, 0   86,443,974    3.11%   Acceptable  Boring
+          0, 0, 1, 1  117,149,197    4.21%   Acceptable  Boring
+          0, 1, 0, 0  102,075,205    3.67%   Acceptable  Boring
+          0, 1, 0, 1      270,587   <0.01%   Acceptable  Boring
+          0, 1, 1, 0  278,452,698   10.01%   Acceptable  Boring
+          0, 1, 1, 1   18,548,574    0.67%   Acceptable  Boring
+          1, 0, 0, 0   96,280,543    3.46%   Acceptable  Boring
+          1, 0, 0, 1  311,153,395   11.19%   Acceptable  Boring
+          1, 0, 1, 0        7,599   <0.01%  Interesting  Whoa
+          1, 0, 1, 1   14,614,329    0.53%   Acceptable  Boring
+          1, 1, 0, 0  195,921,897    7.04%   Acceptable  Boring
+          1, 1, 0, 1   52,391,418    1.88%   Acceptable  Boring
+          1, 1, 1, 0   42,992,478    1.55%   Acceptable  Boring
+          1, 1, 1, 1  738,325,730   26.55%   Acceptable  Boring
      */
 
     @JCStressTest
@@ -212,27 +213,28 @@ PPC64:
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        To see why this is not a vanilla memory reordering, we can put fences around the critical accesses.
-        If we follow the "usual" fencing around the seqc
+        Depending on the hardware, a more thorough fencing might be required. For example, on PPC64,
+        we would need to emit a full fence before the sequentially consistent read, if we want to stop
+        seeing non-MCA behaviors. Indeed, in this test, the interesting cases are gone.
 
-PPC64:
-      RESULT      SAMPLES     FREQ       EXPECT  DESCRIPTION
-  0, 0, 0, 0    3,162,682    0.63%   Acceptable  Boring
-  0, 0, 0, 1      420,692    0.08%   Acceptable  Boring
-  0, 0, 1, 0       49,183   <0.01%   Acceptable  Boring
-  0, 0, 1, 1   17,923,289    3.55%   Acceptable  Boring
-  0, 1, 0, 0      344,895    0.07%   Acceptable  Boring
-  0, 1, 0, 1       58,153    0.01%   Acceptable  Boring
-  0, 1, 1, 0      703,765    0.14%   Acceptable  Boring
-  0, 1, 1, 1   17,055,833    3.38%   Acceptable  Boring
-  1, 0, 0, 0       55,722    0.01%   Acceptable  Boring
-  1, 0, 0, 1      926,450    0.18%   Acceptable  Boring
-  1, 0, 1, 0            0    0.00%  Interesting  Whoa
-  1, 0, 1, 1   15,951,198    3.16%   Acceptable  Boring
-  1, 1, 0, 0   15,055,385    2.98%   Acceptable  Boring
-  1, 1, 0, 1   23,580,682    4.67%   Acceptable  Boring
-  1, 1, 1, 0   20,358,942    4.03%   Acceptable  Boring
-  1, 1, 1, 1  389,383,273   77.10%   Acceptable  Boring
+        PPC64:
+              RESULT        SAMPLES     FREQ       EXPECT  DESCRIPTION
+          0, 0, 0, 0     16,428,729    0.62%   Acceptable  Boring
+          0, 0, 0, 1      1,054,058    0.04%   Acceptable  Boring
+          0, 0, 1, 0        219,026   <0.01%   Acceptable  Boring
+          0, 0, 1, 1     82,801,314    3.11%   Acceptable  Boring
+          0, 1, 0, 0      2,250,558    0.08%   Acceptable  Boring
+          0, 1, 0, 1        248,656   <0.01%   Acceptable  Boring
+          0, 1, 1, 0      3,318,302    0.12%   Acceptable  Boring
+          0, 1, 1, 1     89,272,976    3.36%   Acceptable  Boring
+          1, 0, 0, 0        375,410    0.01%   Acceptable  Boring
+          1, 0, 0, 1      3,598,655    0.14%   Acceptable  Boring
+          1, 0, 1, 0              0    0.00%  Interesting  Whoa
+          1, 0, 1, 1     81,560,207    3.07%   Acceptable  Boring
+          1, 1, 0, 0     94,117,189    3.54%   Acceptable  Boring
+          1, 1, 0, 1    124,773,490    4.69%   Acceptable  Boring
+          1, 1, 1, 0    107,590,486    4.05%   Acceptable  Boring
+          1, 1, 1, 1  2,051,591,968   77.15%   Acceptable  Boring
      */
 
     @JCStressTest

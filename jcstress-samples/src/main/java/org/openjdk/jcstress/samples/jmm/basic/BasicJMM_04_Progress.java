@@ -105,9 +105,9 @@ public class BasicJMM_04_Progress {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        In fact, the overwhelming majority of hardware makes writes eventually visible, so what
-        we minimally want is to make the accesses opaque to the optimizing compilers. Luckily,
-        that is simple to do with VarHandles.{set|get}Opaque.
+        In fact, the overwhelming majority of hardware makes writes eventually visible, so what we minimally
+        want is to make the accesses opaque to the optimizing compilers. Luckily, that is simple to do with
+        VarHandles.{set|get}Opaque.
 
         Indeed, this is guaranteed to happen on all platforms:
 

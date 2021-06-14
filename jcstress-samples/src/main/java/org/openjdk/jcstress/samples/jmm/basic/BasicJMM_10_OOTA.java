@@ -33,11 +33,11 @@ import static org.openjdk.jcstress.annotations.Expect.*;
 @Outcome(id = "0, 0", expect = ACCEPTABLE, desc = "The only valid result")
 @Outcome(             expect = FORBIDDEN,  desc = "Every other result is forbidden")
 @State
-public class BasicJMM_09_OOTA {
+public class BasicJMM_10_OOTA {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t BasicJMM_09_OOTA
+            $ java -jar jcstress-samples/target/jcstress.jar -t BasicJMM_10_OOTA
      */
 
     /*
