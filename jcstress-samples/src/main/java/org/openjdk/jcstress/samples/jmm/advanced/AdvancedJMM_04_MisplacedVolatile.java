@@ -37,7 +37,7 @@ public class AdvancedJMM_04_MisplacedVolatile {
 
      /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_03_LosingUpdates[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_04_MisplacedVolatile[.SubTestName]
      */
 
     static class Composite {
