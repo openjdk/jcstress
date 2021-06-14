@@ -45,22 +45,25 @@ public class UnsafeHolder {
      * @return a sun.misc.Unsafe
      */
     private static sun.misc.Unsafe getUnsafe() {
+        IllegalStateException ex = new IllegalStateException("Cannot get Unsafe");
+
         try {
             return sun.misc.Unsafe.getUnsafe();
-        } catch (SecurityException se) {
-            try {
-                return java.security.AccessController.doPrivileged
-                    ((java.security.PrivilegedExceptionAction<sun.misc.Unsafe>) () -> {
-                        java.lang.reflect.Field f = sun.misc
-                            .Unsafe.class.getDeclaredField("theUnsafe");
-                        f.setAccessible(true);
-                        return (sun.misc.Unsafe) f.get(null);
-                    });
-            } catch (java.security.PrivilegedActionException e) {
-                throw new RuntimeException("Could not initialize intrinsics",
-                                           e.getCause());
-            }
+        } catch (SecurityException e) {
+            // Fall-through
+            ex.addSuppressed(e);
         }
+
+        try {
+            java.lang.reflect.Field f = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+            f.setAccessible(true);
+            return (sun.misc.Unsafe) f.get(null);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            // Fall-through
+            ex.addSuppressed(e);
+        }
+
+        throw ex;
     }
 
 }
