@@ -92,38 +92,23 @@ public class ForkedTestConfig {
     }
 
     public void adjustStrideCount(FootprintEstimator estimator) {
-        int size = 1;
-        int succSize = size;
-        while (tryWith(estimator, size)) {
-            // success!
-            succSize = size;
-
-            // do not go over the max stride size
-            if (succSize >= strideSize) {
-                succSize = strideSize;
-                break;
-            }
-
-            size *= 2;
-        }
-
         int count = 1;
         int succCount = count;
-        while (tryWith(estimator, succSize*count)) {
+        while (tryWith(estimator, count)) {
             // success!
             succCount = count;
 
-            // do not go over the max stride count
-            if (succCount >= strideCount) {
-                succCount = strideCount;
+            // do not go over the the limit
+            if (succCount >= strideSize * strideCount) {
+                succCount = strideSize * strideCount;
                 break;
             }
 
             count *= 2;
         }
 
-        strideCount = succCount;
-        strideSize = succSize;
+        strideSize = Math.min(succCount, strideSize);
+        strideCount = succCount / strideSize;
     }
 
     private boolean tryWith(FootprintEstimator estimator, int count) {
