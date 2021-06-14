@@ -45,10 +45,9 @@ public class BasicJMM_05_Coherence {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        Yet another subtle and intuitive property comes from the naive understanding
-        of how programs work. Under Java Memory Model, in absence of synchronization,
-        the order of independent reads is undefined. That includes reads of the *same*
-        variable!
+        Yet another subtle and intuitive property comes from the naive understanding of how programs work.
+        Under Java Memory Model, in absence of synchronization, the order of independent reads is undefined.
+        That includes reads of the *same* variable!
 
           RESULT      SAMPLES     FREQ       EXPECT  DESCRIPTION
             0, 0   14,577,607    6.96%   Acceptable  Doing both reads early.
@@ -101,9 +100,8 @@ public class BasicJMM_05_Coherence {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        The stronger property -- coherence -- mandates that the writes to the same
-        variable to be observed in a total order (that implies that _observers_ are
-        also ordered). Java "volatile" assumes this property.
+        The stronger property -- coherence -- mandates that the writes to the same variable to be observed in
+        a total order (that implies that _observers_ are also ordered). Java "volatile" assumes this property.
 
           RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
             0, 0  114,696,597   30.95%  Acceptable  Doing both reads early.

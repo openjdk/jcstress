@@ -45,10 +45,9 @@ public class BasicJMM_06_Causality {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        The next property helps some inter-thread semantics. In JMM, happens-before mandates
-        what results are plausible and what are not, when non-synchronized reads are involved.
-        That order is partial, so there are pairs of reads/writes we can tell nothing about
-        order-wise.
+        The next property helps some inter-thread semantics. In JMM, happens-before mandates what results are
+        plausible and what are not, when non-synchronized reads are involved. That order is partial, so there
+        are pairs of reads/writes we can tell nothing about order-wise.
 
         For example, in the case of two non-volatile variables, JMM allows observing
         "1, 0".
@@ -143,11 +142,11 @@ public class BasicJMM_06_Causality {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-         The easiest way to solve this is to mark $y as "volatile". In this case, JMM would
-         disallow seeing (1, 0). Volatile write would now be "release"-ing write and volatile
-         read would now be "acquiring" read. That means all writes that precede releasing store
-         would be visible to readers of acquiring read. Note this effect is only guaranteed
-         if the acquiring read sees the value written by releasing write.
+         The easiest way to solve this is to mark $y as "volatile". In this case, JMM would disallow seeing
+         (1, 0). Volatile write would now be "release"-ing write and volatile read would now be "acquiring"
+         read. That means all writes that precede releasing store would be visible to readers of acquiring
+         read. Note this effect is only guaranteed if the acquiring read sees the value written by releasing
+         write.
 
          Indeed, in all configurations, we shall see zero samples for the now forbidden
          test case.
