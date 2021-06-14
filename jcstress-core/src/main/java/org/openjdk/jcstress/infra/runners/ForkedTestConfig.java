@@ -37,7 +37,7 @@ public class ForkedTestConfig {
     public final int iters;
     public final String generatedRunnerName;
     public final int maxFootprintMB;
-    public final int strideSize;
+    public int strideSize;
     public int strideCount;
     public boolean localAffinity;
     public int[] localAffinityMap;
@@ -98,15 +98,17 @@ public class ForkedTestConfig {
             // success!
             succCount = count;
 
-            // do not go over the max stride count
-            if (succCount >= strideCount) {
-                return;
+            // do not go over the the limit
+            if (succCount >= strideSize * strideCount) {
+                succCount = strideSize * strideCount;
+                break;
             }
 
             count *= 2;
         }
 
-        strideCount = succCount;
+        strideSize = Math.min(succCount, strideSize);
+        strideCount = succCount / strideSize;
     }
 
     private boolean tryWith(FootprintEstimator estimator, int count) {
