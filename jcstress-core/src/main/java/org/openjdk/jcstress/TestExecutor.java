@@ -344,19 +344,34 @@ public class TestExecutor {
             for (int a = 0; a < task.threads; a++) {
                 String an = task.actorNames.get(a);
 
-                // If this actor runs in interpreted mode, then actor method should not be compiled.
-                // Allow run loop to be compiled with the best compiler available.
+                pw.println("  {");
+                pw.println("    match: \"" + task.binaryName + "::" + an + "\",");
+
+                // Make sure actor is compiled with the target mode. Note that normally
+                // we would wait for run loop to inline the actor, but we don't want
+                // the actor thread to escape the compilation mode before that happens.
+                // In intepreted mode, the inlining would not happen, so we definitely
+                // need to forbid the compilation here.
                 if (CompileMode.isInt(cm, a)) {
-                    pw.println("  {");
-                    pw.println("    match: \"" + task.binaryName + "::" + an + "\",");
+                    // Should be interpreter? Forbid compilation completely.
                     pw.println("    c1: {");
                     pw.println("      Exclude: true,");
                     pw.println("    },");
                     pw.println("    c2: {");
                     pw.println("      Exclude: true,");
                     pw.println("    },");
-                    pw.println("  },");
+                } else if (CompileMode.isC2(cm, a)) {
+                    // Should be compiled with C2? Forbid C1 compilation then.
+                    pw.println("    c1: {");
+                    pw.println("      Exclude: true,");
+                    pw.println("    },");
+                } else if (CompileMode.isC1(cm, a)) {
+                    // Should be compiled with C1? Forbid C2 compilation then.
+                    pw.println("    c2: {");
+                    pw.println("      Exclude: true,");
+                    pw.println("    },");
                 }
+                pw.println("  },");
             }
             pw.println("]");
             pw.flush();
