@@ -27,14 +27,10 @@ package org.openjdk.jcstress.samples.jmm.advanced;
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.I_Result;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.openjdk.jcstress.annotations.Expect.*;
 
-@JCStressTest
-@State
-@Outcome(id = "10",                      expect = ACCEPTABLE,             desc = "Boring")
-@Outcome(id = {"0", "1"},                expect = FORBIDDEN,              desc = "Boring")
-@Outcome(id = {"9", "8", "7", "6", "5"}, expect = ACCEPTABLE,             desc = "Okay")
-@Outcome(                                expect = ACCEPTABLE_INTERESTING, desc = "Whoa")
 public class AdvancedJMM_03_LosingUpdates {
 
      /*
@@ -65,7 +61,7 @@ public class AdvancedJMM_03_LosingUpdates {
                8  2,847,721,682   16.57%   Acceptable  Okay
                9  2,533,299,886   14.74%   Acceptable  Okay
 
-        The most interesting result, "2" can be explaned by this interleaving:
+        The most interesting result, "2" can be explained by this interleaving:
             Thread 1: (0 ------ stalled -------> 1)     (1->2)(2->3)(3->4)(4->5)
             Thread 2:   (0->1)(1->2)(2->3)(3->4)    (1 -------- stalled ---------> 2)
 
@@ -75,24 +71,69 @@ public class AdvancedJMM_03_LosingUpdates {
         Exercise for the reader: prove that both "0" and "1" are impossible results.
      */
 
-    volatile int x;
+    @JCStressTest
+    @State
+    @Outcome(id = "10",                      expect = ACCEPTABLE,             desc = "Boring")
+    @Outcome(id = {"0", "1"},                expect = FORBIDDEN,              desc = "Boring")
+    @Outcome(id = {"9", "8", "7", "6", "5"}, expect = ACCEPTABLE,             desc = "Okay")
+    @Outcome(                                expect = ACCEPTABLE_INTERESTING, desc = "Whoa")
+    public static class Volatiles {
+        volatile int x;
 
-    @Actor
-    void actor1() {
-        for (int i = 0; i < 5; i++) {
-            x++;
+        @Actor
+        void actor1() {
+            for (int i = 0; i < 5; i++) {
+                x++;
+            }
+        }
+
+        @Actor
+        void actor2() {
+            for (int i = 0; i < 5; i++) {
+                x++;
+            }
+        }
+
+        @Arbiter
+        public void arbiter(I_Result r) {
+            r.r1 = x;
         }
     }
 
-    @Actor
-    void actor2() {
-        for (int i = 0; i < 5; i++) {
-            x++;
+    /*
+      ----------------------------------------------------------------------------------------------------------
+
+        Of course, if we do AtomicInteger, the only plausible result is "10".
+
+          RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
+              10  638,040,064  100.00%  Acceptable  Boring
+     */
+
+    @JCStressTest
+    @State
+    @Outcome(id = "10", expect = ACCEPTABLE, desc = "Boring")
+    @Outcome(           expect = FORBIDDEN,  desc = "Whoa")
+    public static class Atomics {
+        AtomicInteger ai = new AtomicInteger();
+
+        @Actor
+        void actor1() {
+            for (int i = 0; i < 5; i++) {
+                ai.incrementAndGet();
+            }
+        }
+
+        @Actor
+        void actor2() {
+            for (int i = 0; i < 5; i++) {
+                ai.incrementAndGet();
+            }
+        }
+
+        @Arbiter
+        public void arbiter(I_Result r) {
+            r.r1 = ai.get();
         }
     }
 
-    @Arbiter
-    public void arbiter(I_Result r) {
-        r.r1 = x;
-    }
 }

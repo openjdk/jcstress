@@ -33,11 +33,11 @@ import org.openjdk.jcstress.infra.results.II_Result;
 import static org.openjdk.jcstress.annotations.Expect.*;
 import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
-public class AdvancedJMM_11_SynchronizedAreNotFences {
+public class AdvancedJMM_12_SynchronizedAreNotFences {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_11_SynchronizedAreNotFences
+            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_12_SynchronizedAreNotFences
      */
 
     /*

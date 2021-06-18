@@ -37,9 +37,8 @@ import static org.openjdk.jcstress.annotations.Expect.*;
 
 @JCStressTest
 @State
-@Outcome(id = {"-1", "42"}, expect = ACCEPTABLE,             desc = "Boring")
-@Outcome(id = "0",          expect = ACCEPTABLE_INTERESTING, desc = "Whoa")
-@Outcome(id = {"-2", "-3"}, expect = ACCEPTABLE_INTERESTING, desc = "Whoa-whoa")
+@Outcome(id = {"-1", "42"},       expect = ACCEPTABLE,             desc = "Boring")
+@Outcome(id = {"-2", "-3", "-4"}, expect = ACCEPTABLE_INTERESTING, desc = "Whoa-whoa")
 public class AdvancedJMM_08_WrongListReleaseOrder {
 
     /*
@@ -55,22 +54,34 @@ public class AdvancedJMM_08_WrongListReleaseOrder {
         and stores/releases the initial list before doing the write. Even though the list is "volatile", the
         addition happens late, and the proper "publication" does not help.
 
-        This test on x86_64:
+        x86_64:
+          RESULT        SAMPLES     FREQ       EXPECT  DESCRIPTION
+              -1  9,508,599,695   81.61%   Acceptable  Boring
+              -2     28,299,861    0.24%  Interesting  Whoa-whoa
+              -3              0    0.00%  Interesting  Whoa-whoa
+              -4          7,308   <0.01%  Interesting  Whoa-whoa
+              42  2,114,748,816   18.15%   Acceptable  Boring
+
+        AArch64:
           RESULT      SAMPLES     FREQ       EXPECT  DESCRIPTION
-              -1            0    0.00%   Acceptable  Boring
-              -2            1   <0.01%  Interesting  Whoa-whoa
-               0  256,502,626   56.64%  Interesting  Whoa
-              42  196,385,437   43.36%   Acceptable  Boring
+              -1  519,561,253   82.38%   Acceptable  Boring
+              -2    1,241,751    0.20%  Interesting  Whoa-whoa
+              -3        1,902   <0.01%  Interesting  Whoa-whoa
+              -4            9   <0.01%  Interesting  Whoa-whoa
+              42  109,901,261   17.43%   Acceptable  Boring
 
-        The "0" outcome is very visible for obvious reasons, it is explainable by sequential execution.
+        The "-1" outcome is very visible for obvious reasons, it is explainable by sequential execution.
 
-        There is also a very interesting "-1" outcome, which shows that mutating collections under
+        The "-2" and "-3" outcomes are possible due to simple visibility failures: the store
+        to backing array is not yet visible.
+
+        There is also a very interesting "-4" outcome, which shows that mutating collections under
         races is not a good idea. Even though isEmpty() returned "false" and we proceeded to "get",
         the internal checks in "get" read the sizes again and discovered the list is not yet initialized
         (coherence failure).
      */
 
-    volatile List<Integer> list = new ArrayList<>();
+    volatile List<Integer> list;
 
     @Actor
     public void actor1() {
@@ -81,23 +92,25 @@ public class AdvancedJMM_08_WrongListReleaseOrder {
     @Actor
     public void actor2(I_Result r) {
         List<Integer> l = list;
-        if (l != null) {
-            if (l.isEmpty()) {
-                r.r1 = 0;
-            } else {
-                try {
-                    Integer li = l.get(0);
-                    if (li != null) {
-                        r.r1 = li;
-                    } else {
-                        r.r1 = -2;
-                    }
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    r.r1 = -3;
-                }
-            }
-        } else {
+        if (l == null) {
             r.r1 = -1;
+            return;
+        }
+
+        if (l.isEmpty()) {
+            r.r1 = -2;
+            return;
+        }
+
+        try {
+            Integer li = l.get(0);
+            if (li == null) {
+                r.r1 = -3;
+                return;
+            }
+            r.r1 = li;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            r.r1 = -4;
         }
     }
 }

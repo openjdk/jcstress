@@ -34,10 +34,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.openjdk.jcstress.annotations.Expect.*;
 
-public class AdvancedJMM_13_VolatileVsFinal {
+public class AdvancedJMM_11_VolatileVsFinal {
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_13_VolatileVsFinal[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_11_VolatileVsFinal[.SubTestName]
      */
 
     /*
@@ -46,7 +46,7 @@ public class AdvancedJMM_13_VolatileVsFinal {
         Perhaps, one of the most surprising JMM behaviors is that volatile fields do not include
         the final field semantics. That is, if we publish the reference to the object racily,
         then we can see the default value for the "volatile" field! This is mostly because the
-        volatile itself is in the wrong place. This is similar to AdvancedJMM_10_WrongAcquireReleaseOrder
+        volatile itself is in the wrong place. This is similar to previous AdvancedJMM_10_WrongAcquireReleaseOrder
         example.
 
         It can be seen on some platforms with this synthetic test.

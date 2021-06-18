@@ -72,9 +72,9 @@ public class AdvancedJMM_01_SynchronizedBarriers {
                 1, 1    278,646,578    6.79%   Acceptable  Boring
 
          Technically, this is due to "lock coarsening" that merged the synchronized blocks, and then was able
-         to order the writes to "x" and "y" differently. JMM as stated allows
-         this optimization: we are only required to see these stores in order if we are
-         synchronizing on the same "this". Side observers can see the writes in whatever order.
+         to order the writes to "x" and "y" differently. JMM as stated allows this optimization: we are only
+         required to see these stores in order if we are synchronizing on the same "this". Side observers can
+         see the writes in whatever order.
     */
 
     static final VarHandle VH_X, VH_Y;

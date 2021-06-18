@@ -45,13 +45,12 @@ public class BasicJMM_07_Consensus {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        Another property comes for the inter-thread semantics deals not with
-        partial, but total order. In JMM, synchronization order mandates that
-        special "synchronization" actions always form a total order, consistent
-        with program order.
+        Another property comes for the inter-thread semantics deals not with partial, but total order.
+        In JMM, synchronization order mandates that special "synchronization" actions always form a total
+        order, consistent with program order.
 
-        The most famous example that needs total order of operation is Dekker
-        idiom, the building block of Dekker lock.
+        The most famous example that needs total order of operation is Dekker idiom, the building block
+        of Dekker lock.
 
         x86_64:
           RESULT        SAMPLES     FREQ       EXPECT  DESCRIPTION
@@ -85,9 +84,8 @@ public class BasicJMM_07_Consensus {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        Adding volatile to both $x and $y bring them together into synchronization order,
-        and thus require the results to be consistent with the case when reads/writes
-        form a total order.
+        Adding volatile to both $x and $y bring them together into synchronization order, and thus require
+        the results to be consistent with the case when reads/writes form a total order.
 
           RESULT        SAMPLES     FREQ      EXPECT  DESCRIPTION
             0, 0              0    0.00%   Forbidden  Violates sequential consistency
