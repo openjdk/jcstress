@@ -37,7 +37,7 @@ import static org.openjdk.jcstress.annotations.Expect.*;
     finished.
 
     How to run this test:
-       $ java -jar jcstress-samples/target/jcstress.jar -t APISample_02_Arbiters
+       $ java -jar jcstress-samples/target/jcstress.jar -t API_02_Arbiters
 
         ...
 

@@ -39,13 +39,13 @@ import static org.openjdk.jcstress.annotations.Expect.*;
     record "STALE".
 
     How to run this test:
-       $ java -jar jcstress-samples/target/jcstress.jar -t APISample_03
+       $ java -jar jcstress-samples/target/jcstress.jar -t API_03_Termination
 
         ...
 
           RESULT  SAMPLES     FREQ       EXPECT  DESCRIPTION
-           STALE        4   30.77%  Interesting  Test hung up.
-      TERMINATED        9   69.23%   Acceptable  Gracefully finished.
+           STALE        1   <0.01%  Interesting  Test hung up.
+      TERMINATED   13,168   99.99%   Acceptable  Gracefully finished.
 
       Messages:
         Have stale threads, forcing VM to exit for proper cleanup.

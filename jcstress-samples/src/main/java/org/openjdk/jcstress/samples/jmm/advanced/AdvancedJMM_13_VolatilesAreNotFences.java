@@ -34,17 +34,17 @@ import org.openjdk.jcstress.infra.results.II_Result;
 import static org.openjdk.jcstress.annotations.Expect.*;
 import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
-public class AdvancedJMM_12_VolatilesAreNotFences {
+public class AdvancedJMM_13_VolatilesAreNotFences {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_12_VolatilesAreNotFences[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_13_VolatilesAreNotFences[.SubTestName]
      */
 
     /*
        ----------------------------------------------------------------------------------------------------------
 
-        Similarly to AdvancedJMM_11_SynchronizedAreNotFences example, the volatile accesses cannot be reliably
+        Similarly to AdvancedJMM_12_SynchronizedAreNotFences example, the volatile accesses cannot be reliably
         used for their auxiliary memory effects. In this example, if we do not observe the write of the "b", then
         we can see the old "x", even though volatile accesses _might_ be implemented with barriers.
 

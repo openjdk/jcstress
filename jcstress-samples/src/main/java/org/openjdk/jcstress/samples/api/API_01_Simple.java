@@ -43,10 +43,14 @@ import static org.openjdk.jcstress.annotations.Expect.*;
     and instance, and record what results are coming from there.
 
     Done enough times, we will get the history of observed results, and that
-    would tell us something about the concurrent behavior. For example, running
-    this test would yield:
+    would tell us something about the concurrent behavior.
 
-        .......... [OK] org.openjdk.jcstress.samples.api.APISample_01_Simple
+    How to run this test:
+       $ java -jar jcstress-samples/target/jcstress.jar -t API_01_Simple
+
+       ...
+
+        .......... [OK] org.openjdk.jcstress.samples.api.API_01_Simple
 
           Scheduling class:
             actor1: package group 0, core group 0
@@ -66,9 +70,6 @@ import static org.openjdk.jcstress.annotations.Expect.*;
             1, 1   46,946,789   10.1%  Interesting  Both actors came up with the same value: atomicity failure.
             1, 2  110,240,149   23.8%   Acceptable  actor1 incremented, then actor2.
             2, 1  306,529,420   66.1%   Acceptable  actor2 incremented, then actor1.
-
-     How to run this test:
-       $ java -jar jcstress-samples/target/jcstress.jar -t APISample_01
  */
 
 // Mark the class as JCStress test.

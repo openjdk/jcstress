@@ -148,8 +148,7 @@ public class BasicJMM_06_Causality {
          read. Note this effect is only guaranteed if the acquiring read sees the value written by releasing
          write.
 
-         Indeed, in all configurations, we shall see zero samples for the now forbidden
-         test case.
+         Indeed, in all configurations, we shall see zero samples for the now forbidden test case.
 
          AArch64:
             RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
