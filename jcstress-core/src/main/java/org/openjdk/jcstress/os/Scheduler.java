@@ -161,7 +161,7 @@ public class Scheduler {
         }
 
         // Roll over the sibling threads and allow them too for system uses
-        int[] system = new int[scl.numCores()*topology.threadsPerCore()];
+        int[] system = new int[topology.totalThreads()];
         int systemCnt = 0;
         for (int core : coreGroupToCore) {
             for (int thread : topology.coreThreads(core)) {
@@ -221,7 +221,7 @@ public class Scheduler {
         }
 
         // Take all affected cores as system assignment
-        int[] system = new int[scl.numActors()*topology.threadsPerCore()];
+        int[] system = new int[topology.totalThreads()];
         int systemCnt = 0;
 
         for (int core : actorToCore) {

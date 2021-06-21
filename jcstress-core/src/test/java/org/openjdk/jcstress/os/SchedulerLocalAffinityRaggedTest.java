@@ -22,21 +22,46 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.os.topology;
+package org.openjdk.jcstress.os;
 
-import org.openjdk.jcstress.vm.VMSupport;
+import org.junit.Test;
+import org.openjdk.jcstress.os.topology.PresetListTopology;
+import org.openjdk.jcstress.os.topology.TopologyParseException;
 
-import java.io.PrintStream;
+@Execution(CONCURRENT)
+public class SchedulerLocalAffinityRaggedTest extends AbstractSchedulerAffinityTest {
 
-public class FallbackTopology extends PresetRegularTopology {
+    @Test
+    public void test_unevenCores() throws TopologyParseException {
+        PresetListTopology topo = new PresetListTopology();
+        topo.add(0, 0, 0);
+        topo.add(0, 1, 1);
+        topo.add(0, 1, 2);
+        topo.add(0, 1, 3);
+        topo.finish();
 
-    public FallbackTopology() throws TopologyParseException {
-        super(1, VMSupport.figureOutHotCPUs(), 1);
+        int maxThreads = topo.totalThreads();
+        Scheduler s = new Scheduler(topo, maxThreads);
+        s.enableDebug();
+
+        runLocal(topo, s, maxThreads);
     }
 
-    public void printStatus(PrintStream pw) {
-        pw.println("  Fallback topology, assuming reasonable defaults");
-        super.printStatus(pw);
+    @Test
+    public void test_unevenPackages() throws TopologyParseException {
+        PresetListTopology topo = new PresetListTopology();
+        topo.add(0, 0, 0);
+        topo.add(0, 1, 1);
+        topo.add(1, 2, 2);
+        topo.add(1, 3, 3);
+        topo.add(1, 4, 4);
+        topo.finish();
+
+        int maxThreads = topo.totalThreads();
+        Scheduler s = new Scheduler(topo, maxThreads);
+        s.enableDebug();
+
+        runLocal(topo, s, maxThreads);
     }
 
 }

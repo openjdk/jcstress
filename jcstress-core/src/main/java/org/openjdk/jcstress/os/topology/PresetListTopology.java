@@ -24,19 +24,14 @@
  */
 package org.openjdk.jcstress.os.topology;
 
-import org.openjdk.jcstress.vm.VMSupport;
+public class PresetListTopology extends AbstractTopology {
 
-import java.io.PrintStream;
-
-public class FallbackTopology extends PresetRegularTopology {
-
-    public FallbackTopology() throws TopologyParseException {
-        super(1, VMSupport.figureOutHotCPUs(), 1);
+    public void add(int packageId, int coreId, int threadId) throws TopologyParseException {
+        super.add(packageId, coreId, threadId);
     }
 
-    public void printStatus(PrintStream pw) {
-        pw.println("  Fallback topology, assuming reasonable defaults");
-        super.printStatus(pw);
+    public void finish() throws TopologyParseException {
+        super.finish();
     }
 
 }
