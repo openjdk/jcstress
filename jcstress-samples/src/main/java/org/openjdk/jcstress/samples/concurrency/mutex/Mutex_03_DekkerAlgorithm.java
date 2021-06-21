@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples.algorithm;
+package org.openjdk.jcstress.samples.concurrency.mutex;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
@@ -32,57 +32,69 @@ import org.openjdk.jcstress.infra.results.II_Result;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 
-public class Algorithm_02_PetersonAlgorithm {
+public class Mutex_03_DekkerAlgorithm {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t Algorithm_02_PetersonAlgorithm
+            $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_03_DekkerAlgorithm
      */
 
     /**
-     * Implemented according to https://en.wikipedia.org/wiki/Peterson%27s_algorithm
+     * Implemented according to https://en.wikipedia.org/wiki/Dekker%27s_algorithm
      */
     @JCStressTest
     @Outcome(id = {"1, 1"}, expect = ACCEPTABLE, desc = "Both actors could enter the critical section")
     @Outcome(id = {"1, 2", "2, 1", "2, 2"}, expect = FORBIDDEN, desc = "At least one actor couldn't enter the critical section")
-    @Outcome(id = {"0, 0", "0, 1", "1, 0", "0, 2", "2, 0"}, expect = FORBIDDEN, desc = "At least one actor hang up in the loop")
+    @Outcome(id = {"0, 0", "0, 1", "1, 0", "0, 2", "2, 0"}, expect = FORBIDDEN, desc = "At least one actor hang up in one of the loops")
     @State
-    public static class PetersonAlgorithm {
-        private final AtomicReferenceArray<Boolean> flags = new AtomicReferenceArray<>(new Boolean[]{false, false});
-        private final AtomicInteger turn = new AtomicInteger();
+    public static class DekkerAlgorithm {
+        private final AtomicBoolean actor1wantsToEnter = new AtomicBoolean();
+        private final AtomicBoolean actor2wantsToEnter = new AtomicBoolean();
+        private final AtomicInteger turn = new AtomicInteger(0);
         private final AtomicBoolean isInCriticalSection = new AtomicBoolean();
 
         @Actor
         public void actor1(II_Result r) {
-            flags.set(0, true);
-            turn.set(2);
-            while (flags.get(1) && turn.get() == 2) ;
+            actor1wantsToEnter.set(true);
+            while (actor2wantsToEnter.get()) {
+                if (turn.get() != 0) {
+                    actor1wantsToEnter.set(false);
+                    while (turn.get() != 0) ;
+                    actor1wantsToEnter.set(true);
+                }
+            }
             if (isInCriticalSection.compareAndSet(false, true)) {
                 r.r1 = 1;
                 isInCriticalSection.set(false);
             } else {
                 r.r1 = 2;
             }
-            flags.set(0, false);
+            turn.set(1);
+            actor1wantsToEnter.set(false);
         }
 
         @Actor
         public void actor2(II_Result r) {
-            flags.set(1, true);
-            turn.set(1);
-            while (flags.get(0) && turn.get() == 1) ;
+            actor2wantsToEnter.set(true);
+            while (actor1wantsToEnter.get()) {
+                if (turn.get() != 1) {
+                    actor2wantsToEnter.set(false);
+                    while (turn.get() != 1) ;
+                    actor2wantsToEnter.set(true);
+                }
+            }
             if (isInCriticalSection.compareAndSet(false, true)) {
                 r.r2 = 1;
                 isInCriticalSection.set(false);
             } else {
                 r.r2 = 2;
             }
-            flags.set(1, false);
+            turn.set(0);
+            actor2wantsToEnter.set(false);
         }
     }
 }
