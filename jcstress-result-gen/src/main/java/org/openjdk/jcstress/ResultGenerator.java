@@ -43,7 +43,7 @@ public class ResultGenerator {
     public String generateResult(Class<?>... args) {
         boolean allPrimitive = true;
         String name = "";
-        for (Class k : args) {
+        for (Class<?> k : args) {
             if (k.isPrimitive()) {
                 if (k == boolean.class) name += "Z";
                 if (k == byte.class)    name += "B";
@@ -88,7 +88,7 @@ public class ResultGenerator {
 
         {
             int n = 1;
-            for (Class k : args) {
+            for (Class<?> k : args) {
                 pw.println("    @sun.misc.Contended");
                 pw.println("    @jdk.internal.vm.annotation.Contended");
                 pw.println("    public " + k.getSimpleName() + " r" + n + ";");
@@ -108,7 +108,7 @@ public class ResultGenerator {
         pw.println("        return ");
         {
             int n = 1;
-            for (Class k : args) {
+            for (Class<?> k : args) {
                 pw.print("        ");
                 if (n != 1) {
                     pw.print(" + ");
@@ -147,7 +147,7 @@ public class ResultGenerator {
 
         {
             int n = 1;
-            for (Class k : args) {
+            for (Class<?> k : args) {
                 if (k == boolean.class || k == byte.class || k == short.class || k == char.class
                         || k == int.class || k == long.class) {
                     pw.println("        if (r" + n + " != that.r" + n + ") return false;");
@@ -170,7 +170,7 @@ public class ResultGenerator {
         pw.print("        return \"\" + ");
         {
             int n = 1;
-            for (Class k : args) {
+            for (Class<?> k : args) {
                 if (n != 1)
                     pw.print(" + \", \" + ");
                 pw.print("r" + n);

@@ -28,7 +28,7 @@ public class ResultUtils {
 
     public static String resultName(Class<?>... args) {
         String name = "";
-        for (Class k : args) {
+        for (Class<?> k : args) {
             if (k.isPrimitive()) {
                 if (k == boolean.class) name += "Z";
                 if (k == byte.class)    name += "B";
