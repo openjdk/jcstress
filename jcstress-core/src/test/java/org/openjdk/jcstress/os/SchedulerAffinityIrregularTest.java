@@ -25,20 +25,33 @@
 package org.openjdk.jcstress.os;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.openjdk.jcstress.os.topology.PresetListTopology;
 import org.openjdk.jcstress.os.topology.TopologyParseException;
 
-@Execution(CONCURRENT)
-public class SchedulerLocalAffinityRaggedTest extends AbstractSchedulerAffinityTest {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+@RunWith(Parameterized.class)
+public class SchedulerAffinityIrregularTest extends AbstractSchedulerAffinityTest {
+
+    @Parameterized.Parameters(name = "n={0}")
+    public static Iterable<Object[]> data() {
+        List<Object[]> r = new ArrayList<>();
+        for (int n = 0; n < 2048; n++) {
+            r.add(new Object[] { n });
+        }
+        return r;
+    }
+
+    @Parameterized.Parameter(0)
+    public int n;
 
     @Test
-    public void test_unevenCores() throws TopologyParseException {
-        PresetListTopology topo = new PresetListTopology();
-        topo.add(0, 0, 0);
-        topo.add(0, 1, 1);
-        topo.add(0, 1, 2);
-        topo.add(0, 1, 3);
-        topo.finish();
+    public void test_Local() throws TopologyParseException {
+        PresetListTopology topo = generate();
 
         int maxThreads = topo.totalThreads();
         Scheduler s = new Scheduler(topo, maxThreads);
@@ -48,20 +61,47 @@ public class SchedulerLocalAffinityRaggedTest extends AbstractSchedulerAffinityT
     }
 
     @Test
-    public void test_unevenPackages() throws TopologyParseException {
-        PresetListTopology topo = new PresetListTopology();
-        topo.add(0, 0, 0);
-        topo.add(0, 1, 1);
-        topo.add(1, 2, 2);
-        topo.add(1, 3, 3);
-        topo.add(1, 4, 4);
-        topo.finish();
+    public void test_Global() throws TopologyParseException {
+        PresetListTopology topo = generate();
 
         int maxThreads = topo.totalThreads();
         Scheduler s = new Scheduler(topo, maxThreads);
         s.enableDebug();
 
-        runLocal(topo, s, maxThreads);
+        runGlobal(s, maxThreads);
     }
 
+    @Test
+    public void test_None() throws TopologyParseException {
+        PresetListTopology topo = generate();
+
+        int maxThreads = topo.totalThreads();
+        Scheduler s = new Scheduler(topo, maxThreads);
+        s.enableDebug();
+
+        runNone(topo, s, maxThreads);
+    }
+
+    private PresetListTopology generate() throws TopologyParseException {
+        Random r = new Random(n);
+
+        PresetListTopology topo = new PresetListTopology();
+
+        int pId = 0;
+        int cId = 0;
+        int tId = 0;
+        for (int c = 0; c < 10; c++) {
+            topo.add(pId, cId, tId);
+
+            tId++;
+            if (r.nextInt(10) > 8) {
+                cId++;
+            } else if (r.nextInt(10) > 8) {
+                pId++;
+                cId++;
+            }
+        }
+        topo.finish();
+        return topo;
+    }
 }
