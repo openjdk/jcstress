@@ -400,12 +400,13 @@ public class HTMLReportPrinter {
             Expect expect = null;
 
             for (TestResult r : sorted) {
-                for (GradingResult c : r.grading().gradingResults) {
-                    if (c.id.equals(key)) {
-                        o.println("<td align='right' width='" + 30D/configs + "%' bgColor=" + selectHTMLColor(c.expect, c.count == 0) + ">" + c.count + "</td>");
-                        description = c.description;
-                        expect = c.expect;
-                    }
+                GradingResult c = r.grading().gradingResults.get(key);
+                if (c != null) {
+                    o.println("<td align='right' width='" + 30D/configs + "%' bgColor=" + selectHTMLColor(c.expect, c.count == 0) + ">" + c.count + "</td>");
+                    description = c.description;
+                    expect = c.expect;
+                } else {
+                    o.println("<td align='right' width='" + 30D/configs + "%' bgColor=" + selectHTMLColor(Expect.ACCEPTABLE, true) + ">0</td>");
                 }
             }
 

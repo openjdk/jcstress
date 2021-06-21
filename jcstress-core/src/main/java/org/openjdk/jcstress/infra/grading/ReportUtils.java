@@ -166,7 +166,7 @@ public class ReportUtils {
 
             TestGrading grade = r.grading();
             long totalSamples = 0;
-            for (GradingResult gradeRes : grade.gradingResults) {
+            for (GradingResult gradeRes : grade.gradingResults.values()) {
                 totalSamples += gradeRes.count;
             }
 
@@ -174,7 +174,7 @@ public class ReportUtils {
                 totalSamples = 1;
             }
 
-            for (GradingResult gradeRes : grade.gradingResults) {
+            for (GradingResult gradeRes : grade.gradingResults.values()) {
                 pw.printf("%" + idLen + "s%," + samplesLen + "d%" + freqLen + "s%" + expectLen + "s  %s%n",
                         StringUtils.cutoff(gradeRes.id, idLen),
                         gradeRes.count,
