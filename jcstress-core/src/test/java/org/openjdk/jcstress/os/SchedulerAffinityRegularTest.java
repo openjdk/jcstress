@@ -24,19 +24,17 @@
  */
 package org.openjdk.jcstress.os;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openjdk.jcstress.os.topology.PresetTopology;
+import org.openjdk.jcstress.os.topology.PresetRegularTopology;
 import org.openjdk.jcstress.os.topology.Topology;
 import org.openjdk.jcstress.os.topology.TopologyParseException;
 
 import java.util.*;
-import java.util.concurrent.LinkedBlockingQueue;
 
 @RunWith(Parameterized.class)
-public class SchedulerGlobalAffinityTest {
+public class SchedulerAffinityRegularTest extends AbstractSchedulerAffinityTest {
 
     @Parameterized.Parameters(name = "p={0} c={1} t={2} limited={3}")
     public static Iterable<Object[]> data() {
@@ -65,42 +63,33 @@ public class SchedulerGlobalAffinityTest {
     public boolean limited;
 
     @Test
-    public void test() throws TopologyParseException {
-        Topology topo = new PresetTopology(p, c, t);
-        int maxThreads = limited ? Math.min(4, topo.totalCores()) : topo.totalCores();
+    public void test_Local() throws TopologyParseException {
+        Topology topo = new PresetRegularTopology(p, c, t);
+        int maxThreads = limited ? Math.min(4, topo.totalThreads()) : topo.totalThreads();
         Scheduler s = new Scheduler(topo, maxThreads);
         s.enableDebug();
 
-        Queue<CPUMap> takenMaps = new LinkedBlockingQueue<>();
-
-        List<SchedulingClass> cases = new ArrayList<>();
-        for (int a = 1; a <= 4; a++) {
-            List<SchedulingClass> skel = s.globalAffinityFor(a, maxThreads);
-            for (int c = 0; c < 1000; c++) {
-                cases.addAll(skel);
-            }
-        }
-
-        Collections.shuffle(cases, new Random(12345));
-
-        for (SchedulingClass scl : cases) {
-            CPUMap cpuMap = s.tryAcquire(scl);
-            while (cpuMap == null) {
-                CPUMap old = takenMaps.poll();
-                Assert.assertNotNull("Cannot schedule on empty system", old);
-                s.release(old);
-                cpuMap = s.tryAcquire(scl);
-            }
-
-            takenMaps.offer(cpuMap);
-
-            Assert.assertEquals(scl.numActors(), cpuMap.actorMap().length);
-            for (int c : cpuMap.actorMap()) {
-                Assert.assertEquals(-1, c);
-            }
-            Assert.assertNotEquals(0, cpuMap.systemMap().length);
-        }
+        runLocal(topo, s, maxThreads);
     }
 
+    @Test
+    public void test_Global() throws TopologyParseException {
+        Topology topo = new PresetRegularTopology(p, c, t);
+        int maxThreads = limited ? Math.min(4, topo.totalThreads()) : topo.totalThreads();
+        Scheduler s = new Scheduler(topo, maxThreads);
+        s.enableDebug();
+
+        runGlobal(s, maxThreads);
+    }
+
+    @Test
+    public void test_None() throws TopologyParseException {
+        Topology topo = new PresetRegularTopology(p, c, t);
+        int maxThreads = limited ? Math.min(4, topo.totalThreads()) : topo.totalThreads();
+        Scheduler s = new Scheduler(topo, maxThreads);
+        s.enableDebug();
+
+        runNone(topo, s, maxThreads);
+    }
 
 }

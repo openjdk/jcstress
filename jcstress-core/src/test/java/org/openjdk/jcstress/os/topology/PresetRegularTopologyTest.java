@@ -29,13 +29,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.PrintStream;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(Parameterized.class)
-public class PresetTopologyTest extends AbstractTopologyTest {
+public class PresetRegularTopologyTest extends AbstractTopologyTest {
 
     @Parameterized.Parameters(name = "p={0} c={1} t={2}")
     public static Iterable<Object[]> data() {
@@ -61,7 +59,7 @@ public class PresetTopologyTest extends AbstractTopologyTest {
 
     @Test
     public void test() throws TopologyParseException {
-        Topology topo = new PresetTopology(p, c, t);
+        Topology topo = new PresetRegularTopology(p, c, t);
 
         Assert.assertEquals(p, topo.packagesPerSystem());
         Assert.assertEquals(c, topo.coresPerPackage());
