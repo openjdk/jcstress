@@ -76,7 +76,7 @@ public class VMSupport {
     }
 
     public static void initFlags(Options opts) {
-        System.out.println("Initializing and probing the target VM: ");
+        System.out.println("Initializing and probing the target VM:");
         System.out.println(" (all failures are non-fatal, but may affect testing accuracy)");
         System.out.println();
 
