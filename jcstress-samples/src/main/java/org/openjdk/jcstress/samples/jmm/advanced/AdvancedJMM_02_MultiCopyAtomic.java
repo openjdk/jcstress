@@ -59,7 +59,7 @@ public class AdvancedJMM_02_MultiCopyAtomic {
         IRIW detects whether the independent writes to "x" and "y" are seen in different orders by two
         other workers.
 
-        On x86_64 -- that is multi-copy atomic architecture -- this test yields:
+        On x86_64 -- that is total store order and multi-copy atomic architecture -- this test yields:
 
               RESULT         SAMPLES     FREQ       EXPECT  DESCRIPTION
           0, 0, 0, 0   1,018,009,462    3.39%   Acceptable  Boring
@@ -79,7 +79,8 @@ public class AdvancedJMM_02_MultiCopyAtomic {
           1, 1, 1, 0   1,248,633,288    4.15%   Acceptable  Boring
           1, 1, 1, 1  16,117,960,946   53.63%   Acceptable  Boring
 
-        But on PPC64 -- that is not a multi-copy atomic architecture -- this test yields:
+        But on PPC64 or ARM64 -- that are not the total store order architectures
+        -- this test yields:
 
               RESULT        SAMPLES     FREQ       EXPECT  DESCRIPTION
           0, 0, 0, 0     37,176,296    0.64%   Acceptable  Boring

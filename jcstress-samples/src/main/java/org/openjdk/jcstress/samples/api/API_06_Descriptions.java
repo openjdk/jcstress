@@ -35,7 +35,7 @@ import static org.openjdk.jcstress.annotations.Expect.*;
     the behavior in question.
 
     How to run this test:
-       $ java -jar jcstress-samples/target/jcstress.jar -t APISample_06
+       $ java -jar jcstress-samples/target/jcstress.jar -t API_06_Descriptions
  */
 
 @JCStressTest

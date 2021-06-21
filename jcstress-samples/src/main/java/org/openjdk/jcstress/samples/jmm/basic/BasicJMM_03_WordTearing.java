@@ -43,15 +43,13 @@ public class BasicJMM_03_WordTearing {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        Java Memory Model prohibits word tearing. That is, it requires that
-        every field and array element as distinct, and the operations for one
-        element should not disturb others.
+        Java Memory Model prohibits word tearing. That is, it requires that every field and array element
+        as distinct, and the operations for one element should not disturb others.
 
-        Note this is a bit different from access atomicity. Access atomicity says
-        that the accesses to a _wide_ logical field should be atomic, even if it
-        requires several _narrower_ physical accesses. Prohibited word tearing
-        means the accesses to a _narrow_ logical field should not disturb the
-        adjacent fields, even if done with a _wider_ physical access.
+        Note this is a bit different from access atomicity. Access atomicity says that the accesses to
+        a _wide_ logical field should be atomic, even if it requires several _narrower_ physical accesses.
+        Prohibited word tearing means the accesses to a _narrow_ logical field should not disturb the adjacent
+        fields, even if done with a _wider_ physical access.
 
         Indeed, the test on plain boolean arrays shows this rule holds:
 
@@ -86,10 +84,9 @@ public class BasicJMM_03_WordTearing {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        However, while that requirement is enforced for fields and array elements, the
-        Java classes implementations may still violate this requirement, if, say, they
-        pack elements densely, and read/write adjacent elements routinely. The usual
-        example of this is java.util.BitSet.
+        However, while that requirement is enforced for fields and array elements, the Java classes
+        implementations may still violate this requirement, if, say, they pack elements densely, and
+        read/write adjacent elements routinely. The usual example of this is java.util.BitSet.
 
         Indeed, this is simple to reproduce:
 
@@ -139,7 +136,7 @@ public class BasicJMM_03_WordTearing {
         on platforms that do not have direct sub-word accesses, CASes should still work _as if_
         the boolean fields are distinct.
 
-        For example, this test passes on ARM32 (that does not have byte-wide CASes). The test verifies
+        For example, this test passes on ARM32, that does not have byte-wide CASes. The test verifies
         that CAS over each of the fields do not conflict, and both are able to succeed.
 
               RESULT     SAMPLES     FREQ      EXPECT  DESCRIPTION

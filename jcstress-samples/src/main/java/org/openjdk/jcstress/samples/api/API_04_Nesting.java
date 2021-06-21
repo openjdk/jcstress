@@ -37,7 +37,7 @@ import static org.openjdk.jcstress.annotations.Expect.*;
     better comparison. JCStress allows to nest tests like this:
 
     How to run this test:
-       $ java -jar jcstress-samples/target/jcstress.jar -t APISample_04
+       $ java -jar jcstress-samples/target/jcstress.jar -t API_04_Nesting
 
         ...
 
