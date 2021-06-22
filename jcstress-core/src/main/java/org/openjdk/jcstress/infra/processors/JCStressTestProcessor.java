@@ -65,7 +65,26 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        return Collections.singleton(JCStressTest.class.getName());
+        List<Class<?>> classes = Arrays.asList(
+                JCStressTest.class,
+                JCStressMeta.class,
+                State.class,
+                Result.class,
+                Actor.class,
+                Arbiter.class,
+                Signal.class,
+                Outcome.class,
+                Outcome.Outcomes.class,
+                Ref.class,
+                Ref.Refs.class,
+                Description.class
+        );
+
+        HashSet<String> set = new HashSet<>();
+        for (Class<?> cl : classes) {
+            set.add(cl.getCanonicalName());
+        }
+        return set;
     }
 
     @Override
@@ -480,7 +499,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("        }});");
         }
         pw.println();
-        pw.println("        for (CounterThread t : threads) {");
+        pw.println("        for (CounterThread<" + r + "> t : threads) {");
         pw.println("            t.start();");
         pw.println("        }");
         pw.println();

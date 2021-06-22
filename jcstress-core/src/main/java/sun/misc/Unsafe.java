@@ -246,9 +246,9 @@ public abstract class Unsafe {
 
     public abstract void putByte(java.lang.Object o, long l, byte l1);
 
-    public abstract int arrayBaseOffset(java.lang.Class aClass);
+    public abstract int arrayBaseOffset(java.lang.Class<?> aClass);
 
-    public abstract int arrayIndexScale(java.lang.Class aClass);
+    public abstract int arrayIndexScale(java.lang.Class<?> aClass);
 
     public abstract int getAndAddInt(Object o, long offset, int delta);
 

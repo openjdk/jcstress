@@ -51,7 +51,7 @@ questions.
                 <configuration>
                     <proc>none</proc>
                     <compilerArgs>
-                        <arg>-Xlint:all</arg>
+                        <arg>-Xlint:all,-options,-serial</arg>
                         <arg>-Werror</arg>
                     </compilerArgs>
                 </configuration>

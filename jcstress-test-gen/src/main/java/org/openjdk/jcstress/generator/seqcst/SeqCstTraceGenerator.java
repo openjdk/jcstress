@@ -185,10 +185,8 @@ public class SeqCstTraceGenerator {
     private void emit(MultiThread mt, Collection<TraceResult> scResults) {
         String klass = mt.canonicalId() + "_Test";
 
-        Class[] klasses = new Class[mt.loadCount() + mt.allVariables().size()];
-        for (int c = 0; c < klasses.length; c++) {
-            klasses[c] = int.class;
-        }
+        Class<?>[] klasses = new Class<?>[mt.loadCount() + mt.allVariables().size()];
+        Arrays.fill(klasses, int.class);
 
         String resultName = ResultUtils.resultName(klasses);
 

@@ -62,7 +62,7 @@ public class Main {
     }
 
     static void printVersion(PrintStream out) {
-        Class clazz = Main.class;
+        Class<?> clazz = Main.class;
         String className = clazz.getSimpleName() + ".class";
         String classPath = clazz.getResource(className).toString();
         if (!classPath.startsWith("jar")) {

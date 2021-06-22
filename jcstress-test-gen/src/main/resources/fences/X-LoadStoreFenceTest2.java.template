@@ -52,7 +52,8 @@ public class $TestClassName$ {
 
     @Actor
     public void actor2($T$$T$_Result r) {
-        r.r1 = y;
-        field = ($type$) r.r1;
+        $type$ t = y;
+        field = t;
+        r.r1 = t;
     }
 }

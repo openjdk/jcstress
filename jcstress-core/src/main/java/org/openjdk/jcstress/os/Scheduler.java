@@ -524,6 +524,7 @@ public class Scheduler {
         return Collections.singletonList(scl);
     }
 
+    @SuppressWarnings("fallthrough")
     public List<SchedulingClass> scheduleClasses(int actorThreads, int threadLimit, AffinityMode mode) {
         switch (mode) {
             case LOCAL:
