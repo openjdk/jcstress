@@ -30,8 +30,6 @@ import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.III_Result;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 
@@ -51,25 +49,25 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 @Outcome(id = {"250, 100, 100", "150, 100, 100"}, expect = FORBIDDEN, desc = "Actor2 ignored actor1's result and wrote his wrong result")
 @State
 public class RaceCondition_01_ReadModifyWriteSequence {
-    private final AtomicInteger value = new AtomicInteger(200);
+    private volatile int value = 200;
 
     @Actor
     public void actor1(III_Result r) {
-        int intValue = value.get();
-        intValue += 50;
-        value.set(intValue);
+        int newValue = value;
+        newValue += 50;
+        value = newValue;
 
-        r.r1 = intValue;
-        r.r3 = value.get();
+        r.r1 = newValue;
+        r.r3 = value;
     }
 
     @Actor
     public void actor2(III_Result r) {
-        int intValue = value.get();
-        intValue -= 100;
-        value.set(intValue);
+        int newValue = value;
+        newValue -= 100;
+        value = newValue;
 
-        r.r2 = intValue;
-        r.r3 = value.get();
+        r.r2 = newValue;
+        r.r3 = value;
     }
 }

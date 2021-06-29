@@ -29,6 +29,7 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
+import org.openjdk.jcstress.infra.results.ZZ_Result;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -45,29 +46,29 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
  */
 
 @JCStressTest
-@Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Only one actor got true for the flag in its if-clause")
-@Outcome(id = {"1, 1"}, expect = FORBIDDEN, desc = "Both actors got true for the flag in their if-clauses")
+@Outcome(id = {"true, false", "false, true"}, expect = ACCEPTABLE, desc = "Only one actor got true for the flag in its if-clause")
+@Outcome(id = {"true, true"}, expect = FORBIDDEN, desc = "Both actors got true for the flag in their if-clauses")
 @State
 public class RaceCondition_02_CheckThenReactSequence {
     private volatile boolean flag = true;
 
     @Actor
-    public void actor1(II_Result r) {
+    public void actor1(ZZ_Result r) {
         if (flag) {
             flag = false;
-            r.r1 = 1;
+            r.r1 = true;
         } else {
-            r.r1 = 2;
+            r.r1 = false;
         }
     }
 
     @Actor
-    public void actor2(II_Result r) {
+    public void actor2(ZZ_Result r) {
         if (flag) {
             flag = false;
-            r.r2 = 1;
+            r.r2 = true;
         } else {
-            r.r2 = 2;
+            r.r2 = false;
         }
     }
 }
