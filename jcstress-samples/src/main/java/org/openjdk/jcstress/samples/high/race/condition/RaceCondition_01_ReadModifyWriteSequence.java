@@ -22,54 +22,54 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples.concurrency.race.condition;
+package org.openjdk.jcstress.samples.high.race.condition;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.II_Result;
+import org.openjdk.jcstress.infra.results.III_Result;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 
-public class RaceCondition_02_CheckThenReactSequence {
+/*
+    How to run this test:
+        $ java -jar jcstress-samples/target/jcstress.jar -t RaceCondition_01_ReadModifyWriteSequence
+ */
 
-    /*
-        How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t RaceCondition_02_CheckThenReactSequence
-     */
+/**
+ * This sample demonstrates you how a read-modify-write sequence can lead to surprising results.
+ */
 
-    /**
-     * This sample demonstrates you how a check-then-react sequence can lead to surprising results.
-     */
-    @JCStressTest
-    @Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Only one actor got true for the flag in its if-clause")
-    @Outcome(id = {"1, 1"}, expect = FORBIDDEN, desc = "Both actors got true for the flag in their if-clauses")
-    @State
-    public static class CheckThenReactSequence {
-        private final AtomicBoolean flag = new AtomicBoolean(true);
+@JCStressTest
+@Outcome(id = {"150, 100, 150"}, expect = ACCEPTABLE, desc = "Actor1 considered actor2's result and wrote his right result")
+@Outcome(id = {"250, 150, 150"}, expect = ACCEPTABLE, desc = "Actor2 considered actor1's result and wrote his right result")
+@Outcome(id = {"250, 100, 250", "250, 150, 250"}, expect = FORBIDDEN, desc = "Actor1 ignored actor2's result and wrote his wrong result")
+@Outcome(id = {"250, 100, 100", "150, 100, 100"}, expect = FORBIDDEN, desc = "Actor2 ignored actor1's result and wrote his wrong result")
+@State
+public class RaceCondition_01_ReadModifyWriteSequence {
+    private final AtomicInteger value = new AtomicInteger(200);
 
-        @Actor
-        public void actor1(II_Result r) {
-            if(flag.get()) {
-                flag.set(false);
-                r.r1 = 1;
-            } else {
-                r.r1 = 2;
-            }
-        }
+    @Actor
+    public void actor1(III_Result r) {
+        int intValue = value.get();
+        intValue += 50;
+        value.set(intValue);
 
-        @Actor
-        public void actor2(II_Result r) {
-            if(flag.get()) {
-                flag.set(false);
-                r.r2 = 1;
-            } else {
-                r.r2 = 2;
-            }
-        }
+        r.r1 = intValue;
+        r.r3 = value.get();
+    }
+
+    @Actor
+    public void actor2(III_Result r) {
+        int intValue = value.get();
+        intValue -= 100;
+        value.set(intValue);
+
+        r.r2 = intValue;
+        r.r3 = value.get();
     }
 }
