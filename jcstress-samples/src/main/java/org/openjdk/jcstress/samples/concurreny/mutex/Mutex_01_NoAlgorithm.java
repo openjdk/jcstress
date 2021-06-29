@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,46 +29,38 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
+import org.openjdk.jcstress.infra.results.ZZ_Result;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 
+/*
+    How to run this test:
+        $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_01_NoAlgorithm
+*/
 
+/**
+ * This sample demonstrates you how you can introduce a critical section to check algorithms
+ * which ensure only one actor at most can enter the critical section.
+ */
+@JCStressTest
+@Outcome(id = {"true, true", "true, false", "false, true", "false, false"}, expect = ACCEPTABLE, desc = "Both actors have entered the critical section whenever they wanted")
+@State
 public class Mutex_01_NoAlgorithm {
+    private volatile boolean taken1, taken2;
 
-    /*
-        How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_01_NoAlgorithm
-     */
-    /**
-     * This sample demonstrates you how you can introduce a critical section to check algorithms
-     * which ensure only one actor at most can enter the critical section.
-     */
-    @JCStressTest
-    @Outcome(id = {"1, 1", "1, 2", "2, 1", "2, 2"}, expect = ACCEPTABLE, desc = "Both actors can enter the critical section one by one but must not")
-    @State
-    public static class NoAlgorithm {
-        private final AtomicBoolean isInCriticalSection = new AtomicBoolean();
+    @Actor
+    public void actor1(ZZ_Result r) {
+        taken1 = true;
+        r.r1 = taken2;
+        taken1 = false;
+    }
 
-        @Actor
-        public void actor1(II_Result r) {
-            if (isInCriticalSection.compareAndSet(false, true)) {
-                r.r1 = 1;
-                isInCriticalSection.set(false);
-            } else {
-                r.r1 = 2;
-            }
-        }
-
-        @Actor
-        public void actor2(II_Result r) {
-            if (isInCriticalSection.compareAndSet(false, true)) {
-                r.r2 = 1;
-                isInCriticalSection.set(false);
-            } else {
-                r.r2 = 2;
-            }
-        }
+    @Actor
+    public void actor2(ZZ_Result r) {
+        taken2 = true;
+        r.r2 = taken1;
+        taken2 = false;
     }
 }
