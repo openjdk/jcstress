@@ -47,7 +47,7 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
  */
 @JCStressTest
 @Outcome(id = {"false, false"}, expect = ACCEPTABLE, desc = "Both actors have entered the critical section one after another")
-@Outcome(id = {"true, false", "false, true", "true, true"}, expect = FORBIDDEN, desc = "Both actors have entered the critical section at the same time")
+@Outcome(expect = FORBIDDEN, desc = "Both actors have entered the critical section at the same time")
 @State
 public class Mutex_03_DekkerAlgorithm {
     private final AtomicBoolean actor1wantsToEnter = new AtomicBoolean();

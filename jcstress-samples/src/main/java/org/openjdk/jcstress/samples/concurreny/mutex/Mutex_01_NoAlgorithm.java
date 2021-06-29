@@ -45,7 +45,7 @@ import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
  * which ensure only one actor at most can enter the critical section.
  */
 @JCStressTest
-@Outcome(id = {"true, true", "true, false", "false, true", "false, false"}, expect = ACCEPTABLE, desc = "Both actors have entered the critical section whenever they wanted")
+@Outcome(expect = ACCEPTABLE, desc = "Both actors have entered the critical section whenever they wanted")
 @State
 public class Mutex_01_NoAlgorithm {
     private volatile boolean taken1, taken2;
