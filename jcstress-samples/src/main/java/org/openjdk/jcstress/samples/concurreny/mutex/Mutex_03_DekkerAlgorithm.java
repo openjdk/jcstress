@@ -50,42 +50,42 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 @Outcome(expect = FORBIDDEN, desc = "Both actors have entered the critical section at the same time")
 @State
 public class Mutex_03_DekkerAlgorithm {
-    private final AtomicBoolean actor1wantsToEnter = new AtomicBoolean();
-    private final AtomicBoolean actor2wantsToEnter = new AtomicBoolean();
-    private final AtomicInteger turn = new AtomicInteger(0);
+    private volatile boolean actor1wantsToEnter;
+    private volatile boolean actor2wantsToEnter;
+    private volatile int turn = 1;
     private volatile boolean taken1, taken2;
 
     @Actor
     public void actor1(ZZ_Result r) {
-        actor1wantsToEnter.set(true);
-        while (actor2wantsToEnter.get()) {
-            if (turn.get() != 0) {
-                actor1wantsToEnter.set(false);
-                while (turn.get() != 0) ;
-                actor1wantsToEnter.set(true);
+        actor1wantsToEnter = true;
+        while (actor2wantsToEnter) {
+            if (turn != 1) {
+                actor1wantsToEnter = false;
+                while (turn != 1) ;
+                actor1wantsToEnter = true;
             }
         }
         taken1 = true;
         r.r1 = taken2;
         taken1 = false;
-        turn.set(1);
-        actor1wantsToEnter.set(false);
+        turn = 2;
+        actor1wantsToEnter = false;
     }
 
     @Actor
     public void actor2(ZZ_Result r) {
-        actor2wantsToEnter.set(true);
-        while (actor1wantsToEnter.get()) {
-            if (turn.get() != 1) {
-                actor2wantsToEnter.set(false);
-                while (turn.get() != 1) ;
-                actor2wantsToEnter.set(true);
+        actor2wantsToEnter = true;
+        while (actor1wantsToEnter) {
+            if (turn != 2) {
+                actor2wantsToEnter = false;
+                while (turn != 2) ;
+                actor2wantsToEnter = true;
             }
         }
         taken2 = true;
         r.r2 = taken1;
         taken2 = false;
-        turn.set(0);
-        actor2wantsToEnter.set(false);
+        turn = 1;
+        actor2wantsToEnter = false;
     }
 }

@@ -50,30 +50,30 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 @Outcome(expect = FORBIDDEN, desc = "Both actors have entered the critical section at the same time")
 @State
 public class Mutex_02_PetersonAlgorithm {
-    private final AtomicBoolean flagForActor1 = new AtomicBoolean();
-    private final AtomicBoolean flagForActor2 = new AtomicBoolean();
-    private final AtomicInteger turn = new AtomicInteger();
+    private volatile boolean flagForActor1;
+    private volatile boolean flagForActor2;
+    private volatile int turn;
     private volatile boolean taken1, taken2;
 
     @Actor
     public void actor1(ZZ_Result r) {
-        flagForActor1.set(true);
-        turn.set(2);
-        while (flagForActor2.get() && turn.get() == 2) ;
+        flagForActor1 = true;
+        turn = 2;
+        while (flagForActor2 && turn == 2) ;
         taken1 = true;
         r.r1 = taken2;
         taken1 = false;
-        flagForActor1.set(false);
+        flagForActor1 = false;
     }
 
     @Actor
     public void actor2(ZZ_Result r) {
-        flagForActor2.set(true);
-        turn.set(1);
-        while (flagForActor1.get() && turn.get() == 1) ;
+        flagForActor2 = true;
+        turn = 1;
+        while (flagForActor1 && turn == 1) ;
         taken2 = true;
         r.r2 = taken1;
         taken2 = false;
-        flagForActor2.set(false);
+        flagForActor2 = false;
     }
 }
