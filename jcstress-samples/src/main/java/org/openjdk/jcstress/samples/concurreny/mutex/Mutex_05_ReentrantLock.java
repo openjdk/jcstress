@@ -32,7 +32,8 @@ import org.openjdk.jcstress.infra.results.II_Result;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.openjdk.jcstress.annotations.Expect.*;
+import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
+import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
 
 /*
     How to run this test:
