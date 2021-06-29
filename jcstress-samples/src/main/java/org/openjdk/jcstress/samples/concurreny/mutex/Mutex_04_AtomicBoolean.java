@@ -50,7 +50,7 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 @State
 public class Mutex_04_AtomicBoolean {
     private final AtomicBoolean canEnterCriticalSection = new AtomicBoolean(true);
-    private volatile boolean taken1, taken2;
+    private boolean taken1, taken2;
 
     @Actor
     public void actor1(ZZ_Result r) {

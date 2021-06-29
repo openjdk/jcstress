@@ -53,7 +53,7 @@ public class Mutex_03_DekkerAlgorithm {
     private volatile boolean actor1wantsToEnter;
     private volatile boolean actor2wantsToEnter;
     private volatile int turn = 1;
-    private volatile boolean taken1, taken2;
+    private boolean taken1, taken2;
 
     @Actor
     public void actor1(ZZ_Result r) {

@@ -53,7 +53,7 @@ public class Mutex_02_PetersonAlgorithm {
     private volatile boolean flagForActor1;
     private volatile boolean flagForActor2;
     private volatile int turn;
-    private volatile boolean taken1, taken2;
+    private boolean taken1, taken2;
 
     @Actor
     public void actor1(ZZ_Result r) {

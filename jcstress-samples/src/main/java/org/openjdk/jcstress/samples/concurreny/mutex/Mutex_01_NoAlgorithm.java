@@ -43,12 +43,14 @@ import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 /**
  * This sample demonstrates you how you can introduce a critical section to check algorithms
  * which ensure only one actor at most can enter the critical section.
+ *
+ *
  */
 @JCStressTest
 @Outcome(expect = ACCEPTABLE, desc = "Both actors have entered the critical section whenever they wanted")
 @State
 public class Mutex_01_NoAlgorithm {
-    private volatile boolean taken1, taken2;
+    private boolean taken1, taken2;
 
     @Actor
     public void actor1(ZZ_Result r) {
