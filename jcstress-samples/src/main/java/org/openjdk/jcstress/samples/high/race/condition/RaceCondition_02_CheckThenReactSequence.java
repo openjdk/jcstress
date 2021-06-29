@@ -44,7 +44,6 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 /**
  * This sample demonstrates you how a check-then-react sequence can lead to surprising results.
  */
-
 @JCStressTest
 @Outcome(id = {"true, false", "false, true"}, expect = ACCEPTABLE, desc = "Only one actor got true for the flag in its if-clause")
 @Outcome(id = {"true, true"}, expect = FORBIDDEN, desc = "Both actors got true for the flag in their if-clauses")
