@@ -44,7 +44,17 @@ import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
  * This sample demonstrates you how you can introduce a critical section to check algorithms
  * which ensure only one actor at most can enter the critical section.
  *
- *
+ * All samples for mutex algorithm use a trick:
+ * Instead of telling their results they themselves have entered the critical section,
+ * they witness whether both actors have entered the critical section at the same time.
+ * The actors achieve that by setting their result to the state of the other actor
+ * because their own state is clear at that moment: they are in the critical section.
+ * Therefore, only the state of the other actor is relevant.
+ * And if the other actor's state is true, then the actor has observed both actors have been in the section at the same time.
+ * Otherwise he hasn't observed.
+ * As both actors do that, at least one actor will always witness it because
+ * even if both actors are in the critical section and one actor leaves it too fast
+ * so that the otheractor cannot observe it anymore, the one actor who left it so fast will have observed it.
  */
 @JCStressTest
 @Outcome(expect = ACCEPTABLE, desc = "Both actors have entered the critical section whenever they wanted")
