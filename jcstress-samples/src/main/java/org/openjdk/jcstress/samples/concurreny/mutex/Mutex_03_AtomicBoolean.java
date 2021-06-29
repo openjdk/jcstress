@@ -42,7 +42,8 @@ import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
 
 @JCStressTest
 @Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Sequential execution.")
-@Outcome(id = "1, 1", expect = ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: lock failure.")@State
+@Outcome(id = "1, 1", expect = ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: lock failure.")
+@State
 public class Mutex_03_AtomicBoolean {
     private final AtomicBoolean taken = new AtomicBoolean(false);
     private int v;
