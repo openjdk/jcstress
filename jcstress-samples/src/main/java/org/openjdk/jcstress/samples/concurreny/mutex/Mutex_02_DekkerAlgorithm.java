@@ -30,8 +30,7 @@ import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
 
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
-import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
+import static org.openjdk.jcstress.annotations.Expect.*;
 
 /*
     How to run this test:
@@ -42,9 +41,8 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
  * Implemented according to https://en.wikipedia.org/wiki/Dekker%27s_algorithm
  */
 @JCStressTest
-@Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Both actors have entered the critical section one after another")
-@Outcome(id = "1, 1", expect = FORBIDDEN, desc = "Both actors have entered the critical section at the same time")
-@State
+@Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Sequential execution.")
+@Outcome(id = "1, 1", expect = ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: lock failure.")@State
 public class Mutex_02_DekkerAlgorithm {
     private volatile boolean actor1wantsToEnter;
     private volatile boolean actor2wantsToEnter;
