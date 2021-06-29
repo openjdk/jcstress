@@ -41,7 +41,6 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 /**
  * This sample demonstrates you how a read-modify-write sequence can lead to surprising results.
  */
-
 @JCStressTest
 @Outcome(id = {"150, 100, 150"}, expect = ACCEPTABLE, desc = "Actor1 considered actor2's result and wrote his right result")
 @Outcome(id = {"250, 150, 150"}, expect = ACCEPTABLE, desc = "Actor2 considered actor1's result and wrote his right result")
