@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,27 +29,23 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
-import org.openjdk.jcstress.infra.results.ZZ_Result;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 
 /*
     How to run this test:
-        $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_03_DekkerAlgorithm
+        $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_02_DekkerAlgorithm
 */
 
 /**
  * Implemented according to https://en.wikipedia.org/wiki/Dekker%27s_algorithm
  */
 @JCStressTest
-@Outcome(expect = ACCEPTABLE, desc = "Both actors have entered the critical section one after another")
+@Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Both actors have entered the critical section one after another")
 @Outcome(id = "1, 1", expect = FORBIDDEN, desc = "Both actors have entered the critical section at the same time")
 @State
-public class Mutex_03_DekkerAlgorithm {
+public class Mutex_02_DekkerAlgorithm {
     private volatile boolean actor1wantsToEnter;
     private volatile boolean actor2wantsToEnter;
     private volatile int turn = 1;
@@ -61,7 +57,7 @@ public class Mutex_03_DekkerAlgorithm {
         while (actor2wantsToEnter) {
             if (turn != 1) {
                 actor1wantsToEnter = false;
-                while (turn != 1) ;
+                while (turn != 1); // wait
                 actor1wantsToEnter = true;
             }
         }
@@ -78,7 +74,7 @@ public class Mutex_03_DekkerAlgorithm {
         while (actor1wantsToEnter) {
             if (turn != 2) {
                 actor2wantsToEnter = false;
-                while (turn != 2) ;
+                while (turn != 2); // wait
                 actor2wantsToEnter = true;
             }
         }

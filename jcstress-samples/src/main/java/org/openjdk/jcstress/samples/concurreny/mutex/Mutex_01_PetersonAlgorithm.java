@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,43 +29,47 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
-import org.openjdk.jcstress.infra.results.ZZ_Result;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 
 /*
     How to run this test:
-        $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_05_Synchronized
-*/
+        $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_01_PetersonAlgorithm
+ */
 
 /**
- * This sample demonstrates you how you can introduce a critical section to check algorithms
- * which ensure only one actor at most can enter the critical section.
+ * Implemented according to https://en.wikipedia.org/wiki/Peterson%27s_algorithm
  */
 @JCStressTest
-@Outcome(expect = ACCEPTABLE, desc = "Both actors have entered the critical section one after another")
+@Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Both actors have entered the critical section one after another")
 @Outcome(id = "1, 1", expect = FORBIDDEN, desc = "Both actors have entered the critical section at the same time")
 @State
-public class Mutex_05_Synchronized {
-    private final Object lock = new Object();
+public class Mutex_01_PetersonAlgorithm {
+    private volatile boolean flagForActor1;
+    private volatile boolean flagForActor2;
+    private volatile int turn;
     private int v;
 
     @Actor
     public void actor1(II_Result r) {
-        synchronized (lock) {
-            // critical section
+        flagForActor1 = true;
+        turn = 2;
+        while (flagForActor2 && turn == 2); // wait
+        { // critical section
             r.r1 = ++v;
         }
+        flagForActor1 = false;
     }
 
     @Actor
     public void actor2(II_Result r) {
-        synchronized (lock) {
-            // critical section
+        flagForActor2 = true;
+        turn = 1;
+        while (flagForActor1 && turn == 1); // wait
+        { // critical section
             r.r2 = ++v;
         }
+        flagForActor2 = false;
     }
 }

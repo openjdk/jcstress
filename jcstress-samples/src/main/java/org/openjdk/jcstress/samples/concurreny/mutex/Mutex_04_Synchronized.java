@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,45 +29,36 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
-import org.openjdk.jcstress.infra.results.ZZ_Result;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 
 /*
     How to run this test:
-        $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_04_AtomicBoolean
+        $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_04_Synchronized
 */
 
-/**
- * This sample demonstrates you how you can introduce a critical section to check algorithms
- * which ensure only one actor at most can enter the critical section.
- */
 @JCStressTest
-@Outcome(expect = ACCEPTABLE, desc = "Both actors have entered the critical section one after another")
+@Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Both actors have entered the critical section one after another")
 @Outcome(id = "1, 1", expect = FORBIDDEN, desc = "Both actors have entered the critical section at the same time")
 @State
-public class Mutex_04_AtomicBoolean {
-    private final AtomicBoolean canEnterCriticalSection = new AtomicBoolean(true);
+public class Mutex_04_Synchronized {
+    private final Object lock = new Object();
     private int v;
 
     @Actor
     public void actor1(II_Result r) {
-        while(!canEnterCriticalSection.compareAndSet(true, false)) ;
-        { // critical section
+        synchronized (lock) {
+            // critical section
             r.r1 = ++v;
         }
-        canEnterCriticalSection.set(true);
     }
 
     @Actor
     public void actor2(II_Result r) {
-        while(!canEnterCriticalSection.compareAndSet(true, false)) ;
-        { // critical section
+        synchronized (lock) {
+            // critical section
             r.r2 = ++v;
         }
-        canEnterCriticalSection.set(true);
     }
 }

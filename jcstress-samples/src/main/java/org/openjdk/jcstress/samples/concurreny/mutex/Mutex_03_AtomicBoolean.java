@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,45 +29,40 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
-import org.openjdk.jcstress.infra.results.ZZ_Result;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
+import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 
 /*
     How to run this test:
-        $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_01_NoAlgorithm
+        $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_03_AtomicBoolean
 */
 
-/**
- * This sample demonstrates you how you can introduce a critical section to check algorithms
- * which ensure only one actor at most can enter the critical section.
- *
- * All samples for mutex algorithms use the fact that incrementing int v is not an atomic operation.
- * It works because if both actors enter the critical section at the same time,
- * they will both read 0 for v and increment it to 1 for their results.
- * If one actor after another enters the critical section,
- * the first actor will read 0 for v and increment v to 1 for its result
- * the second actor will read 1 for v and increment v to 2 for its result.
- */
 @JCStressTest
-@Outcome(expect = ACCEPTABLE, desc = "Both actors have entered the critical section whenever they wanted")
+@Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Both actors have entered the critical section one after another")
+@Outcome(id = "1, 1", expect = FORBIDDEN, desc = "Both actors have entered the critical section at the same time")
 @State
-public class Mutex_01_NoAlgorithm {
+public class Mutex_03_AtomicBoolean {
+    private final AtomicBoolean taken = new AtomicBoolean(false);
     private int v;
 
     @Actor
     public void actor1(II_Result r) {
-        { // critical section (broken)
+        while(taken.get() || !taken.compareAndSet(false, true)); // spin
+        { // critical section
             r.r1 = ++v;
         }
+        taken.set(false);
     }
 
     @Actor
     public void actor2(II_Result r) {
-        { // critical section (broken)
+        while(taken.get() || !taken.compareAndSet(false, true)); // spin
+        { // critical section
             r.r2 = ++v;
         }
+        taken.set(false);
     }
 }
