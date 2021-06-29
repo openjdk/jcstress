@@ -46,34 +46,34 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
  * Implemented according to https://en.wikipedia.org/wiki/Peterson%27s_algorithm
  */
 @JCStressTest
-@Outcome(id = {"false, false"}, expect = ACCEPTABLE, desc = "Both actors have entered the critical section one after another")
-@Outcome(expect = FORBIDDEN, desc = "Both actors have entered the critical section at the same time")
+@Outcome(expect = ACCEPTABLE, desc = "Both actors have entered the critical section one after another")
+@Outcome(id = "1, 1", expect = FORBIDDEN, desc = "Both actors have entered the critical section at the same time")
 @State
 public class Mutex_02_PetersonAlgorithm {
     private volatile boolean flagForActor1;
     private volatile boolean flagForActor2;
     private volatile int turn;
-    private boolean taken1, taken2;
+    private int v;
 
     @Actor
-    public void actor1(ZZ_Result r) {
+    public void actor1(II_Result r) {
         flagForActor1 = true;
         turn = 2;
         while (flagForActor2 && turn == 2) ;
-        taken1 = true;
-        r.r1 = taken2;
-        taken1 = false;
+        { // critical section
+            r.r1 = ++v;
+        }
         flagForActor1 = false;
     }
 
     @Actor
-    public void actor2(ZZ_Result r) {
+    public void actor2(II_Result r) {
         flagForActor2 = true;
         turn = 1;
         while (flagForActor1 && turn == 1) ;
-        taken2 = true;
-        r.r2 = taken1;
-        taken2 = false;
+        { // critical section
+            r.r2 = ++v;
+        }
         flagForActor2 = false;
     }
 }

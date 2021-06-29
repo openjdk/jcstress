@@ -46,17 +46,17 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
  * Implemented according to https://en.wikipedia.org/wiki/Dekker%27s_algorithm
  */
 @JCStressTest
-@Outcome(id = {"false, false"}, expect = ACCEPTABLE, desc = "Both actors have entered the critical section one after another")
-@Outcome(expect = FORBIDDEN, desc = "Both actors have entered the critical section at the same time")
+@Outcome(expect = ACCEPTABLE, desc = "Both actors have entered the critical section one after another")
+@Outcome(id = "1, 1", expect = FORBIDDEN, desc = "Both actors have entered the critical section at the same time")
 @State
 public class Mutex_03_DekkerAlgorithm {
     private volatile boolean actor1wantsToEnter;
     private volatile boolean actor2wantsToEnter;
     private volatile int turn = 1;
-    private boolean taken1, taken2;
+    private int v;
 
     @Actor
-    public void actor1(ZZ_Result r) {
+    public void actor1(II_Result r) {
         actor1wantsToEnter = true;
         while (actor2wantsToEnter) {
             if (turn != 1) {
@@ -65,15 +65,15 @@ public class Mutex_03_DekkerAlgorithm {
                 actor1wantsToEnter = true;
             }
         }
-        taken1 = true;
-        r.r1 = taken2;
-        taken1 = false;
+        { // critical section
+            r.r1 = ++v;
+        }
         turn = 2;
         actor1wantsToEnter = false;
     }
 
     @Actor
-    public void actor2(ZZ_Result r) {
+    public void actor2(II_Result r) {
         actor2wantsToEnter = true;
         while (actor1wantsToEnter) {
             if (turn != 2) {
@@ -82,9 +82,9 @@ public class Mutex_03_DekkerAlgorithm {
                 actor2wantsToEnter = true;
             }
         }
-        taken2 = true;
-        r.r2 = taken1;
-        taken2 = false;
+        { // critical section
+            r.r2 = ++v;
+        }
         turn = 1;
         actor2wantsToEnter = false;
     }

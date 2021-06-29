@@ -44,35 +44,30 @@ import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
  * This sample demonstrates you how you can introduce a critical section to check algorithms
  * which ensure only one actor at most can enter the critical section.
  *
- * All samples for mutex algorithm use a trick:
- * Instead of telling their results they themselves have entered the critical section,
- * they witness whether both actors have entered the critical section at the same time.
- * The actors achieve that by setting their result to the state of the other actor
- * because their own state is clear at that moment: they are in the critical section.
- * Therefore, only the state of the other actor is relevant.
- * And if the other actor's state is true, then the actor has observed both actors have been in the section at the same time.
- * Otherwise he hasn't observed.
- * As both actors do that, at least one actor will always witness it because
- * even if both actors are in the critical section and one actor leaves it too fast
- * so that the otheractor cannot observe it anymore, the one actor who left it so fast will have observed it.
+ * All samples for mutex algorithms use the fact that incrementing int v is not an atomic operation.
+ * It works because if both actors enter the critical section at the same time,
+ * they will both read 0 for v and increment it to 1 for their results.
+ * If one actor after another enters the critical section,
+ * the first actor will read 0 for v and increment v to 1 for its result
+ * the second actor will read 1 for v and increment v to 2 for its result.
  */
 @JCStressTest
 @Outcome(expect = ACCEPTABLE, desc = "Both actors have entered the critical section whenever they wanted")
 @State
 public class Mutex_01_NoAlgorithm {
-    private boolean taken1, taken2;
+    private int v;
 
     @Actor
-    public void actor1(ZZ_Result r) {
-        taken1 = true;
-        r.r1 = taken2;
-        taken1 = false;
+    public void actor1(II_Result r) {
+        { // critical section (broken)
+            r.r1 = ++v;
+        }
     }
 
     @Actor
-    public void actor2(ZZ_Result r) {
-        taken2 = true;
-        r.r2 = taken1;
-        taken2 = false;
+    public void actor2(II_Result r) {
+        { // critical section (broken)
+            r.r2 = ++v;
+        }
     }
 }

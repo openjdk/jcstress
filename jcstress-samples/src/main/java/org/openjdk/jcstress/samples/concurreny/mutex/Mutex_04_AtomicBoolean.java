@@ -28,6 +28,7 @@ import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
+import org.openjdk.jcstress.infra.results.II_Result;
 import org.openjdk.jcstress.infra.results.ZZ_Result;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -45,28 +46,28 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
  * which ensure only one actor at most can enter the critical section.
  */
 @JCStressTest
-@Outcome(id = {"false, false"}, expect = ACCEPTABLE, desc = "Both actors have entered the critical section one after another")
-@Outcome(expect = FORBIDDEN, desc = "Both actors have entered the critical section at the same time")
+@Outcome(expect = ACCEPTABLE, desc = "Both actors have entered the critical section one after another")
+@Outcome(id = "1, 1", expect = FORBIDDEN, desc = "Both actors have entered the critical section at the same time")
 @State
 public class Mutex_04_AtomicBoolean {
     private final AtomicBoolean canEnterCriticalSection = new AtomicBoolean(true);
-    private boolean taken1, taken2;
+    private int v;
 
     @Actor
-    public void actor1(ZZ_Result r) {
+    public void actor1(II_Result r) {
         while(!canEnterCriticalSection.compareAndSet(true, false)) ;
-        taken1 = true;
-        r.r1 = taken2;
-        taken1 = false;
+        { // critical section
+            r.r1 = ++v;
+        }
         canEnterCriticalSection.set(true);
     }
 
     @Actor
-    public void actor2(ZZ_Result r) {
+    public void actor2(II_Result r) {
         while(!canEnterCriticalSection.compareAndSet(true, false)) ;
-        taken2 = true;
-        r.r2 = taken1;
-        taken2 = false;
+        { // critical section
+            r.r2 = ++v;
+        }
         canEnterCriticalSection.set(true);
     }
 }
