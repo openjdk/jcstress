@@ -26,7 +26,6 @@ package org.openjdk.jcstress.samples.high.race.condition;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.III_Result;
-import org.openjdk.jcstress.infra.results.I_Result;
 
 import static org.openjdk.jcstress.annotations.Expect.*;
 
@@ -39,34 +38,34 @@ import static org.openjdk.jcstress.annotations.Expect.*;
  * This sample demonstrates you how a read-modify-write sequence can lead to surprising results.
  */
 @JCStressTest
-@Outcome(id = {"150, 100, 150"}, expect = ACCEPTABLE, desc = "Actor1 considered actor2's result and wrote its right result")
-@Outcome(id = {"250, 150, 150"}, expect = ACCEPTABLE, desc = "Actor2 considered actor1's result and wrote its right result")
-@Outcome(id = {"250, 100, 250", "250, 150, 250"}, expect = ACCEPTABLE_INTERESTING, desc = "Actor1 ignored actor2's result and wrote its wrong result")
-@Outcome(id = {"250, 100, 100", "150, 100, 100"}, expect = ACCEPTABLE_INTERESTING, desc = "Actor2 ignored actor1's result and wrote its wrong result")
+@Outcome(id = {"150, 100, 150"}, expect = ACCEPTABLE, desc = "2:v=200, 2:newV=100, 2:v=newV, 1:v=100, 1:newV=150, 1:v=newV")
+@Outcome(id = {"250, 150, 150"}, expect = ACCEPTABLE, desc = "1:v=200, 1:newV=250, 1:v=newV, 2:v=250, 2:newV=150, 2:v=newV")
+@Outcome(id = {"250, 100, 250"}, expect = ACCEPTABLE_INTERESTING, desc = "1:v=200, 1:newV=250, 2:v=200, 2:newV=100, 2:v=newV, 1:v=newV")
+@Outcome(id = {"250, 100, 100"}, expect = ACCEPTABLE_INTERESTING, desc = "1:v=200, 1:newV=250, 2:v=200, 2:newV=100, 1:v=newV, 2:v=newV")
 @State
 public class RaceCondition_01_ReadModifyWriteSequence {
-    private volatile int value = 200;
+    private volatile int v = 200;
 
     @Actor
     public void actor1(III_Result r) {
-        int newValue = value;
-        newValue += 50;
-        value = newValue;
+        int newV = v;
+        newV += 50;
+        v = newV;
 
-        r.r1 = newValue;
+        r.r1 = newV;
     }
 
     @Actor
     public void actor2(III_Result r) {
-        int newValue = value;
-        newValue -= 100;
-        value = newValue;
+        int newV = v;
+        newV -= 100;
+        v = newV;
 
-        r.r2 = newValue;
+        r.r2 = newV;
     }
 
     @Arbiter
     public void arbiter(III_Result r) {
-        r.r3 = value;
+        r.r3 = v;
     }
 }
