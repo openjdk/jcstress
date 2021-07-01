@@ -24,11 +24,9 @@
  */
 package org.openjdk.jcstress.samples.high.race.condition;
 
-import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.JCStressTest;
-import org.openjdk.jcstress.annotations.Outcome;
-import org.openjdk.jcstress.annotations.State;
+import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.III_Result;
+import org.openjdk.jcstress.infra.results.I_Result;
 
 import static org.openjdk.jcstress.annotations.Expect.*;
 
@@ -56,7 +54,6 @@ public class RaceCondition_01_ReadModifyWriteSequence {
         value = newValue;
 
         r.r1 = newValue;
-        r.r3 = value;
     }
 
     @Actor
@@ -66,6 +63,10 @@ public class RaceCondition_01_ReadModifyWriteSequence {
         value = newValue;
 
         r.r2 = newValue;
+    }
+
+    @Arbiter
+    public void arbiter(III_Result r) {
         r.r3 = value;
     }
 }
