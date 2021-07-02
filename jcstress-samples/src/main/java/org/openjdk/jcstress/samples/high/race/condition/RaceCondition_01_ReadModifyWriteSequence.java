@@ -38,30 +38,30 @@ import static org.openjdk.jcstress.annotations.Expect.*;
  * This sample demonstrates you how a read-modify-write sequence can lead to surprising results.
  */
 @JCStressTest
-@Outcome(id = {"150, 100, 150"}, expect = ACCEPTABLE, desc = "2: v=200, 2: v2=100, 2: v=v2, 1: v=100, 1: v1=150, 1: v=v1")
-@Outcome(id = {"250, 150, 150"}, expect = ACCEPTABLE, desc = "1: v=200, 1: v1=250, 1: v=v1, 2: v=250, 2: v2=150, 2: v=v2")
-@Outcome(id = {"250, 100, 250"}, expect = ACCEPTABLE_INTERESTING, desc = "1: v=200, 1: v1=250, 2: v=200, 2: v2=100, 2: v=v2, 1: v=v1")
-@Outcome(id = {"250, 100, 100"}, expect = ACCEPTABLE_INTERESTING, desc = "1: v=200, 1: v1=250, 2: v=200, 2: v2=100, 1: v=v1, 2: v=v2")
+@Outcome(id = {"150, 100, 150"}, expect = ACCEPTABLE, desc = "2: v=200, 2: t2=100, 2: v=t2, 1: v=100, 1: t1=150, 1: v=t1")
+@Outcome(id = {"250, 150, 150"}, expect = ACCEPTABLE, desc = "1: v=200, 1: t1=250, 1: v=t1, 2: v=250, 2: t2=150, 2: v=t2")
+@Outcome(id = {"250, 100, 250"}, expect = ACCEPTABLE_INTERESTING, desc = "1: v=200, 1: t1=250, 2: v=200, 2: t2=100, 2: v=t2, 1: v=t1")
+@Outcome(id = {"250, 100, 100"}, expect = ACCEPTABLE_INTERESTING, desc = "1: v=200, 1: t1=250, 2: v=200, 2: t2=100, 1: v=t1, 2: v=t2")
 @State
 public class RaceCondition_01_ReadModifyWriteSequence {
     private volatile int v = 200;
 
     @Actor
     public void actor1(III_Result r) {
-        int v1 = v;
-        v1 += 50;
-        v = v1;
+        int t1 = v;
+        t1 += 50;
+        v = t1;
 
-        r.r1 = v1;
+        r.r1 = t1;
     }
 
     @Actor
     public void actor2(III_Result r) {
-        int v2 = v;
-        v2 -= 100;
-        v = v2;
+        int t2 = v;
+        t2 -= 100;
+        v = t2;
 
-        r.r2 = v2;
+        r.r2 = t2;
     }
 
     @Arbiter
