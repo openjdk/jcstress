@@ -39,7 +39,7 @@ import static org.openjdk.jcstress.annotations.Expect.*;
  */
 @JCStressTest
 @Outcome(id = {"150, 100, 150"}, expect = ACCEPTABLE, desc = "actor2 completed first, then actor1 completed")
-@Outcome(id = {"250, 150, 150"}, expect = ACCEPTABLE, desc = "actor1 completed first, then actor2")
+@Outcome(id = {"250, 150, 150"}, expect = ACCEPTABLE, desc = "actor1 completed first, then actor2 completed")
 @Outcome(id = {"250, 100, 250"}, expect = ACCEPTABLE_INTERESTING, desc = "actors conflicted, actor1 won the race")
 @Outcome(id = {"250, 100, 100"}, expect = ACCEPTABLE_INTERESTING, desc = "actors conflicted, actor2 won the race")
 @State
