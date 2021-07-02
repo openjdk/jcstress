@@ -38,10 +38,10 @@ import static org.openjdk.jcstress.annotations.Expect.*;
  * This sample demonstrates you how a read-modify-write sequence can lead to surprising results.
  */
 @JCStressTest
-@Outcome(id = {"150, 100, 150"}, expect = ACCEPTABLE, desc = "2: v=200, 2: t2=100, 2: v=t2, 1: v=100, 1: t1=150, 1: v=t1")
-@Outcome(id = {"250, 150, 150"}, expect = ACCEPTABLE, desc = "1: v=200, 1: t1=250, 1: v=t1, 2: v=250, 2: t2=150, 2: v=t2")
-@Outcome(id = {"250, 100, 250"}, expect = ACCEPTABLE_INTERESTING, desc = "1: v=200, 1: t1=250, 2: v=200, 2: t2=100, 2: v=t2, 1: v=t1")
-@Outcome(id = {"250, 100, 100"}, expect = ACCEPTABLE_INTERESTING, desc = "1: v=200, 1: t1=250, 2: v=200, 2: t2=100, 1: v=t1, 2: v=t2")
+@Outcome(id = {"150, 100, 150"}, expect = ACCEPTABLE, desc = "actor2 completed first, then actor1 completed")
+@Outcome(id = {"250, 150, 150"}, expect = ACCEPTABLE, desc = "actor1 completed first, then actor2")
+@Outcome(id = {"250, 100, 250"}, expect = ACCEPTABLE_INTERESTING, desc = "actors conflicted, actor1 won the race")
+@Outcome(id = {"250, 100, 100"}, expect = ACCEPTABLE_INTERESTING, desc = "actors conflicted, actor2 won the race")
 @State
 public class RaceCondition_01_ReadModifyWriteSequence {
     private volatile int v = 200;
