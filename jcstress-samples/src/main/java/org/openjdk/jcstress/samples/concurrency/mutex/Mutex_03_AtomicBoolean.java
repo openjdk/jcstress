@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -33,42 +33,36 @@ import org.openjdk.jcstress.infra.results.II_Result;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
+import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
 
+/*
+    How to run this test:
+        $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_03_AtomicBoolean
+*/
 
-public class Mutex_01_NoAlgorithm {
+@JCStressTest
+@Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Sequential execution.")
+@Outcome(id = "1, 1", expect = ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: lock failure.")
+@State
+public class Mutex_03_AtomicBoolean {
+    private final AtomicBoolean taken = new AtomicBoolean(false);
+    private int v;
 
-    /*
-        How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_01_NoAlgorithm
-     */
-    /**
-     * This sample demonstrates you how you can introduce a critical section to check algorithms
-     * which ensure only one actor at most can enter the critical section.
-     */
-    @JCStressTest
-    @Outcome(id = {"1, 1", "1, 2", "2, 1", "2, 2"}, expect = ACCEPTABLE, desc = "Both actors can enter the critical section one by one but must not")
-    @State
-    public static class NoAlgorithm {
-        private final AtomicBoolean isInCriticalSection = new AtomicBoolean();
-
-        @Actor
-        public void actor1(II_Result r) {
-            if (isInCriticalSection.compareAndSet(false, true)) {
-                r.r1 = 1;
-                isInCriticalSection.set(false);
-            } else {
-                r.r1 = 2;
-            }
+    @Actor
+    public void actor1(II_Result r) {
+        while(taken.get() || !taken.compareAndSet(false, true)); // spin
+        { // critical section
+            r.r1 = ++v;
         }
+        taken.set(false);
+    }
 
-        @Actor
-        public void actor2(II_Result r) {
-            if (isInCriticalSection.compareAndSet(false, true)) {
-                r.r2 = 1;
-                isInCriticalSection.set(false);
-            } else {
-                r.r2 = 2;
-            }
+    @Actor
+    public void actor2(II_Result r) {
+        while(taken.get() || !taken.compareAndSet(false, true)); // spin
+        { // critical section
+            r.r2 = ++v;
         }
+        taken.set(false);
     }
 }
