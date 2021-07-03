@@ -29,7 +29,7 @@ questions.
 
     <groupId>org.openjdk.jcstress</groupId>
     <artifactId>jcstress-parent</artifactId>
-    <version>0.14-SNAPSHOT</version>
+    <version>0.15-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>JCStress Parent</name>
@@ -78,10 +78,15 @@ questions.
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.0</version>
+                    <version>3.8.1</version>
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
+                        <compilerArgs>
+                            <arg>-Xlint:all,-deprecation,-options,-serial,-processing</arg>
+                            <arg>-Werror</arg>
+                        </compilerArgs>
+                        <showWarnings>true</showWarnings>
                     </configuration>
                 </plugin>
                 <plugin>

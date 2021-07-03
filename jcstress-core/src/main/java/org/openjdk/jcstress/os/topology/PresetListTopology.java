@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Red Hat Inc. All rights reserved.
+ * Copyright (c) 2021, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,28 +22,16 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.util;
+package org.openjdk.jcstress.os.topology;
 
-public class ResultUtils {
+public class PresetListTopology extends AbstractTopology {
 
-    public static String resultName(Class<?>... args) {
-        String name = "";
-        for (Class<?> k : args) {
-            if (k.isPrimitive()) {
-                if (k == boolean.class) name += "Z";
-                if (k == byte.class)    name += "B";
-                if (k == short.class)   name += "S";
-                if (k == char.class)    name += "C";
-                if (k == int.class)     name += "I";
-                if (k == long.class)    name += "J";
-                if (k == float.class)   name += "F";
-                if (k == double.class)  name += "D";
-            } else {
-                name += "L";
-            }
-        }
-        name += "_Result";
-        return name;
+    public void add(int packageId, int coreId, int threadId) throws TopologyParseException {
+        super.add(packageId, coreId, threadId);
+    }
+
+    public void finish() throws TopologyParseException {
+        super.finish();
     }
 
 }

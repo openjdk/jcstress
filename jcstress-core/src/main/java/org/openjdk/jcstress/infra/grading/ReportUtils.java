@@ -161,12 +161,12 @@ public class ReportUtils {
             freqLen += 2;
             expectLen += 2;
 
-            pw.printf("%" + idLen + "s%" + samplesLen + "s%" + freqLen + "s%" + expectLen + "s  %-" + descLen + "s%n",
+            pw.printf("%" + idLen + "s%" + samplesLen + "s%" + freqLen + "s%" + expectLen + "s  %s%n",
                     headResult, headSamples, headFreq, headExpect, headDesc);
 
             TestGrading grade = r.grading();
             long totalSamples = 0;
-            for (GradingResult gradeRes : grade.gradingResults) {
+            for (GradingResult gradeRes : grade.gradingResults.values()) {
                 totalSamples += gradeRes.count;
             }
 
@@ -174,8 +174,8 @@ public class ReportUtils {
                 totalSamples = 1;
             }
 
-            for (GradingResult gradeRes : grade.gradingResults) {
-                pw.printf("%" + idLen + "s%," + samplesLen + "d%" + freqLen + "s%" + expectLen + "s  %-" + descLen + "s%n",
+            for (GradingResult gradeRes : grade.gradingResults.values()) {
+                pw.printf("%" + idLen + "s%," + samplesLen + "d%" + freqLen + "s%" + expectLen + "s  %s%n",
                         StringUtils.cutoff(gradeRes.id, idLen),
                         gradeRes.count,
                         StringUtils.percent(gradeRes.count, totalSamples, 2),
@@ -190,7 +190,7 @@ public class ReportUtils {
         for (String data : r.getMessages()) {
             if (skipMessage(data)) continue;
             if (!errMsgsPrinted) {
-                pw.println("  Messages: ");
+                pw.println("  Messages:");
                 errMsgsPrinted = true;
             }
             pw.println("    " + data);
@@ -203,7 +203,7 @@ public class ReportUtils {
         for (String data : r.getVmOut()) {
             if (skipMessage(data)) continue;
             if (!vmOutPrinted) {
-                pw.println("  VM output stream: ");
+                pw.println("  VM output stream:");
                 vmOutPrinted = true;
             }
             pw.println("    " + data);
@@ -216,7 +216,7 @@ public class ReportUtils {
         for (String data : r.getVmErr()) {
             if (skipMessage(data)) continue;
             if (!vmErrPrinted) {
-                pw.println("  VM error stream: ");
+                pw.println("  VM error stream:");
                 vmErrPrinted = true;
             }
             pw.println("    " + data);

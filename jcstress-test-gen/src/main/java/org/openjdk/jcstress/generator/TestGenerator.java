@@ -227,7 +227,7 @@ public class TestGenerator {
             return types[index];
         }
 
-        public Class[] all() {
+        public Class<?>[] all() {
             return types;
         }
 

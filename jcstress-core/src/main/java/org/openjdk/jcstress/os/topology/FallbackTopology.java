@@ -28,7 +28,7 @@ import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.PrintStream;
 
-public class FallbackTopology extends PresetTopology {
+public class FallbackTopology extends PresetRegularTopology {
 
     public FallbackTopology() throws TopologyParseException {
         super(1, VMSupport.figureOutHotCPUs(), 1);

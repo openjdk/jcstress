@@ -30,7 +30,7 @@ questions.
     <parent>
         <groupId>org.openjdk.jcstress</groupId>
         <artifactId>jcstress-parent</artifactId>
-        <version>0.14-SNAPSHOT</version>
+        <version>0.15-SNAPSHOT</version>
     </parent>
 
     <artifactId>jcstress-core</artifactId>
@@ -51,7 +51,7 @@ questions.
                 <configuration>
                     <proc>none</proc>
                     <compilerArgs>
-                        <arg>-Xlint:all</arg>
+                        <arg>-Xlint:all,-options,-serial</arg>
                         <arg>-Werror</arg>
                     </compilerArgs>
                 </configuration>
@@ -60,9 +60,9 @@ questions.
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <forkCount>1C</forkCount>
-                    <reuseForks>false</reuseForks>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <threadCount>1</threadCount>
+                    <perCoreThreadCount>true</perCoreThreadCount>
+                    <parallel>classes</parallel>
                 </configuration>
             </plugin>
             <plugin>

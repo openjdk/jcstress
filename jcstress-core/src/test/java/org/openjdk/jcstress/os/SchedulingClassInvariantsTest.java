@@ -28,7 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openjdk.jcstress.os.topology.PresetTopology;
+import org.openjdk.jcstress.os.topology.PresetRegularTopology;
 import org.openjdk.jcstress.os.topology.Topology;
 import org.openjdk.jcstress.os.topology.TopologyParseException;
 
@@ -61,7 +61,7 @@ public class SchedulingClassInvariantsTest {
 
     @Test
     public void test() throws TopologyParseException {
-        Topology topo = new PresetTopology(p, c, t);
+        Topology topo = new PresetRegularTopology(p, c, t);
         Scheduler s = new Scheduler(topo, topo.totalThreads());
         for (int a = 1; a <= 4; a++) {
             checkInvariants(s.localAffinityFor(a, topo.totalThreads()));

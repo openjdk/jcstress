@@ -51,6 +51,7 @@ public class TestResult implements Serializable {
     private final List<String> messages;
     private final List<String> vmOut;
     private final List<String> vmErr;
+    private transient TestGrading grading;
 
     public TestResult(Status status) {
         this.status = status;
@@ -189,7 +190,12 @@ public class TestResult implements Serializable {
     }
 
     public TestGrading grading() {
-        return TestGrading.grade(this);
+        TestGrading g = grading;
+        if (g == null) {
+            g = TestGrading.grade(this);
+            grading = g;
+        }
+        return g;
     }
 
     public boolean isEmpty() {

@@ -32,7 +32,7 @@ public class SchedulerTest {
 
     @Test
     public void trivial_differentCores() throws TopologyParseException {
-        Topology t = new PresetTopology(2, 4, 4);
+        Topology t = new PresetRegularTopology(2, 4, 4);
         Scheduler s = new Scheduler(t, t.totalThreads());
 
         SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, 2);
@@ -51,7 +51,7 @@ public class SchedulerTest {
 
     @Test
     public void trivial_sameCore() throws TopologyParseException {
-        Topology t = new PresetTopology(2, 4, 4);
+        Topology t = new PresetRegularTopology(2, 4, 4);
         Scheduler s = new Scheduler(t, t.totalThreads());
 
         SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, 2);
@@ -70,7 +70,7 @@ public class SchedulerTest {
 
     @Test
     public void trivial_differentPackages() throws TopologyParseException {
-        Topology t = new PresetTopology(2, 4, 4);
+        Topology t = new PresetRegularTopology(2, 4, 4);
         Scheduler s = new Scheduler(t, t.totalThreads());
 
         SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, 2);

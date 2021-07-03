@@ -39,7 +39,7 @@ import java.util.*;
 public class TestGrading {
     public boolean isPassed;
     public boolean hasInteresting;
-    public final List<GradingResult> gradingResults;
+    public final TreeMap<String, GradingResult> gradingResults;
     public final List<String> failureMessages;
 
     public static TestGrading grade(TestResult r) {
@@ -48,7 +48,7 @@ public class TestGrading {
 
     private TestGrading(TestResult r) {
         TestInfo test = TestList.getInfo(r.getName());
-        gradingResults = new ArrayList<>();
+        gradingResults = new TreeMap<>();
         failureMessages = new NonNullArrayList<>();
 
         isPassed = true;
@@ -92,12 +92,13 @@ public class TestGrading {
             hasInteresting |= hasInteresting(ex, count);
             failureMessages.add(failureMessage(s, ex, count, matched.description()));
 
-            gradingResults.add(new GradingResult(
-                    s,
-                    matched.expect(),
-                    count,
-                    matched.description()
-            ));
+            gradingResults.put(s,
+                    new GradingResult(
+                            s,
+                            matched.expect(),
+                            count,
+                            matched.description()
+                    ));
         }
 
         // Record unmatched cases from the test description itself
@@ -107,16 +108,14 @@ public class TestGrading {
             hasInteresting |= hasInteresting(ex, 0);
             failureMessages.add(failureMessage("N/A", ex, 0, c.description()));
 
-            gradingResults.add(new GradingResult(
-                    c.matchPattern(),
-                    ex,
-                    0,
-                    c.description()
-            ));
+            gradingResults.put(c.matchPattern(),
+                    new GradingResult(
+                            c.matchPattern(),
+                            ex,
+                            0,
+                            c.description()
+                    ));
         }
-
-        Collections.sort(gradingResults,
-                Comparator.comparing(c -> c.id));
     }
 
     public static String failureMessage(String id, Expect expect, long count, String description) {
