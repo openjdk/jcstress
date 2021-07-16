@@ -104,14 +104,14 @@ public class AdvancedJMM_12_SynchronizedAreNotFences {
         @Actor
         public void actor1() {
             x = 1;
-            UNSAFE.fullFence();
+            UNSAFE.storeFence();
             y = 1;
         }
 
         @Actor
         public void actor2(II_Result r) {
             r.r1 = y;
-            UNSAFE.fullFence();
+            UNSAFE.loadFence();
             r.r2 = x;
         }
     }

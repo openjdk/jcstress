@@ -106,14 +106,14 @@ public class AdvancedJMM_13_VolatilesAreNotFences {
         @Actor
         void thread1() {
             x = 1;
-            UNSAFE.fullFence();
+            UNSAFE.storeFence();
             y = 1;
         }
 
         @Actor
         void thread2(II_Result r) {
             r.r1 = y;
-            UNSAFE.fullFence();
+            UNSAFE.loadFence();
             r.r2 = x;
         }
     }
