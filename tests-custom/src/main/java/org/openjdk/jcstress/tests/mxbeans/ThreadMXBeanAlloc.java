@@ -28,14 +28,12 @@ import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.ZZ_Result;
 
 import java.lang.management.ManagementFactory;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import static org.openjdk.jcstress.annotations.Expect.*;
 
 @JCStressTest
-@Outcome(id = "true, true",  expect = ACCEPTABLE, desc = "Delta is >= 0")
+@Outcome(id = "true, true",  expect = ACCEPTABLE,             desc = "Delta is >= 0")
 @Outcome(                    expect = ACCEPTABLE_INTERESTING, desc = "At least one thread experiences delta <0")
 @State
 public class ThreadMXBeanAlloc {
