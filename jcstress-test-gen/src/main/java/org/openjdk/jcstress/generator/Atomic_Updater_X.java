@@ -50,7 +50,7 @@ public class Atomic_Updater_X implements Primitive {
 
     @Override
     public String printStateField(String klassName) {
-        return "final " + guardType.getSimpleName() + "<" + klassName + "> g = " + guardType.getSimpleName() + ".<" + klassName + ">newUpdater(" + klassName + ".class, \"v\");" + "\n"
+        return "static final " + guardType.getSimpleName() + "<" + klassName + "> g = " + guardType.getSimpleName() + ".<" + klassName + ">newUpdater(" + klassName + ".class, \"v\");" + "\n"
                + "volatile " + primType.getSimpleName() + " v;";
     }
 
