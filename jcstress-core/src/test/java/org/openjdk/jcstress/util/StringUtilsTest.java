@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class StringUtilsTest {
 
@@ -43,8 +44,8 @@ public class StringUtilsTest {
 
     @Test
     public void testGetStacktrace() {
-        String actual = StringUtils.getStacktrace(new NullPointerException("my message"));
-        String firstLine = StringUtils.getFirstLine(actual);
+        List<String> actual = StringUtils.getStacktrace(new NullPointerException("my message"));
+        String firstLine = actual.get(0);
 
         Assert.assertEquals("java.lang.NullPointerException: my message", firstLine);
     }
