@@ -30,6 +30,7 @@ import org.openjdk.jcstress.infra.grading.TestGrading;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.util.Counter;
 import org.openjdk.jcstress.util.Environment;
+import org.openjdk.jcstress.util.StringUtils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -117,31 +118,27 @@ public class TestResult implements Serializable {
         messages.add(msg);
     }
 
+    public void addMessages(Throwable throwable) {
+        addMessages(StringUtils.getStacktrace(throwable));
+    }
+
     public void addMessages(Collection<String> msgs) {
         for (String m : msgs) {
             addMessage(m);
         }
     }
 
-    public void addVMOut(String msg) {
-        if (ReportUtils.skipMessage(msg)) return;
-        vmOut.add(msg);
-    }
-
     public void addVMOuts(Collection<String> msgs) {
         for (String m : msgs) {
-            addVMOut(m);
+            if (ReportUtils.skipMessage(m)) continue;
+            vmOut.add(m);
         }
-    }
-
-    public void addVMErr(String msg) {
-        if (ReportUtils.skipMessage(msg)) return;
-        vmErr.add(msg);
     }
 
     public void addVMErrs(Collection<String> msgs) {
         for (String m : msgs) {
-            addVMErr(m);
+            if (ReportUtils.skipMessage(m)) continue;
+            vmErr.add(m);
         }
     }
 
