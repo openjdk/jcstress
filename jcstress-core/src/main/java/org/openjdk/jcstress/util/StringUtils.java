@@ -123,16 +123,7 @@ public class StringUtils {
         PrintWriter pw = new PrintWriter(sw);
         throwable.printStackTrace(pw);
         pw.close();
-        // TODO: This should be better
-        return Arrays.asList(sw.toString().split("\n"));
-    }
-
-    public static String getFirstLine(String src) {
-        int endLine = src.indexOf("\n");
-        if (endLine > 0) {
-            return src.substring(0, endLine).trim();
-        }
-        return src;
+        return Arrays.asList(sw.toString().split(System.lineSeparator()));
     }
 
     static final String[] PADS;

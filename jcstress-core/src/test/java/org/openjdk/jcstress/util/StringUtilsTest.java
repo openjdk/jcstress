@@ -47,13 +47,7 @@ public class StringUtilsTest {
         List<String> actual = StringUtils.getStacktrace(new NullPointerException("my message"));
         String firstLine = actual.get(0);
 
-        Assert.assertEquals("java.lang.NullPointerException: my message", firstLine);
-    }
-
-    @Test
-    public void testGetFirstLine() {
-        Assert.assertEquals("First line", StringUtils.getFirstLine("First line"));
-        Assert.assertEquals("First line", StringUtils.getFirstLine("First line\nsecond line"));
+        Assert.assertTrue(firstLine, firstLine.startsWith("java.lang.NullPointerException: my message"));
     }
 
     @Test
