@@ -33,17 +33,18 @@ import org.openjdk.jcstress.infra.results.II_Result;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
-import static org.openjdk.jcstress.annotations.Expect.*;
+import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
+import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 
 @JCStressTest
 @Outcome(id = {"0, 0", "1, 1", "0, 1"}, expect = ACCEPTABLE, desc = "Trivial")
 @Outcome(id = "1, 0",                   expect = FORBIDDEN,  desc = "Cannot happen")
 @State
-public class RMW_04_SuccessMemoryEffects {
+public class RMW_05_ReleaseOnSuccess {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_04_SuccessMemoryEffects[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_05_ReleaseOnSuccess[.SubTestName]
      */
 
     /*
@@ -57,10 +58,10 @@ public class RMW_04_SuccessMemoryEffects {
 
         x86_64, AArch64:
           RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
-            0, 0  228,564,338   57.90%  Acceptable  Trivial
-            0, 1    9,793,943    2.48%  Acceptable  Trivial
+            0, 0  138,542,022   42.99%  Acceptable  Trivial
+            0, 1    3,232,097    1.00%  Acceptable  Trivial
             1, 0            0    0.00%   Forbidden  Cannot happen
-            1, 1  156,369,143   39.61%  Acceptable  Trivial
+            1, 1  180,464,345   56.00%  Acceptable  Trivial
      */
 
     private int x, g;
@@ -68,7 +69,7 @@ public class RMW_04_SuccessMemoryEffects {
 
     static {
         try {
-            VH = MethodHandles.lookup().findVarHandle(RMW_04_SuccessMemoryEffects.class, "g", int.class);
+            VH = MethodHandles.lookup().findVarHandle(RMW_05_ReleaseOnSuccess.class, "g", int.class);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
@@ -82,7 +83,7 @@ public class RMW_04_SuccessMemoryEffects {
 
     @Actor
     public void actor2(II_Result r) {
-        r.r1 = (int) VH.getVolatile(this);
+        r.r1 = (int)VH.getVolatile(this);
         r.r2 = x;
     }
 

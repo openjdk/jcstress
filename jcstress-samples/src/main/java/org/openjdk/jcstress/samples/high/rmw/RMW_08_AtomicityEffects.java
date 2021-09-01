@@ -39,17 +39,21 @@ import java.lang.invoke.VarHandle;
 import static org.openjdk.jcstress.annotations.Expect.*;
 
 
-public class RMW_05_FailureMemoryEffects {
+public class RMW_08_AtomicityEffects {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_05_FailureMemoryEffects[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_08_AtomicBound[.SubTestName]
      */
 
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        This test produces (0, 0), and the justifying execution is:
+        This test explores the behaviors of atomic RMW instructions. Since failing RMW operations do not
+        produce observable writes, the tests are complicated, and have to test the memory semantics
+        in a round-about way, gradually building up the test case.
+
+        First, a very basic test. This test produces (0, 0), and the justifying execution is:
 
              w(x, 1) --po/hb--> r(y):0
                                   |
@@ -59,7 +63,7 @@ public class RMW_05_FailureMemoryEffects {
 
         In other words, this reads "x" through a race, and "y" has not been set yet.
 
-        AArch64:
+        Indeed, this is clearly visible on AArch64:
           RESULT     SAMPLES     FREQ       EXPECT  DESCRIPTION
             0, 0       4,930    0.02%  Interesting  Interesting
             0, 1  12,429,506   58.06%   Acceptable  Trivial
@@ -98,7 +102,8 @@ public class RMW_05_FailureMemoryEffects {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        This test produces (0, 0), and the justifying execution is:
+        Replacing both non-atomic checks with CAS yields the example that still produces
+        (0, 0). The justifying execution for that outcome is:
 
              w(x, 1) --po/hb--> [ r(y):0; nothing happens ]
                                          |
@@ -108,7 +113,7 @@ public class RMW_05_FailureMemoryEffects {
 
         ...where CAS actions are "indivisible" in "[ ]".
 
-        It is similar as before, and the fact these are CASes changes nothing (yet).
+        The fact these are atomic CASes changes nothing (yet).
 
         AArch64:
           RESULT     SAMPLES     FREQ       EXPECT  DESCRIPTION
@@ -152,11 +157,13 @@ public class RMW_05_FailureMemoryEffects {
     /*
       ----------------------------------------------------------------------------------------------------------
 
+
+
         This test produces (0, 0), and the justifying execution is:
 
         w(x,1) --po/hb--> r(y):0 --po/hb--> w(y,0)
                             |                 ^
-                            |                 |
+                            | so              | so
                             v                 |
                         [ r(y):0     ;     w(y,1) ] --po/hb--> r(x):0
 
@@ -225,7 +232,7 @@ public class RMW_05_FailureMemoryEffects {
 
         w(x,1) --po/hb--> [ r(y):0 ; w(y,0) ]
                               |         ^
-                              |         |
+                              | so      | so
                               v         |
                           [ r(y):0 ; w(y,1) ] --po/hb--> r(x):0
 
@@ -255,9 +262,9 @@ public class RMW_05_FailureMemoryEffects {
         In the end, there is no execution that justifies (0, 0).
 
         Note that it is an effect of all three:
-          - GAS and CAS being atomic;
-          - GAS and CAS being sequentially consistent;
-          - GAS performing the unconditional store;
+          - GAS being atomic;
+          - GAS carrying "volatile" semantics;
+          - GAS performing the unconditional store that links the sw;
 
         Previous examples show how failing any of these prerequisites exposes (0, 0).
 
