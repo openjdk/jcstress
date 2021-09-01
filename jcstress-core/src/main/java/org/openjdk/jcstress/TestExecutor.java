@@ -477,7 +477,7 @@ public class TestExecutor {
             // There is a pending exception that terminated the target VM.
             if (pendingException != null) {
                 result = new TestResult(Status.VM_ERROR);
-                result.addMessage(pendingException.getMessage());
+                result.addMessages(pendingException);
                 result.setConfig(task);
                 sink.add(result);
                 return;
@@ -501,7 +501,7 @@ public class TestExecutor {
                 sink.add(result);
             } catch (InterruptedException | ExecutionException ex) {
                 result = new TestResult(Status.VM_ERROR);
-                result.addMessage(ex.getMessage());
+                result.addMessages(ex);
                 result.setConfig(task);
                 sink.add(result);
             } finally {
