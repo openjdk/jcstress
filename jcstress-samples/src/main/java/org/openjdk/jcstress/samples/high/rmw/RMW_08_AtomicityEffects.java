@@ -43,7 +43,7 @@ public class RMW_08_AtomicityEffects {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_08_AtomicBound[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_08_AtomicityEffects[.SubTestName]
      */
 
     /*
