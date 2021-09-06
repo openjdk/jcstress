@@ -50,7 +50,9 @@ public class RMW_07_ReleaseOnFailure {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        This test explores the behaviors of atomic RMW instructions.
+        This test naively tries to show that a failing CAS does not provide "release" semantics.
+        But there are no observable results, because failing CAS does not write anything.
+        As far as reader side is concerned, no writes of "g" had been published.
 
         x86_64, AArch64:
           RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
@@ -74,7 +76,8 @@ public class RMW_07_ReleaseOnFailure {
     @Actor
     public void actor1(II_Result r) {
         x = 1;
-        VH.compareAndSet(this, 1, 0); // always fails
+        // This CAS always fails: no release semantics.
+        VH.compareAndSet(this, 1, 0);
     }
 
     @Actor

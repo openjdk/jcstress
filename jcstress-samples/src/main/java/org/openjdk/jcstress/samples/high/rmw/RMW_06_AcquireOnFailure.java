@@ -33,8 +33,7 @@ import org.openjdk.jcstress.infra.results.II_Result;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
-import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
+import static org.openjdk.jcstress.annotations.Expect.*;
 
 @JCStressTest
 @Outcome(id = {"0, 0", "1, 1", "0, 1"}, expect = ACCEPTABLE, desc = "Trivial")
@@ -50,7 +49,8 @@ public class RMW_06_AcquireOnFailure {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        This test explores the behaviors of atomic RMW instructions.
+        This test shows that even a failing CAS provides the "acquire" semantics:
+        it still observes the value regardless of the subsequent CAS result.
 
         x86_64, AArch64:
           RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
@@ -79,7 +79,9 @@ public class RMW_06_AcquireOnFailure {
 
     @Actor
     public void actor2(II_Result r) {
-        r.r1 = VH.compareAndSet(this, 0, 1) ? 0 : 1; // fails if (g == 1)
+        // This CAS fails when it observes "1".
+        // Ternary operator converts that failure to "1" explicitly.
+        r.r1 = VH.compareAndSet(this, 0, 1) ? 0 : 1;
         r.r2 = x;
     }
 

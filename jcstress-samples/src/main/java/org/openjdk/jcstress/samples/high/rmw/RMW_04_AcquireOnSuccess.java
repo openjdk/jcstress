@@ -49,11 +49,12 @@ public class RMW_04_AcquireOnSuccess {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        This test explores the behaviors of atomic RMW instructions.
+        This test shows that CAS provides "acquire" semantics on success. This is similar
+        to other tests, for example BasicJMM_06_Causality: once we observe something
+        "release"-d by another thread, using any primitive with "acquire" semantics,
+        we are guaranteed to see things that happened before that release.
 
-        This shows that CAS provides "acquire" semantics on success.
-
-        x86_64, AArch64:
+        Indeed, on both x86_64 and AArch64 this would happen:
           RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
             0, 0  138,542,022   42.99%  Acceptable  Trivial
             0, 1    3,232,097    1.00%  Acceptable  Trivial

@@ -46,9 +46,7 @@ public class RMW_02_ContendedSuccess {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        This test explores the behaviors of atomic RMW instructions.
-
-        A more advanced property of CASes:
+        This tests explores a more advanced property of CASes:
           - for strong CASes, exactly one operation should succeed
           - for weak CASes, at most one operation should succeed (accept spurious failures)
 

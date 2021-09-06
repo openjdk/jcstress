@@ -39,7 +39,7 @@ import java.lang.invoke.VarHandle;
 import static org.openjdk.jcstress.annotations.Expect.*;
 
 
-public class RMW_08_AtomicityEffects {
+public class RMW_08_GAS_Effects {
 
     /*
         How to run this test:
@@ -49,11 +49,14 @@ public class RMW_08_AtomicityEffects {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        This test explores the behaviors of atomic RMW instructions. Since failing RMW operations do not
-        produce observable writes, the tests are complicated, and have to test the memory semantics
-        in a round-about way, gradually building up the test case.
+        This test construct a rather complicated example when the failing CAS semantics
+        matters a bit, and why a stronger primitives might be needed. Since failing RMW
+        operations do not produce observable writes, the tests are complicated, and have
+        to test the memory semantics in a round-about way.
 
-        First, a very basic test. This test produces (0, 0), and the justifying execution is:
+        We shall build up the test case gradually. First, a very basic test.
+
+        This test produces (0, 0), and the justifying execution is:
 
              w(x, 1) --po/hb--> r(y):0
                                   |
@@ -113,9 +116,10 @@ public class RMW_08_AtomicityEffects {
 
         ...where CAS actions are "indivisible" in "[ ]".
 
-        The fact these are atomic CASes changes nothing (yet).
+        The fact these are atomic CASes changes nothing (yet): there is no store,
+        and therefore no memory semantics can be assumed.
 
-        AArch64:
+        Indeed, this still happens on AArch64:
           RESULT     SAMPLES     FREQ       EXPECT  DESCRIPTION
             0, 0         868   <0.01%  Interesting  Interesting
             0, 1  13,122,195   63.29%   Acceptable  Trivial
@@ -157,9 +161,8 @@ public class RMW_08_AtomicityEffects {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-
-
-        This test produces (0, 0), and the justifying execution is:
+        Doing the store to provide the release on one side still produces (0, 0),
+        and the justifying execution is:
 
         w(x,1) --po/hb--> r(y):0 --po/hb--> w(y,0)
                             |                 ^
@@ -173,7 +176,7 @@ public class RMW_08_AtomicityEffects {
         Note that the order over "y" is still linearizable, as required for synchronization
         actions: r(y):0 --> r(y):0 --> w(y,1) --> w(y, 0).
 
-        AArch64:
+        Indeed, this is still possible on AArch64:
           RESULT     SAMPLES     FREQ       EXPECT  DESCRIPTION
             0, 0       2,087   <0.01%  Interesting  Interesting
             0, 1  11,400,418   52.20%   Acceptable  Trivial
@@ -217,8 +220,11 @@ public class RMW_08_AtomicityEffects {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        This test cannot produce (0, 0), because (drum roll, please). We basically need to
-        fill in the blanks in between the actions in GAS and CAS:
+        Now to the final test. This test cannot produce (0, 0), because it uses a much stronger
+        primitive: Get-And-Set (GAS).
+
+        To reason whether we can produce (0, 0), we basically need to fill in the blanks
+        in between the actions in GAS and CAS:
 
         w(x,1) --po/hb--> [ r(y):0 ; w(y,0) ]
 
@@ -248,7 +254,6 @@ public class RMW_08_AtomicityEffects {
                                         |
                           [ r(y):0 ; w(y,1) ] --po/hb--> r(x):0
 
-
         This execution is invalid, because r(y) observes w(y), which means there
         is a synchronizes-with between them, which hooks w(x) and r(x), which
         fails happens-before consistency: r(x) should see 1.
@@ -262,13 +267,13 @@ public class RMW_08_AtomicityEffects {
         In the end, there is no execution that justifies (0, 0).
 
         Note that it is an effect of all three:
-          - GAS being atomic;
-          - GAS carrying "volatile" semantics;
-          - GAS performing the unconditional store that links the sw;
+          - GAS is being atomic;
+          - GAS is carrying "release" semantics;
+          - GAS is performing the unconditional store is detectable by CAS;
 
         Previous examples show how failing any of these prerequisites exposes (0, 0).
 
-        AArch64:
+        Indeed, this does not happen on AArch64 anymore:
           RESULT    SAMPLES     FREQ      EXPECT  DESCRIPTION
             0, 0          0    0.00%   Forbidden  Nope
             0, 1  9,899,632   53.12%  Acceptable  Trivial
