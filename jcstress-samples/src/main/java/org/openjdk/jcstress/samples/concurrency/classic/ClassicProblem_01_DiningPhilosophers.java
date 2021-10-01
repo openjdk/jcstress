@@ -91,13 +91,31 @@ public class ClassicProblem_01_DiningPhilosophers {
         }
     }
 
+    static abstract class Base {
+        private final AtomicIntegerArray forks = new AtomicIntegerArray(3);
+
+        protected boolean tryPickForks(int fork1, int fork2) {
+            if (forks.getAndSet(fork1, 1) == 0) {
+                if (forks.getAndSet(fork2, 1) == 0) {
+                    return true;
+                } else {
+                    forks.set(fork1, 0);
+                }
+            }
+            return false;
+        }
+
+        protected void dropFork(int fork) {
+            forks.set(fork, 0);
+        }
+    }
+
     @JCStressTest
     @Outcome(id = {"true"}, expect = ACCEPTABLE, desc = "All philosophers could eat with their 2 neighboured forks.")
     @Outcome(expect = FORBIDDEN, desc = "At least one philosopher couldn't eat.")
     @State
-    public static class Arbitrator {
+    public static class Arbitrator extends Base {
         private final Semaphore waiter = new Semaphore(1);
-        private final AtomicIntegerArray forks = new AtomicIntegerArray(3);
 
         @Actor
         public void p1() {
@@ -124,21 +142,61 @@ public class ClassicProblem_01_DiningPhilosophers {
 
         final protected void eat(int fork1, int fork2) {
             try {
-                boolean hasForks = false;
                 waiter.acquire();
-                if (forks.getAndSet(fork1, 1) == 0) {
-                    if (forks.getAndSet(fork2, 1) == 0) {
-                        hasForks = true;
-                    } else {
-                        forks.set(fork1, 0);
-                    }
-                }
+                final boolean hasForks = tryPickForks(fork1, fork2);
                 waiter.release();
 
                 if(hasForks) {
                     // eating
-                    forks.set(fork1, 0);
-                    forks.set(fork2, 0);
+                    dropFork(fork1);
+                    dropFork(fork2);
+                }
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    }
+
+    @JCStressTest
+    @Outcome(id = {"true"}, expect = ACCEPTABLE, desc = "All philosophers could eat with their 2 neighboured forks.")
+    @Outcome(expect = FORBIDDEN, desc = "At least one philosopher couldn't eat.")
+    @State
+    public static class OneDinerFewer extends Base {
+        private final Semaphore diners = new Semaphore(2);
+
+        @Actor
+        public void p1() {
+            // think
+            eat(0, 1);
+        }
+
+        @Actor
+        public void p2() {
+            // think
+            eat(1, 2);
+        }
+
+        @Actor
+        public void p3() {
+            // think
+            eat(2, 0);
+        }
+
+        @Arbiter
+        public void fake(Z_Result r) {
+            r.r1 = true;
+        }
+
+        final protected void eat(int fork1, int fork2) {
+            try {
+                diners.acquire();
+                final boolean hasForks = tryPickForks(fork1, fork2);
+                diners.release();
+
+                if(hasForks) {
+                    // eating
+                    dropFork(fork1);
+                    dropFork(fork2);
                 }
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e);
