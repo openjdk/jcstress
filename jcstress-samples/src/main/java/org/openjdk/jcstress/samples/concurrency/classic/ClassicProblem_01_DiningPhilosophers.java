@@ -43,7 +43,7 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 
 /**
  * This sample shows you how JCStress can help you to test solutions for the famous Dining philosophers problem.
- * It solves this problem by a resource hierarchy.
+ * It solves this problem by a resource hierarchy, by an arbitrator and by limiting the number of diners.
  * See https://en.wikipedia.org/wiki/Dining_philosophers_problem for more information about the problem.
  */
 public class ClassicProblem_01_DiningPhilosophers {
@@ -52,7 +52,7 @@ public class ClassicProblem_01_DiningPhilosophers {
     @Outcome(expect = FORBIDDEN, desc = "At least one philosopher couldn't eat.")
     @State
     public static class ResourceHierarchy {
-        private final Semaphore[] semaphores =
+        private final Semaphore[] forks =
                 new Semaphore[]{new Semaphore(1), new Semaphore(1), new Semaphore(1)};
 
         @Actor
@@ -80,11 +80,11 @@ public class ClassicProblem_01_DiningPhilosophers {
 
         final protected void eat(int fork1, int fork2) {
             try {
-                semaphores[fork1].acquire();
-                semaphores[fork2].acquire();
+                forks[fork1].acquire();
+                forks[fork2].acquire();
                 // eating
-                semaphores[fork2].release();
-                semaphores[fork1].release();
+                forks[fork2].release();
+                forks[fork1].release();
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e);
             }
