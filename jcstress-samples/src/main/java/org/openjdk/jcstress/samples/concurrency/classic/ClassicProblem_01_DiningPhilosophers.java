@@ -28,6 +28,8 @@ import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.Z_Result;
 
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -81,8 +83,63 @@ public class ClassicProblem_01_DiningPhilosophers {
                 semaphores[fork1].acquire();
                 semaphores[fork2].acquire();
                 // eating
-                semaphores[fork1].release();
                 semaphores[fork2].release();
+                semaphores[fork1].release();
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    }
+
+    @JCStressTest
+    @Outcome(id = {"true"}, expect = ACCEPTABLE, desc = "All philosophers could eat with their 2 neighboured forks.")
+    @Outcome(expect = FORBIDDEN, desc = "At least one philosopher couldn't eat.")
+    @State
+    public static class Arbitrator {
+        private final Semaphore waiter = new Semaphore(1);
+        private final AtomicIntegerArray forks = new AtomicIntegerArray(3);
+
+        @Actor
+        public void p1() {
+            // think
+            eat(0, 1);
+        }
+
+        @Actor
+        public void p2() {
+            // think
+            eat(1, 2);
+        }
+
+        @Actor
+        public void p3() {
+            // think
+            eat(2, 0);
+        }
+
+        @Arbiter
+        public void fake(Z_Result r) {
+            r.r1 = true;
+        }
+
+        final protected void eat(int fork1, int fork2) {
+            try {
+                boolean hasForks = false;
+                waiter.acquire();
+                if (forks.getAndSet(fork1, 1) == 0) {
+                    if (forks.getAndSet(fork2, 1) == 0) {
+                        hasForks = true;
+                    } else {
+                        forks.set(fork1, 0);
+                    }
+                }
+                waiter.release();
+
+                if(hasForks) {
+                    // eating
+                    forks.set(fork1, 0);
+                    forks.set(fork2, 0);
+                }
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e);
             }
