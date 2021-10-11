@@ -27,6 +27,7 @@ package org.openjdk.jcstress.util;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -117,20 +118,12 @@ public class StringUtils {
         return sb.toString();
     }
 
-    public static String getStacktrace(Throwable throwable) {
+    public static List<String> getStacktrace(Throwable throwable) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         throwable.printStackTrace(pw);
         pw.close();
-        return sw.toString();
-    }
-
-    public static String getFirstLine(String src) {
-        int endLine = src.indexOf("\n");
-        if (endLine > 0) {
-            return src.substring(0, endLine).trim();
-        }
-        return src;
+        return Arrays.asList(sw.toString().split(System.lineSeparator()));
     }
 
     static final String[] PADS;

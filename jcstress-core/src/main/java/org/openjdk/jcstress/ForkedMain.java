@@ -80,10 +80,10 @@ public class ForkedMain {
             forceExit = o.forceExit();
         } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
             result = new TestResult(Status.API_MISMATCH);
-            result.addMessage(StringUtils.getStacktrace(e));
+            result.addMessages(e);
         } catch (Throwable ex) {
             result = new TestResult(Status.TEST_ERROR);
-            result.addMessage(StringUtils.getStacktrace(ex));
+            result.addMessages(ex);
         }
 
         if (forceExit) {

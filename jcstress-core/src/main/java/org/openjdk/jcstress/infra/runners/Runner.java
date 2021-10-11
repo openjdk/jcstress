@@ -114,7 +114,7 @@ public abstract class Runner<R> {
     protected TestResult dumpFailure(Status status, String message, Throwable aux) {
         TestResult r = new TestResult(status);
         r.addMessage(message);
-        r.addMessage(StringUtils.getStacktrace(aux));
+        r.addMessages(aux);
         return r;
     }
 
