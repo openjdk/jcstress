@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,10 +28,7 @@ import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.Z_Result;
 
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicIntegerArray;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
@@ -52,8 +49,7 @@ public class ClassicProblem_01_DiningPhilosophers {
     @Outcome(expect = FORBIDDEN, desc = "At least one philosopher couldn't eat.")
     @State
     public static class ResourceHierarchy {
-        private final Semaphore[] forks =
-                new Semaphore[]{new Semaphore(1), new Semaphore(1), new Semaphore(1)};
+        private final Object[] forks = new Object[] { new Object(), new Object(), new Object() };
 
         @Actor
         public void p1() {
@@ -79,14 +75,10 @@ public class ClassicProblem_01_DiningPhilosophers {
         }
 
         final protected void eat(int fork1, int fork2) {
-            try {
-                forks[fork1].acquire();
-                forks[fork2].acquire();
-                // eating
-                forks[fork2].release();
-                forks[fork1].release();
-            } catch (InterruptedException e) {
-                throw new IllegalStateException(e);
+            synchronized (forks[fork1]) {
+                synchronized (forks[fork2]) {
+                    // eating
+                }
             }
         }
     }
@@ -95,14 +87,18 @@ public class ClassicProblem_01_DiningPhilosophers {
         private final AtomicIntegerArray forks = new AtomicIntegerArray(3);
 
         protected boolean tryPickForks(int fork1, int fork2) {
-            if (forks.getAndSet(fork1, 1) == 0) {
-                if (forks.getAndSet(fork2, 1) == 0) {
+            if (tryPickFork(fork1)) {
+                if (tryPickFork(fork2)) {
                     return true;
                 } else {
-                    forks.set(fork1, 0);
+                    dropFork(fork1);
                 }
             }
             return false;
+        }
+
+        protected boolean tryPickFork(int fork) {
+            return forks.compareAndSet(fork, 0, 1);
         }
 
         protected void dropFork(int fork) {
@@ -115,7 +111,7 @@ public class ClassicProblem_01_DiningPhilosophers {
     @Outcome(expect = FORBIDDEN, desc = "At least one philosopher couldn't eat.")
     @State
     public static class Arbitrator extends Base {
-        private final Semaphore waiter = new Semaphore(1);
+        private final Object waiter = new Object();
 
         @Actor
         public void p1() {
@@ -141,18 +137,15 @@ public class ClassicProblem_01_DiningPhilosophers {
         }
 
         final protected void eat(int fork1, int fork2) {
-            try {
-                waiter.acquire();
-                final boolean hasForks = tryPickForks(fork1, fork2);
-                waiter.release();
+            final boolean hasForks;
+            synchronized (waiter) {
+                hasForks = tryPickForks(fork1, fork2);
+            }
 
-                if(hasForks) {
-                    // eating
-                    dropFork(fork1);
-                    dropFork(fork2);
-                }
-            } catch (InterruptedException e) {
-                throw new IllegalStateException(e);
+            if (hasForks) {
+                // eating
+                dropFork(fork1);
+                dropFork(fork2);
             }
         }
     }
@@ -193,7 +186,7 @@ public class ClassicProblem_01_DiningPhilosophers {
                 final boolean hasForks = tryPickForks(fork1, fork2);
                 diners.release();
 
-                if(hasForks) {
+                if (hasForks) {
                     // eating
                     dropFork(fork1);
                     dropFork(fork2);
