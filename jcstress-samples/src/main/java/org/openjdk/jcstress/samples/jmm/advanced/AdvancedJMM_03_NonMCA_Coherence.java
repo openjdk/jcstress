@@ -37,10 +37,8 @@ import java.lang.invoke.VarHandle;
 import static org.openjdk.jcstress.annotations.Expect.*;
 
 @JCStressTest
-@Outcome(id = {"0, 1, 1, 0", "1, 0, 0, 1",
-               "1, 2, 2, 1", "2, 1, 1, 2",
-               "0, 2, 2, 0", "2, 0, 0, 2"}, expect = FORBIDDEN, desc = "Violates coherence.")
-@Outcome(                                   expect = ACCEPTABLE, desc = "Everything else is acceptable.")
+@Outcome(id = {"1, 2, 2, 1", "2, 1, 1, 2"}, expect = FORBIDDEN,  desc = "Violates coherence.")
+@Outcome(                                   expect = ACCEPTABLE, desc = "Every other result is ignored.")
 @State
 public class AdvancedJMM_03_NonMCA_Coherence {
 
@@ -62,21 +60,17 @@ public class AdvancedJMM_03_NonMCA_Coherence {
 
          PPC64 (some less likely Acceptable results pruned):
               RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
-          0, 0, 0, 0  144,731,042    8.70%  Acceptable  Everything else is acceptable.
-          0, 0, 1, 1  110,292,857    6.63%  Acceptable  Everything else is acceptable.
-          0, 0, 2, 2  109,134,556    6.56%  Acceptable  Everything else is acceptable.
-          0, 1, 1, 0            0    0.00%   Forbidden  Violates coherence.
-          0, 2, 2, 0            0    0.00%   Forbidden  Violates coherence.
-          1, 0, 0, 1            0    0.00%   Forbidden  Violates coherence.
-          1, 1, 0, 0  107,110,080    6.44%  Acceptable  Everything else is acceptable.
-          1, 1, 1, 1  360,030,567   21.65%  Acceptable  Everything else is acceptable.
-          1, 1, 2, 2  171,924,770   10.34%  Acceptable  Everything else is acceptable.
+          0, 0, 0, 0  144,731,042    8.70%  Acceptable  Every other result is ignored.
+          0, 0, 1, 1  110,292,857    6.63%  Acceptable  Every other result is ignored.
+          0, 0, 2, 2  109,134,556    6.56%  Acceptable  Every other result is ignored.
+          1, 1, 0, 0  107,110,080    6.44%  Acceptable  Every other result is ignored.
+          1, 1, 1, 1  360,030,567   21.65%  Acceptable  Every other result is ignored.
+          1, 1, 2, 2  171,924,770   10.34%  Acceptable  Every other result is ignored.
           1, 2, 2, 1            0    0.00%   Forbidden  Violates coherence.
-          2, 0, 0, 2            0    0.00%   Forbidden  Violates coherence.
           2, 1, 1, 2            0    0.00%   Forbidden  Violates coherence.
-          2, 2, 0, 0  107,366,602    6.46%  Acceptable  Everything else is acceptable.
-          2, 2, 1, 1  172,793,130   10.39%  Acceptable  Everything else is acceptable.
-          2, 2, 2, 2  370,602,534   22.29%  Acceptable  Everything else is acceptable.
+          2, 2, 0, 0  107,366,602    6.46%  Acceptable  Every other result is ignored.
+          2, 2, 1, 1  172,793,130   10.39%  Acceptable  Every other result is ignored.
+          2, 2, 2, 2  370,602,534   22.29%  Acceptable  Every other result is ignored.
      */
 
     static final VarHandle VH;
