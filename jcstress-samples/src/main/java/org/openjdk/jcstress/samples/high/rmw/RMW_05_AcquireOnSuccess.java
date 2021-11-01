@@ -39,25 +39,27 @@ import static org.openjdk.jcstress.annotations.Expect.*;
 @Outcome(id = {"0, 0", "1, 1", "0, 1"}, expect = ACCEPTABLE, desc = "Trivial")
 @Outcome(id = "1, 0",                   expect = FORBIDDEN,  desc = "Cannot happen")
 @State
-public class RMW_06_AcquireOnFailure {
+public class RMW_05_AcquireOnSuccess {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_06_AcquireOnFailure[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_05_AcquireOnSuccess[.SubTestName]
      */
 
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        This test shows that even a failing CAS provides the "acquire" semantics:
-        it still observes the value regardless of the subsequent CAS result.
+        This test shows that CAS provides "acquire" semantics on success. This is similar
+        to other tests, for example BasicJMM_06_Causality: once we observe something
+        "release"-d by another thread, using any primitive with "acquire" semantics,
+        we are guaranteed to see things that happened before that release.
 
-        x86_64, AArch64:
+        Indeed, on both x86_64 and AArch64 this would happen:
           RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
-            0, 0  146,825,939   44.46%  Acceptable  Trivial
-            0, 1    4,112,904    1.25%  Acceptable  Trivial
+            0, 0  138,542,022   42.99%  Acceptable  Trivial
+            0, 1    3,232,097    1.00%  Acceptable  Trivial
             1, 0            0    0.00%   Forbidden  Cannot happen
-            1, 1  179,276,581   54.29%  Acceptable  Trivial
+            1, 1  180,464,345   56.00%  Acceptable  Trivial
      */
 
     private int x, g;
@@ -65,7 +67,7 @@ public class RMW_06_AcquireOnFailure {
 
     static {
         try {
-            VH = MethodHandles.lookup().findVarHandle(RMW_06_AcquireOnFailure.class, "g", int.class);
+            VH = MethodHandles.lookup().findVarHandle(RMW_05_AcquireOnSuccess.class, "g", int.class);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
@@ -79,9 +81,7 @@ public class RMW_06_AcquireOnFailure {
 
     @Actor
     public void actor2(II_Result r) {
-        // This CAS fails when it observes "1".
-        // Ternary operator converts that failure to "1" explicitly.
-        r.r1 = VH.compareAndSet(this, 0, 1) ? 0 : 1;
+        r.r1 = VH.compareAndSet(this, 1, 0) ? 1 : 0; // succeeds if (g == 1)
         r.r2 = x;
     }
 

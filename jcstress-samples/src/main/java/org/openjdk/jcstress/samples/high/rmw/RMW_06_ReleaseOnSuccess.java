@@ -33,28 +33,30 @@ import org.openjdk.jcstress.infra.results.II_Result;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
-import static org.openjdk.jcstress.annotations.Expect.*;
+import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
+import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 
 @JCStressTest
 @Outcome(id = {"0, 0", "1, 1", "0, 1"}, expect = ACCEPTABLE, desc = "Trivial")
 @Outcome(id = "1, 0",                   expect = FORBIDDEN,  desc = "Cannot happen")
 @State
-public class RMW_04_AcquireOnSuccess {
+public class RMW_06_ReleaseOnSuccess {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_04_AcquireOnSuccess[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_06_ReleaseOnSuccess[.SubTestName]
      */
 
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        This test shows that CAS provides "acquire" semantics on success. This is similar
+        This test shows that CAS provides "release" semantics on success. This is similar
         to other tests, for example BasicJMM_06_Causality: once we observe something
-        "release"-d by another thread, using any primitive with "acquire" semantics,
-        we are guaranteed to see things that happened before that release.
+        "release"-d by another thread using any primitive with "release" semantics,
+        by using any primitive with "acquire" semantics, we are guaranteed to see
+        things that happened before that release.
 
-        Indeed, on both x86_64 and AArch64 this would happen:
+        Indeed, on both x86_64 and AArch64:
           RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
             0, 0  138,542,022   42.99%  Acceptable  Trivial
             0, 1    3,232,097    1.00%  Acceptable  Trivial
@@ -67,7 +69,7 @@ public class RMW_04_AcquireOnSuccess {
 
     static {
         try {
-            VH = MethodHandles.lookup().findVarHandle(RMW_04_AcquireOnSuccess.class, "g", int.class);
+            VH = MethodHandles.lookup().findVarHandle(RMW_06_ReleaseOnSuccess.class, "g", int.class);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
@@ -76,12 +78,12 @@ public class RMW_04_AcquireOnSuccess {
     @Actor
     public void actor1(II_Result r) {
         x = 1;
-        VH.setVolatile(this, 1);
+        VH.compareAndSet(this, 0, 1); // always succeeds
     }
 
     @Actor
     public void actor2(II_Result r) {
-        r.r1 = VH.compareAndSet(this, 1, 0) ? 1 : 0; // succeeds if (g == 1)
+        r.r1 = (int)VH.getVolatile(this);
         r.r2 = x;
     }
 

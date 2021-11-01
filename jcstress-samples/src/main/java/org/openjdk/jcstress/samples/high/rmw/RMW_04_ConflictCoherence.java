@@ -40,15 +40,17 @@ import static org.openjdk.jcstress.annotations.Expect.*;
 @Outcome(id = "false, false",                 expect = ACCEPTABLE, desc = "Not even once")
 @Outcome(id = "true, true",                   expect = FORBIDDEN,  desc = "More than once")
 @State
-public class RMW_03_ConflictCoherence {
+public class RMW_04_ConflictCoherence {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_03_ConflictCoherence[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_04_ConflictCoherence[.SubTestName]
      */
 
     /*
       ----------------------------------------------------------------------------------------------------------
+
+        Another example elaborates on conflict behavior.
 
         This example shows that even with the weakest form of RMW (CAS), without any memory ordering
         whatsoever, we are still covered by coherence (see BasicJMM_05_Coherence example). That is,
@@ -76,7 +78,7 @@ public class RMW_03_ConflictCoherence {
 
     static {
         try {
-            VH = MethodHandles.lookup().findVarHandle(RMW_03_ConflictCoherence.class, "v", int.class);
+            VH = MethodHandles.lookup().findVarHandle(RMW_04_ConflictCoherence.class, "v", int.class);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }

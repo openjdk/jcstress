@@ -39,11 +39,11 @@ import java.lang.invoke.VarHandle;
 import static org.openjdk.jcstress.annotations.Expect.*;
 
 
-public class RMW_08_GAS_Effects {
+public class RMW_09_GAS_Effects {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_08_AtomicityEffects[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_09_GAS_Effects[.SubTestName]
      */
 
     /*
