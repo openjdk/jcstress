@@ -34,27 +34,34 @@ import static org.openjdk.jcstress.annotations.Expect.*;
 
 @JCStressTest
 @State
-@Outcome(id = {"0, 0", "1, 1"}, expect = ACCEPTABLE, desc = "Boring")
-@Outcome(id = {"0, 1", "1, 0"}, expect = ACCEPTABLE, desc = "Plausible")
-public class AdvancedJMM_09_WrongAcquireOrder {
+@Outcome(id = {"0, 0", "1, 1"}, expect = ACCEPTABLE,             desc = "Boring")
+@Outcome(id = "0, 1",           expect = ACCEPTABLE,             desc = "Plausible")
+@Outcome(id = "1, 0",           expect = ACCEPTABLE_INTERESTING, desc = "Whoa")
+public class AdvancedJMM_08_WrongReleaseOrder {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_09_WrongAcquireOrder
+            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_08_WrongReleaseOrder
      */
 
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        For completeness, the example that has a wrong acquire order. All these results can be explained by
-        sequential execution of the code.
+        Remember, it is critically important that proper release-acquire chains follows the proper structure:
+           A --before--> release --sees--> acquire --before--> B
 
-        x86_64:
+        Only this way we can guarantee that B sees A. This test is one of the exploratory tests what bad
+        things happen when that rule is violated. This example differs from BasicJMM_05_Coherence by doing
+        the release in wrong order.
+
+        This test yields:
           RESULT        SAMPLES     FREQ       EXPECT  DESCRIPTION
-            0, 0  2,560,656,086   55.33%   Acceptable  Boring
-            0, 1      2,961,349    0.06%   Acceptable  Plausible
-            1, 0      7,885,064    0.17%   Acceptable  Plausible
-            1, 1  2,056,684,125   44.44%   Acceptable  Boring
+            0, 0  2,285,705,011   53.75%   Acceptable  Boring
+            0, 1      3,023,487    0.07%   Acceptable  Plausible
+            1, 0     17,424,594    0.41%  Interesting  Whoa
+            1, 1  1,946,573,692   45.77%   Acceptable  Boring
+
+        The "1, 0" outcome is now eminently possible and can be explained by a simple sequential execution.
      */
 
     int x;
@@ -62,13 +69,13 @@ public class AdvancedJMM_09_WrongAcquireOrder {
 
     @Actor
     public void actor1() {
+        g = 1;  // premature release
         x = 1;
-        g = 1;
     }
 
     @Actor
     public void actor2(II_Result r) {
-        r.r1 = x;
-        r.r2 = g; // acquiring too late
+        r.r1 = g;
+        r.r2 = x;
     }
 }

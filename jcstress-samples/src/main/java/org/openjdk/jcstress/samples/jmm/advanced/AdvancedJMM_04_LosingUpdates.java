@@ -31,11 +31,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.openjdk.jcstress.annotations.Expect.*;
 
-public class AdvancedJMM_03_LosingUpdates {
+public class AdvancedJMM_04_LosingUpdates {
 
      /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_03_LosingUpdates[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_04_LosingUpdates[.SubTestName]
      */
 
     /*
