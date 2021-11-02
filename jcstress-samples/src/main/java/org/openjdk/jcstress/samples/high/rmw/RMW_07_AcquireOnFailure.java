@@ -33,35 +33,31 @@ import org.openjdk.jcstress.infra.results.II_Result;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
-import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
+import static org.openjdk.jcstress.annotations.Expect.*;
 
 @JCStressTest
 @Outcome(id = {"0, 0", "1, 1", "0, 1"}, expect = ACCEPTABLE, desc = "Trivial")
 @Outcome(id = "1, 0",                   expect = FORBIDDEN,  desc = "Cannot happen")
 @State
-public class RMW_05_ReleaseOnSuccess {
+public class RMW_07_AcquireOnFailure {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_05_ReleaseOnSuccess[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_07_AcquireOnFailure[.SubTestName]
      */
 
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        This test shows that CAS provides "release" semantics on success. This is similar
-        to other tests, for example BasicJMM_06_Causality: once we observe something
-        "release"-d by another thread using any primitive with "release" semantics,
-        by using any primitive with "acquire" semantics, we are guaranteed to see
-        things that happened before that release.
+        This test shows that even a failing CAS provides the "acquire" semantics:
+        it still observes the value regardless of the subsequent CAS result.
 
-        Indeed, on both x86_64 and AArch64:
+        x86_64, AArch64:
           RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
-            0, 0  138,542,022   42.99%  Acceptable  Trivial
-            0, 1    3,232,097    1.00%  Acceptable  Trivial
+            0, 0  146,825,939   44.46%  Acceptable  Trivial
+            0, 1    4,112,904    1.25%  Acceptable  Trivial
             1, 0            0    0.00%   Forbidden  Cannot happen
-            1, 1  180,464,345   56.00%  Acceptable  Trivial
+            1, 1  179,276,581   54.29%  Acceptable  Trivial
      */
 
     private int x, g;
@@ -69,7 +65,7 @@ public class RMW_05_ReleaseOnSuccess {
 
     static {
         try {
-            VH = MethodHandles.lookup().findVarHandle(RMW_05_ReleaseOnSuccess.class, "g", int.class);
+            VH = MethodHandles.lookup().findVarHandle(RMW_07_AcquireOnFailure.class, "g", int.class);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
@@ -78,12 +74,14 @@ public class RMW_05_ReleaseOnSuccess {
     @Actor
     public void actor1(II_Result r) {
         x = 1;
-        VH.compareAndSet(this, 0, 1); // always succeeds
+        VH.setVolatile(this, 1);
     }
 
     @Actor
     public void actor2(II_Result r) {
-        r.r1 = (int)VH.getVolatile(this);
+        // This CAS fails when it observes "1".
+        // Ternary operator converts that failure to "1" explicitly.
+        r.r1 = VH.compareAndSet(this, 0, 1) ? 0 : 1;
         r.r2 = x;
     }
 

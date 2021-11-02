@@ -32,12 +32,11 @@ import org.openjdk.jcstress.infra.results.I_Result;
 
 import static org.openjdk.jcstress.annotations.Expect.*;
 
+public class AdvancedJMM_06_SemiSynchronized {
 
-public class AdvancedJMM_04_MisplacedVolatile {
-
-     /*
+    /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_04_MisplacedVolatile[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_06_SemiSynchronized[.SubTestName]
      */
 
     static class Composite {
@@ -53,23 +52,23 @@ public class AdvancedJMM_04_MisplacedVolatile {
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        This test shows the common pitfall: the misplaced synchronization points. Here, the "volatile" is
-        placed on the "h" field itself. But there are no releasing writes to "h" that gives us visibility
-        of other updates! Note that test checks the value of dependent field, Composite.x -- the field of
-        the object that we have passed between the threads unsafely.
+        Somewhat similar to previous example, this test now publishes the Composite with the synchronized
+        setter. But, the getter is deliberately non-synchronized. Unfortunately, synchronizing only the
+        setter is not enough: the getter is still racy, and can observe surprising results.
 
-        This outcome is possible on AArch64:
+        This can be seen on some platforms, for example with PPC64 (modern JDKs require -XX:+UseBiasedLocking):
           RESULT      SAMPLES     FREQ       EXPECT  DESCRIPTION
-              -1  388,488,952   81.30%   Acceptable  Boring
-               0          553   <0.01%  Interesting  Whoa
-              42   89,365,471   18.70%   Acceptable  Boring
+              -1  566,235,858   91.44%   Acceptable  Boring
+               0          354   <0.01%  Interesting  Whoa
+              42   53,010,764    8.56%   Acceptable  Boring
      */
+
     @JCStressTest
     @State
     @Outcome(id = {"-1", "42"}, expect = ACCEPTABLE,             desc = "Boring")
     @Outcome(id = "0",          expect = ACCEPTABLE_INTERESTING, desc = "Whoa")
     public static class Racy {
-        volatile Holder<Composite> h = new Holder<>(new Composite(-1));
+        Holder<Composite> h = new Holder<>(new Composite(-1));
 
         @Actor
         void actor() {
@@ -77,7 +76,7 @@ public class AdvancedJMM_04_MisplacedVolatile {
         }
 
         @Actor
-        void observer(I_Result r){
+        void observer(I_Result r) {
             r.r1 = h.get().get();
         }
 
@@ -88,11 +87,11 @@ public class AdvancedJMM_04_MisplacedVolatile {
                 value = v;
             }
 
-            public void set(T v) {
+            public synchronized void set(T v) {
                 value = v;
             }
 
-            public T get() {
+            public T get() { // Deliberately not synchronized
                 return value;
             }
         }
@@ -100,20 +99,19 @@ public class AdvancedJMM_04_MisplacedVolatile {
 
     /*
       ----------------------------------------------------------------------------------------------------------
-        Correctly synchronized program has "volatile" at the publication point: the write to "value" is now
-        releasing write, and read from "value" is now acquiring write. Therefore, seeing zero in the composite
-        data is illegal now.
 
-        AArch64:
-          RESULT      SAMPLES     FREQ       EXPECT  DESCRIPTION
-              -1  309,220,995   72.04%  Acceptable  Boring
-               0            0    0.00%   Forbidden  Illegal
-              42  120,004,221   27.96%  Acceptable  Boring
+        If we properly synchronize both getter and setter, the previously interesting example is now forbidden.
+
+        PPC64:
+          RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
+              -1  229,147,333   43.33%  Acceptable  Boring
+               0            0    0.00%   Forbidden  Now forbidden
+              42  299,711,163   56.67%  Acceptable  Boring
      */
     @JCStressTest
     @State
     @Outcome(id = {"-1", "42"}, expect = ACCEPTABLE, desc = "Boring")
-    @Outcome(id = "0",          expect = FORBIDDEN,  desc = "Illegal")
+    @Outcome(id = "0",          expect = FORBIDDEN,  desc = "Now forbidden")
     public static class NonRacy {
         Holder<Composite> h = new Holder<>(new Composite(-1));
 
@@ -123,26 +121,25 @@ public class AdvancedJMM_04_MisplacedVolatile {
         }
 
         @Actor
-        void observer(I_Result r){
+        void observer(I_Result r) {
             r.r1 = h.get().get();
         }
 
         static class Holder<T> {
-            volatile T value; // volatile is now here
+            T value;
 
             public Holder(T v) {
                 value = v;
             }
 
-            public void set(T v) {
+            public synchronized void set(T v) {
                 value = v;
             }
 
-            public T get() {
+            public synchronized T get() {
                 return value;
             }
         }
     }
-
 
 }

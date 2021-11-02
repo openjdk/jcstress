@@ -39,11 +39,11 @@ import static org.openjdk.jcstress.annotations.Expect.*;
 @State
 @Outcome(id = {"-1", "42"},       expect = ACCEPTABLE,             desc = "Boring")
 @Outcome(id = {"-2", "-3", "-4"}, expect = ACCEPTABLE_INTERESTING, desc = "Whoa-whoa")
-public class AdvancedJMM_08_WrongListReleaseOrder {
+public class AdvancedJMM_09_WrongListReleaseOrder {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_08_WrongListReleaseOrder
+            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_09_WrongListReleaseOrder
      */
 
     /*

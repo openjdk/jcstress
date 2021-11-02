@@ -28,69 +28,71 @@ import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
+import org.openjdk.jcstress.infra.results.III_Result;
 import org.openjdk.jcstress.infra.results.II_Result;
 
 import static org.openjdk.jcstress.annotations.Expect.*;
 import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
-public class AdvancedJMM_12_SynchronizedAreNotFences {
+public class AdvancedJMM_14_VolatilesAreNotFences {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_12_SynchronizedAreNotFences
+            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_14_VolatilesAreNotFences[.SubTestName]
      */
 
     /*
        ----------------------------------------------------------------------------------------------------------
 
-        This example is superficially similar to AdvancedJMM_01_SynchronizedBarriers, but this time it shows
-        that relying on the "synchronized" just for the memory effects is not reliable. Notably, the constructions
-        that use no-op synchronized blocks are routinely elided by optimizers. This test produces the interesting
-        result more or less reliably, by using "new Object()" as synchronization target. Choosing a different
-        target may mask the interesting result, but it can reappear in real programs after aggressive optimizations.
+        Similarly to AdvancedJMM_13_SynchronizedAreNotFences example, the volatile accesses cannot be reliably
+        used for their auxiliary memory effects. In this example, if we do not observe the write of the "b", then
+        we can see the old "x", even though volatile accesses _might_ be implemented with barriers.
 
-        On x86_64 this test yields:
-          RESULT        SAMPLES     FREQ       EXPECT  DESCRIPTION
-            0, 0    704,537,467   18.23%   Acceptable  Boring
-            0, 1     51,261,212    1.33%   Acceptable  Plausible
-            1, 0      2,583,316    0.07%  Interesting  Whoa
-            1, 1  3,106,218,069   80.38%   Acceptable  Boring
+        This reproduces on AArch64:
+            RESULT      SAMPLES     FREQ       EXPECT  DESCRIPTION
+           0, 0, 0  401,242,129   51.33%   Acceptable  Boring
+           0, 0, 1   12,608,887    1.61%   Acceptable  Irrelevant
+           0, 1, 1    6,231,104    0.80%   Acceptable  Irrelevant
+           1, 0, 0       91,935    0.01%  Interesting  Whoa
+           1, 0, 1    4,941,677    0.63%   Acceptable  Irrelevant
+           1, 1, 1  356,621,484   45.62%   Acceptable  Boring
      */
 
     @JCStressTest
     @State
-    @Outcome(id = {"0, 0", "1, 1"}, expect = ACCEPTABLE,             desc = "Boring")
-    @Outcome(id = "0, 1",           expect = ACCEPTABLE,             desc = "Plausible")
-    @Outcome(id = "1, 0",           expect = ACCEPTABLE_INTERESTING, desc = "Whoa")
-    public static class Synchronized {
+    @Outcome(id = {"0, 0, 0", "1, 1, 1"},   expect = ACCEPTABLE,             desc = "Boring")
+    @Outcome(id = {"0, .*, 1", "1, .*, 1"}, expect = ACCEPTABLE,             desc = "Irrelevant")
+    @Outcome(id = "1, 0, 0",                expect = ACCEPTABLE_INTERESTING, desc = "Whoa")
+    public static class Volatiles {
         int x, y;
+        volatile int b;
 
         @Actor
-        public void actor1() {
+        void thread1() {
             x = 1;
-            synchronized (new Object()) {}
+            b = 1; // fake "release"
             y = 1;
         }
 
         @Actor
-        public void actor2(II_Result r) {
+        void thread2(III_Result r) {
             r.r1 = y;
-            synchronized (new Object()) {}
-            r.r2 = x;
+            r.r2 = b; // fake "acquire"
+            r.r3 = x;
         }
     }
 
     /*
        ----------------------------------------------------------------------------------------------------------
 
-        If fence-like effects are required in low-level concurrency code, then Unsafe.*Fence should be used instead.
+        Once again, using the fences directly helps to get the effect that we want.
 
-        Indeed, this provides the effect we are after, on all platforms:
-          RESULT        SAMPLES     FREQ      EXPECT  DESCRIPTION
-            0, 0    943,174,523   40.81%  Acceptable  Boring
-            0, 1     58,099,523    2.51%  Acceptable  Plausible
-            1, 0              0    0.00%   Forbidden  Now forbidden
-            1, 1  1,309,989,698   56.68%  Acceptable  Boring
+        Same AArch64:
+          RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
+            0, 0   97,306,826   10.81%  Acceptable  Boring
+            0, 1    9,990,750    1.11%  Acceptable  Plausible
+            1, 0            0    0.00%   Forbidden  Now forbidden
+            1, 1  793,182,680   88.08%  Acceptable  Boring
      */
 
     @JCStressTest
@@ -98,21 +100,22 @@ public class AdvancedJMM_12_SynchronizedAreNotFences {
     @Outcome(id = {"0, 0", "1, 1"}, expect = ACCEPTABLE, desc = "Boring")
     @Outcome(id = "0, 1",           expect = ACCEPTABLE, desc = "Plausible")
     @Outcome(id = "1, 0",           expect = FORBIDDEN,  desc = "Now forbidden")
-    public static class Fenced {
+    public static class Fences {
         int x, y;
 
         @Actor
-        public void actor1() {
+        void thread1() {
             x = 1;
             UNSAFE.storeFence();
             y = 1;
         }
 
         @Actor
-        public void actor2(II_Result r) {
+        void thread2(II_Result r) {
             r.r1 = y;
             UNSAFE.loadFence();
             r.r2 = x;
         }
     }
+
 }
