@@ -31,8 +31,11 @@ import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.InProcessCollector;
 import org.openjdk.jcstress.infra.collectors.TestResult;
+import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.TestList;
+import org.openjdk.jcstress.os.SchedulingClass;
 import org.openjdk.jcstress.util.*;
+import org.openjdk.jcstress.vm.CompileMode;
 
 import java.awt.*;
 import java.io.File;
@@ -368,9 +371,16 @@ public class HTMLReportPrinter {
         int configs = 0;
         for (TestResult r : sorted) {
             o.println("<tr>");
-            o.println("<td nowrap><b>TC " + (configs + 1) + "</b></td>");
-            o.println("<td nowrap>" + r.getConfig() + "</td>");
+            o.println("<td nowrap rowspan=4 valign=top><b>TC " + (configs + 1) + "</b></td>");
             o.println("</tr>");
+            TestConfig cfg = r.getConfig();
+            o.println("<tr><td nowrap><pre>Compilation: " + CompileMode.description(cfg.compileMode, cfg.actorNames) + "</pre></td></tr>");
+            o.println("<tr><td nowrap><pre>Scheduling class:\n" + SchedulingClass.description(cfg.shClass, cfg.actorNames) + "</pre></td></tr>");
+            o.println("<tr><td nowrap>");
+            if (!cfg.jvmArgs.isEmpty()) {
+                o.println("<pre>JVM Options: " + cfg.jvmArgs + "</pre>");
+            }
+            o.println("</td></tr>");
             configs++;
         }
         o.println("</table>");
