@@ -261,27 +261,27 @@ public class VMSupport {
         LinkedHashSet<Config> configs = new LinkedHashSet<>();
 
         if (!jvmArgs.isEmpty()) {
-            configs.add(new Config(jvmArgs, false));
+            configs.add(new Config(jvmArgs, false, false));
         } else if (splitCompilation && COMPILER_DIRECTIVES_AVAILABLE) {
             System.out.println(" (split compilation is requested and compiler directives are available)");
             // Default global
-            configs.add(new Config(Collections.emptyList(), false));
+            configs.add(new Config(Collections.emptyList(), false, false));
             if (C2_AVAILABLE) {
                 // C2 compilations stress
-                configs.add(new Config(C2_STRESS_JVM_FLAGS, true));
+                configs.add(new Config(C2_STRESS_JVM_FLAGS, true, true));
             }
         } else {
             // Interpreted
-            configs.add(new Config(Arrays.asList("-Xint"), false));
+            configs.add(new Config(Arrays.asList("-Xint"), false, false));
             if (C1_AVAILABLE) {
                 // C1
-                configs.add(new Config(Arrays.asList("-XX:TieredStopAtLevel=1"), false));
+                configs.add(new Config(Arrays.asList("-XX:TieredStopAtLevel=1"), false, false));
             }
             if (C2_AVAILABLE) {
                 // C2
-                configs.add(new Config(Arrays.asList("-XX:-TieredCompilation"), false));
+                configs.add(new Config(Arrays.asList("-XX:-TieredCompilation"), false, false));
                 // C2 only + stress
-                configs.add(new Config(C2_ONLY_STRESS_JVM_FLAGS, true));
+                configs.add(new Config(C2_ONLY_STRESS_JVM_FLAGS, true, true));
             }
         }
 
@@ -299,7 +299,7 @@ public class VMSupport {
                 List<String> l = new ArrayList<>();
                 l.addAll(inputArgs);
                 l.addAll(c.args());
-                return new Config(l, c.onlyIfC2());
+                return new Config(l, c.onlyIfC2(), c.stress());
             }).collect(Collectors.toCollection(LinkedHashSet::new));
         }
 
@@ -309,7 +309,7 @@ public class VMSupport {
                 List<String> l = new ArrayList<>();
                 l.addAll(jvmArgsPrepend);
                 l.addAll(c.args());
-                return new Config(l, c.onlyIfC2());
+                return new Config(l, c.onlyIfC2(), c.stress());
             }).collect(Collectors.toCollection(LinkedHashSet::new));
         }
 
@@ -467,14 +467,20 @@ public class VMSupport {
     public static class Config {
         private final List<String> args;
         private final boolean onlyIfC2;
+        private final boolean stress;
 
-        private Config(List<String> args, boolean onlyIfC2) {
+        private Config(List<String> args, boolean onlyIfC2, boolean stress) {
             this.args = args;
             this.onlyIfC2 = onlyIfC2;
+            this.stress = stress;
         }
 
         public boolean onlyIfC2() {
             return onlyIfC2;
+        }
+
+        public boolean stress() {
+            return stress;
         }
 
         public List<String> args() {
