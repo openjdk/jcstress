@@ -105,8 +105,4 @@ public class TestConfig implements Serializable {
         return name.hashCode();
     }
 
-    @Override
-    public String toString() {
-        return "JVM options: " + jvmArgs +"; Compile mode: " + getCompileMode();
-    }
 }
