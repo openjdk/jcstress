@@ -105,8 +105,4 @@ public class TestConfig implements Serializable {
         return name.hashCode();
     }
 
-    public String toString() {
-        throw new IllegalStateException();
-    }
-
 }
