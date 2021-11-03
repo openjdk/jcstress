@@ -26,7 +26,6 @@ package org.openjdk.jcstress.vm;
 
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.util.ArrayUtils;
-import org.openjdk.jcstress.util.FileUtils;
 import org.openjdk.jcstress.util.InputStreamDrainer;
 
 import java.io.ByteArrayOutputStream;
@@ -50,6 +49,7 @@ public class VMSupport {
     private static volatile boolean THREAD_SPIN_WAIT_AVAILABLE;
     private static volatile boolean COMPILER_DIRECTIVES_AVAILABLE;
     private static volatile boolean PRINT_ASSEMBLY_AVAILABLE;
+    private static volatile boolean STRESS_SEED_AVAILABLE;
 
     private static volatile boolean C1_AVAILABLE;
     private static volatile boolean C2_AVAILABLE;
@@ -192,6 +192,12 @@ public class VMSupport {
                     "-XX:+StressCCP"
             );
 
+            STRESS_SEED_AVAILABLE = detect("Checking if C2 randomizers accept stress seed",
+                    SimpleTestMain.class,
+                    null,
+                    "-XX:StressSeed=42"
+            );
+
             C2_ONLY_STRESS_JVM_FLAGS.add("-XX:-TieredCompilation");
             C2_ONLY_STRESS_JVM_FLAGS.addAll(C2_STRESS_JVM_FLAGS);
         }
@@ -298,7 +304,7 @@ public class VMSupport {
             configs = configs.stream().map(c -> {
                 List<String> l = new ArrayList<>();
                 l.addAll(inputArgs);
-                l.addAll(c.args());
+                l.addAll(c.origArgs());
                 return new Config(l, c.onlyIfC2(), c.stress());
             }).collect(Collectors.toCollection(LinkedHashSet::new));
         }
@@ -308,7 +314,7 @@ public class VMSupport {
             configs = configs.stream().map(c -> {
                 List<String> l = new ArrayList<>();
                 l.addAll(jvmArgsPrepend);
-                l.addAll(c.args());
+                l.addAll(c.origArgs());
                 return new Config(l, c.onlyIfC2(), c.stress());
             }).collect(Collectors.toCollection(LinkedHashSet::new));
         }
@@ -316,7 +322,7 @@ public class VMSupport {
         System.out.println();
 
         for (Config config : configs) {
-            List<String> args = config.args();
+            List<String> args = config.origArgs();
             try {
                 List<String> line = new ArrayList<>(args);
                 line.add(SimpleTestMain.class.getName());
@@ -465,14 +471,31 @@ public class VMSupport {
     }
 
     public static class Config {
+        private static final Random SEED_RANDOM = new Random();
+
         private final List<String> args;
         private final boolean onlyIfC2;
         private final boolean stress;
+        private final boolean addStressSeed;
 
         private Config(List<String> args, boolean onlyIfC2, boolean stress) {
             this.args = args;
             this.onlyIfC2 = onlyIfC2;
             this.stress = stress;
+            this.addStressSeed = shouldAddStressSeed();
+        }
+
+        private boolean shouldAddStressSeed() {
+            // Prefer to add the explicit stress seed to aid reproducibility.
+            // Support the case where user already passes the seed, probably
+            // for replication.
+            if (stress && STRESS_SEED_AVAILABLE) {
+                for (String arg : args) {
+                    if (arg.contains("-XX:StressSeed")) return false;
+                }
+                return true;
+            }
+            return false;
         }
 
         public boolean onlyIfC2() {
@@ -483,8 +506,18 @@ public class VMSupport {
             return stress;
         }
 
-        public List<String> args() {
+        public List<String> origArgs() {
             return args;
+        }
+
+        public List<String> args() {
+            if (addStressSeed) {
+                List<String> na = new ArrayList<>(args);
+                na.add("-XX:StressSeed=" + SEED_RANDOM.nextInt(Integer.MAX_VALUE));
+                return na;
+            } else {
+                return args;
+            }
         }
 
         @Override
