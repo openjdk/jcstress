@@ -368,7 +368,7 @@ public class HTMLReportPrinter {
         }
         o.println("</table>");
 
-        o.println("<h3>Observed states</h3>");
+        o.println("<h3>Results</h3>");
 
         Set<String> keys = new TreeSet<>();
         for (TestResult r : sorted) {
@@ -376,21 +376,24 @@ public class HTMLReportPrinter {
         }
 
         o.println("<table cellpadding=5 border=1>");
+
         o.println("<tr>");
         o.println("<th>Compilation Mode</th>");
         o.println("<th>Scheduling Class</th>");
         o.println("<th>Java Options</th>");
-        o.println("<th>Passed</th>");
+        o.println("<th>Status</th>");
+        o.println("<th colspan=" + keys.size() + ">Observed States</th>");
+        o.println("</tr>");
+
+        o.println("<tr>");
+        o.println("<th colspan=4></th>");
         for (String key : keys) {
             o.println("<th nowrap align='center'>" + key + "</th>");
         }
         o.println("</tr>");
 
         o.println("<tr>");
-        o.println("<td></td>");
-        o.println("<td></td>");
-        o.println("<td></td>");
-        o.println("<td></td>");
+        o.println("<td colspan=4></td>");
         for (String key : keys) {
             for (TestResult r : sorted) {
                 GradingResult c = r.grading().gradingResults.get(key);
@@ -403,10 +406,7 @@ public class HTMLReportPrinter {
         o.println("</tr>");
 
         o.println("<tr>");
-        o.println("<td></td>");
-        o.println("<td></td>");
-        o.println("<td></td>");
-        o.println("<td></td>");
+        o.println("<td colspan=4></td>");
         for (String key : keys) {
             for (TestResult r : sorted) {
                 GradingResult c = r.grading().gradingResults.get(key);
@@ -424,7 +424,7 @@ public class HTMLReportPrinter {
             TestConfig cfg = r.getConfig();
             o.println("<td nowrap valign=top width=10><pre>" + CompileMode.description(cfg.compileMode, cfg.actorNames) + "</pre></td>");
             o.println("<td nowrap valign=top width=10><pre>" + SchedulingClass.description(cfg.shClass, cfg.actorNames) + "</pre></td>");
-            o.println("<td nowrap valign=top width=10>");
+            o.println("<td        valign=top width=10>");
             if (!cfg.jvmArgs.isEmpty()) {
                 o.println("<pre>" + cfg.jvmArgs + "</pre>");
             }
@@ -451,7 +451,7 @@ public class HTMLReportPrinter {
 
         for (TestResult r : sorted) {
             if (!r.getMessages().isEmpty()) {
-                o.println("<p><b>" + r.getConfig() + "</b></p>");
+                resultHeader(o, r);
                 o.println("<pre>");
                 for (String data : r.getMessages()) {
                     o.println(data);
@@ -465,7 +465,7 @@ public class HTMLReportPrinter {
 
         for (TestResult r : sorted) {
             if (!r.getVmOut().isEmpty()) {
-                o.println("<p><b>" + r.getConfig() + "</b></p>");
+                resultHeader(o, r);
                 o.println("<pre>");
                 for (String data : r.getVmOut()) {
                     o.println(data);
@@ -479,7 +479,7 @@ public class HTMLReportPrinter {
 
         for (TestResult r : sorted) {
             if (!r.getVmErr().isEmpty()) {
-                o.println("<p><b>" + r.getConfig() + "</b></p>");
+                resultHeader(o, r);
                 o.println("<pre>");
                 for (String data : r.getVmErr()) {
                     o.println(data);
@@ -490,6 +490,18 @@ public class HTMLReportPrinter {
         }
 
         printFooter(o);
+    }
+
+    private void resultHeader(PrintWriter o, TestResult r) {
+        TestConfig cfg = r.getConfig();
+        o.println("<p><b>");
+        o.println("<pre>" + CompileMode.description(cfg.compileMode, cfg.actorNames) + "</pre>");
+        o.println("<pre>" + SchedulingClass.description(cfg.shClass, cfg.actorNames) + "</pre>");
+        o.println("");
+        if (!cfg.jvmArgs.isEmpty()) {
+            o.println("<pre>" + cfg.jvmArgs + "</pre>");
+        }
+        o.println("</b></p>");
     }
 
     public String selectHTMLColor(Expect type, boolean isZero) {
