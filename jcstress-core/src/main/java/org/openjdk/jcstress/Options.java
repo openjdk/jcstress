@@ -58,6 +58,7 @@ public class Options {
     private int cpuCount;
     private int heapPerFork;
     private int forks;
+    private int forksStressMultiplier;
     private String mode;
     private SpinLoopStyle spinStyle;
     private String resultFile;
@@ -116,6 +117,10 @@ public class Options {
         OptionSpec<Integer> forks = parser.accepts("f", "Should fork each test N times. \"0\" to run in the embedded mode " +
                 "with occasional forking.")
                 .withOptionalArg().ofType(Integer.class).describedAs("count");
+
+        OptionSpec<Integer> forksStressMultiplier = parser.accepts("fsm", "Fork multiplier for randomized/stress tests. " +
+                "This allows more efficient randomized testing, as each fork would use a different seed.")
+                .withOptionalArg().ofType(Integer.class).describedAs("multiplier");
 
         OptionSpec<String> modeStr = parser.accepts("m", "Test mode preset: sanity, quick, default, tough, stress.")
                 .withRequiredArg().ofType(String.class).describedAs("mode");
@@ -196,6 +201,7 @@ public class Options {
         this.time = 1000;
         this.iters = 5;
         this.forks = 1;
+        this.forksStressMultiplier = 5;
         this.strideSize = 256;
         this.strideCount = 40;
 
@@ -204,22 +210,21 @@ public class Options {
             this.time = 0;
             this.iters = 1;
             this.forks = 1;
+            this.forksStressMultiplier = 1;
             this.strideSize = 1;
             this.strideCount = 1;
-        } else
-        if (this.mode.equalsIgnoreCase("quick")) {
+        } else if (this.mode.equalsIgnoreCase("quick")) {
             this.time = 200;
-        } else
-        if (this.mode.equalsIgnoreCase("default")) {
+            this.forksStressMultiplier = 1;
+        } else if (this.mode.equalsIgnoreCase("default")) {
             // Nothing changed.
-        } else
-        if (this.mode.equalsIgnoreCase("tough")) {
+        } else if (this.mode.equalsIgnoreCase("tough")) {
             this.iters = 10;
             this.forks = 10;
-        } else
-        if (this.mode.equalsIgnoreCase("stress")) {
+        } else if (this.mode.equalsIgnoreCase("stress")) {
             this.iters = 50;
             this.forks = 10;
+            this.forksStressMultiplier = 10;
         } else {
             System.err.println("Unknown test mode: " + this.mode);
             System.err.println();
@@ -231,6 +236,7 @@ public class Options {
         this.time = orDefault(set.valueOf(time), this.time);
         this.iters = orDefault(set.valueOf(iters), this.iters);
         this.forks = orDefault(set.valueOf(forks), this.forks);
+        this.forksStressMultiplier = orDefault(set.valueOf(forksStressMultiplier), this.forksStressMultiplier);
         this.strideSize = orDefault(set.valueOf(strideSize), this.strideSize);
         this.strideCount = orDefault(set.valueOf(strideCount), this.strideCount);
 
@@ -270,13 +276,17 @@ public class Options {
         return forks;
     }
 
+    public int getForksStressMultiplier() {
+        return forksStressMultiplier;
+    }
+
     public void printSettingsOn(PrintStream out) {
         out.println("  Test configuration:");
         out.printf("    Test preset mode: \"%s\"%n", mode);
         out.printf("    Hardware CPUs in use: %d%n", getCPUCount());
         out.printf("    Spinning style: %s%n", getSpinStyle());
         out.printf("    Test selection: \"%s\"%n", getTestFilter());
-        out.printf("    Forks per test: %d%n", getForks());
+        out.printf("    Forks per test: %d normal, %d stress%n", getForks(), getForks()*getForksStressMultiplier());
         out.printf("    Iterations per fork: %d%n", getIterations());
         out.printf("    Time per iteration: %d ms%n", getTime());
         out.printf("    Test stride: %d strides x %d tests, but taking no more than %d Mb%n", getStrideCount(), getStrideSize(), getMaxFootprintMb());

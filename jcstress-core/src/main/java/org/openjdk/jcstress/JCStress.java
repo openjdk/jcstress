@@ -178,14 +178,16 @@ public class JCStress {
                 // testing time.
                 continue;
             }
-            for (int f = 0; f < opts.getForks(); f++) {
+            int forks = opts.getForks() * (config.stress() ? opts.getForksStressMultiplier() : 1);
+            for (int f = 0; f < forks; f++) {
                 testConfigs.add(new TestConfig(opts, info, f, config.args(), cc, scl));
             }
         }
     }
 
     private void forkedUnified(List<TestConfig> testConfigs, VMSupport.Config config, TestInfo info, SchedulingClass scl) {
-        for (int f = 0; f < opts.getForks(); f++) {
+        int forks = opts.getForks() * (config.stress() ? opts.getForksStressMultiplier() : 1);
+        for (int f = 0; f < forks; f++) {
             testConfigs.add(new TestConfig(opts, info, f, config.args(), CompileMode.UNIFIED, scl));
         }
     }
