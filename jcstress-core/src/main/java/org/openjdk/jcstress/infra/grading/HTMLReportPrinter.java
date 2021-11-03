@@ -353,7 +353,10 @@ public class HTMLReportPrinter {
         }
 
         List<TestResult> sorted = new ArrayList<>(results);
-        sorted.sort(Comparator.comparing((TestResult t) -> StringUtils.join(t.getConfig().jvmArgs, ",")));
+        sorted.sort(Comparator
+                .comparing((TestResult t) -> t.getConfig().getCompileMode())
+                .thenComparing((TestResult t) -> t.getConfig().getSchedulingClass().toString())
+                .thenComparing((TestResult t) -> StringUtils.join(t.getConfig().jvmArgs, ",")));
 
         o.println("<h3>Environment</h3>");
         o.println("<table>");
@@ -365,26 +368,6 @@ public class HTMLReportPrinter {
         }
         o.println("</table>");
 
-        o.println("<h3>Test configurations</h3>");
-
-        o.println("<table>");
-        int configs = 0;
-        for (TestResult r : sorted) {
-            o.println("<tr>");
-            o.println("<td nowrap rowspan=4 valign=top><b>TC " + (configs + 1) + "</b></td>");
-            o.println("</tr>");
-            TestConfig cfg = r.getConfig();
-            o.println("<tr><td nowrap><pre>Compilation: " + CompileMode.description(cfg.compileMode, cfg.actorNames) + "</pre></td></tr>");
-            o.println("<tr><td nowrap><pre>Scheduling class:\n" + SchedulingClass.description(cfg.shClass, cfg.actorNames) + "</pre></td></tr>");
-            o.println("<tr><td nowrap>");
-            if (!cfg.jvmArgs.isEmpty()) {
-                o.println("<pre>JVM Options: " + cfg.jvmArgs + "</pre>");
-            }
-            o.println("</td></tr>");
-            configs++;
-        }
-        o.println("</table>");
-
         o.println("<h3>Observed states</h3>");
 
         Set<String> keys = new TreeSet<>();
@@ -392,49 +375,75 @@ public class HTMLReportPrinter {
             keys.addAll(r.getStateKeys());
         }
 
-        o.println("<table cellpadding=5>");
+        o.println("<table cellpadding=5 border=1>");
         o.println("<tr>");
-        o.println("<th>Observed state</th>");
-        for (int c = 0; c < configs; c++) {
-            o.println("<th nowrap>TC " + (c+1) + "</th>");
+        o.println("<th>Compilation Mode</th>");
+        o.println("<th>Scheduling Class</th>");
+        o.println("<th>Java Options</th>");
+        o.println("<th>Passed</th>");
+        for (String key : keys) {
+            o.println("<th nowrap align='center'>" + key + "</th>");
         }
-        o.println("<th>Expectation</th>");
-        o.println("<th>Interpretation</th>");
         o.println("</tr>");
 
+        o.println("<tr>");
+        o.println("<td></td>");
+        o.println("<td></td>");
+        o.println("<td></td>");
+        o.println("<td></td>");
         for (String key : keys) {
-            o.println("<tr>");
-            o.println("<td align='center'>" + key + "</td>");
-
-            String description = "";
-            Expect expect = null;
-
             for (TestResult r : sorted) {
                 GradingResult c = r.grading().gradingResults.get(key);
                 if (c != null) {
-                    o.println("<td align='right' width='" + 30D/configs + "%' bgColor=" + selectHTMLColor(c.expect, c.count == 0) + ">" + c.count + "</td>");
-                    description = c.description;
-                    expect = c.expect;
-                } else {
-                    o.println("<td align='right' width='" + 30D/configs + "%' bgColor=" + selectHTMLColor(Expect.ACCEPTABLE, true) + ">0</td>");
+                    o.println("<td>" + c.expect + "</td>");
+                    break;
                 }
             }
-
-            o.println("<td>" + expect + "</td>");
-            o.println("<td>" + description + "</td>");
-            o.println("</tr>");
         }
+        o.println("</tr>");
 
         o.println("<tr>");
         o.println("<td></td>");
+        o.println("<td></td>");
+        o.println("<td></td>");
+        o.println("<td></td>");
+        for (String key : keys) {
+            for (TestResult r : sorted) {
+                GradingResult c = r.grading().gradingResults.get(key);
+                if (c != null) {
+                    o.println("<td>" + c.description + "</td>");
+                    break;
+                }
+            }
+        }
+        o.println("</tr>");
+
         for (TestResult r : sorted) {
+            o.println("<tr>");
+
+            TestConfig cfg = r.getConfig();
+            o.println("<td nowrap valign=top width=10><pre>" + CompileMode.description(cfg.compileMode, cfg.actorNames) + "</pre></td>");
+            o.println("<td nowrap valign=top width=10><pre>" + SchedulingClass.description(cfg.shClass, cfg.actorNames) + "</pre></td>");
+            o.println("<td nowrap valign=top width=10>");
+            if (!cfg.jvmArgs.isEmpty()) {
+                o.println("<pre>" + cfg.jvmArgs + "</pre>");
+            }
+            o.println("</td>");
+
             String color = ReportUtils.statusToPassed(r) ? "green" : "red";
             String label = ReportUtils.statusToLabel(r);
             o.println("<td align='center' bgColor='" + color + " '>" + label + "</td>");
+
+            for (String key : keys) {
+                GradingResult c = r.grading().gradingResults.get(key);
+                if (c != null) {
+                    o.println("<td align='right' width='" + 100D/keys.size() + "%' bgColor=" + selectHTMLColor(c.expect, c.count == 0) + ">" + c.count + "</td>");
+                } else {
+                    o.println("<td align='right' width='" + 100D/keys.size() + "%' bgColor=" + selectHTMLColor(Expect.ACCEPTABLE, true) + ">0</td>");
+                }
+            }
+            o.println("</tr>");
         }
-        o.println("<td></td>");
-        o.println("<td></td>");
-        o.println("</tr>");
 
         o.println("</table>");
 
