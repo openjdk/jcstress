@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Red Hat, Inc. All rights reserved.
+ * Copyright (c) 2016, 2021, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples.high.rmw;
+package org.openjdk.jcstress.samples.jmm.advanced;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
@@ -30,59 +30,52 @@ import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
-
 import static org.openjdk.jcstress.annotations.Expect.*;
 
 @JCStressTest
-@Outcome(id = {"0, 0", "1, 1", "0, 1"}, expect = ACCEPTABLE, desc = "Trivial")
-@Outcome(id = "1, 0",                   expect = FORBIDDEN,  desc = "Cannot happen")
 @State
-public class RMW_06_AcquireOnFailure {
+@Outcome(id = {"0, 0", "1, 1"}, expect = ACCEPTABLE,             desc = "Boring")
+@Outcome(id = "0, 1",           expect = ACCEPTABLE,             desc = "Plausible")
+@Outcome(id = "1, 0",           expect = ACCEPTABLE_INTERESTING, desc = "Whoa")
+public class AdvancedJMM_08_WrongReleaseOrder {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_06_AcquireOnFailure[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_08_WrongReleaseOrder
      */
 
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        This test shows that even a failing CAS provides the "acquire" semantics:
-        it still observes the value regardless of the subsequent CAS result.
+        Remember, it is critically important that proper release-acquire chains follows the proper structure:
+           A --before--> release --sees--> acquire --before--> B
 
-        x86_64, AArch64:
-          RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
-            0, 0  146,825,939   44.46%  Acceptable  Trivial
-            0, 1    4,112,904    1.25%  Acceptable  Trivial
-            1, 0            0    0.00%   Forbidden  Cannot happen
-            1, 1  179,276,581   54.29%  Acceptable  Trivial
+        Only this way we can guarantee that B sees A. This test is one of the exploratory tests what bad
+        things happen when that rule is violated. This example differs from BasicJMM_05_Coherence by doing
+        the release in wrong order.
+
+        This test yields:
+          RESULT        SAMPLES     FREQ       EXPECT  DESCRIPTION
+            0, 0  2,285,705,011   53.75%   Acceptable  Boring
+            0, 1      3,023,487    0.07%   Acceptable  Plausible
+            1, 0     17,424,594    0.41%  Interesting  Whoa
+            1, 1  1,946,573,692   45.77%   Acceptable  Boring
+
+        The "1, 0" outcome is now eminently possible and can be explained by a simple sequential execution.
      */
 
-    private int x, g;
-    public static final VarHandle VH;
-
-    static {
-        try {
-            VH = MethodHandles.lookup().findVarHandle(RMW_06_AcquireOnFailure.class, "g", int.class);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
-    }
+    int x;
+    volatile int g;
 
     @Actor
-    public void actor1(II_Result r) {
+    public void actor1() {
+        g = 1;  // premature release
         x = 1;
-        VH.setVolatile(this, 1);
     }
 
     @Actor
     public void actor2(II_Result r) {
-        // This CAS fails when it observes "1".
-        // Ternary operator converts that failure to "1" explicitly.
-        r.r1 = VH.compareAndSet(this, 0, 1) ? 0 : 1;
+        r.r1 = g;
         r.r2 = x;
     }
-
 }

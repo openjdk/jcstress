@@ -37,31 +37,29 @@ import static org.openjdk.jcstress.annotations.Expect.*;
 @Outcome(id = {"0, 0", "1, 1"}, expect = ACCEPTABLE,             desc = "Boring")
 @Outcome(id = "0, 1",           expect = ACCEPTABLE,             desc = "Plausible")
 @Outcome(id = "1, 0",           expect = ACCEPTABLE_INTERESTING, desc = "Whoa")
-public class AdvancedJMM_07_WrongReleaseOrder {
+public class AdvancedJMM_11_WrongAcquireReleaseOrder {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_07_WrongReleaseOrder
+            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_11_WrongAcquireReleaseOrder
      */
 
     /*
-      ----------------------------------------------------------------------------------------------------------
+       ----------------------------------------------------------------------------------------------------------
 
-        Remember, it is critically important that proper release-acquire chains follows the proper structure:
-           A --before--> release --sees--> acquire --before--> B
+        This example effectively inverts the BasicJMM_06_Causality test: it "guards" the volatile "g" with
+        plain "x". The interesting outcome (1, 0) cannot be explained by the sequential execution of this code,
+        nevertheless it is allowed by JMM, because it is a data race.
 
-        Only this way we can guarantee that B sees A. This test is one of the exploratory tests what bad
-        things happen when that rule is violated. This example differs from BasicJMM_05_Coherence by doing
-        the release in wrong order.
+        Note that even if we have seen "x = 1", we can still see "g = 1". That is, adding "volatile" to "g"
+        does not guarantee the _promptness_ of publishing of "g".
 
-        This test yields:
+        x86_64:
           RESULT        SAMPLES     FREQ       EXPECT  DESCRIPTION
-            0, 0  2,285,705,011   53.75%   Acceptable  Boring
-            0, 1      3,023,487    0.07%   Acceptable  Plausible
-            1, 0     17,424,594    0.41%  Interesting  Whoa
-            1, 1  1,946,573,692   45.77%   Acceptable  Boring
-
-        The "1, 0" outcome is now eminently possible and can be explained by a simple sequential execution.
+            0, 0  2,694,178,631   58.36%   Acceptable  Boring
+            0, 1     69,859,185    1.51%   Acceptable  Plausible
+            1, 0        930,435    0.02%  Interesting  Whoa
+            1, 1  1,851,647,173   40.11%   Acceptable  Boring
      */
 
     int x;
@@ -69,13 +67,13 @@ public class AdvancedJMM_07_WrongReleaseOrder {
 
     @Actor
     public void actor1() {
-        g = 1;  // premature release
+        g = 1;
         x = 1;
     }
 
     @Actor
     public void actor2(II_Result r) {
-        r.r1 = g;
-        r.r2 = x;
+        r.r1 = x;
+        r.r2 = g;
     }
 }

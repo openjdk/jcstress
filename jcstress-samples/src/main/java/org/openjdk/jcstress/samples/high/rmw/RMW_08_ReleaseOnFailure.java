@@ -40,11 +40,11 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 @Outcome(id = {"0, 0", "1, 1", "0, 1"}, expect = ACCEPTABLE, desc = "Trivial")
 @Outcome(id = {"1, 0", "1, 1"},         expect = FORBIDDEN,  desc = "Cannot happen by construction")
 @State
-public class RMW_07_ReleaseOnFailure {
+public class RMW_08_ReleaseOnFailure {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_07_ReleaseOnFailure[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_08_ReleaseOnFailure[.SubTestName]
      */
 
     /*
@@ -67,7 +67,7 @@ public class RMW_07_ReleaseOnFailure {
 
     static {
         try {
-            VH = MethodHandles.lookup().findVarHandle(RMW_07_ReleaseOnFailure.class, "g", int.class);
+            VH = MethodHandles.lookup().findVarHandle(RMW_08_ReleaseOnFailure.class, "g", int.class);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
