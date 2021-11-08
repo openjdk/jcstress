@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2021, Red Hat, Inc. All rights reserved.
+ * Copyright (c) 2021, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples.jmm.advanced;
+package org.openjdk.jcstress.samples.high.rmw;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
@@ -30,45 +30,59 @@ import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+
 import static org.openjdk.jcstress.annotations.Expect.*;
 
 @JCStressTest
+@Outcome(id = {"0, 0", "1, 1", "0, 1"}, expect = ACCEPTABLE, desc = "Trivial")
+@Outcome(id = "1, 0",                   expect = FORBIDDEN,  desc = "Cannot happen")
 @State
-@Outcome(id = {"0, 0", "1, 1"}, expect = ACCEPTABLE, desc = "Boring")
-@Outcome(id = {"0, 1", "1, 0"}, expect = ACCEPTABLE, desc = "Plausible")
-public class AdvancedJMM_09_WrongAcquireOrder {
+public class RMW_05_AcquireOnSuccess {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_09_WrongAcquireOrder
+            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_05_AcquireOnSuccess[.SubTestName]
      */
 
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        For completeness, the example that has a wrong acquire order. All these results can be explained by
-        sequential execution of the code.
+        This test shows that CAS provides "acquire" semantics on success. This is similar
+        to other tests, for example BasicJMM_06_Causality: once we observe something
+        "release"-d by another thread, using any primitive with "acquire" semantics,
+        we are guaranteed to see things that happened before that release.
 
-        x86_64:
-          RESULT        SAMPLES     FREQ       EXPECT  DESCRIPTION
-            0, 0  2,560,656,086   55.33%   Acceptable  Boring
-            0, 1      2,961,349    0.06%   Acceptable  Plausible
-            1, 0      7,885,064    0.17%   Acceptable  Plausible
-            1, 1  2,056,684,125   44.44%   Acceptable  Boring
+        Indeed, on both x86_64 and AArch64 this would happen:
+          RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
+            0, 0  138,542,022   42.99%  Acceptable  Trivial
+            0, 1    3,232,097    1.00%  Acceptable  Trivial
+            1, 0            0    0.00%   Forbidden  Cannot happen
+            1, 1  180,464,345   56.00%  Acceptable  Trivial
      */
 
-    int x;
-    volatile int g;
+    private int x, g;
+    public static final VarHandle VH;
+
+    static {
+        try {
+            VH = MethodHandles.lookup().findVarHandle(RMW_05_AcquireOnSuccess.class, "g", int.class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     @Actor
-    public void actor1() {
+    public void actor1(II_Result r) {
         x = 1;
-        g = 1;
+        VH.setVolatile(this, 1);
     }
 
     @Actor
     public void actor2(II_Result r) {
-        r.r1 = x;
-        r.r2 = g; // acquiring too late
+        r.r1 = VH.compareAndSet(this, 1, 0) ? 1 : 0; // succeeds if (g == 1)
+        r.r2 = x;
     }
+
 }
