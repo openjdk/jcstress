@@ -22,14 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples.high.rmw;
+package org.openjdk.jcstress.samples.primitives.rmw;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.ZZ_Result;
-import org.openjdk.jcstress.infra.results.Z_Result;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;

@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples.concurrency.mutex;
+package org.openjdk.jcstress.samples.primitives.mutex;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
@@ -30,45 +30,59 @@ import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
 
-import java.util.concurrent.Semaphore;
-
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
-
-/*
-    How to run this test:
-        $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_06_Semaphore
-*/
+import static org.openjdk.jcstress.annotations.Expect.*;
 
 @JCStressTest
-@Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Sequential execution.")
-@Outcome(id = "1, 1", expect = ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: lock failure.")
+@Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Mutex works")
+@Outcome(id = "1, 1",           expect = FORBIDDEN,  desc = "Mutex failure")
 @State
-public class Mutex_06_Semaphore {
-    private final Semaphore semaphore = new Semaphore(1);
+public class Mutex_01_PetersonAlgorithm {
+
+    /*
+        How to run this test:
+            $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_01_PetersonAlgorithm
+    */
+
+    /*
+      ----------------------------------------------------------------------------------------------------------
+        This example demonstrates the Peterson's algorithm for mutual exclusion.
+            See: https://en.wikipedia.org/wiki/Peterson%27s_algorithm
+
+        The core of this algorithm is to use the sequential consistency over flags and turn.
+        "Flags" allows thread to proceed when other thread is known not to contend.
+        "Turn" allows threads to coordinate their turns when they are contending.
+
+        On x86_64, AArch64, PPC64:
+          RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
+            1, 1            0    0.00%   Forbidden  Mutex failure
+            1, 2  304,248,771   50.26%  Acceptable  Mutex works
+            2, 1  301,144,125   49.74%  Acceptable  Mutex works
+     */
+
+    private volatile boolean flag1, flag2;
+    private volatile int turn;
+
     private int v;
 
     @Actor
     public void actor1(II_Result r) {
-        try {
-            semaphore.acquire();
-            // critical section
+        flag1 = true;
+        turn = 2;
+        while (flag2 && turn == 2); // wait
+        { // critical section
             r.r1 = ++v;
-            semaphore.release();
-        } catch (InterruptedException e) {
-            throw new IllegalStateException(e);
         }
+        flag1 = false;
     }
 
     @Actor
     public void actor2(II_Result r) {
-        try {
-            semaphore.acquire();
-            // critical section
+        flag2 = true;
+        turn = 1;
+        while (flag1 && turn == 1); // wait
+        { // critical section
             r.r2 = ++v;
-            semaphore.release();
-        } catch (InterruptedException e) {
-            throw new IllegalStateException(e);
         }
+        flag2 = false;
     }
 }

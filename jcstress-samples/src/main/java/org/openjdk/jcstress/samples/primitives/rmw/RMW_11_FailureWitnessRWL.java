@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples.high.rmw;
+package org.openjdk.jcstress.samples.primitives.rmw;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.LLLL_Result;
