@@ -36,16 +36,18 @@ import java.util.concurrent.locks.ReentrantLock;
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
 
-/*
-    How to run this test:
-        $ java -jar jcstress-samples/target/jcstress.jar -t ClassicProblem_02_ProducerConsumerProblem
- */
+public class ClassicProblem_02_ProducerConsumerProblem {
+    /*
+        How to run this test:
+            $ java -jar jcstress-samples/target/jcstress.jar -t ClassicProblem_02_ProducerConsumerProblem
+    */
 
-/**
- * This sample shows you how JCStress can help you to test solutions for the famous producer-consumer problem.
- * See https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem for more information about the problem and solutions.
- */
-public abstract class ClassicProblem_02_ProducerConsumerProblem {
+    /*
+        This sample shows you how JCStress can help you to test solutions for the famous producer-consumer problem.
+        See https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem for more information
+        about the problem and solutions.
+     */
+
     private final static int BUFFER_SIZE = 2;
 
     static class SemaphoresBase {
@@ -97,16 +99,18 @@ public abstract class ClassicProblem_02_ProducerConsumerProblem {
     }
 
     @JCStressTest
-    @Outcome(id = {"true"}, expect = ACCEPTABLE)
+    @Outcome(id = {"true"}, expect = ACCEPTABLE, desc = "One producer produced 2 items which were consumed.")
     @State
     public static class OneProducerOneConsumer extends SemaphoresBase {
         @Actor
-        void p() {
+        void producer() {
+            produce();
             produce();
         }
 
         @Actor
-        void c() {
+        void consumer() {
+            consume();
             consume();
         }
 
@@ -116,67 +120,67 @@ public abstract class ClassicProblem_02_ProducerConsumerProblem {
         }
     }
 
-    /**
-     * This solution with semaphores only works with one producer and one consumer.
-     * If two producers are used, then this leads to a race condition:
-     * Both producers might use the same index at the same time
-     * to put their elements into the buffer so that they overwrite each other's item.
-     *
-     *   RESULT     SAMPLES     FREQ       EXPECT  DESCRIPTION
-     *   0, 0, 0      61.158    0,37%   Acceptable
-     *   0, 0, 1  15.066.987   91,84%   Acceptable
-     *   0, 0, 2       9.078    0,06%  Interesting  Producers used the same index at the same time.
-     *   0, 1, 0      23.658    0,14%   Acceptable
-     *   0, 1, 1      80.552    0,49%   Acceptable
-     *   0, 1, 2     799.311    4,87%   Acceptable
-     *   1, 0, 0      48.668    0,30%   Acceptable
-     *   1, 0, 1      66.056    0,40%   Acceptable
-     *   1, 0, 2     251.060    1,53%   Acceptable
+    /*
+        This solution with semaphores only works with one producer and one consumer.
+        If two producers are used, then this leads to a race condition:
+        Both producers might use the same index at the same time
+        to put their elements into the buffer so that they overwrite each other's item.
+
+          RESULT     SAMPLES     FREQ       EXPECT  DESCRIPTION
+          0, 0, 0      61.158    0,37%   Acceptable
+          0, 0, 1  15.066.987   91,84%   Acceptable
+          0, 0, 2       9.078    0,06%  Interesting  Producers used the same index at the same time.
+          0, 1, 0      23.658    0,14%   Acceptable
+          0, 1, 1      80.552    0,49%   Acceptable
+          0, 1, 2     799.311    4,87%   Acceptable
+          1, 0, 0      48.668    0,30%   Acceptable
+          1, 0, 1      66.056    0,40%   Acceptable
+          1, 0, 2     251.060    1,53%   Acceptable
      */
     @JCStressTest
-    @Outcome(expect = ACCEPTABLE)
-    @Outcome(id = {"0, 0, 2"}, expect = ACCEPTABLE_INTERESTING, desc = "Producers used the same index at the same time.")
+    @Outcome(expect = ACCEPTABLE, desc = "Producers didn't overwrite each other's item.")
+    @Outcome(id = {"0, 0, 2"}, expect = ACCEPTABLE_INTERESTING, desc = "Producers overwrote each other's item.")
     @State
     public static class FlawedTwoProducersOneConsumer extends SemaphoresBase {
         @Actor
-        void p1(III_Result r) {
+        void producer1(III_Result r) {
             r.r1 = produce();
         }
 
         @Actor
-        void p2(III_Result r) {
+        void producer2(III_Result r) {
             r.r2 = produce();
         }
 
         @Actor
-        void c(III_Result r) {
+        void consumer(III_Result r) {
             r.r3 = consume();
         }
     }
 
-    /**
-     * The solution with semaphores can be extended so that more than one producer and consumer are supported.
+    /*
+        The solution with semaphores can be extended so that more than one producer and consumer are supported.
      */
     @JCStressTest
-    @Outcome(expect = ACCEPTABLE)
-    @Outcome(id = {"0, 0, 2"}, expect = ACCEPTABLE_INTERESTING, desc = "Producers used the same index at the same time.")
+    @Outcome(expect = ACCEPTABLE, desc = "Producers didn't overwrite each other's item.")
+    @Outcome(id = {"0, 0, 2"}, expect = ACCEPTABLE_INTERESTING, desc = "Producers overwrote each other's item.")
     @State
     public static class FixedTwoProducersOneConsumer extends SemaphoresBase {
         private final Object indexLock = new Object();
         private int index = 0;
 
         @Actor
-        void p1(III_Result r) {
+        void producer1(III_Result r) {
             r.r1 = produce();
         }
 
         @Actor
-        void p2(III_Result r) {
+        void producer2(III_Result r) {
             r.r2 = produce();
         }
 
         @Actor
-        void c(III_Result r) {
+        void consume(III_Result r) {
             r.r3 = consume();
         }
 
@@ -195,12 +199,12 @@ public abstract class ClassicProblem_02_ProducerConsumerProblem {
         }
     }
 
-    /**
-     * This solution with a ReentrantLock and two conditions works with many producers and many consumers.
+    /*
+        This solution with a ReentrantLock and two conditions works with many producers and many consumers.
      */
     @JCStressTest
-    @Outcome(expect = ACCEPTABLE)
-    @Outcome(id = {"0, 0, 2"}, expect = ACCEPTABLE_INTERESTING, desc = "Producers used the same index at the same time.")
+    @Outcome(expect = ACCEPTABLE, desc = "Producers didn't overwrite each other's item.")
+    @Outcome(id = {"0, 0, 2"}, expect = ACCEPTABLE_INTERESTING, desc = "Producers overwrote each other's item.")
     @State
     public static class Lock {
         private final ReentrantLock lock = new ReentrantLock();
@@ -209,17 +213,17 @@ public abstract class ClassicProblem_02_ProducerConsumerProblem {
         private int count = 0;
 
         @Actor
-        void p1(III_Result r) {
+        void producer1(III_Result r) {
             r.r1 = produce();
         }
 
         @Actor
-        void p2(III_Result r) {
+        void producer2(III_Result r) {
             r.r2 = produce();
         }
 
         @Actor
-        void c(III_Result r) {
+        void consumer(III_Result r) {
             r.r3 = consume();
         }
 
@@ -266,26 +270,26 @@ public abstract class ClassicProblem_02_ProducerConsumerProblem {
         }
     }
 
-    /**
-     * This solution with AtomicIntegers only works with one producer and one consumer.
-     * It fails if an int overflow happens.
+    /*
+        This solution with AtomicIntegers only works with one producer and one consumer.
+        It fails if an int overflow happens.
      */
     @SuppressWarnings("StatementWithEmptyBody")
     @JCStressTest
-    @Outcome(id = {"true"}, expect = ACCEPTABLE)
+    @Outcome(id = {"true"}, expect = ACCEPTABLE, desc = "One producer produced 2 items which were consumed.")
     @State
     public static class AtomicIntegers {
         private final AtomicInteger produced = new AtomicInteger();
         private final AtomicInteger consumed = new AtomicInteger();
 
         @Actor
-        void p() {
+        void producer() {
             produce();
             produce();
         }
 
         @Actor
-        void c() {
+        void consumer() {
             consume();
             consume();
         }
