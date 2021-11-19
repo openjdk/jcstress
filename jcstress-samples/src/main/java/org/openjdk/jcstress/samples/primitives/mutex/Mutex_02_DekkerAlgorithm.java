@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples.concurrency.mutex;
+package org.openjdk.jcstress.samples.primitives.mutex;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
@@ -30,58 +30,70 @@ import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
 
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
+import static org.openjdk.jcstress.annotations.Expect.*;
 
-/*
-    How to run this test:
-        $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_02_DekkerAlgorithm
-*/
-
-/**
- * Implemented according to https://en.wikipedia.org/wiki/Dekker%27s_algorithm
- */
 @JCStressTest
-@Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Sequential execution.")
-@Outcome(id = "1, 1", expect = ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: lock failure.")
+@Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Mutex works")
+@Outcome(id = "1, 1",           expect = FORBIDDEN,  desc = "Mutex failure")
 @State
 public class Mutex_02_DekkerAlgorithm {
-    private volatile boolean actor1wantsToEnter;
-    private volatile boolean actor2wantsToEnter;
+
+    /*
+        How to run this test:
+            $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_02_DekkerAlgorithm
+    */
+
+    /*
+      ----------------------------------------------------------------------------------------------------------
+        This example demonstrates the Dekker's algorithm for mutual exclusion.
+            See: https://en.wikipedia.org/wiki/Dekker%27s_algorithm
+
+        The core of this algorithm is to use the sequential consistency over flags and turn.
+        "Flags" allows thread to proceed when other thread is known not to contend.
+        "Turn" allows threads to coordinate their turns when they are contending.
+
+        On x86_64, AArch64, PPC64:
+          RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
+            1, 1            0    0.00%   Forbidden  Mutex failure
+            1, 2  213,556,068   58.13%  Acceptable  Mutex works
+            2, 1  153,830,556   41.87%  Acceptable  Mutex works
+     */
+
+    private volatile boolean want1, want2;
     private volatile int turn = 1;
     private int v;
 
     @Actor
     public void actor1(II_Result r) {
-        actor1wantsToEnter = true;
-        while (actor2wantsToEnter) {
+        want1 = true;
+        while (want2) {
             if (turn != 1) {
-                actor1wantsToEnter = false;
+                want1 = false;
                 while (turn != 1); // wait
-                actor1wantsToEnter = true;
+                want1 = true;
             }
         }
         { // critical section
             r.r1 = ++v;
         }
         turn = 2;
-        actor1wantsToEnter = false;
+        want1 = false;
     }
 
     @Actor
     public void actor2(II_Result r) {
-        actor2wantsToEnter = true;
-        while (actor1wantsToEnter) {
+        want2 = true;
+        while (want1) {
             if (turn != 2) {
-                actor2wantsToEnter = false;
+                want2 = false;
                 while (turn != 2); // wait
-                actor2wantsToEnter = true;
+                want2 = true;
             }
         }
         { // critical section
             r.r2 = ++v;
         }
         turn = 1;
-        actor2wantsToEnter = false;
+        want2 = false;
     }
 }

@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples.concurrency.mutex;
+package org.openjdk.jcstress.samples.primitives.mutex;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
@@ -30,43 +30,58 @@ import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
 
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Semaphore;
 
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
-
-/*
-    How to run this test:
-        $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_05_ReentrantLock
-*/
+import static org.openjdk.jcstress.annotations.Expect.*;
 
 @JCStressTest
-@Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Sequential execution.")
-@Outcome(id = "1, 1", expect = ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: lock failure.")
+@Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Mutex works")
+@Outcome(id = "1, 1",           expect = FORBIDDEN,  desc = "Mutex failure")
 @State
-public class Mutex_05_ReentrantLock {
-    private final ReentrantLock reentrantLock = new ReentrantLock();
+public class Mutex_06_Semaphore {
+
+    /*
+        How to run this test:
+            $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_06_Semaphore
+    */
+
+    /*
+      ----------------------------------------------------------------------------------------------------------
+
+        Single-permit Semaphore can be used as a crude mutex too. Of course, this primitive
+        is much more flexible, it can admit a few threads at once with more permits.
+
+        On x86_64, AArch64, PPC64:
+          RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
+            1, 1            0    0.00%   Forbidden  Mutex failure
+            1, 2  254,394,919   50.23%  Acceptable  Mutex works
+            2, 1  252,081,625   49.77%  Acceptable  Mutex works
+     */
+
+    private final Semaphore semaphore = new Semaphore(1);
     private int v;
 
     @Actor
     public void actor1(II_Result r) {
-        reentrantLock.lock();
         try {
+            semaphore.acquire();
             // critical section
             r.r1 = ++v;
-        } finally {
-            reentrantLock.unlock();
+            semaphore.release();
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e);
         }
     }
 
     @Actor
     public void actor2(II_Result r) {
-        reentrantLock.lock();
         try {
+            semaphore.acquire();
             // critical section
             r.r2 = ++v;
-        } finally {
-            reentrantLock.unlock();
+            semaphore.release();
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e);
         }
     }
 }

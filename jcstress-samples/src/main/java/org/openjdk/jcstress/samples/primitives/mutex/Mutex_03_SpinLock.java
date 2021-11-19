@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples.concurrency.mutex;
+package org.openjdk.jcstress.samples.primitives.mutex;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
@@ -32,25 +32,38 @@ import org.openjdk.jcstress.infra.results.II_Result;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
-
-/*
-    How to run this test:
-        $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_03_AtomicBoolean
-*/
+import static org.openjdk.jcstress.annotations.Expect.*;
 
 @JCStressTest
-@Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Sequential execution.")
-@Outcome(id = "1, 1", expect = ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: lock failure.")
+@Outcome(id = {"1, 2", "2, 1"}, expect = ACCEPTABLE, desc = "Mutex works")
+@Outcome(id = "1, 1",           expect = FORBIDDEN,  desc = "Mutex failure")
 @State
-public class Mutex_03_AtomicBoolean {
+public class Mutex_03_SpinLock {
+
+    /*
+        How to run this test:
+            $ java -jar jcstress-samples/target/jcstress.jar -t Mutex_03_SpinLock
+    */
+
+    /*
+      ----------------------------------------------------------------------------------------------------------
+
+        A mutex can be implemented with a single atomic variable, which would coordinate threads
+        entering the critical section. This construction is usually known as "spinlock".
+
+        On x86_64, AArch64, PPC64:
+            RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
+              1, 1            0    0.00%   Forbidden  Mutex failure
+              1, 2  299,137,894   51.69%  Acceptable  Mutex works
+              2, 1  279,551,130   48.31%  Acceptable  Mutex works
+     */
+
     private final AtomicBoolean taken = new AtomicBoolean(false);
     private int v;
 
     @Actor
     public void actor1(II_Result r) {
-        while(taken.get() || !taken.compareAndSet(false, true)); // spin
+        while(taken.get() || !taken.compareAndSet(false, true)); // wait
         { // critical section
             r.r1 = ++v;
         }
@@ -59,7 +72,7 @@ public class Mutex_03_AtomicBoolean {
 
     @Actor
     public void actor2(II_Result r) {
-        while(taken.get() || !taken.compareAndSet(false, true)); // spin
+        while(taken.get() || !taken.compareAndSet(false, true)); // wait
         { // critical section
             r.r2 = ++v;
         }
