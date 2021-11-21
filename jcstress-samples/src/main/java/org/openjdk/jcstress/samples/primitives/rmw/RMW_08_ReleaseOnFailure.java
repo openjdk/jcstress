@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples.high.rmw;
+package org.openjdk.jcstress.samples.primitives.rmw;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressTest;
@@ -38,30 +38,28 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 
 @JCStressTest
 @Outcome(id = {"0, 0", "1, 1", "0, 1"}, expect = ACCEPTABLE, desc = "Trivial")
-@Outcome(id = "1, 0",                   expect = FORBIDDEN,  desc = "Cannot happen")
+@Outcome(id = {"1, 0", "1, 1"},         expect = FORBIDDEN,  desc = "Cannot happen by construction")
 @State
-public class RMW_06_ReleaseOnSuccess {
+public class RMW_08_ReleaseOnFailure {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_06_ReleaseOnSuccess[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t RMW_08_ReleaseOnFailure[.SubTestName]
      */
 
     /*
       ----------------------------------------------------------------------------------------------------------
 
-        This test shows that CAS provides "release" semantics on success. This is similar
-        to other tests, for example BasicJMM_06_Causality: once we observe something
-        "release"-d by another thread using any primitive with "release" semantics,
-        by using any primitive with "acquire" semantics, we are guaranteed to see
-        things that happened before that release.
+        This test naively tries to show that a failing CAS does not provide "release" semantics.
+        But there are no observable results, because failing CAS does not write anything.
+        As far as reader side is concerned, no writes of "g" had been published.
 
-        Indeed, on both x86_64 and AArch64:
+        x86_64, AArch64:
           RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
-            0, 0  138,542,022   42.99%  Acceptable  Trivial
-            0, 1    3,232,097    1.00%  Acceptable  Trivial
-            1, 0            0    0.00%   Forbidden  Cannot happen
-            1, 1  180,464,345   56.00%  Acceptable  Trivial
+            0, 0  161,650,705   52.25%  Acceptable  Trivial
+            0, 1  147,757,039   47.75%  Acceptable  Trivial
+            1, 0            0    0.00%   Forbidden  Cannot happen by construction
+            1, 1            0    0.00%   Forbidden  Cannot happen by construction
      */
 
     private int x, g;
@@ -69,7 +67,7 @@ public class RMW_06_ReleaseOnSuccess {
 
     static {
         try {
-            VH = MethodHandles.lookup().findVarHandle(RMW_06_ReleaseOnSuccess.class, "g", int.class);
+            VH = MethodHandles.lookup().findVarHandle(RMW_08_ReleaseOnFailure.class, "g", int.class);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
@@ -78,7 +76,8 @@ public class RMW_06_ReleaseOnSuccess {
     @Actor
     public void actor1(II_Result r) {
         x = 1;
-        VH.compareAndSet(this, 0, 1); // always succeeds
+        // This CAS always fails: no release semantics.
+        VH.compareAndSet(this, 1, 0);
     }
 
     @Actor

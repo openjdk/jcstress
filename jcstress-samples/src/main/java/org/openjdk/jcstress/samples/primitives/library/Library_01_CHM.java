@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples.high;
+package org.openjdk.jcstress.samples.primitives.library;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.LL_Result;
@@ -35,14 +35,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static org.openjdk.jcstress.annotations.Expect.*;
 
-public class Concurrency_01_CHM {
+public class Library_01_CHM {
+
+    /*
+        How to run this test:
+            $ java -jar jcstress-samples/target/jcstress.jar -t Library_01_CHM
+    */
 
     /*
       ----------------------------------------------------------------------------------------------------------
-
-        This test demonstrates the operation atomicity tests, taking
-        ConcurrentHashMap-backed Multimap as the example.
-    */
+        This test demonstrates the operation atomicity tests, taking ConcurrentHashMap-backed
+        Multimap as the example.
+     */
 
     public static class Multimap {
         Map<String, List<String>> map = new ConcurrentHashMap<>();
