@@ -34,4 +34,9 @@ public class PresetListTopology extends AbstractTopology {
         super.finish();
     }
 
+    @Override
+    public boolean trustworthy() {
+        return true;
+    }
+
 }

@@ -38,4 +38,9 @@ public class PresetRegularTopology extends AbstractTopology {
         finish();
     }
 
+    @Override
+    public boolean trustworthy() {
+        return true;
+    }
+
 }
