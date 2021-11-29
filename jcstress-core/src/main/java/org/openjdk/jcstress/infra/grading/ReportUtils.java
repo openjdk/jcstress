@@ -122,8 +122,7 @@ public class ReportUtils {
         } else {
             pw.format("  Scheduling class:%n");
             pw.println(SchedulingClass.description(config.getSchedulingClass(), config.actorNames));
-            pw.format("  CPU allocation:%n");
-            pw.println(CPUMap.description(config.cpuMap, config.actorNames));
+            pw.format("  CPU allocation: %s%n", CPUMap.description(config.cpuMap, config.actorNames));
             pw.format("  Compilation: %s%n", CompileMode.description(config.getCompileMode(), config.actorNames));
             pw.format("  JVM args: %s%n", config.jvmArgs);
             pw.format("  Fork: #%d%n", config.forkId + 1);

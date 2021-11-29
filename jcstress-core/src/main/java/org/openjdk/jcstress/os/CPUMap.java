@@ -28,18 +28,18 @@ import java.io.Serializable;
 import java.util.List;
 
 public class CPUMap implements Serializable {
-    public static final CPUMap UNSET = new CPUMap(new int[] {}, new int[] {}, new int[] {}, new int[] {});
-
     private final int[] actorMap;
     private final int[] systemMap;
     private final int[] packageMap;
     private final int[] coreMap;
+    private final boolean affinity;
 
-    public CPUMap(int[] actorMap, int[] systemMap, int[] packageMap, int[] coreMap) {
+    public CPUMap(int[] actorMap, int[] systemMap, int[] packageMap, int[] coreMap, boolean affinity) {
         this.actorMap = actorMap;
         this.systemMap = systemMap;
         this.packageMap = packageMap;
         this.coreMap = coreMap;
+        this.affinity = affinity;
     }
 
     public int[] actorMap() {
@@ -51,12 +51,17 @@ public class CPUMap implements Serializable {
     }
 
     public static String description(CPUMap map, List<String> actorNames) {
+        if (!map.affinity) {
+            return "no special handling";
+        }
+
         int[] actorMap = map.actorMap;
         int[] systemMap = map.systemMap;
         int[] packageMap = map.packageMap;
         int[] coreMap = map.coreMap;
 
         StringBuilder sb = new StringBuilder();
+        sb.append("\n");
         for (int a = 0; a < actorMap.length; a++) {
             if (actorMap[a] != -1) {
                 sb.append("    ");
@@ -87,6 +92,10 @@ public class CPUMap implements Serializable {
     }
 
     public String globalAffinityMap() {
+        if (!affinity) {
+            return "";
+        }
+
         StringBuilder sb = new StringBuilder();
 
         boolean first = true;

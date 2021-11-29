@@ -66,10 +66,11 @@ public class Scheduler {
 
         switch (scl.mode()) {
             case NONE:
-                cpuMap = scheduleNone(scl);
+                // Pretty much the same, but do not publish system map
+                cpuMap = scheduleGlobal(scl, false);
                 break;
             case GLOBAL:
-                cpuMap = scheduleGlobal(scl);
+                cpuMap = scheduleGlobal(scl, true);
                 break;
             case LOCAL:
                 cpuMap = scheduleLocal(scl);
@@ -193,10 +194,10 @@ public class Scheduler {
             coreMap[thread] = topology.threadToCore(thread);
         }
 
-        return new CPUMap(actorMap, systemMap, packageMap, coreMap);
+        return new CPUMap(actorMap, systemMap, packageMap, coreMap, true);
     }
 
-    private CPUMap scheduleGlobal(SchedulingClass scl) {
+    private CPUMap scheduleGlobal(SchedulingClass scl, boolean affinity) {
         // This ignores per-actor assignments completely.
         // It only allocates a separate core per actor, from the pool of all available cores.
 
@@ -249,12 +250,7 @@ public class Scheduler {
             coreMap[thread] = topology.threadToCore(thread);
         }
 
-        return new CPUMap(actorMap, systemMap, packageMap, coreMap);
-    }
-
-    private CPUMap scheduleNone(SchedulingClass scl) {
-        // TODO: Does this mean "none" is actually fake?
-        return scheduleGlobal(scl);
+        return new CPUMap(actorMap, systemMap, packageMap, coreMap, affinity);
     }
 
     private void checkInvariants(String when) {
