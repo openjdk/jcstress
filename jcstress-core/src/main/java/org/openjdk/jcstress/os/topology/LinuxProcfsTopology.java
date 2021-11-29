@@ -92,4 +92,8 @@ public class LinuxProcfsTopology extends AbstractTopology {
         super.printStatus(pw);
     }
 
+    @Override
+    public boolean trustworthy() {
+        return true;
+    }
 }

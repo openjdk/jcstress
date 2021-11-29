@@ -152,4 +152,9 @@ public class LinuxSysfsTopology extends AbstractTopology {
         super.printStatus(pw);
     }
 
+    @Override
+    public boolean trustworthy() {
+        return true;
+    }
+
 }

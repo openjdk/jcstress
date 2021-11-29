@@ -528,11 +528,11 @@ public class Scheduler {
     public List<SchedulingClass> scheduleClasses(int actorThreads, int threadLimit, AffinityMode mode) {
         switch (mode) {
             case LOCAL:
-                if (OSSupport.affinitySupportAvailable()) {
+                if (topology.trustworthy() && OSSupport.affinitySupportAvailable()) {
                     return localAffinityFor(actorThreads, threadLimit);
                 }
             case GLOBAL:
-                if (OSSupport.taskSetAvailable()) {
+                if (topology.trustworthy() && OSSupport.taskSetAvailable()) {
                     return globalAffinityFor(actorThreads, threadLimit);
                 }
             case NONE:
