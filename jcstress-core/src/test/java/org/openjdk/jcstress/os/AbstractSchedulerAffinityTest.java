@@ -25,9 +25,7 @@
 package org.openjdk.jcstress.os;
 
 import org.junit.Assert;
-import org.openjdk.jcstress.os.topology.PresetRegularTopology;
 import org.openjdk.jcstress.os.topology.Topology;
-import org.openjdk.jcstress.os.topology.TopologyParseException;
 
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -63,6 +61,8 @@ public class AbstractSchedulerAffinityTest {
                 Assert.assertEquals(-1, c);
             }
             Assert.assertNotEquals(0, cpuMap.systemMap().length);
+            Assert.assertNotEquals("", cpuMap.globalAffinityMap());
+            Assert.assertNotEquals(0, cpuMap.allocatedMap().length);
         }
     }
 
@@ -109,6 +109,8 @@ public class AbstractSchedulerAffinityTest {
                     }
                 }
             }
+
+            Assert.assertNotEquals("", cpuMap.globalAffinityMap());
         }
     }
 
@@ -139,7 +141,9 @@ public class AbstractSchedulerAffinityTest {
             for (int c : cpuMap.actorMap()) {
                 Assert.assertEquals(-1, c);
             }
-            Assert.assertNotEquals(0, cpuMap.systemMap().length);
+            Assert.assertEquals(0, cpuMap.systemMap().length);
+            Assert.assertEquals("", cpuMap.globalAffinityMap());
+            Assert.assertNotEquals(0, cpuMap.allocatedMap().length);
         }
     }
 

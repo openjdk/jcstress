@@ -36,8 +36,7 @@ public class Scheduler {
     private final int maxUse;
     private final Topology topology;
     private final BitSet availableCores;
-    private int currentActorUse;
-    private int currentSystemUse;
+    private int currentUse;
     private final PackageRecord[] freeMapPackage;
 
     public Scheduler(Topology t, int max) {
@@ -55,7 +54,7 @@ public class Scheduler {
     }
 
     public synchronized CPUMap tryAcquire(SchedulingClass scl) {
-        if (currentActorUse + scl.numActors() > maxUse) {
+        if (currentUse + scl.numActors() > maxUse) {
             // Over the limit, break out.
             return null;
         }
@@ -67,10 +66,10 @@ public class Scheduler {
         switch (scl.mode()) {
             case NONE:
                 // Pretty much the same, but do not publish system map
-                cpuMap = scheduleGlobal(scl, false);
+                cpuMap = scheduleGlobalOrNone(scl, true);
                 break;
             case GLOBAL:
-                cpuMap = scheduleGlobal(scl, true);
+                cpuMap = scheduleGlobalOrNone(scl, false);
                 break;
             case LOCAL:
                 cpuMap = scheduleLocal(scl);
@@ -155,7 +154,7 @@ public class Scheduler {
                 if (availableCPUs.get(thread)) {
                     availableCPUs.set(thread, false);
                     actorMap[aIdx] = thread;
-                    currentActorUse++;
+                    currentUse++;
                     break;
                 }
             }
@@ -169,7 +168,7 @@ public class Scheduler {
                 if (availableCPUs.get(thread)) {
                     availableCPUs.set(thread, false);
                     system[systemCnt++] = thread;
-                    currentSystemUse++;
+                    currentUse++;
                 }
             }
         }
@@ -194,10 +193,14 @@ public class Scheduler {
             coreMap[thread] = topology.threadToCore(thread);
         }
 
-        return new CPUMap(actorMap, systemMap, packageMap, coreMap, true);
+        int[] allocatedMap = new int[actorMap.length + systemMap.length];
+        System.arraycopy(actorMap, 0, allocatedMap, 0, actorMap.length);
+        System.arraycopy(systemMap, 0, allocatedMap, actorMap.length, systemMap.length);
+
+        return new CPUMap(allocatedMap, actorMap, systemMap, packageMap, coreMap);
     }
 
-    private CPUMap scheduleGlobal(SchedulingClass scl, boolean affinity) {
+    private CPUMap scheduleGlobalOrNone(SchedulingClass scl, boolean none) {
         // This ignores per-actor assignments completely.
         // It only allocates a separate core per actor, from the pool of all available cores.
 
@@ -221,9 +224,9 @@ public class Scheduler {
             }
         }
 
-        // Take all affected cores as system assignment
-        int[] system = new int[topology.totalThreads()];
-        int systemCnt = 0;
+        // Take all affected cores as assignment
+        int[] takenCPUs = new int[topology.totalThreads()];
+        int cnt = 0;
 
         for (int core : actorToCore) {
             for (int thread : topology.coreThreads(core)) {
@@ -231,26 +234,34 @@ public class Scheduler {
                     throw new IllegalStateException("Thread should be free");
                 }
                 availableCPUs.set(thread, false);
-                system[systemCnt++] = thread;
-                currentSystemUse++;
+                takenCPUs[cnt++] = thread;
+                currentUse++;
             }
         }
 
         int[] actorMap = new int[scl.numActors()];
         Arrays.fill(actorMap, -1);
 
-        int[] systemMap = Arrays.copyOf(system, systemCnt);
+        takenCPUs = Arrays.copyOf(takenCPUs, cnt);
+        int[] systemMap;
+        if (none) {
+            // No assignments for system
+            systemMap = new int[0];
+        } else {
+            // All assignments go to system
+            systemMap = Arrays.copyOf(takenCPUs, cnt);
+        }
 
         int[] coreMap = new int[topology.totalThreads()];
         int[] packageMap = new int[topology.totalThreads()];
         Arrays.fill(coreMap, -1);
         Arrays.fill(packageMap, -1);
-        for (int thread : systemMap) {
+        for (int thread : takenCPUs) {
             packageMap[thread] = topology.threadToPackage(thread);
             coreMap[thread] = topology.threadToCore(thread);
         }
 
-        return new CPUMap(actorMap, systemMap, packageMap, coreMap, affinity);
+        return new CPUMap(takenCPUs, actorMap, systemMap, packageMap, coreMap);
     }
 
     private void checkInvariants(String when) {
@@ -276,7 +287,7 @@ public class Scheduler {
             }
         }
 
-        final int expected = currentActorUse + currentSystemUse;
+        final int expected = currentUse;
         if (use != expected) {
             throw new IllegalStateException(when + ": CPU use counts are inconsistent, counter = " + expected + ", actually taken = " + use);
         }
@@ -299,17 +310,10 @@ public class Scheduler {
     public synchronized void release(CPUMap cpuMap) {
         checkInvariants("Before release");
 
-        for (int c : cpuMap.actorMap()) {
-            if (c != -1) {
-                availableCPUs.set(c, true);
-                availableCores.set(topology.threadToCore(c), true);
-                currentActorUse--;
-            }
-        }
-        for (int c : cpuMap.systemMap()) {
+        for (int c : cpuMap.allocatedMap()) {
             availableCPUs.set(c, true);
             availableCores.set(topology.threadToCore(c), true);
-            currentSystemUse--;
+            currentUse--;
         }
 
         recomputeFreeMaps();
@@ -332,12 +336,8 @@ public class Scheduler {
         Arrays.sort(freeMapPackage);
     }
 
-    public int getActorCpus() {
-        return currentActorUse;
-    }
-
-    public int getSystemCpus() {
-        return currentSystemUse;
+    public int getCpus() {
+        return currentUse;
     }
 
     private static class PackageRecord implements Comparable<PackageRecord> {

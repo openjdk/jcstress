@@ -32,14 +32,18 @@ public class CPUMap implements Serializable {
     private final int[] systemMap;
     private final int[] packageMap;
     private final int[] coreMap;
-    private final boolean affinity;
+    private final int[] allocatedMap;
 
-    public CPUMap(int[] actorMap, int[] systemMap, int[] packageMap, int[] coreMap, boolean affinity) {
+    public CPUMap(int[] allocatedMap, int[] actorMap, int[] systemMap, int[] packageMap, int[] coreMap) {
+        this.allocatedMap = allocatedMap;
         this.actorMap = actorMap;
         this.systemMap = systemMap;
         this.packageMap = packageMap;
         this.coreMap = coreMap;
-        this.affinity = affinity;
+    }
+
+    public int[] allocatedMap() {
+        return allocatedMap;
     }
 
     public int[] actorMap() {
@@ -51,19 +55,20 @@ public class CPUMap implements Serializable {
     }
 
     public static String description(CPUMap map, List<String> actorNames) {
-        if (!map.affinity) {
-            return "no special handling";
-        }
-
         int[] actorMap = map.actorMap;
         int[] systemMap = map.systemMap;
         int[] packageMap = map.packageMap;
         int[] coreMap = map.coreMap;
 
+        boolean hasOne = false;
+
         StringBuilder sb = new StringBuilder();
-        sb.append("\n");
         for (int a = 0; a < actorMap.length; a++) {
             if (actorMap[a] != -1) {
+                if (!hasOne) {
+                    sb.append("\n");
+                    hasOne = true;
+                }
                 sb.append("    ");
                 sb.append(actorNames.get(a));
                 sb.append(": ");
@@ -78,6 +83,10 @@ public class CPUMap implements Serializable {
         }
         for (int a = 0; a < systemMap.length; a++) {
             if (systemMap[a] != -1) {
+                if (!hasOne) {
+                    sb.append("\n");
+                    hasOne = true;
+                }
                 sb.append("    <system>: ");
                 sb.append("CPU #");
                 sb.append(systemMap[a]);
@@ -88,14 +97,15 @@ public class CPUMap implements Serializable {
                 sb.append(System.lineSeparator());
             }
         }
+        if (!hasOne) {
+            sb.append("unspecified");
+            sb.append(System.lineSeparator());
+        }
+
         return sb.toString();
     }
 
     public String globalAffinityMap() {
-        if (!affinity) {
-            return "";
-        }
-
         StringBuilder sb = new StringBuilder();
 
         boolean first = true;

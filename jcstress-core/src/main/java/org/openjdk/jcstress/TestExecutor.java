@@ -197,12 +197,8 @@ public class TestExecutor {
         return reclaimed;
     }
 
-    public int getActorCpus() {
-        return scheduler.getActorCpus();
-    }
-
-    public int getSystemCpus() {
-        return scheduler.getSystemCpus();
+    public int getCpus() {
+        return scheduler.getCpus();
     }
 
     public int getJVMsStarting() {
