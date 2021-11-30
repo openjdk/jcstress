@@ -225,7 +225,7 @@ public class Scheduler {
         }
 
         // Take all affected cores as assignment
-        int[] takenCPUs = new int[topology.totalThreads()];
+        int[] allocatedMap = new int[topology.totalThreads()];
         int cnt = 0;
 
         for (int core : actorToCore) {
@@ -234,7 +234,7 @@ public class Scheduler {
                     throw new IllegalStateException("Thread should be free");
                 }
                 availableCPUs.set(thread, false);
-                takenCPUs[cnt++] = thread;
+                allocatedMap[cnt++] = thread;
                 currentUse++;
             }
         }
@@ -242,26 +242,26 @@ public class Scheduler {
         int[] actorMap = new int[scl.numActors()];
         Arrays.fill(actorMap, -1);
 
-        takenCPUs = Arrays.copyOf(takenCPUs, cnt);
+        allocatedMap = Arrays.copyOf(allocatedMap, cnt);
         int[] systemMap;
         if (none) {
             // No assignments for system
             systemMap = new int[0];
         } else {
             // All assignments go to system
-            systemMap = Arrays.copyOf(takenCPUs, cnt);
+            systemMap = Arrays.copyOf(allocatedMap, cnt);
         }
 
         int[] coreMap = new int[topology.totalThreads()];
         int[] packageMap = new int[topology.totalThreads()];
         Arrays.fill(coreMap, -1);
         Arrays.fill(packageMap, -1);
-        for (int thread : takenCPUs) {
+        for (int thread : allocatedMap) {
             packageMap[thread] = topology.threadToPackage(thread);
             coreMap[thread] = topology.threadToCore(thread);
         }
 
-        return new CPUMap(takenCPUs, actorMap, systemMap, packageMap, coreMap);
+        return new CPUMap(allocatedMap, actorMap, systemMap, packageMap, coreMap);
     }
 
     private void checkInvariants(String when) {
