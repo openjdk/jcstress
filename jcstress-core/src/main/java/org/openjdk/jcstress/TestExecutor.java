@@ -197,12 +197,8 @@ public class TestExecutor {
         return reclaimed;
     }
 
-    public int getActorCpus() {
-        return scheduler.getActorCpus();
-    }
-
-    public int getSystemCpus() {
-        return scheduler.getSystemCpus();
+    public int getCpus() {
+        return scheduler.getCpus();
     }
 
     public int getJVMsStarting() {
@@ -392,10 +388,13 @@ public class TestExecutor {
             try {
                 List<String> command = new ArrayList<>();
 
-                if (OSSupport.taskSetAvailable() && (task.shClass.mode() != AffinityMode.NONE)) {
-                    command.add("taskset");
-                    command.add("-c");
-                    command.add(cpuMap.globalAffinityMap());
+                if (OSSupport.taskSetAvailable()) {
+                    String map = cpuMap.globalAffinityMap();
+                    if (!map.isEmpty()) {
+                        command.add("taskset");
+                        command.add("-c");
+                        command.add(map);
+                    }
                 }
 
                 // basic Java line

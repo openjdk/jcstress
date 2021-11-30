@@ -72,10 +72,12 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private long softErrors;
     private long hardErrors;
     private TestExecutor executor;
+    private final int totalCpuCount;
 
     public ConsoleReportPrinter(Options opts, PrintWriter pw, long expectedForks) {
         this.output = pw;
         this.expectedResults = expectedForks;
+        totalCpuCount = opts.getCPUCount();
         verbosity = opts.verbosity();
         progressLen = new int[PROGRESS_COMPONENTS];
         Arrays.fill(progressLen, 1);
@@ -159,8 +161,7 @@ public class ConsoleReportPrinter implements TestResultCollector {
 
     private void printStatusLine() {
         long currentTime = System.nanoTime();
-        final int actorCpus = executor.getActorCpus();
-        final int systemCpus = executor.getSystemCpus();
+        final int cpus = executor.getCpus();
 
         String l0 = String.format("(ETA: %s)",
                 computeETA());
@@ -168,8 +169,8 @@ public class ConsoleReportPrinter implements TestResultCollector {
                 computeSpeed());
         String l2 = String.format("(JVMs: %d starting, %d running, %d finishing)",
                 executor.getJVMsStarting(), executor.getJVMsRunning(), executor.getJVMsFinishing());
-        String l3 = String.format("(CPUs: %d actor, %d system, %d total)",
-                actorCpus, systemCpus, actorCpus + systemCpus);
+        String l3 = String.format("(CPUs: %d configured, %d allocated)",
+                totalCpuCount, cpus);
         String l4 = String.format("(Results: %d planned; %d passed, %d failed, %d soft errs, %d hard errs)",
                 expectedResults, passed, failed, softErrors, hardErrors);
 

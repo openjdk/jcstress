@@ -28,18 +28,22 @@ import java.io.Serializable;
 import java.util.List;
 
 public class CPUMap implements Serializable {
-    public static final CPUMap UNSET = new CPUMap(new int[] {}, new int[] {}, new int[] {}, new int[] {});
-
     private final int[] actorMap;
     private final int[] systemMap;
     private final int[] packageMap;
     private final int[] coreMap;
+    private final int[] allocatedMap;
 
-    public CPUMap(int[] actorMap, int[] systemMap, int[] packageMap, int[] coreMap) {
+    public CPUMap(int[] allocatedMap, int[] actorMap, int[] systemMap, int[] packageMap, int[] coreMap) {
+        this.allocatedMap = allocatedMap;
         this.actorMap = actorMap;
         this.systemMap = systemMap;
         this.packageMap = packageMap;
         this.coreMap = coreMap;
+    }
+
+    public int[] allocatedMap() {
+        return allocatedMap;
     }
 
     public int[] actorMap() {
@@ -56,9 +60,15 @@ public class CPUMap implements Serializable {
         int[] packageMap = map.packageMap;
         int[] coreMap = map.coreMap;
 
+        boolean hasOne = false;
+
         StringBuilder sb = new StringBuilder();
         for (int a = 0; a < actorMap.length; a++) {
             if (actorMap[a] != -1) {
+                if (!hasOne) {
+                    sb.append("\n");
+                    hasOne = true;
+                }
                 sb.append("    ");
                 sb.append(actorNames.get(a));
                 sb.append(": ");
@@ -73,6 +83,10 @@ public class CPUMap implements Serializable {
         }
         for (int a = 0; a < systemMap.length; a++) {
             if (systemMap[a] != -1) {
+                if (!hasOne) {
+                    sb.append("\n");
+                    hasOne = true;
+                }
                 sb.append("    <system>: ");
                 sb.append("CPU #");
                 sb.append(systemMap[a]);
@@ -83,6 +97,11 @@ public class CPUMap implements Serializable {
                 sb.append(System.lineSeparator());
             }
         }
+        if (!hasOne) {
+            sb.append("unspecified");
+            sb.append(System.lineSeparator());
+        }
+
         return sb.toString();
     }
 
