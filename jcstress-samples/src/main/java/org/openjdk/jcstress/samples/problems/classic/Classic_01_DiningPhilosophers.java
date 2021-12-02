@@ -142,7 +142,7 @@ public class Classic_01_DiningPhilosophers {
             // Acquire forks
             while (true) {
                 synchronized (waiter) {
-                    if (!forks[f1] && !forks[f1]) {
+                    if (!forks[f1] && !forks[f2]) {
                         // Success!
                         forks[f1] = true;
                         forks[f2] = true;
