@@ -43,12 +43,15 @@ public class Classic_02_ProducerConsumerProblem {
     */
 
     /*
+
+      ----------------------------------------------------------------------------------------------------------
+
         This sample shows you how JCStress can help you to test solutions for the famous producer-consumer problem.
         See https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem for more information
         about the problem and solutions.
 
         The producer-consumer problem is about transferring items
-        from the producers to the consumers in a thread-safe way.
+        from the producer(s) to the consumer(s) in a thread-safe way.
         Some solutions support only one producer and one consumer
         while other solutions don't mind many producers and many consumers.
      */
@@ -111,7 +114,7 @@ public class Classic_02_ProducerConsumerProblem {
 
      */
     @JCStressTest
-    @Outcome(id = {"true"}, expect = ACCEPTABLE, desc = "Trivial")
+    @Outcome(id = "true", expect = ACCEPTABLE, desc = "Trivial")
     @State
     public static class OneProducerOneConsumer extends SemaphoresBase {
         @Actor
@@ -150,8 +153,8 @@ public class Classic_02_ProducerConsumerProblem {
           1, 0, 2     251.060    1,53%   Acceptable  Producers didn't overwrite each other's item.
      */
     @JCStressTest
-    @Outcome(expect = ACCEPTABLE, desc = "Producers didn't overwrite each other's item.")
     @Outcome(id = {"0, 0, 2"}, expect = ACCEPTABLE_INTERESTING, desc = "Producers overwrote each other's item.")
+    @Outcome(expect = ACCEPTABLE, desc = "Producers didn't overwrite each other's item.")
     @State
     public static class FlawedTwoProducersOneConsumer extends SemaphoresBase {
         @Actor
@@ -176,8 +179,8 @@ public class Classic_02_ProducerConsumerProblem {
         This makes it impossible for producers to accidentally use the same index.
      */
     @JCStressTest
-    @Outcome(expect = ACCEPTABLE, desc = "Producers didn't overwrite each other's item.")
     @Outcome(id = {"0, 0, 2"}, expect = ACCEPTABLE_INTERESTING, desc = "Producers overwrote each other's item.")
+    @Outcome(expect = ACCEPTABLE, desc = "Producers didn't overwrite each other's item.")
     @State
     public static class FixedTwoProducersOneConsumer extends SemaphoresBase {
         private final Object indexLock = new Object();
@@ -218,8 +221,8 @@ public class Classic_02_ProducerConsumerProblem {
         While the condition full wakes up producers when
      */
     @JCStressTest
-    @Outcome(expect = ACCEPTABLE, desc = "Producers didn't overwrite each other's item.")
     @Outcome(id = {"0, 0, 2"}, expect = ACCEPTABLE_INTERESTING, desc = "Producers overwrote each other's item.")
+    @Outcome(expect = ACCEPTABLE, desc = "Producers didn't overwrite each other's item.")
     @State
     public static class Lock {
         private final ReentrantLock lock = new ReentrantLock();
@@ -285,9 +288,8 @@ public class Classic_02_ProducerConsumerProblem {
         This solution with AtomicIntegers only works with one producer and one consumer.
         It fails if an int overflow happens.
      */
-    @SuppressWarnings("StatementWithEmptyBody")
     @JCStressTest
-    @Outcome(id = {"true"}, expect = ACCEPTABLE, desc = "One producer produced 2 items which were consumed.")
+    @Outcome(id = "true", expect = ACCEPTABLE, desc = "One producer produced 2 items which were consumed.")
     @State
     public static class AtomicIntegers {
         private final AtomicInteger produced = new AtomicInteger();
