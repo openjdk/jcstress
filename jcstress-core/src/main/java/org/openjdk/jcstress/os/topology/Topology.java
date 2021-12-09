@@ -59,6 +59,8 @@ public interface Topology {
 
     void printStatus(PrintStream pw);
 
+    boolean trustworthy();
+
     int threadsPerCore();
     int coresPerPackage();
     int packagesPerSystem();

@@ -35,8 +35,12 @@ public class FallbackTopology extends PresetRegularTopology {
     }
 
     public void printStatus(PrintStream pw) {
-        pw.println("  Fallback topology, assuming reasonable defaults");
-        super.printStatus(pw);
+        pw.println("  Fallback topology, faking CPU layout, downgrading to \"NONE\" affinity mode");
+    }
+
+    @Override
+    public boolean trustworthy() {
+        return false;
     }
 
 }

@@ -65,7 +65,7 @@ public class SampleTestBench {
         int[] map = new int[2];
         map[0] = -1;
         map[1] = -1;
-        cfg.setCPUMap(new CPUMap(map, map, map, map));
+        cfg.setCPUMap(new CPUMap(map, map, map, map, map));
 
         pool = Executors.newCachedThreadPool();
 
