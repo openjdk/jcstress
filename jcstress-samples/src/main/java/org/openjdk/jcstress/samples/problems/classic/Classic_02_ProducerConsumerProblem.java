@@ -43,22 +43,22 @@ public class Classic_02_ProducerConsumerProblem {
     */
 
     /*
-
       ----------------------------------------------------------------------------------------------------------
 
         This sample shows you how JCStress can help you to test solutions for the famous producer-consumer problem.
         See https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem for more information
         about the problem and solutions.
 
-        The producer-consumer problem is about transferring items
-        from the producer(s) to the consumer(s) in a thread-safe way.
-        Some solutions support only one producer and one consumer
-        while other solutions don't mind many producers and many consumers.
+        The producer-consumer problem is about transferring items from the producer(s) to the consumer(s)
+        in a thread-safe way. Some solutions support only one producer and one consumer while other solutions
+        don't mind many producers and many consumers.
      */
 
     private final static int BUFFER_SIZE = 2;
 
     /*
+      ----------------------------------------------------------------------------------------------------------
+
         One solution uses semaphores to solve the producer-consumer problem.
      */
     static class SemaphoresBase {
@@ -108,10 +108,10 @@ public class Classic_02_ProducerConsumerProblem {
     }
 
     /*
+      ----------------------------------------------------------------------------------------------------------
+
         This solution shows how semaphores can be used to solve the producer-consumer problem
         for only one producer and only one consumer.
-
-
      */
     @JCStressTest
     @Outcome(id = "true", expect = ACCEPTABLE, desc = "Trivial")
@@ -136,6 +136,8 @@ public class Classic_02_ProducerConsumerProblem {
     }
 
     /*
+      ----------------------------------------------------------------------------------------------------------
+
         This solution with semaphores only works with one producer and one consumer.
         If two producers are used, then this leads to a race condition:
         Both producers might use the same index at the same time
@@ -153,7 +155,7 @@ public class Classic_02_ProducerConsumerProblem {
           1, 0, 2     251.060    1,53%   Acceptable  Producers didn't overwrite each other's item.
      */
     @JCStressTest
-    @Outcome(id = {"0, 0, 2"}, expect = ACCEPTABLE_INTERESTING, desc = "Producers overwrote each other's item.")
+    @Outcome(id = "0, 0, 2", expect = ACCEPTABLE_INTERESTING, desc = "Producers overwrote each other's item.")
     @Outcome(expect = ACCEPTABLE, desc = "Producers didn't overwrite each other's item.")
     @State
     public static class FlawedTwoProducersOneConsumer extends SemaphoresBase {
@@ -174,12 +176,14 @@ public class Classic_02_ProducerConsumerProblem {
     }
 
     /*
+      ----------------------------------------------------------------------------------------------------------
+
         The solution with semaphores can be extended so that more than one producer and consumer are supported.
         It uses a separate lock to synchronize the access to index counter.
         This makes it impossible for producers to accidentally use the same index.
      */
     @JCStressTest
-    @Outcome(id = {"0, 0, 2"}, expect = ACCEPTABLE_INTERESTING, desc = "Producers overwrote each other's item.")
+    @Outcome(id = "0, 0, 2", expect = ACCEPTABLE_INTERESTING, desc = "Producers overwrote each other's item.")
     @Outcome(expect = ACCEPTABLE, desc = "Producers didn't overwrite each other's item.")
     @State
     public static class FixedTwoProducersOneConsumer extends SemaphoresBase {
@@ -217,11 +221,13 @@ public class Classic_02_ProducerConsumerProblem {
     }
 
     /*
+      ----------------------------------------------------------------------------------------------------------
+
         This solution with a ReentrantLock and two conditions works with many producers and many consumers.
         While the condition full wakes up producers when
      */
     @JCStressTest
-    @Outcome(id = {"0, 0, 2"}, expect = ACCEPTABLE_INTERESTING, desc = "Producers overwrote each other's item.")
+    @Outcome(id = "0, 0, 2", expect = ACCEPTABLE_INTERESTING, desc = "Producers overwrote each other's item.")
     @Outcome(expect = ACCEPTABLE, desc = "Producers didn't overwrite each other's item.")
     @State
     public static class Lock {
@@ -248,11 +254,11 @@ public class Classic_02_ProducerConsumerProblem {
         public int produce() {
             lock.lock();
             try {
-                while(count == BUFFER_SIZE) {
+                while (count == BUFFER_SIZE) {
                     full.await();
                 }
                 int index = count++;
-                if(count == 1) {
+                if (count == 1) {
                     empty.signalAll();
                 }
                 return index;
@@ -267,12 +273,12 @@ public class Classic_02_ProducerConsumerProblem {
             int result;
             lock.lock();
             try {
-                while(count == 0) {
+                while (count == 0) {
                     empty.await();
                 }
                 result = count;
                 count--;
-                if(count == BUFFER_SIZE - 1) {
+                if (count == BUFFER_SIZE - 1) {
                     full.signalAll();
                 }
             } catch (InterruptedException e) {
@@ -285,6 +291,8 @@ public class Classic_02_ProducerConsumerProblem {
     }
 
     /*
+      ----------------------------------------------------------------------------------------------------------
+
         This solution with AtomicIntegers only works with one producer and one consumer.
         It fails if an int overflow happens.
      */
@@ -308,12 +316,12 @@ public class Classic_02_ProducerConsumerProblem {
         }
 
         public void produce() {
-            while(produced.get() - consumed.get() == BUFFER_SIZE); // spin
+            while (produced.get() - consumed.get() == BUFFER_SIZE); // spin
             produced.getAndIncrement();
         }
 
         public void consume() {
-            while(produced.get() - consumed.get() == 0); // spin
+            while (produced.get() - consumed.get() == 0); // spin
             consumed.getAndIncrement();
         }
 
