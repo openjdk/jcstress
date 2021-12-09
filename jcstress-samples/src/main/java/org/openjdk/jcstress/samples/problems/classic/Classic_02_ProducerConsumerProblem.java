@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.samples.concurrency.classic;
+package org.openjdk.jcstress.samples.problems.classic;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.III_Result;
@@ -36,20 +36,28 @@ import java.util.concurrent.locks.ReentrantLock;
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
 
-public class ClassicProblem_02_ProducerConsumerProblem {
+public class Classic_02_ProducerConsumerProblem {
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t ClassicProblem_02_ProducerConsumerProblem
+            $ java -jar jcstress-samples/target/jcstress.jar -t Classic_02_ProducerConsumerProblem
     */
 
     /*
         This sample shows you how JCStress can help you to test solutions for the famous producer-consumer problem.
         See https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem for more information
         about the problem and solutions.
+
+        The producer-consumer problem is about transferring items
+        from the producers to the consumers in a thread-safe way.
+        Some solutions support only one producer and one consumer
+        while other solutions don't mind many producers and many consumers.
      */
 
     private final static int BUFFER_SIZE = 2;
 
+    /*
+        One solution uses semaphores to solve the producer-consumer problem.
+     */
     static class SemaphoresBase {
         protected final Semaphore fillCount = new Semaphore(BUFFER_SIZE);
         protected final Semaphore emptyCount = new Semaphore(BUFFER_SIZE);
@@ -64,7 +72,6 @@ public class ClassicProblem_02_ProducerConsumerProblem {
 
         public int produce() {
             try {
-                // produce item
                 emptyCount.acquire();
                 int index = putItemIntoBuffer();
                 fillCount.release();
@@ -80,7 +87,6 @@ public class ClassicProblem_02_ProducerConsumerProblem {
                 fillCount.acquire();
                 takeItemFromBuffer();
                 emptyCount.release();
-                // consume item
                 return count;
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e);
@@ -98,8 +104,14 @@ public class ClassicProblem_02_ProducerConsumerProblem {
         }
     }
 
+    /*
+        This solution shows how semaphores can be used to solve the producer-consumer problem
+        for only one producer and only one consumer.
+
+
+     */
     @JCStressTest
-    @Outcome(id = {"true"}, expect = ACCEPTABLE, desc = "One producer produced 2 items which were consumed.")
+    @Outcome(id = {"true"}, expect = ACCEPTABLE, desc = "Trivial")
     @State
     public static class OneProducerOneConsumer extends SemaphoresBase {
         @Actor
@@ -127,15 +139,15 @@ public class ClassicProblem_02_ProducerConsumerProblem {
         to put their elements into the buffer so that they overwrite each other's item.
 
           RESULT     SAMPLES     FREQ       EXPECT  DESCRIPTION
-          0, 0, 0      61.158    0,37%   Acceptable
-          0, 0, 1  15.066.987   91,84%   Acceptable
-          0, 0, 2       9.078    0,06%  Interesting  Producers used the same index at the same time.
-          0, 1, 0      23.658    0,14%   Acceptable
-          0, 1, 1      80.552    0,49%   Acceptable
-          0, 1, 2     799.311    4,87%   Acceptable
-          1, 0, 0      48.668    0,30%   Acceptable
-          1, 0, 1      66.056    0,40%   Acceptable
-          1, 0, 2     251.060    1,53%   Acceptable
+          0, 0, 0      61.158    0,37%   Acceptable  Producers didn't overwrite each other's item.
+          0, 0, 1  15.066.987   91,84%   Acceptable  Producers didn't overwrite each other's item.
+          0, 0, 2       9.078    0,06%  Interesting  Producers overwrote each other's item.
+          0, 1, 0      23.658    0,14%   Acceptable  Producers didn't overwrite each other's item.
+          0, 1, 1      80.552    0,49%   Acceptable  Producers didn't overwrite each other's item.
+          0, 1, 2     799.311    4,87%   Acceptable  Producers didn't overwrite each other's item.
+          1, 0, 0      48.668    0,30%   Acceptable  Producers didn't overwrite each other's item.
+          1, 0, 1      66.056    0,40%   Acceptable  Producers didn't overwrite each other's item.
+          1, 0, 2     251.060    1,53%   Acceptable  Producers didn't overwrite each other's item.
      */
     @JCStressTest
     @Outcome(expect = ACCEPTABLE, desc = "Producers didn't overwrite each other's item.")
@@ -160,6 +172,8 @@ public class ClassicProblem_02_ProducerConsumerProblem {
 
     /*
         The solution with semaphores can be extended so that more than one producer and consumer are supported.
+        It uses a separate lock to synchronize the access to index counter.
+        This makes it impossible for producers to accidentally use the same index.
      */
     @JCStressTest
     @Outcome(expect = ACCEPTABLE, desc = "Producers didn't overwrite each other's item.")
@@ -201,6 +215,7 @@ public class ClassicProblem_02_ProducerConsumerProblem {
 
     /*
         This solution with a ReentrantLock and two conditions works with many producers and many consumers.
+        While the condition full wakes up producers when
      */
     @JCStressTest
     @Outcome(expect = ACCEPTABLE, desc = "Producers didn't overwrite each other's item.")
@@ -228,13 +243,11 @@ public class ClassicProblem_02_ProducerConsumerProblem {
         }
 
         public int produce() {
-            // produce item
             lock.lock();
             try {
                 while(count == BUFFER_SIZE) {
                     full.await();
                 }
-                // put item to buffer
                 int index = count++;
                 if(count == 1) {
                     empty.signalAll();
@@ -255,7 +268,6 @@ public class ClassicProblem_02_ProducerConsumerProblem {
                     empty.await();
                 }
                 result = count;
-                // put item to buffer
                 count--;
                 if(count == BUFFER_SIZE - 1) {
                     full.signalAll();
@@ -265,7 +277,6 @@ public class ClassicProblem_02_ProducerConsumerProblem {
             } finally {
                 lock.unlock();
             }
-            // consume item
             return result;
         }
     }
@@ -295,17 +306,13 @@ public class ClassicProblem_02_ProducerConsumerProblem {
         }
 
         public void produce() {
-            // produce item
             while(produced.get() - consumed.get() == BUFFER_SIZE); // spin
-            // put item to buffer
             produced.getAndIncrement();
         }
 
         public void consume() {
             while(produced.get() - consumed.get() == 0); // spin
-            // take item from buffer
             consumed.getAndIncrement();
-            // consume item
         }
 
         @Arbiter
