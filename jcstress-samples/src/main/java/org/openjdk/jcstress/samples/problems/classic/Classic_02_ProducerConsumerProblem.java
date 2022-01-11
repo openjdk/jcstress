@@ -33,8 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
+import static org.openjdk.jcstress.annotations.Expect.*;
 
 public class Classic_02_ProducerConsumerProblem {
     /*
@@ -116,8 +115,9 @@ public class Classic_02_ProducerConsumerProblem {
           RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
             true  685.944.832  100,00%  Acceptable  Trivial
      */
-    @JCStressTest
-    @Outcome(id = "true", expect = ACCEPTABLE, desc = "Trivial")
+    @JCStressTest(Mode.Termination)
+    @Outcome(id = "TERMINATED", expect = ACCEPTABLE, desc = "Gracefully finished")
+    @Outcome(id = "STALE",      expect = FORBIDDEN,  desc = "Test is stuck")
     @State
     public static class OneProducerOneConsumer extends SemaphoresBase {
         @Actor
@@ -130,11 +130,6 @@ public class Classic_02_ProducerConsumerProblem {
         void consumer() {
             consume();
             consume();
-        }
-
-        @Arbiter
-        public void fake(Z_Result r) {
-            r.r1 = true;
         }
     }
 
@@ -322,8 +317,9 @@ public class Classic_02_ProducerConsumerProblem {
           RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
             true  558.057.472  100,00%  Acceptable  One producer produced 2 items which were consumed.
      */
-    @JCStressTest
-    @Outcome(id = "true", expect = ACCEPTABLE, desc = "One producer produced 2 items which were consumed.")
+    @JCStressTest(Mode.Termination)
+    @Outcome(id = "TERMINATED", expect = ACCEPTABLE, desc = "Gracefully finished")
+    @Outcome(id = "STALE",      expect = FORBIDDEN,  desc = "Test is stuck")
     @State
     public static class AtomicIntegers {
         private final AtomicInteger produced = new AtomicInteger();
@@ -349,11 +345,6 @@ public class Classic_02_ProducerConsumerProblem {
         public void consume() {
             while (produced.get() - consumed.get() == 0); // spin
             consumed.getAndIncrement();
-        }
-
-        @Arbiter
-        public void fake(Z_Result r) {
-            r.r1 = true;
         }
     }
 }

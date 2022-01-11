@@ -31,6 +31,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
+import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 
 public class Classic_01_DiningPhilosophers {
 
@@ -52,7 +53,7 @@ public class Classic_01_DiningPhilosophers {
 
         The trivial deadlock in this problem is when every philosopher holds one fork,
         and waits for other fork to drop. If all philosophers take the fork on one side,
-        no philosophers would be able to complete. // TODO: Demo with multi-actor termination tests.
+        no philosophers would be able to complete.
 
         The first solution is "Resource Hierarchy": it avoids the deadlock by asking the
         last philosopher to take the forks in the _different_ order.
@@ -62,8 +63,9 @@ public class Classic_01_DiningPhilosophers {
             true  6,325,295,104  100.00%  Acceptable  Trivial.
      */
 
-    @JCStressTest
-    @Outcome(expect = ACCEPTABLE, desc = "Trivial.")
+    @JCStressTest(Mode.Termination)
+    @Outcome(id = "TERMINATED", expect = ACCEPTABLE, desc = "Gracefully finished")
+    @Outcome(id = "STALE",      expect = FORBIDDEN,  desc = "Test is stuck")
     @State
     public static class ResourceHierarchy {
         private final Object[] forks = new Object[] { new Object(), new Object(), new Object() };
@@ -81,12 +83,6 @@ public class Classic_01_DiningPhilosophers {
         @Actor
         public void p3() {
             eat(0, 2); // in different order
-        }
-
-        @Arbiter
-        public void fake(Z_Result r) {
-            // Fake the result. The actual failure is deadlock.
-            r.r1 = true;
         }
 
         final protected void eat(int fork1, int fork2) {
@@ -110,8 +106,9 @@ public class Classic_01_DiningPhilosophers {
             true  6,270,081,024  100.00%  Acceptable  Trivial.
      */
 
-    @JCStressTest
-    @Outcome(id = "true", expect = ACCEPTABLE, desc = "Trivial.")
+    @JCStressTest(Mode.Termination)
+    @Outcome(id = "TERMINATED", expect = ACCEPTABLE, desc = "Gracefully finished")
+    @Outcome(id = "STALE",      expect = FORBIDDEN,  desc = "Test is stuck")
     @State
     public static class Arbitrator  {
         private final boolean[] forks = new boolean[3];
@@ -130,12 +127,6 @@ public class Classic_01_DiningPhilosophers {
         @Actor
         public void p3() {
             eat(2, 0);
-        }
-
-        @Arbiter
-        public void fake(Z_Result r) {
-            // Fake the result. The actual failure is deadlock.
-            r.r1 = true;
         }
 
         void eat(int f1, int f2) {
@@ -169,8 +160,9 @@ public class Classic_01_DiningPhilosophers {
             true  5,377,787,904  100.00%  Acceptable  Trivial.
      */
 
-    @JCStressTest
-    @Outcome(id = "true", expect = ACCEPTABLE, desc = "Trivial.")
+    @JCStressTest(Mode.Termination)
+    @Outcome(id = "TERMINATED", expect = ACCEPTABLE, desc = "Gracefully finished")
+    @Outcome(id = "STALE",      expect = FORBIDDEN,  desc = "Test is stuck")
     @State
     public static class OneDinerFewer {
         private final AtomicIntegerArray forks = new AtomicIntegerArray(3);
@@ -189,12 +181,6 @@ public class Classic_01_DiningPhilosophers {
         @Actor
         public void p3() {
             eat(2, 0);
-        }
-
-        @Arbiter
-        public void fake(Z_Result r) {
-            // Fake the result. The actual failure is deadlock.
-            r.r1 = true;
         }
 
         void eat(int f1, int f2) {

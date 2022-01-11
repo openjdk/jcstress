@@ -41,4 +41,10 @@ public enum Mode {
      */
     Termination,
 
+    /**
+     * Deadlock mode: run several {@link Actor} threads continuously, and see if
+     * any actor deadlocks.
+     */
+    Deadlock,
+
 }
