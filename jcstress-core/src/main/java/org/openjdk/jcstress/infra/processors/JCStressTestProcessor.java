@@ -103,6 +103,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
                         case Termination:
                             generateTermination(info);
                             break;
+                        case Deadlock:
+                            generateDeadlock(info);
+                            break;
                         default:
                             throw new GenerationException("Unknown mode: " + mode, e);
                     }
@@ -749,6 +752,219 @@ public class JCStressTestProcessor extends AbstractProcessor {
     }
 
     private void generateTermination(TestInfo info) {
+        if (info.getSignal() == null) {
+            throw new GenerationException("@" + JCStressTest.class.getSimpleName() + " with mode=" + Mode.Termination +
+                    " should have a @" + Signal.class.getSimpleName() + " method", info.getTest());
+        }
+
+        if (info.getActors().size() != 1) {
+            throw new GenerationException("@" + JCStressTest.class.getSimpleName() + " with mode=" + Mode.Termination +
+                    " should have only the single @" + Actor.class.getName(), info.getTest());
+        }
+
+        String generatedName = getGeneratedName(info.getTest());
+
+        PrintWriter pw;
+        Writer writer;
+        try {
+            writer = processingEnv.getFiler().createSourceFile(getPackageName(info.getTest()) + "." + generatedName).openWriter();
+            pw = new PrintWriter(writer);
+        } catch (IOException e) {
+            throw new GenerationException("IOException: " + e.getMessage(), info.getTest());
+        }
+
+        String t = info.getTest().getSimpleName().toString();
+
+        ExecutableElement actor = info.getActors().get(0);
+
+        pw.println("package " + getPackageName(info.getTest()) + ";");
+
+        printImports(pw, info);
+
+        pw.println("public class " + generatedName + " extends Runner<" + generatedName + ".Outcome> {");
+        pw.println();
+
+        pw.println("    public " + generatedName + "(ForkedTestConfig config) {");
+        pw.println("        super(config);");
+        pw.println("    }");
+        pw.println();
+
+        pw.println("    @Override");
+        pw.println("    public TestResult run() {");
+        pw.println("        Counter<Outcome> results = new Counter<>();");
+        pw.println();
+        pw.println("        for (int c = 0; c < config.iters; c++) {");
+        pw.println("            run(results);");
+        pw.println();
+        pw.println("            if (results.count(Outcome.STALE) > 0) {");
+        pw.println("                forceExit = true;");
+        pw.println("                break;");
+        pw.println("            }");
+        pw.println("        }");
+        pw.println();
+        pw.println("        return dump(results);");
+        pw.println("    }");
+        pw.println();
+        pw.println("    @Override");
+        pw.println("    public void sanityCheck(Counter<Outcome> counter) throws Throwable {");
+        pw.println("        throw new UnsupportedOperationException();");
+        pw.println("    }");
+        pw.println();
+        pw.println("    @Override");
+        pw.println("    public ArrayList<CounterThread<Outcome>> internalRun() {");
+        pw.println("        throw new UnsupportedOperationException();");
+        pw.println("    }");
+        pw.println();
+        pw.println("    private void run(Counter<Outcome> results) {");
+        pw.println("        long target = System.currentTimeMillis() + config.time;");
+        pw.println("        while (System.currentTimeMillis() < target) {");
+        pw.println();
+
+        if (info.getTest().equals(info.getState())) {
+            pw.println("            final " + info.getState().getSimpleName() + " state = new " + info.getState().getSimpleName() + "();");
+        } else {
+            if (info.getState() != null) {
+                pw.println("            final " + info.getState().getSimpleName() + " state = new " + info.getState().getSimpleName() + "();");
+            }
+            pw.println("            final " + t + " test = new " + t + "();");
+        }
+
+        pw.println("            final Holder holder = new Holder();");
+        pw.println();
+        pw.println("            Thread t1 = new Thread(new Runnable() {");
+        pw.println("                public void run() {");
+        pw.println("                    try {");
+        pw.println("                        holder.started = true;");
+
+        if (info.getTest().equals(info.getState())) {
+            emitMethodTermination(pw, actor, "                        state." + actor.getSimpleName(), "state");
+        } else {
+            emitMethodTermination(pw, actor, "                        test." + actor.getSimpleName(), "state");
+        }
+
+        pw.println("                    } catch (Exception e) {");
+        pw.println("                        holder.error = true;");
+        pw.println("                    }");
+        pw.println("                    holder.terminated = true;");
+        pw.println("                }");
+        pw.println("            });");
+        pw.println("            t1.setDaemon(true);");
+        pw.println("            t1.start();");
+        pw.println();
+        pw.println("            while (!holder.started) {");
+        pw.println("                try {");
+        pw.println("                    TimeUnit.MILLISECONDS.sleep(1);");
+        pw.println("                } catch (InterruptedException e) {");
+        pw.println("                    // do nothing");
+        pw.println("                }");
+        pw.println("            }");
+        pw.println();
+        pw.println("            try {");
+
+        if (info.getTest().equals(info.getState())) {
+            emitMethodTermination(pw, info.getSignal(), "                state." + info.getSignal().getSimpleName(), "state");
+        } else {
+            emitMethodTermination(pw, info.getSignal(), "                test." + info.getSignal().getSimpleName(), "state");
+        }
+
+        pw.println("            } catch (Exception e) {");
+        pw.println("                holder.error = true;");
+        pw.println("            }");
+        pw.println();
+        pw.println("            try {");
+        pw.println("                t1.join(Math.max(2*config.time, Runner.MIN_TIMEOUT_MS));");
+        pw.println("            } catch (InterruptedException e) {");
+        pw.println("                // do nothing");
+        pw.println("            }");
+        pw.println();
+        pw.println("            if (holder.terminated) {");
+        pw.println("                if (holder.error) {");
+        pw.println("                    results.record(Outcome.ERROR);");
+        pw.println("                } else {");
+        pw.println("                    results.record(Outcome.TERMINATED);");
+        pw.println("                }");
+        pw.println("            } else {");
+        pw.println("                results.record(Outcome.STALE);");
+        pw.println("                return;");
+        pw.println("            }");
+        pw.println("        }");
+        pw.println("    }");
+        pw.println();
+        pw.println("    private static class Holder {");
+        pw.println("        volatile boolean started;");
+        pw.println("        volatile boolean terminated;");
+        pw.println("        volatile boolean error;");
+        pw.println("    }");
+        pw.println();
+        pw.println("    public enum Outcome {");
+        pw.println("        TERMINATED,");
+        pw.println("        STALE,");
+        pw.println("        ERROR,");
+        pw.println("    }");
+        pw.println("}");
+        pw.close();
+    }
+
+    private boolean hasResultArgs(ExecutableElement el) {
+        for (VariableElement var : el.getParameters()) {
+            TypeElement paramClass = (TypeElement) processingEnv.getTypeUtils().asElement(var.asType());
+            if (paramClass.getAnnotation(Result.class) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void emitMethod(PrintWriter pw, ExecutableElement el, String lvalue, String stateAccessor, String resultAccessor, boolean terminate) {
+        pw.print(lvalue + "(");
+
+        boolean isFirst = true;
+        for (VariableElement var : el.getParameters()) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                pw.print(", ");
+            }
+            TypeElement paramClass = (TypeElement) processingEnv.getTypeUtils().asElement(var.asType());
+            if (paramClass.getAnnotation(State.class) != null) {
+                pw.print(stateAccessor);
+            } else if (paramClass.getAnnotation(Result.class) != null) {
+                pw.print(resultAccessor);
+            }
+        }
+        pw.print(")");
+        if (terminate) {
+            pw.println(";");
+        }
+    }
+
+    private void emitMethodTermination(PrintWriter pw, ExecutableElement el, String lvalue, String stateAccessor) {
+        pw.print(lvalue + "(");
+
+        boolean isFirst = true;
+        for (VariableElement var : el.getParameters()) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                pw.print(", ");
+            }
+            TypeElement paramClass = (TypeElement) processingEnv.getTypeUtils().asElement(var.asType());
+            if (paramClass.getAnnotation(State.class) != null) {
+                pw.print(stateAccessor);
+            }
+            if (paramClass.getQualifiedName().toString().equals("java.lang.Thread")) {
+                pw.print("t1");
+            }
+        }
+        pw.println(");");
+    }
+
+    private void generateDeadlock(TestInfo info) {
+        if (info.getSignal() != null) {
+            throw new GenerationException("@" + JCStressTest.class.getSimpleName() + " with mode=" + Mode.Deadlock +
+                    " does not support @" + Signal.class.getSimpleName() + " methods", info.getTest());
+        }
+
         String generatedName = getGeneratedName(info.getTest());
 
         PrintWriter pw;
@@ -854,20 +1070,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
         }
         pw.println();
 
-        if (info.getSignal() != null) {
-            pw.println("            try {");
-            if (info.getTest().equals(info.getState())) {
-                emitMethodTermination(pw, info.getSignal(), "                state." + info.getSignal().getSimpleName(), "state");
-            } else {
-                emitMethodTermination(pw, info.getSignal(), "                test." + info.getSignal().getSimpleName(), "state");
-            }
-            pw.println("            } catch (Exception e) {");
-            // TODO: This assumes h0 exists
-            pw.println("                h0.error = true;");
-            pw.println("            }");
-        }
-        pw.println();
-
         for (int a = 0; a < info.getActors().size(); a++) {
             pw.println("            try {");
             pw.println("                t" + a + ".join(Math.max(2*config.time, Runner.MIN_TIMEOUT_MS));");
@@ -906,61 +1108,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    }");
         pw.println("}");
         pw.close();
-    }
-
-    private boolean hasResultArgs(ExecutableElement el) {
-        for (VariableElement var : el.getParameters()) {
-            TypeElement paramClass = (TypeElement) processingEnv.getTypeUtils().asElement(var.asType());
-            if (paramClass.getAnnotation(Result.class) != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void emitMethod(PrintWriter pw, ExecutableElement el, String lvalue, String stateAccessor, String resultAccessor, boolean terminate) {
-        pw.print(lvalue + "(");
-
-        boolean isFirst = true;
-        for (VariableElement var : el.getParameters()) {
-            if (isFirst) {
-                isFirst = false;
-            } else {
-                pw.print(", ");
-            }
-            TypeElement paramClass = (TypeElement) processingEnv.getTypeUtils().asElement(var.asType());
-            if (paramClass.getAnnotation(State.class) != null) {
-                pw.print(stateAccessor);
-            } else if (paramClass.getAnnotation(Result.class) != null) {
-                pw.print(resultAccessor);
-            }
-        }
-        pw.print(")");
-        if (terminate) {
-            pw.println(";");
-        }
-    }
-
-    private void emitMethodTermination(PrintWriter pw, ExecutableElement el, String lvalue, String stateAccessor) {
-        pw.print(lvalue + "(");
-
-        boolean isFirst = true;
-        for (VariableElement var : el.getParameters()) {
-            if (isFirst) {
-                isFirst = false;
-            } else {
-                pw.print(", ");
-            }
-            TypeElement paramClass = (TypeElement) processingEnv.getTypeUtils().asElement(var.asType());
-            if (paramClass.getAnnotation(State.class) != null) {
-                pw.print(stateAccessor);
-            }
-            if (paramClass.getQualifiedName().toString().equals("java.lang.Thread")) {
-                // TODO: Should be as many threads as Actors?
-                pw.print("t0");
-            }
-        }
-        pw.println(");");
     }
 
     private void printImports(PrintWriter pw, TestInfo info) {
