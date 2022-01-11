@@ -112,12 +112,14 @@ public class Classic_02_ProducerConsumerProblem {
         This solution shows how semaphores can be used to solve the producer-consumer problem
         for only one producer and only one consumer.
 
-          RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
-            true  685.944.832  100,00%  Acceptable  Trivial
+        Indeed, it works correctly:
+            RESULT  SAMPLES     FREQ      EXPECT  DESCRIPTION
+          FINISHED       60  100.00%  Acceptable  Gracefully finished
+             STALE        0    0.00%   Forbidden  Deadlock?
      */
     @JCStressTest(Mode.Deadlock)
-    @Outcome(id = "TERMINATED", expect = ACCEPTABLE, desc = "Gracefully finished")
-    @Outcome(id = "STALE",      expect = FORBIDDEN,  desc = "Test is stuck")
+    @Outcome(id = "FINISHED", expect = ACCEPTABLE, desc = "Gracefully finished")
+    @Outcome(id = "STALE",    expect = FORBIDDEN,  desc = "Deadlock?")
     @State
     public static class OneProducerOneConsumer extends SemaphoresBase {
         @Actor
@@ -314,12 +316,13 @@ public class Classic_02_ProducerConsumerProblem {
         This solution with AtomicIntegers only works with one producer and one consumer.
         It fails if an int overflow happens.
 
-          RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
-            true  558.057.472  100,00%  Acceptable  One producer produced 2 items which were consumed.
+            RESULT  SAMPLES     FREQ      EXPECT  DESCRIPTION
+          FINISHED      203   93.98%  Acceptable  Gracefully finished
+             STALE       13    6.02%   Forbidden  Deadlock?
      */
     @JCStressTest(Mode.Deadlock)
-    @Outcome(id = "TERMINATED", expect = ACCEPTABLE, desc = "Gracefully finished")
-    @Outcome(id = "STALE",      expect = FORBIDDEN,  desc = "Test is stuck")
+    @Outcome(id = "FINISHED", expect = ACCEPTABLE,             desc = "Gracefully finished")
+    @Outcome(id = "STALE",    expect = ACCEPTABLE_INTERESTING, desc = "Deadlock?")
     @State
     public static class AtomicIntegers {
         private final AtomicInteger produced = new AtomicInteger();

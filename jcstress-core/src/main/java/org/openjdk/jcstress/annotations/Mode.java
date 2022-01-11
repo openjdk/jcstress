@@ -33,9 +33,10 @@ public enum Mode {
      * Continuous mode: run several {@link Actor}, {@link Arbiter} threads, and
      * collect the histogram of {@link Result}s.
      *
-     * In this mode, each {@link Actor} and {@link Arbiter} method is called
-     * exactly once per {@link State} instance. The test runs continuously until
-     * the test time expires.
+     * <p>In this mode, each {@link Actor} and {@link Arbiter} method is called
+     * exactly once per {@link State} instance.
+     *
+     * <p>The test runs continuously until the test time expires.
      */
     Continuous,
 
@@ -43,9 +44,11 @@ public enum Mode {
      * Termination mode: run a single {@link Actor} with a blocking/looping operation,
      * and see if it responds to a {@link Signal}.
      *
-     * In this mode, each {@link Actor} and {@link Signal} method is called
-     * exactly once per {@link State} instance. The test finishes as soon as
-     * {@link Actor} exits (possibly as the reaction to a {@link Signal}).
+     * <p>In this mode, each {@link Actor} and {@link Signal} method is called
+     * exactly once per {@link State} instance.
+     *
+     * <p>The test finishes as soon as {@link Actor} exits, possibly as the reaction
+     * to a {@link Signal}.
      */
     Termination,
 
@@ -53,8 +56,13 @@ public enum Mode {
      * Deadlock mode: run several {@link Actor} threads continuously, and see if
      * any actor deadlocks.
      *
-     * In contrast to other modes, each {@link Actor} methods is called over the
-     * same {@link State} instance. This allows testing
+     * <p>In contrast to other modes, each {@link Actor} methods is called over the
+     * same {@link State} instance. This allows testing deadlock conditions more
+     * precisely. If you need a test that still runs {@link Actor} once per
+     * {@link State}, consider using {@link #Continuous} mode, producing
+     * only {@link Expect#ACCEPTABLE} results.
+     *
+     * <p>The test runs continuously until the test time expires.
      */
     Deadlock,
 

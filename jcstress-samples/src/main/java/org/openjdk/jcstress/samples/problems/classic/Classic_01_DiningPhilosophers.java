@@ -59,13 +59,14 @@ public class Classic_01_DiningPhilosophers {
         last philosopher to take the forks in the _different_ order.
 
         Indeed, no deadlock occurs:
-          RESULT        SAMPLES     FREQ      EXPECT  DESCRIPTION
-            true  6,325,295,104  100.00%  Acceptable  Trivial.
+            RESULT  SAMPLES     FREQ      EXPECT  DESCRIPTION
+          FINISHED       60  100.00%  Acceptable  Gracefully finished
+             STALE        0    0.00%   Forbidden  Deadlock?
      */
 
     @JCStressTest(Mode.Deadlock)
-    @Outcome(id = "TERMINATED", expect = ACCEPTABLE, desc = "Gracefully finished")
-    @Outcome(id = "STALE",      expect = FORBIDDEN,  desc = "Test is stuck")
+    @Outcome(id = "FINISHED", expect = ACCEPTABLE, desc = "Gracefully finished")
+    @Outcome(id = "STALE",    expect = FORBIDDEN,  desc = "Deadlock?")
     @State
     public static class ResourceHierarchy {
         private final Object[] forks = new Object[] { new Object(), new Object(), new Object() };
@@ -102,13 +103,14 @@ public class Classic_01_DiningPhilosophers {
         philosopher busy-wait (sic!) on a waiter.
 
         Indeed, no deadlock occurs:
-          RESULT        SAMPLES     FREQ      EXPECT  DESCRIPTION
-            true  6,270,081,024  100.00%  Acceptable  Trivial.
+            RESULT  SAMPLES     FREQ      EXPECT  DESCRIPTION
+          FINISHED       60  100.00%  Acceptable  Gracefully finished
+             STALE        0    0.00%   Forbidden  Deadlock?
      */
 
     @JCStressTest(Mode.Deadlock)
-    @Outcome(id = "TERMINATED", expect = ACCEPTABLE, desc = "Gracefully finished")
-    @Outcome(id = "STALE",      expect = FORBIDDEN,  desc = "Test is stuck")
+    @Outcome(id = "FINISHED", expect = ACCEPTABLE, desc = "Gracefully finished")
+    @Outcome(id = "STALE",    expect = FORBIDDEN,  desc = "Deadlock?")
     @State
     public static class Arbitrator  {
         private final boolean[] forks = new boolean[3];
@@ -156,13 +158,14 @@ public class Classic_01_DiningPhilosophers {
         to complete before trying to acquire forks.
 
         Indeed, no deadlock occurs:
-          RESULT        SAMPLES     FREQ      EXPECT  DESCRIPTION
-            true  5,377,787,904  100.00%  Acceptable  Trivial.
+            RESULT  SAMPLES     FREQ      EXPECT  DESCRIPTION
+          FINISHED       60  100.00%  Acceptable  Gracefully finished
+             STALE        0    0.00%   Forbidden  Deadlock?
      */
 
     @JCStressTest(Mode.Deadlock)
-    @Outcome(id = "TERMINATED", expect = ACCEPTABLE, desc = "Gracefully finished")
-    @Outcome(id = "STALE",      expect = FORBIDDEN,  desc = "Test is stuck")
+    @Outcome(id = "FINISHED", expect = ACCEPTABLE, desc = "Gracefully finished")
+    @Outcome(id = "STALE",    expect = FORBIDDEN,  desc = "Deadlock?")
     @State
     public static class OneDinerFewer {
         private final AtomicIntegerArray forks = new AtomicIntegerArray(3);
