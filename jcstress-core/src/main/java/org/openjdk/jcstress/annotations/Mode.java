@@ -57,8 +57,10 @@ public enum Mode {
      * any actor deadlocks.
      *
      * <p>In contrast to other modes, each {@link Actor} methods is called over the
-     * same {@link State} instance. This allows testing deadlock conditions more
-     * precisely. If you need a test that still runs {@link Actor} once per
+     * same {@link State} instance, the same number of times. This allows testing
+     * deadlock conditions more precisely, while matching the test symmetry exactly.
+     *
+     * <p>If you need a test that still runs {@link Actor} once per
      * {@link State}, consider using {@link #Continuous} mode, producing
      * only {@link Expect#ACCEPTABLE} results.
      *

@@ -1034,17 +1034,19 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("            final " + t + " test = new " + t + "();");
         }
 
+        pw.println("            long remainingTime = Math.max(config.time, Runner.MIN_TIMEOUT_MS);");
+
+        pw.println("            while (remainingTime > 0) {");
         for (int a = 0; a < info.getActors().size(); a++) {
             pw.println("            final Holder h" + a + " = new Holder();");
         }
-        pw.println("            final Control control = new Control();");
         pw.println();
 
         for (int a = 0; a < info.getActors().size(); a++) {
             ExecutableElement actor = info.getActors().get(a);
             pw.println("            Thread t" + a + " = new Thread(new Runnable() {");
             pw.println("                public void run() {");
-            pw.println("                    while (!control.terminated) {");
+            pw.println("                    for (int c = 0; c < 10000; c++) {"); // TODO: hook stride values here
             pw.println("                        try {");
             pw.println("                            h" + a + ".started = true;");
 
@@ -1066,16 +1068,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("            t" + a + ".start();");
         }
         pw.println();
-
-        pw.println("            try {");
-        pw.println("                TimeUnit.MILLISECONDS.sleep(config.time);");
-        pw.println("            } catch (InterruptedException e) {");
-        pw.println("                // do nothing");
-        pw.println("            }");
-        pw.println();
-        pw.println("            control.terminated = true;");
-        pw.println();
-        pw.println("            long remainingTime = Math.max(config.time, Runner.MIN_TIMEOUT_MS);");
 
         for (int a = 0; a < info.getActors().size(); a++) {
             pw.println("            if (remainingTime > 0) {");
@@ -1102,6 +1094,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("                return;");
             pw.println("            }");
         }
+
+        pw.println("            }");
+
         pw.println("        }");
         pw.println("    }");
 
