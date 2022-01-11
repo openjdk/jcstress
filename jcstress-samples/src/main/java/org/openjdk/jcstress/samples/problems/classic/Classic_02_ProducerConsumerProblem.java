@@ -115,7 +115,7 @@ public class Classic_02_ProducerConsumerProblem {
           RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
             true  685.944.832  100,00%  Acceptable  Trivial
      */
-    @JCStressTest(Mode.Termination)
+    @JCStressTest(Mode.Deadlock)
     @Outcome(id = "TERMINATED", expect = ACCEPTABLE, desc = "Gracefully finished")
     @Outcome(id = "STALE",      expect = FORBIDDEN,  desc = "Test is stuck")
     @State
@@ -317,7 +317,7 @@ public class Classic_02_ProducerConsumerProblem {
           RESULT      SAMPLES     FREQ      EXPECT  DESCRIPTION
             true  558.057.472  100,00%  Acceptable  One producer produced 2 items which were consumed.
      */
-    @JCStressTest(Mode.Termination)
+    @JCStressTest(Mode.Deadlock)
     @Outcome(id = "TERMINATED", expect = ACCEPTABLE, desc = "Gracefully finished")
     @Outcome(id = "STALE",      expect = FORBIDDEN,  desc = "Test is stuck")
     @State

@@ -964,6 +964,10 @@ public class JCStressTestProcessor extends AbstractProcessor {
             throw new GenerationException("@" + JCStressTest.class.getSimpleName() + " with mode=" + Mode.Deadlock +
                     " does not support @" + Signal.class.getSimpleName() + " methods", info.getTest());
         }
+        if (info.getArbiter() != null) {
+            throw new GenerationException("@" + JCStressTest.class.getSimpleName() + " with mode=" + Mode.Deadlock +
+                    " does not support @" + Arbiter.class.getSimpleName() + " methods", info.getTest());
+        }
 
         String generatedName = getGeneratedName(info.getTest());
 
@@ -1033,23 +1037,27 @@ public class JCStressTestProcessor extends AbstractProcessor {
         for (int a = 0; a < info.getActors().size(); a++) {
             pw.println("            final Holder h" + a + " = new Holder();");
         }
+        pw.println("            final Control control = new Control();");
         pw.println();
 
         for (int a = 0; a < info.getActors().size(); a++) {
             ExecutableElement actor = info.getActors().get(a);
             pw.println("            Thread t" + a + " = new Thread(new Runnable() {");
             pw.println("                public void run() {");
-            pw.println("                    try {");
-            pw.println("                        h" + a + ".started = true;");
+            pw.println("                    while (!control.terminated) {");
+            pw.println("                        try {");
+            pw.println("                            h" + a + ".started = true;");
 
             if (info.getTest().equals(info.getState())) {
-                emitMethodTermination(pw, actor, "                        state." + actor.getSimpleName(), "state");
+                emitMethodTermination(pw, actor, "                            state." + actor.getSimpleName(), "state");
             } else {
-                emitMethodTermination(pw, actor, "                        test." + actor.getSimpleName(), "state");
+                emitMethodTermination(pw, actor, "                            test." + actor.getSimpleName(), "state");
             }
 
-            pw.println("                    } catch (Exception e) {");
-            pw.println("                        h" + a + ".error = true;");
+            pw.println("                        } catch (Exception e) {");
+            pw.println("                            h" + a + ".error = true;");
+            pw.println("                            return;");
+            pw.println("                        }");
             pw.println("                    }");
             pw.println("                    h" + a + ".terminated = true;");
             pw.println("                }");
@@ -1059,20 +1067,17 @@ public class JCStressTestProcessor extends AbstractProcessor {
         }
         pw.println();
 
-        for (int a = 0; a < info.getActors().size(); a++) {
-            pw.println("            while (!h" + a + ".started) {");
-            pw.println("                try {");
-            pw.println("                    TimeUnit.MILLISECONDS.sleep(1);");
-            pw.println("                } catch (InterruptedException e) {");
-            pw.println("                    // do nothing");
-            pw.println("                }");
-            pw.println("            }");
-        }
+        pw.println("                try {");
+        pw.println("                    TimeUnit.MILLISECONDS.sleep(config.time);");
+        pw.println("                } catch (InterruptedException e) {");
+        pw.println("                    // do nothing");
+        pw.println("                }");
         pw.println();
+        pw.println("            control.terminated = true;");
 
         for (int a = 0; a < info.getActors().size(); a++) {
             pw.println("            try {");
-            pw.println("                t" + a + ".join(Math.max(2*config.time, Runner.MIN_TIMEOUT_MS));");
+            pw.println("                t" + a + ".join(Math.max(config.time, Runner.MIN_TIMEOUT_MS));");
             pw.println("            } catch (InterruptedException e) {");
             pw.println("                // do nothing");
             pw.println("            }");
@@ -1094,6 +1099,10 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        }");
         pw.println("    }");
 
+        pw.println();
+        pw.println("    private static class Control {");
+        pw.println("        volatile boolean terminated;");
+        pw.println("    }");
         pw.println();
         pw.println("    private static class Holder {");
         pw.println("        volatile boolean started;");

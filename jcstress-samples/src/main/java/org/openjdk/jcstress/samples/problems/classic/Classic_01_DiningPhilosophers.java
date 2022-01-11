@@ -63,7 +63,7 @@ public class Classic_01_DiningPhilosophers {
             true  6,325,295,104  100.00%  Acceptable  Trivial.
      */
 
-    @JCStressTest(Mode.Termination)
+    @JCStressTest(Mode.Deadlock)
     @Outcome(id = "TERMINATED", expect = ACCEPTABLE, desc = "Gracefully finished")
     @Outcome(id = "STALE",      expect = FORBIDDEN,  desc = "Test is stuck")
     @State
@@ -106,7 +106,7 @@ public class Classic_01_DiningPhilosophers {
             true  6,270,081,024  100.00%  Acceptable  Trivial.
      */
 
-    @JCStressTest(Mode.Termination)
+    @JCStressTest(Mode.Deadlock)
     @Outcome(id = "TERMINATED", expect = ACCEPTABLE, desc = "Gracefully finished")
     @Outcome(id = "STALE",      expect = FORBIDDEN,  desc = "Test is stuck")
     @State
@@ -160,7 +160,7 @@ public class Classic_01_DiningPhilosophers {
             true  5,377,787,904  100.00%  Acceptable  Trivial.
      */
 
-    @JCStressTest(Mode.Termination)
+    @JCStressTest(Mode.Deadlock)
     @Outcome(id = "TERMINATED", expect = ACCEPTABLE, desc = "Gracefully finished")
     @Outcome(id = "STALE",      expect = FORBIDDEN,  desc = "Test is stuck")
     @State
