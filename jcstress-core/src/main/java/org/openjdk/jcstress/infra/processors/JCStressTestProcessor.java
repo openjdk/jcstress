@@ -1059,7 +1059,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("                            return;");
             pw.println("                        }");
             pw.println("                    }");
-            pw.println("                    h" + a + ".terminated = true;");
+            pw.println("                    h" + a + ".finished = true;");
             pw.println("                }");
             pw.println("            });");
             pw.println("            t" + a + ".setDaemon(true);");
@@ -1067,29 +1067,35 @@ public class JCStressTestProcessor extends AbstractProcessor {
         }
         pw.println();
 
-        pw.println("                try {");
-        pw.println("                    TimeUnit.MILLISECONDS.sleep(config.time);");
-        pw.println("                } catch (InterruptedException e) {");
-        pw.println("                    // do nothing");
-        pw.println("                }");
+        pw.println("            try {");
+        pw.println("                TimeUnit.MILLISECONDS.sleep(config.time);");
+        pw.println("            } catch (InterruptedException e) {");
+        pw.println("                // do nothing");
+        pw.println("            }");
         pw.println();
         pw.println("            control.terminated = true;");
+        pw.println();
+        pw.println("            long remainingTime = Math.max(config.time, Runner.MIN_TIMEOUT_MS);");
 
         for (int a = 0; a < info.getActors().size(); a++) {
-            pw.println("            try {");
-            pw.println("                t" + a + ".join(Math.max(config.time, Runner.MIN_TIMEOUT_MS));");
-            pw.println("            } catch (InterruptedException e) {");
-            pw.println("                // do nothing");
+            pw.println("            if (remainingTime > 0) {");
+            pw.println("                long start = System.nanoTime();");
+            pw.println("                try {");
+            pw.println("                    t" + a + ".join(remainingTime);");
+            pw.println("                } catch (InterruptedException e) {");
+            pw.println("                    // do nothing");
+            pw.println("                }");
+            pw.println("                remainingTime -= System.nanoTime() - start;");
             pw.println("            }");
         }
         pw.println();
 
         for (int a = 0; a < info.getActors().size(); a++) {
-            pw.println("            if (h" + a + ".terminated) {");
+            pw.println("            if (h" + a + ".finished) {");
             pw.println("                if (h" + a + ".error) {");
             pw.println("                    results.record(Outcome.ERROR);");
             pw.println("                } else {");
-            pw.println("                    results.record(Outcome.TERMINATED);");
+            pw.println("                    results.record(Outcome.FINISHED);");
             pw.println("                }");
             pw.println("            } else {");
             pw.println("                results.record(Outcome.STALE);");
@@ -1106,12 +1112,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
         pw.println("    private static class Holder {");
         pw.println("        volatile boolean started;");
-        pw.println("        volatile boolean terminated;");
+        pw.println("        volatile boolean finished;");
         pw.println("        volatile boolean error;");
         pw.println("    }");
         pw.println();
         pw.println("    public enum Outcome {");
-        pw.println("        TERMINATED,");
+        pw.println("        FINISHED,");
         pw.println("        STALE,");
         pw.println("        ERROR,");
         pw.println("    }");

@@ -32,18 +32,29 @@ public enum Mode {
     /**
      * Continuous mode: run several {@link Actor}, {@link Arbiter} threads, and
      * collect the histogram of {@link Result}s.
+     *
+     * In this mode, each {@link Actor} and {@link Arbiter} method is called
+     * exactly once per {@link State} instance. The test runs continuously until
+     * the test time expires.
      */
     Continuous,
 
     /**
      * Termination mode: run a single {@link Actor} with a blocking/looping operation,
      * and see if it responds to a {@link Signal}.
+     *
+     * In this mode, each {@link Actor} and {@link Signal} method is called
+     * exactly once per {@link State} instance. The test finishes as soon as
+     * {@link Actor} exits (possibly as the reaction to a {@link Signal}).
      */
     Termination,
 
     /**
      * Deadlock mode: run several {@link Actor} threads continuously, and see if
      * any actor deadlocks.
+     *
+     * In contrast to other modes, each {@link Actor} methods is called over the
+     * same {@link State} instance. This allows testing
      */
     Deadlock,
 

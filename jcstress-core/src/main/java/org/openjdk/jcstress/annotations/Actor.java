@@ -31,13 +31,7 @@ import java.lang.annotation.Target;
 
 /**
  * {@link Actor} is the central test annotation. It marks the methods that hold the
- * actions done by the threads. The invariants that are maintained by the infrastructure
- * are as follows:
- *
- * <ol>
- *     <li>Each method is called only by one particular thread.</li>
- *     <li>Each method is called exactly once per {@link State} instance.</li>
- * </ol>
+ * actions done by the threads. Each method is called only by one fixed thread.
  *
  * <p>Note that the invocation order against other {@link Actor} methods is deliberately
  * not specified. Therefore, two or more {@link Actor} methods may be used to model
