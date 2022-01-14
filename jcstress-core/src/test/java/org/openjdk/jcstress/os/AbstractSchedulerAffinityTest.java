@@ -56,13 +56,13 @@ public class AbstractSchedulerAffinityTest {
 
             takenMaps.offer(cpuMap);
 
-            Assert.assertEquals(scl.numActors(), cpuMap.actorMap().length);
-            for (int c : cpuMap.actorMap()) {
+            Assert.assertEquals(scl.numActors(), cpuMap.actorThreads().length);
+            for (int c : cpuMap.actorThreads()) {
                 Assert.assertEquals(-1, c);
             }
-            Assert.assertNotEquals(0, cpuMap.systemMap().length);
+            Assert.assertNotEquals(0, cpuMap.systemThreads().length);
             Assert.assertNotEquals("", cpuMap.globalAffinityMap());
-            Assert.assertNotEquals(0, cpuMap.allocatedMap().length);
+            Assert.assertNotEquals(0, cpuMap.allocatedThreads().length);
         }
     }
 
@@ -89,7 +89,7 @@ public class AbstractSchedulerAffinityTest {
             }
 
             takenMaps.offer(cpuMap);
-            int[] actorMap = cpuMap.actorMap();
+            int[] actorMap = cpuMap.actorThreads();
 
             for (int a1 = 0; a1 < scl.numActors(); a1++) {
                 for (int a2 = 0; a2 < scl.numActors(); a2++) {
@@ -137,13 +137,13 @@ public class AbstractSchedulerAffinityTest {
             }
 
             takenMaps.offer(cpuMap);
-            Assert.assertEquals(scl.numActors(), cpuMap.actorMap().length);
-            for (int c : cpuMap.actorMap()) {
+            Assert.assertEquals(scl.numActors(), cpuMap.actorThreads().length);
+            for (int c : cpuMap.actorThreads()) {
                 Assert.assertEquals(-1, c);
             }
-            Assert.assertEquals(0, cpuMap.systemMap().length);
+            Assert.assertEquals(0, cpuMap.systemThreads().length);
             Assert.assertEquals("", cpuMap.globalAffinityMap());
-            Assert.assertNotEquals(0, cpuMap.allocatedMap().length);
+            Assert.assertNotEquals(0, cpuMap.allocatedThreads().length);
         }
     }
 

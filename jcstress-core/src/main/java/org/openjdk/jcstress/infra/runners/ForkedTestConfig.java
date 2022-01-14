@@ -52,7 +52,7 @@ public class ForkedTestConfig {
         strideCount = cfg.strideCount;
         localAffinity = cfg.shClass.mode() == AffinityMode.LOCAL;
         if (localAffinity) {
-            localAffinityMap = cfg.cpuMap.actorMap();
+            localAffinityMap = cfg.cpuMap.actorRealCPUs();
         }
     }
 

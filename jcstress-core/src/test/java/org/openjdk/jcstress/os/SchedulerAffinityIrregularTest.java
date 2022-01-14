@@ -30,9 +30,7 @@ import org.junit.runners.Parameterized;
 import org.openjdk.jcstress.os.topology.PresetListTopology;
 import org.openjdk.jcstress.os.topology.TopologyParseException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @RunWith(Parameterized.class)
 public class SchedulerAffinityIrregularTest extends AbstractSchedulerAffinityTest {
@@ -87,19 +85,26 @@ public class SchedulerAffinityIrregularTest extends AbstractSchedulerAffinityTes
 
         PresetListTopology topo = new PresetListTopology();
 
-        int pId = 0;
-        int cId = 0;
-        int tId = 0;
-        for (int c = 0; c < 10; c++) {
-            topo.add(pId, cId, tId);
+        Set<Integer> takenThreads = new HashSet<>();
+        Map<Integer, Integer> coreToPackage = new HashMap<>();
 
-            tId++;
-            if (r.nextInt(10) > 8) {
-                cId++;
-            } else if (r.nextInt(10) > 8) {
-                pId++;
-                cId++;
+        for (int c = 0; c < 24; c++) {
+            int tId;
+            do {
+                tId = r.nextInt(32);
+            } while (!takenThreads.add(tId));
+
+            int cId = r.nextInt(16);
+
+            int pId;
+            if (coreToPackage.containsKey(cId)) {
+                pId = coreToPackage.get(cId);
+            } else {
+                pId = r.nextInt(4);
+                coreToPackage.put(cId, pId);
             }
+
+            topo.add(pId, cId, tId);
         }
         topo.finish();
         return topo;

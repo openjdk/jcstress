@@ -28,6 +28,7 @@ import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.PrintStream;
 import java.util.Collection;
+import java.util.Objects;
 
 public interface Topology {
 
@@ -73,4 +74,7 @@ public interface Topology {
     int threadToCore(int threadId);
     int threadToPackage(int threadId);
     int coreToPackage(int coreId);
+
+    int threadToRealCPU(int threadId);
+
 }

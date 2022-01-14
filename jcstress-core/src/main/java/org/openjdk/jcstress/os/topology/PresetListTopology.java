@@ -31,6 +31,7 @@ public class PresetListTopology extends AbstractTopology {
     }
 
     public void finish() throws TopologyParseException {
+        renumberAll();
         super.finish();
     }
 
