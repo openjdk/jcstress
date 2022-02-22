@@ -35,11 +35,11 @@ import java.lang.invoke.VarHandle;
 
 import static org.openjdk.jcstress.annotations.Expect.*;
 
-public class AdvancedJMM_07_ArrayVolatility {
+public class AdvancedJMM_08_ArrayVolatility {
 
     /*
         How to run this test:
-            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_07_ArrayVolatility[.SubTestName]
+            $ java -jar jcstress-samples/target/jcstress.jar -t AdvancedJMM_08_ArrayVolatility[.SubTestName]
      */
 
     /*
