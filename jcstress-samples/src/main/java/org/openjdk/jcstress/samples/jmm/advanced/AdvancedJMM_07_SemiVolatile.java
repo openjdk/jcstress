@@ -114,8 +114,8 @@ public class AdvancedJMM_07_SemiVolatile {
         This is a corner-stone of final field semantics in Java and "Release-Consume Ordering" in C/C++.
         This does not extend to independent memory locations, as BasicJMM_06_Causality shows.
 
-        If anyone has an DEC Alpha machine, try running this test there, as Alpha is one of a few
-        known architctures that does not honor data-dependent loads, and might show Interesting outcomes
+        If anyone has a DEC Alpha machine, try running this test there, as Alpha is one of a few
+        known architectures that do not honor data-dependent loads, and might show Interesting outcomes
         here.
 
         Implementation note: this test uses VarHandles to get access to the mismatched volatile/plain ops.
