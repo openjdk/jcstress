@@ -65,12 +65,12 @@ public class AdvancedJMM_07_SemiVolatile {
 
         This can be seen on some platforms, for example AArch64, PPC64:
           RESULT        SAMPLES     FREQ       EXPECT  DESCRIPTION
-              -4  1,312,356,301   69.12%   Acceptable  Boring
-               0            497   <0.01%  Interesting  Whoa
-               1             41   <0.01%  Interesting  Whoa
-               2             22   <0.01%  Interesting  Whoa
-               3            128   <0.01%  Interesting  Whoa
-               4    586,358,147   30.88%   Acceptable  Boring
+              -1  2,342,899,375   73.07%   Acceptable  Boring
+               0          1,848   <0.01%  Interesting  Whoa
+               1             83   <0.01%  Interesting  Whoa
+               2             44   <0.01%  Interesting  Whoa
+               3             77   <0.01%  Interesting  Whoa
+               4    863,574,349   26.93%   Acceptable  Boring
      */
 
     @JCStressTest
