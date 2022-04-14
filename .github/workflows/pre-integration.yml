@@ -14,9 +14,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build-java: [11, 17, 18-ea]
-        run-java: [8, 11, 17, 18-ea]
-        os: [ubuntu-18.04, windows-2019, macos-10.15]
+        build-java: [11, 17, 19-ea]
+        run-java: [8, 11, 17, 19-ea]
+        os: [ubuntu-20.04, windows-2022, macos-11]
       fail-fast: false
     name: Build JDK ${{ matrix.build-java }}, run JDK ${{ matrix.run-java }}, ${{ matrix.os }}
 
