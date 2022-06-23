@@ -39,6 +39,8 @@ public class AllocProfileSupport {
     private static final boolean ALLOC_AVAILABLE;
     private static ThreadMXBean ALLOC_MX_BEAN;
     private static Method ALLOC_MX_BEAN_GETTER;
+    private static Method THREAD_ID_GETTER;
+
 
     static {
         ALLOC_AVAILABLE = tryInitAlloc();
@@ -60,6 +62,12 @@ public class AllocProfileSupport {
             ALLOC_MX_BEAN = bean;
             ALLOC_MX_BEAN_GETTER = internalIntf.getMethod("getThreadAllocatedBytes", long.class);
 
+            try {
+                THREAD_ID_GETTER = Thread.class.getMethod("threadId");
+            } catch (NoSuchMethodError nsme) {
+                THREAD_ID_GETTER = Thread.class.getMethod("getId");
+            }
+
             // Warm up until the difference drops to zero
             long last = -1;
             for (int t = 0; t < 10; t++) {
@@ -80,7 +88,8 @@ public class AllocProfileSupport {
     public static long getAllocatedBytes() {
         if (ALLOC_AVAILABLE) {
             try {
-                return (long) ALLOC_MX_BEAN_GETTER.invoke(ALLOC_MX_BEAN, Thread.currentThread().getId());
+                long id = (long) THREAD_ID_GETTER.invoke(Thread.currentThread());
+                return (long) ALLOC_MX_BEAN_GETTER.invoke(ALLOC_MX_BEAN, id);
             } catch (InvocationTargetException | IllegalAccessException e) {
                 throw new IllegalStateException(e);
             }
