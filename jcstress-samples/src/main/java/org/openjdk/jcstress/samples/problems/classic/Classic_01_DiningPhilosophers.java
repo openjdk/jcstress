@@ -105,6 +105,10 @@ public class Classic_01_DiningPhilosophers {
         solves the deadlock by not letting circular resource waits. For the purposes of this test,
         philosopher busy-wait (sic!) on a waiter.
 
+        Note that we also synchronize the fork releases to guarantee progress. Making the fork
+        accesses "opaque" would also suffice, but using the same lock on reader and writer side
+        is cleaner here. See also BasicJMM_04_Progress sample.
+
         Indeed, no deadlock occurs:
           RESULT        SAMPLES     FREQ      EXPECT  DESCRIPTION
             true  6,270,081,024  100.00%  Acceptable  Trivial.
@@ -152,8 +156,10 @@ public class Classic_01_DiningPhilosophers {
             }
 
             // Release forks
-            forks[f1] = false;
-            forks[f2] = false;
+            synchronized (waiter) {
+                forks[f1] = false;
+                forks[f2] = false;
+            }
         }
     }
 
