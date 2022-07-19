@@ -152,8 +152,10 @@ public class Classic_01_DiningPhilosophers {
             }
 
             // Release forks
-            forks[f1] = false;
-            forks[f2] = false;
+            synchronized (waiter) {
+                forks[f1] = false;
+                forks[f2] = false;
+            }
         }
     }
 
