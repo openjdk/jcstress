@@ -144,4 +144,43 @@ public class BasicJMM_04_Progress {
         }
     }
 
+    /*
+      ----------------------------------------------------------------------------------------------------------
+
+        For completeness, writing and reading the variable under explicit synchronization
+        also provides the progress guarantees. The writes under one thread releasing the lock
+        are visible to the thread subsequently acquiring the lock. Therefore, the loop eventually
+        terminates.
+
+        Indeed, this is guaranteed to happen on all platforms:
+
+              RESULT  SAMPLES     FREQ       EXPECT  DESCRIPTION
+               STALE        0    0.00%  Interesting  Test is stuck
+          TERMINATED   35,750  100.00%   Acceptable  Gracefully finished
+     */
+
+    @JCStressTest(Mode.Termination)
+    @Outcome(id = "TERMINATED", expect = ACCEPTABLE,             desc = "Gracefully finished")
+    @Outcome(id = "STALE",      expect = ACCEPTABLE_INTERESTING, desc = "Test is stuck")
+    @State
+    public static class SyncSpin {
+        boolean ready;
+
+        @Actor
+        public void actor1() {
+            while (true) { // spin
+               synchronized (this) {
+                   if (ready) break;
+               }
+            }
+        }
+
+        @Signal
+        public void signal() {
+            synchronized (this) {
+                ready = true;
+            }
+        }
+    }
+
 }
