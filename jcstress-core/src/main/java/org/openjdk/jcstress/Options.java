@@ -114,8 +114,7 @@ public class Options {
                 "HARD = hard busy loop; THREAD_YIELD = use Thread.yield(); THREAD_SPIN_WAIT = use Thread.onSpinWait(); LOCKSUPPORT_PARK_NANOS = use LockSupport.parkNanos().")
                 .withRequiredArg().ofType(SpinLoopStyle.class).describedAs("style");
 
-        OptionSpec<Integer> forks = parser.accepts("f", "Should fork each test N times. \"0\" to run in the embedded mode " +
-                "with occasional forking.")
+        OptionSpec<Integer> forks = parser.accepts("f", "Should fork each test N times. Must be 1 or higher.")
                 .withOptionalArg().ofType(Integer.class).describedAs("count");
 
         OptionSpec<Integer> forksStressMultiplier = parser.accepts("fsm", "Fork multiplier for randomized/stress tests. " +
@@ -236,6 +235,14 @@ public class Options {
         this.time = orDefault(set.valueOf(time), this.time);
         this.iters = orDefault(set.valueOf(iters), this.iters);
         this.forks = orDefault(set.valueOf(forks), this.forks);
+
+        if (this.forks < 1) {
+            System.err.println("Forks value must be 1 or higher");
+            System.err.println();
+            parser.printHelpOn(System.err);
+            return false;
+        }
+
         this.forksStressMultiplier = orDefault(set.valueOf(forksStressMultiplier), this.forksStressMultiplier);
         this.strideSize = orDefault(set.valueOf(strideSize), this.strideSize);
         this.strideCount = orDefault(set.valueOf(strideCount), this.strideCount);
