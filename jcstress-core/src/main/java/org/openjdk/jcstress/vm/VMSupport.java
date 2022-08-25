@@ -291,14 +291,18 @@ public class VMSupport {
             }
         }
 
-        // Mix in input arguments, if available
-        List<String> inputArgs = new ArrayList<>();
-
+        // Mix in input arguments, if available, skipping the debug options
+        List<String> mxArgs;
         try {
-            inputArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
+            mxArgs = ManagementFactory.getRuntimeMXBean().getInputArguments();
         } catch (InternalError e) {
             System.out.println("Warning: cannot get input arguments: " + e.getMessage());
+            mxArgs = Collections.emptyList();
         }
+
+        List<String> inputArgs = mxArgs.stream()
+                .filter(s -> !s.contains("-agentlib:jdwp"))
+                .collect(Collectors.toList());
 
         if (!inputArgs.isEmpty()) {
             configs = configs.stream().map(c -> {
