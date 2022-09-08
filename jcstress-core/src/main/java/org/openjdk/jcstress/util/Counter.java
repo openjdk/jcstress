@@ -95,21 +95,11 @@ public final class Counter<R> implements Serializable {
     }
 
     /**
-     * Records the result.
-     * The result can mutate after the record() is finished.
-     *
-     * @param result result to record
-     */
-    public final void record(R result) {
-        record(result, 1);
-    }
-
-    /**
      * Records the result with given occurrences count.
      * The result can mutate after the call is finished.
      *
      * @param result result to record
-     * @param count number of occurences to record
+     * @param count number of occurrences to record
      */
     public final void record(R result, long count) {
         int idx = result.hashCode() & (length - 1);
