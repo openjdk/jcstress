@@ -396,7 +396,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             emitMethod(pw, info.getArbiter(), (isStateItself ? "s." : "t.") + info.getArbiter().getSimpleName(), "s", "r", false);
             pw.println(";");
         }
-        pw.println("        counter.record(r);");
+        pw.println("        counter.record(r, 1);");
         pw.println("    }");
         pw.println();
 
@@ -454,7 +454,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         }
 
         pw.println("            for (int c = 0; c < size; c++) {");
-        pw.println("                counter.record(lr[c]);");
+        pw.println("                counter.record(lr[c], 1);");
         pw.println("            }");
         pw.println("            long time2 = System.nanoTime();");
         pw.println("            long alloc2 = AllocProfileSupport.getAllocatedBytes();");
@@ -548,7 +548,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("            ls[c] = new " + s + "();");
         }
 
-        pw.println("            cnt.record(r);");
+        pw.println("            cnt.record(r, 1);");
 
         for (VariableElement var : ElementFilter.fieldsIn(info.getResult().getEnclosedElements())) {
             if (var.getSimpleName().toString().equals("jcstress_trap")) continue;
@@ -876,12 +876,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println();
         pw.println("            if (holder.terminated) {");
         pw.println("                if (holder.error) {");
-        pw.println("                    results.record(Outcome.ERROR);");
+        pw.println("                    results.record(Outcome.ERROR, 1);");
         pw.println("                } else {");
-        pw.println("                    results.record(Outcome.TERMINATED);");
+        pw.println("                    results.record(Outcome.TERMINATED, 1);");
         pw.println("                }");
         pw.println("            } else {");
-        pw.println("                results.record(Outcome.STALE);");
+        pw.println("                results.record(Outcome.STALE, 1);");
         pw.println("                return;");
         pw.println("            }");
         pw.println("        }");

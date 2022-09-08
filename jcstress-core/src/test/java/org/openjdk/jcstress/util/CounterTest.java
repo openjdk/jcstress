@@ -34,7 +34,7 @@ public class CounterTest {
     @Test
     public void test1() {
         Counter<String> cnt = new Counter<>();
-        cnt.record("Foo");
+        cnt.record("Foo", 1);
 
         Assert.assertEquals(1, cnt.count("Foo"));
         Assert.assertEquals(1, cnt.elementSet().size());
