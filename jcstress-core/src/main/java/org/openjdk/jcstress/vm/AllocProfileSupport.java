@@ -64,7 +64,7 @@ public class AllocProfileSupport {
 
             try {
                 THREAD_ID_GETTER = Thread.class.getMethod("threadId");
-            } catch (NoSuchMethodError nsme) {
+            } catch (NoSuchMethodException nsme) {
                 THREAD_ID_GETTER = Thread.class.getMethod("getId");
             }
 
