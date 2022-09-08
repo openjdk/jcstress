@@ -561,10 +561,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    }");
         pw.println();
 
-        for (String type : new String[] { "int", "short", "byte", "char", "long", "float", "double", "Object" }) {
-            pw.println("    private void " + AUX_PREFIX + "sink(" + type + " v) {};");
-        }
-
         int n = 0;
         for (ExecutableElement a : info.getActors()) {
             pw.println();
@@ -604,10 +600,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
             // compiler to avoid null-pointer checks in the workload, which will
             // free it to choose alternative load/store orders.
             //
-            // For results, we access the most convenient result field, and make sure
-            // its null-checking effects stays behind by calling the empty method.
-            // That method would be normally inlined and eliminated, but the NP-check
-            // would persist.
+            // For results, we access the most convenient result field, and access it.
+            // Java rules require the JVMs to perform the NP-check there anyway.
             //
             // For states that are passed as arguments we can do the same.
             // For states that are receivers themselves, we already have the NP-check.
@@ -615,15 +609,15 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("            " + s + " s = ls[c];");
             if (hasResultArgs(a)) {
                 pw.println("            " + r + " r = lr[c];");
-                pw.println("            " + AUX_PREFIX + "sink(r.jcstress_trap);");
+                pw.println("            int trap_r = r.jcstress_trap;");
             }
 
             if (isStateItself) {
                 emitMethod(pw, a, "            s." + a.getSimpleName(), "s", "r", true);
             } else {
-                String sf = selectSinkField(info.getState());
+                String[] sf = selectSinkField(info.getState());
                 if (sf != null) {
-                    pw.println("            " + AUX_PREFIX + "sink(s." + sf + ");");
+                    pw.println("            " + sf[0] + " trap_s = s." + sf[1] + ";");
                 }
                 emitMethod(pw, a, "           lt." + a.getSimpleName(), "s", "r", true);
             }
@@ -639,7 +633,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.close();
     }
 
-    private String selectSinkField(TypeElement cl) {
+    private String[] selectSinkField(TypeElement cl) {
         String[] typePref = { "int", "short", "byte", "char", "long", "float", "double" };
 
         // Select first field of preferential type
@@ -650,7 +644,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 if (mods.contains(Modifier.PRIVATE)) continue;
 
                 String t = var.asType().toString();
-                if (t.equals(typeP)) return var.getSimpleName().toString();
+                if (t.equals(typeP)) return new String[] { t, var.getSimpleName().toString() };
             }
         }
 
@@ -660,7 +654,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             if (mods.contains(Modifier.STATIC)) continue;
             if (mods.contains(Modifier.PRIVATE)) continue;
 
-            return var.getSimpleName().toString();
+            return new String[] { "Object", var.getSimpleName().toString() };
         }
 
         return null;
