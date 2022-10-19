@@ -16,24 +16,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build-java: [11, 17, 19-ea]
-        run-java: [8, 11, 17, 19-ea]
-        os: [ubuntu-20.04, windows-2022, macos-11]
+        build-java: [11, 17, 19, 20-ea]
+        run-java: [8, 11, 17, 19, 20-ea]
+        os: [ubuntu-22.04, windows-2022, macos-11]
       fail-fast: false
     name: Build JDK ${{ matrix.build-java }}, run JDK ${{ matrix.run-java }}, ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up build JDK ${{ matrix.build-java }}
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v3
       with:
+        distribution: temurin
         java-version: ${{ matrix.build-java }}
-    - name: Cache Maven packages
-      uses: actions/cache@v2
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml', '.github/workflows/pre-integration.yml') }}
-        restore-keys: ${{ runner.os }}-maven
+        cache: maven
     - name: Build/test
       run: mvn clean install -T 1C -B --file pom.xml
     - name: Set up run JDK ${{ matrix.run-java }}
