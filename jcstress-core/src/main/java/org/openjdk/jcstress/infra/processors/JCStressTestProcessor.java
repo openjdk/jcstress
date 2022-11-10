@@ -52,9 +52,10 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
     private final List<TestInfo> tests = new ArrayList<>();
 
-    public static final String TASK_LOOP_PREFIX = "task_";
-    public static final String RUN_LOOP_PREFIX = "run_";
-    public static final String AUX_PREFIX = "jcstress_";
+    public static final String TASK_LOOP_PREFIX = "jcstress_task_";
+    public static final String RUN_LOOP_PREFIX = "jcstress_run_";
+    public static final String CONSUME_PREFIX = "jcstress_consume_";
+    public static final String CONSUME_NI_PREFIX = "jcstress_ni_consume_";
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
@@ -478,7 +479,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        }");
         pw.println("        workerSync = new WorkerSync(false, " + actorsCount + ", config.spinLoopStyle);");
         pw.println();
-        pw.println("        control.isStopped = false;");
+        pw.println("        control.stopping = false;");
         pw.println();
 
         // Initialize affinity before starting the timing measurement, so that init time
@@ -510,56 +511,65 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("            }");
         pw.println("        }");
         pw.println();
-        pw.println("        control.isStopped = true;");
+        pw.println("        control.stopping = true;");
         pw.println();
         pw.println("        return threads;");
         pw.println("    }");
         pw.println();
 
-        pw.println("    private void " + AUX_PREFIX + "consume(Counter<" + r + "> cnt, int a) {");
-        pw.println("        " + s + "[] ls = gs;");
-        pw.println("        " + r + "[] lr = gr;");
-        pw.println("        int len = config.strideSize * config.strideCount;");
-        pw.println("        int left = a * len / " + actorsCount + ";");
-        pw.println("        int right = (a + 1) * len / " + actorsCount + ";");
-        pw.println("        for (int c = left; c < right; c++) {");
-        pw.println("            " + r + " r = lr[c];");
-        pw.println("            " + s + " s = ls[c];");
+        for (boolean reinit : new boolean[] { false, true }) {
+            String name = reinit ? (CONSUME_PREFIX + "reinit") : (CONSUME_NI_PREFIX + "final");
+            pw.println("    private void " + name + "(Counter<" + r + "> cnt, int a) {");
+            pw.println("        " + s + "[] ls = gs;");
+            pw.println("        " + r + "[] lr = gr;");
+            pw.println("        int len = config.strideSize * config.strideCount;");
+            pw.println("        int left = a * len / " + actorsCount + ";");
+            pw.println("        int right = (a + 1) * len / " + actorsCount + ";");
+            pw.println("        for (int c = left; c < right; c++) {");
+            pw.println("            " + r + " r = lr[c];");
+            pw.println("            " + s + " s = ls[c];");
 
-        if (info.getArbiter() != null) {
-            if (isStateItself) {
-                emitMethod(pw, info.getArbiter(), "            s." + info.getArbiter().getSimpleName(), "s", "r", true);
-            } else {
-                emitMethod(pw, info.getArbiter(), "            test." + info.getArbiter().getSimpleName(), "s", "r", true);
+            if (info.getArbiter() != null) {
+                if (isStateItself) {
+                    emitMethod(pw, info.getArbiter(), "            s." + info.getArbiter().getSimpleName(), "s", "r", true);
+                } else {
+                    emitMethod(pw, info.getArbiter(), "            test." + info.getArbiter().getSimpleName(), "s", "r", true);
+                }
             }
-        }
 
-        // If state is trivial, we can reset its fields directly, without
-        // reallocating the object.
+            if (reinit) {
+                // If state is trivial, we can reset its fields directly, without
+                // reallocating the object.
 
-        if (allFieldsAreDefault(info.getState())) {
-            for (VariableElement var : ElementFilter.fieldsIn(info.getState().getEnclosedElements())) {
-                if (var.getModifiers().contains(Modifier.STATIC)) continue;
-                pw.print("            s." + var.getSimpleName().toString() + " = ");
-                pw.print(getDefaultVal(var));
-                pw.println(";");
+                if (allFieldsAreDefault(info.getState())) {
+                    for (VariableElement var : ElementFilter.fieldsIn(info.getState().getEnclosedElements())) {
+                        if (var.getModifiers().contains(Modifier.STATIC))
+                            continue;
+                        pw.print("            s." + var.getSimpleName().toString() + " = ");
+                        pw.print(getDefaultVal(var));
+                        pw.println(";");
+                    }
+                } else {
+                    pw.println("            ls[c] = new " + s + "();");
+                }
             }
-        } else {
-            pw.println("            ls[c] = new " + s + "();");
+
+            pw.println("            cnt.record(r, 1);");
+
+            if (reinit) {
+                for (VariableElement var : ElementFilter.fieldsIn(info.getResult().getEnclosedElements())) {
+                    if (var.getSimpleName().toString().equals("jcstress_trap"))
+                        continue;
+                    pw.print("            r." + var.getSimpleName().toString() + " = ");
+                    pw.print(getDefaultVal(var));
+                    pw.println(";");
+                }
+            }
+
+            pw.println("        }");
+            pw.println("    }");
+            pw.println();
         }
-
-        pw.println("            cnt.record(r, 1);");
-
-        for (VariableElement var : ElementFilter.fieldsIn(info.getResult().getEnclosedElements())) {
-            if (var.getSimpleName().toString().equals("jcstress_trap")) continue;
-            pw.print("            r." + var.getSimpleName().toString() + " = ");
-            pw.print(getDefaultVal(var));
-            pw.println(";");
-        }
-
-        pw.println("        }");
-        pw.println("    }");
-        pw.println();
 
         int n = 0;
         for (ExecutableElement a : info.getActors()) {
@@ -571,18 +581,20 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("        if (config.localAffinity) AffinitySupport.bind(config.localAffinityMap[" + n + "]);");
             pw.println("        while (true) {");
             pw.println("            WorkerSync sync = workerSync;");
-            pw.println("            if (sync.stopped) {");
-            pw.println("                return counter;");
-            pw.println("            }");
             pw.println("            int check = 0;");
             pw.println("            for (int start = 0; start < len; start += stride) {");
             pw.println("                " + RUN_LOOP_PREFIX + a.getSimpleName() + "(gs, gr, start, start + stride);");
             pw.println("                check += " + actorsCount + ";");
             pw.println("                sync.awaitCheckpoint(check);");
             pw.println("            }");
-            pw.println("            " + AUX_PREFIX + "consume(counter, " + n + ");");
+            pw.println("            if (sync.stopping) {");
+            pw.println("                " + CONSUME_NI_PREFIX + "final(counter, " + n + ");");
+            pw.println("                return counter;");
+            pw.println("            } else {");
+            pw.println("                " + CONSUME_PREFIX + "reinit(counter, " + n + ");");
+            pw.println("            }");
             pw.println("            if (sync.tryStartUpdate()) {");
-            pw.println("                workerSync = new WorkerSync(control.isStopped, " + actorsCount + ", config.spinLoopStyle);");
+            pw.println("                workerSync = new WorkerSync(control.stopping, " + actorsCount + ", config.spinLoopStyle);");
             pw.println("            }");
             pw.println("            sync.postUpdate();");
             pw.println("        }");

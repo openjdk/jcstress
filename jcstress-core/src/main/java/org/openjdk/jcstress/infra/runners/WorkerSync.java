@@ -35,7 +35,7 @@ import java.util.concurrent.locks.LockSupport;
 @jdk.internal.vm.annotation.Contended
 public class WorkerSync {
 
-    public final boolean stopped;
+    public final boolean stopping;
     public final SpinLoopStyle spinStyle;
 
     private volatile int notConsumed;
@@ -46,8 +46,8 @@ public class WorkerSync {
     static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_NOT_UPDATED = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "notUpdated");
     static final AtomicIntegerFieldUpdater<WorkerSync> UPDATER_CHECKPOINT = AtomicIntegerFieldUpdater.newUpdater(WorkerSync.class, "checkpoint");
 
-    public WorkerSync(boolean stopped, int expectedWorkers, SpinLoopStyle spinStyle) {
-        this.stopped = stopped;
+    public WorkerSync(boolean stopping, int expectedWorkers, SpinLoopStyle spinStyle) {
+        this.stopping = stopping;
         this.spinStyle = spinStyle;
         this.notConsumed = expectedWorkers;
         this.notUpdated = expectedWorkers;
