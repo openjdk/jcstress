@@ -40,12 +40,25 @@ public class $name$ {
 
     @Actor
     public void actor1() {
+#if[sync]
+        synchronized (this) {
+#end[sync]
         data = new Data();
+#if[sync]
+        }
+#end[sync]
     }
 
     @Actor
     public void actor2(Z_Result r) {
-        Object d = this.data;
+        Object d;
+#if[sync]
+        synchronized (this) {
+#end[sync]
+        d = this.data;
+#if[sync]
+        }
+#end[sync]
         if (d == null) {
             // Pretend we have seen the set value
             r.r1 = true;

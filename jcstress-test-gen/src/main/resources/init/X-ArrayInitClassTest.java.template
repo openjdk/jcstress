@@ -41,12 +41,25 @@ public class $name$ {
 
     @Actor
     public void actor1() {
+#if[sync]
+        synchronized (this) {
+#end[sync]
         arr = new $type$[4];
+#if[sync]
+        }
+#end[sync]
     }
 
     @Actor
     public void actor2(Z_Result r) {
-        Object a = arr;
+        Object a;
+#if[sync]
+        synchronized (this) {
+#end[sync]
+        a = arr;
+#if[sync]
+        }
+#end[sync]
         if (a == null) {
             r.r1 = true;
         } else {

@@ -46,99 +46,98 @@ public class Chapter0aTestGenerator {
                 dest,
                 GeneratorUtils.readFromResource("/accessAtomic/X-FieldAtomicityTest.java.template"),
                 "accessAtomic.fields",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
 
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/accessAtomic/X-FieldConflictAtomicityTest.java.template"),
                 "accessAtomic.fields.conflict",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
 
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/defaultValues/X-FieldDefaultValuesTest.java.template"),
                 "defaultValues.fields",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "final", "sync" }
         );
 
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/init/X-FieldInitTest.java.template"),
                 "init.fields",
-                new String[]{ "", "volatile", "final" }
+                new String[]{ "", "volatile", "final", "sync" }
         );
-
 
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/init/X-FieldInitClassTest.java.template"),
                 "initClass.fields",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
 
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/tearing/X-FieldTearingTest.java.template"),
                 "tearing.fields",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
 
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/defaultValues/X-ArrayDefaultValuesTest.java.template"),
                 "defaultValues.arrays.small",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
 
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/defaultValues/X-ArrayLargeDefaultValuesTest.java.template"),
                 "defaultValues.arrays.large",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
 
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/init/X-ArrayInitTest.java.template"),
                 "init.arrays.small",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
 
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/init/X-ArrayLargeInitTest.java.template"),
                 "init.arrays.large",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
 
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/init/X-ArrayInitClassTest.java.template"),
                 "initClass.arrays.small",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
 
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/init/X-ArrayLargeInitClassTest.java.template"),
                 "initClass.arrays.large",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
 
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/init/X-ArrayInitLengthTest.java.template"),
                 "initLen.arrays.small",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
 
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/init/X-ArrayLargeInitLengthTest.java.template"),
                 "initLen.arrays.large",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
 
         makeTests(
@@ -173,34 +172,34 @@ public class Chapter0aTestGenerator {
                 dest,
                 GeneratorUtils.readFromResource("/tearing/X-ArrayTearingTest.java.template"),
                 "tearing.arrays.small",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
 
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/tearing/X-ArrayLargeTearingTest.java.template"),
                 "tearing.arrays.large",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
 
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/coherence/X-FieldCoherenceTest.java.template"),
                 "coherence.fields",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
 
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/coherence/X-ArrayCoherenceTest.java.template"),
                 "coherence.arrays",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
     }
 
     private static void makeTests(String dest, String template, String label, String[] modifiers) throws IOException {
         for (String modifier : modifiers) {
-            String pack = PREFIX + "." + label + "." + (modifier.equals("") ? "plain" : modifier + "s");
+            String pack = PREFIX + "." + label + "." + packageModifier(modifier);
             for (String type : TYPES) {
                 if (!alwaysAtomic(modifier, type, label)) continue;
                 if (!coherent(modifier, type, label)) continue;
@@ -215,6 +214,32 @@ public class Chapter0aTestGenerator {
         }
     }
 
+    private static String packageModifier(String modifier) {
+        switch (modifier) {
+            case "":
+                return "plain";
+            case "sync":
+                return "sync";
+            case "volatile":
+            case "final":
+                return modifier + "s";
+            default:
+                throw new IllegalArgumentException("Unknown modifier: " + modifier);
+        }
+    }
+
+    private static String fieldModifier(String modifier) {
+        switch (modifier) {
+            case "":
+            case "sync":
+                return "";
+            case "volatile":
+            case "final":
+                return modifier + " ";
+            default:
+                throw new IllegalArgumentException("Unknown modifier: " + modifier);
+        }
+    }
 
     private static Map<String, String> vars(String modifier, String type, String pack, String name) {
         Map<String, String> map = new HashMap<>();
@@ -227,7 +252,7 @@ public class Chapter0aTestGenerator {
         map.put("defaultLiteral", Values.DEFAULTS_LITERAL.get(type));
         map.put("set", Values.VALUES.get(type));
         map.put("setLiteral", Values.VALUES_LITERAL.get(type));
-        map.put("modifier", (modifier.equals("") ? "" : modifier + " "));
+        map.put("modifier", fieldModifier(modifier));
         map.put("package", pack);
         return map;
     }
@@ -241,11 +266,13 @@ public class Chapter0aTestGenerator {
 
     private static boolean alwaysAtomic(String modifier, String type, String label) {
         return (modifier.equals("volatile") && !label.contains("array")) ||
-                !(type.equals("double") || type.equals("long"));
+                !(type.equals("double") || type.equals("long")) ||
+                modifier.equals("sync");
     }
 
     private static boolean coherent(String modifier, String type, String label) {
-        return (modifier.equals("volatile") && !label.contains("array"));
+        return (modifier.equals("volatile") && !label.contains("array")) ||
+                modifier.equals("sync");
     }
 
     private static String testName(String type) {
