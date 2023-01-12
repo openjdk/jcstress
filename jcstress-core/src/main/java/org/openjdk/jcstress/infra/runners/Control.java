@@ -28,5 +28,5 @@ package org.openjdk.jcstress.infra.runners;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class Control {
-    public volatile boolean isStopped;
+    public volatile boolean stopping;
 }

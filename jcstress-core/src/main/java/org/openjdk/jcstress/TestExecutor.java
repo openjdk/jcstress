@@ -270,9 +270,12 @@ public class TestExecutor {
             pw.println("    inline: \"-" + task.generatedRunnerName + "::" + JCStressTestProcessor.RUN_LOOP_PREFIX + "*\",");
 
             // Force inline the auxiliary methods and classes in the run loop
-            pw.println("    inline: \"+" + task.generatedRunnerName + "::" + JCStressTestProcessor.AUX_PREFIX + "*\",");
+            pw.println("    inline: \"+" + task.generatedRunnerName + "::" + JCStressTestProcessor.CONSUME_PREFIX + "*\",");
             pw.println("    inline: \"+" + WorkerSync.class.getName() + "::*\",");
             pw.println("    inline: \"+java.util.concurrent.atomic.*::*\",");
+
+            // Omit inlining of non-essential methods
+            pw.println("    inline: \"-" + task.generatedRunnerName + "::" + JCStressTestProcessor.CONSUME_NI_PREFIX + "*\",");
 
             // The test is running in resource-constrained JVM. Block the task loop execution until
             // compiled code is available. This would allow compilers to work in relative peace.
@@ -299,7 +302,8 @@ public class TestExecutor {
 
                 pw.println("  {");
                 pw.println("    match: \"" + task.generatedRunnerName + "::" + JCStressTestProcessor.RUN_LOOP_PREFIX + an + "\",");
-                pw.println("    inline: \"+" + task.generatedRunnerName + "::" + JCStressTestProcessor.AUX_PREFIX + "*\",");
+                pw.println("    inline: \"+" + task.generatedRunnerName + "::" + JCStressTestProcessor.CONSUME_PREFIX + "*\",");
+                pw.println("    inline: \"-" + task.generatedRunnerName + "::" + JCStressTestProcessor.CONSUME_NI_PREFIX + "*\",");
 
                 // Force inline of actor methods if run in compiled mode: this would inherit
                 // compiler for them. Forbid inlining of actor methods in interpreted mode:
