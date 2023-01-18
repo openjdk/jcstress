@@ -144,8 +144,8 @@ public class Scheduler {
         }
 
         // Roll over actors and fill their core assignments
-        int[] actorMap = new int[scl.numActors()];
-        Arrays.fill(actorMap, -1);
+        int[] actorToThread = new int[scl.numActors()];
+        Arrays.fill(actorToThread, -1);
 
         for (int aIdx = 0; aIdx < scl.numActors(); aIdx++) {
             int core = coreGroupToCore[scl.cores[aIdx]];
@@ -153,7 +153,7 @@ public class Scheduler {
             for (int thread : topology.coreThreads(core)) {
                 if (availableCPUs.get(thread)) {
                     availableCPUs.set(thread, false);
-                    actorMap[aIdx] = thread;
+                    actorToThread[aIdx] = thread;
                     currentUse++;
                     break;
                 }
@@ -173,31 +173,39 @@ public class Scheduler {
             }
         }
 
-        for (int a : actorMap) {
+        for (int a : actorToThread) {
             if (a == -1) {
                 throw new IllegalStateException("Scheduler error: allocation must have succeeded for " + scl +
-                        ", was: " + Arrays.toString(actorMap));
+                        ", was: " + Arrays.toString(actorToThread));
             }
         }
 
-        int[] systemMap = Arrays.copyOf(system, systemCnt);
+        int[] systemThreads = Arrays.copyOf(system, systemCnt);
 
-        int[] coreMap = new int[topology.totalThreads()];
-        int[] packageMap = new int[topology.totalThreads()];
-        for (int thread : actorMap) {
-            packageMap[thread] = topology.threadToPackage(thread);
-            coreMap[thread] = topology.threadToCore(thread);
+        int[] threadToCore = new int[topology.totalThreads()];
+        int[] threadToPackage = new int[topology.totalThreads()];
+        int[] threadToRealCPU = new int[topology.totalThreads()];
+        Arrays.fill(threadToCore, -1);
+        Arrays.fill(threadToPackage, -1);
+        Arrays.fill(threadToRealCPU, -1);
+
+        for (int thread : actorToThread) {
+            threadToPackage[thread] = topology.threadToPackage(thread);
+            threadToCore[thread] = topology.threadToCore(thread);
+            threadToRealCPU[thread] = topology.threadToRealCPU(thread);
         }
-        for (int thread : systemMap) {
-            packageMap[thread] = topology.threadToPackage(thread);
-            coreMap[thread] = topology.threadToCore(thread);
+        for (int thread : systemThreads) {
+            threadToPackage[thread] = topology.threadToPackage(thread);
+            threadToCore[thread] = topology.threadToCore(thread);
+            threadToRealCPU[thread] = topology.threadToRealCPU(thread);
         }
 
-        int[] allocatedMap = new int[actorMap.length + systemMap.length];
-        System.arraycopy(actorMap, 0, allocatedMap, 0, actorMap.length);
-        System.arraycopy(systemMap, 0, allocatedMap, actorMap.length, systemMap.length);
+        int[] allocatedThreads = new int[actorToThread.length + systemThreads.length];
+        System.arraycopy(actorToThread, 0, allocatedThreads, 0, actorToThread.length);
+        System.arraycopy(systemThreads, 0, allocatedThreads, actorToThread.length, systemThreads.length);
 
-        return new CPUMap(allocatedMap, actorMap, systemMap, packageMap, coreMap);
+        return new CPUMap(allocatedThreads, actorToThread, systemThreads,
+                threadToPackage, threadToCore, threadToRealCPU);
     }
 
     private CPUMap scheduleGlobalOrNone(SchedulingClass scl, boolean none) {
@@ -225,7 +233,7 @@ public class Scheduler {
         }
 
         // Take all affected cores as assignment
-        int[] allocatedMap = new int[topology.totalThreads()];
+        int[] allocatedThreads = new int[topology.totalThreads()];
         int cnt = 0;
 
         for (int core : actorToCore) {
@@ -234,34 +242,38 @@ public class Scheduler {
                     throw new IllegalStateException("Thread should be free");
                 }
                 availableCPUs.set(thread, false);
-                allocatedMap[cnt++] = thread;
+                allocatedThreads[cnt++] = thread;
                 currentUse++;
             }
         }
 
-        int[] actorMap = new int[scl.numActors()];
-        Arrays.fill(actorMap, -1);
+        int[] actorThreads = new int[scl.numActors()];
+        Arrays.fill(actorThreads, -1);
 
-        allocatedMap = Arrays.copyOf(allocatedMap, cnt);
-        int[] systemMap;
+        allocatedThreads = Arrays.copyOf(allocatedThreads, cnt);
+        int[] systemThreads;
         if (none) {
             // No assignments for system
-            systemMap = new int[0];
+            systemThreads = new int[0];
         } else {
             // All assignments go to system
-            systemMap = Arrays.copyOf(allocatedMap, cnt);
+            systemThreads = Arrays.copyOf(allocatedThreads, cnt);
         }
 
-        int[] coreMap = new int[topology.totalThreads()];
-        int[] packageMap = new int[topology.totalThreads()];
-        Arrays.fill(coreMap, -1);
-        Arrays.fill(packageMap, -1);
-        for (int thread : allocatedMap) {
-            packageMap[thread] = topology.threadToPackage(thread);
-            coreMap[thread] = topology.threadToCore(thread);
+        int[] threadToCore = new int[topology.totalThreads()];
+        int[] threadToPackage = new int[topology.totalThreads()];
+        int[] threadToRealCPU = new int[topology.totalThreads()];
+        Arrays.fill(threadToCore, -1);
+        Arrays.fill(threadToPackage, -1);
+        Arrays.fill(threadToRealCPU, -1);
+        for (int thread : allocatedThreads) {
+            threadToPackage[thread] = topology.threadToPackage(thread);
+            threadToCore[thread] = topology.threadToCore(thread);
+            threadToRealCPU[thread] = topology.threadToRealCPU(thread);
         }
 
-        return new CPUMap(allocatedMap, actorMap, systemMap, packageMap, coreMap);
+        return new CPUMap(allocatedThreads, actorThreads, systemThreads,
+                threadToPackage, threadToCore, threadToRealCPU);
     }
 
     private void checkInvariants(String when) {
@@ -310,7 +322,7 @@ public class Scheduler {
     public synchronized void release(CPUMap cpuMap) {
         checkInvariants("Before release");
 
-        for (int c : cpuMap.allocatedMap()) {
+        for (int c : cpuMap.allocatedThreads()) {
             availableCPUs.set(c, true);
             availableCores.set(topology.threadToCore(c), true);
             currentUse--;

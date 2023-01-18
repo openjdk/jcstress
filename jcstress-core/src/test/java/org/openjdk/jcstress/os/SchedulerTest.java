@@ -43,7 +43,7 @@ public class SchedulerTest {
 
         CPUMap cpuMap = s.tryAcquire(scl);
         Assert.assertNotNull("Should be scheduled", cpuMap);
-        int[] schedule = cpuMap.actorMap();
+        int[] schedule = cpuMap.actorThreads();
 
         Assert.assertTrue("Should be scheduled at the different cores",
                 t.threadToCore(schedule[0]) != t.threadToCore(schedule[1]));
@@ -62,7 +62,7 @@ public class SchedulerTest {
 
         CPUMap cpuMap = s.tryAcquire(scl);
         Assert.assertNotNull("Should be scheduled", cpuMap);
-        int[] schedule = cpuMap.actorMap();
+        int[] schedule = cpuMap.actorThreads();
 
         Assert.assertTrue("Should be scheduled at the same core",
                 t.threadToCore(schedule[0]) == t.threadToCore(schedule[1]));
@@ -81,7 +81,7 @@ public class SchedulerTest {
 
         CPUMap cpuMap = s.tryAcquire(scl);
         Assert.assertNotNull("Should be scheduled", cpuMap);
-        int[] schedule = cpuMap.actorMap();
+        int[] schedule = cpuMap.actorThreads();
 
         Assert.assertTrue("Should be scheduled at the different packages",
                 t.threadToPackage(schedule[0]) != t.threadToPackage(schedule[1]));
