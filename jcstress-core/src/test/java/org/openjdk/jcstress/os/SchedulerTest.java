@@ -35,7 +35,7 @@ public class SchedulerTest {
         Topology t = new PresetRegularTopology(2, 4, 4);
         Scheduler s = new Scheduler(t, t.totalThreads());
 
-        SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, 2);
+        SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, 2, false);
         scl.setPackage(0, 0);
         scl.setPackage(1, 0);
         scl.setCore(0, 0);
@@ -54,7 +54,7 @@ public class SchedulerTest {
         Topology t = new PresetRegularTopology(2, 4, 4);
         Scheduler s = new Scheduler(t, t.totalThreads());
 
-        SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, 2);
+        SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, 2, false);
         scl.setPackage(0, 0);
         scl.setPackage(1, 0);
         scl.setCore(0, 0);
@@ -73,7 +73,7 @@ public class SchedulerTest {
         Topology t = new PresetRegularTopology(2, 4, 4);
         Scheduler s = new Scheduler(t, t.totalThreads());
 
-        SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, 2);
+        SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, 2, false);
         scl.setPackage(0, 0);
         scl.setPackage(1, 1);
         scl.setCore(0, 0);

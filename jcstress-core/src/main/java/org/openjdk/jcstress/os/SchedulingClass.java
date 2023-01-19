@@ -34,12 +34,14 @@ public class SchedulingClass implements Serializable {
     final int actors;
     final int[] packages;
     final int[] cores;
+    final boolean groupIsNUMA;
 
-    public SchedulingClass(AffinityMode mode, int actors) {
+    public SchedulingClass(AffinityMode mode, int actors, boolean groupIsNUMA) {
         this.mode = mode;
         this.packages = new int[actors];
         this.cores = new int[actors];
         this.actors = actors;
+        this.groupIsNUMA = groupIsNUMA;
         Arrays.fill(packages, -1);
         Arrays.fill(cores, -1);
     }
@@ -47,6 +49,7 @@ public class SchedulingClass implements Serializable {
     public SchedulingClass(SchedulingClass copy) {
         this.actors = copy.actors;
         this.mode = copy.mode;
+        this.groupIsNUMA = copy.groupIsNUMA;
         this.packages = Arrays.copyOf(copy.packages, copy.packages.length);
         this.cores = Arrays.copyOf(copy.cores, copy.cores.length);
     }
@@ -125,7 +128,11 @@ public class SchedulingClass implements Serializable {
             if (a != 0) {
                 sb.append(", ");
             }
-            sb.append("(PG ");
+            if (groupIsNUMA) {
+                sb.append("(NG ");
+            } else {
+                sb.append("(PG ");
+            }
             int p = packages[a];
             if (p != -1) {
                 sb.append(p);
@@ -154,7 +161,11 @@ public class SchedulingClass implements Serializable {
                 sb.append(an);
                 sb.append(": ");
             }
-            sb.append("package group ");
+            if (scl.groupIsNUMA) {
+                sb.append("NUMA node group ");
+            } else {
+                sb.append("package group");
+            }
             int p = scl.packages[a];
             if (p != -1) {
                 sb.append(p);

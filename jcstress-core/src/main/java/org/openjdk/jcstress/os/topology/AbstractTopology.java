@@ -249,17 +249,23 @@ public abstract class AbstractTopology implements Topology {
     @Override
     public void printStatus(PrintStream pw) {
         checkFinished();
-        pw.printf("  %d node%s/package%s, %d core%s per package, %d thread%s per core%n",
-                packagesPerSystem, packagesPerSystem > 1 ? "s" : "", packagesPerSystem > 1 ? "s" : "",
-                coresPerPackage, coresPerPackage > 1 ? "s" : "",
-                threadsPerCore, threadsPerCore > 1 ? "s" : "");
+        pw.printf("  %d %s%s, %d core%s per %s, %d thread%s per core%n",
+                packagesPerSystem,
+                groupIsNUMA() ? "NUMA node" : "package",
+                packagesPerSystem > 1 ? "s" : "",
+                coresPerPackage,
+                coresPerPackage > 1 ? "s" : "",
+                groupIsNUMA() ? "NUMA node" : "package",
+                threadsPerCore,
+                threadsPerCore > 1 ? "s" : "");
         pw.println();
         pw.println("  CPU topology:");
         for (Integer pack : packages) {
             for (Integer core : packageToCore.get(pack)) {
                 for (Integer thread : coreToThread.get(core)) {
-                    pw.printf("    CPU %s: node/package #%d, core #%d, thread #%d%n",
+                    pw.printf("    CPU %s: %s #%d, core #%d, thread #%d%n",
                             String.format("%3s", "#" + threadToRealCPU.get(thread)),
+                            groupIsNUMA() ? "NUMA node" : "package",
                             pack, core, thread);
                 }
             }
@@ -340,4 +346,8 @@ public abstract class AbstractTopology implements Topology {
         return v;
     }
 
+    @Override
+    public boolean groupIsNUMA() {
+        return false;
+    }
 }

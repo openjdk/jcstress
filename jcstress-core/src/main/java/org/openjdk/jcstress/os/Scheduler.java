@@ -205,7 +205,8 @@ public class Scheduler {
         System.arraycopy(systemThreads, 0, allocatedThreads, actorToThread.length, systemThreads.length);
 
         return new CPUMap(allocatedThreads, actorToThread, systemThreads,
-                threadToPackage, threadToCore, threadToRealCPU);
+                threadToPackage, threadToCore, threadToRealCPU,
+                topology.groupIsNUMA());
     }
 
     private CPUMap scheduleGlobalOrNone(SchedulingClass scl, boolean none) {
@@ -273,7 +274,8 @@ public class Scheduler {
         }
 
         return new CPUMap(allocatedThreads, actorThreads, systemThreads,
-                threadToPackage, threadToCore, threadToRealCPU);
+                threadToPackage, threadToCore, threadToRealCPU,
+                topology.groupIsNUMA());
     }
 
     private void checkInvariants(String when) {
@@ -381,7 +383,7 @@ public class Scheduler {
         // Assign package groups
         int[][] packagePerms = classPermutation(actors, topology.packagesPerSystem());
         for (int[] pp : packagePerms) {
-            SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, actors);
+            SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, actors, topology.groupIsNUMA());
             for (int a = 0; a < actors; a++) {
                 scl.setPackage(a, pp[a]);
             }
@@ -524,7 +526,7 @@ public class Scheduler {
         if (threads > threadLimit) {
             return Collections.emptyList();
         }
-        SchedulingClass scl = new SchedulingClass(mode, threads);
+        SchedulingClass scl = new SchedulingClass(mode, threads, topology.groupIsNUMA());
         for (int t = 0; t < threads; t++) {
             scl.setPackage(t, -1);
             scl.setCore(t, -1);

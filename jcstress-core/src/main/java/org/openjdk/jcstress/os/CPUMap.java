@@ -34,15 +34,18 @@ public class CPUMap implements Serializable {
     private final int[] threadToCore;
     private final int[] allocatedThreads;
     private final int[] threadToRealCPU;
+    private final boolean groupIsNUMA;
 
     public CPUMap(int[] allocatedThreads, int[] actorThreads, int[] systemThreads,
-                  int[] threadToPackage, int[] threadToCore, int[] threadToRealCPU) {
+                  int[] threadToPackage, int[] threadToCore, int[] threadToRealCPU,
+                  boolean groupIsNUMA) {
         this.allocatedThreads = allocatedThreads;
         this.actorThreads = actorThreads;
         this.systemThreads = systemThreads;
         this.threadToPackage = threadToPackage;
         this.threadToCore = threadToCore;
         this.threadToRealCPU = threadToRealCPU;
+        this.groupIsNUMA = groupIsNUMA;
     }
 
     public int[] allocatedThreads() {
@@ -71,6 +74,7 @@ public class CPUMap implements Serializable {
         int[] packageMap = map.threadToPackage;
         int[] coreMap = map.threadToCore;
         int[] threadToRealCPU = map.threadToRealCPU;
+        boolean groupIsNUMA = map.groupIsNUMA;
 
         boolean hasOne = false;
 
@@ -85,12 +89,16 @@ public class CPUMap implements Serializable {
                 sb.append(actorNames.get(a));
                 sb.append(": CPU #");
                 sb.append(threadToRealCPU[actorToThread[a]]);
-                sb.append(" (thread #");
-                sb.append(actorToThread[a]);
+                if (groupIsNUMA) {
+                    sb.append(" (NUMA node #");
+                } else {
+                    sb.append(" (package #");
+                }
+                sb.append(packageMap[actorToThread[a]]);
                 sb.append(", core #");
                 sb.append(coreMap[actorToThread[a]]);
-                sb.append(", node/package #");
-                sb.append(packageMap[actorToThread[a]]);
+                sb.append(", thread #");
+                sb.append(actorToThread[a]);
                 sb.append(")");
                 sb.append(System.lineSeparator());
             }
@@ -103,12 +111,16 @@ public class CPUMap implements Serializable {
                 }
                 sb.append("    <system>: CPU #");
                 sb.append(threadToRealCPU[systemMap[a]]);
-                sb.append(" (thread #");
-                sb.append(systemMap[a]);
+                if (groupIsNUMA) {
+                    sb.append(" (NUMA node #");
+                } else {
+                    sb.append(" (package #");
+                }
+                sb.append(packageMap[systemMap[a]]);
                 sb.append(", core #");
                 sb.append(coreMap[systemMap[a]]);
-                sb.append(", node/package #");
-                sb.append(packageMap[systemMap[a]]);
+                sb.append(", thread #");
+                sb.append(systemMap[a]);
                 sb.append(")");
                 sb.append(System.lineSeparator());
             }

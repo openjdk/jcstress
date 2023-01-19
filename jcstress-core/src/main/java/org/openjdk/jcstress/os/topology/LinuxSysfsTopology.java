@@ -38,6 +38,7 @@ public class LinuxSysfsTopology extends AbstractTopology {
 
     private final Path cpuRoot;
     private final Path nodeRoot;
+    private boolean numaMode;
 
     private int readInt(Path path) throws IOException, TopologyParseException {
         List<String> lines = Files.readAllLines(path);
@@ -144,9 +145,17 @@ public class LinuxSysfsTopology extends AbstractTopology {
             cpuToNuma.clear();
         }
 
+        // There is more than 1 package. Disable NUMA support in favor of
+        // per-package scheduling. There are some platforms that have multiple
+        // sockets per "NUMA node" (see hwloc examples), but that seems to be
+        // synthetic, and it would be more exhaustive to test per-package.
+        if (packageCount > 1) {
+            cpuToNuma.clear();
+        }
+
         try (DirectoryStream<Path> ds = Files.newDirectoryStream(cpuRoot)) {
             boolean found = false;
-            boolean numaMode = false;
+            numaMode = false;
 
             for (Path d : ds) {
                 if (!Files.isDirectory(d.resolve("topology"))) continue;
@@ -189,13 +198,18 @@ public class LinuxSysfsTopology extends AbstractTopology {
     }
 
     public void printStatus(PrintStream pw) {
-        pw.println("  Linux, using " + cpuRoot);
+        pw.println("  Linux, using " + cpuRoot + ", " + nodeRoot);
         super.printStatus(pw);
     }
 
     @Override
     public boolean trustworthy() {
         return true;
+    }
+
+    @Override
+    public boolean groupIsNUMA() {
+        return numaMode;
     }
 
 }
