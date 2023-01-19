@@ -36,7 +36,8 @@ import java.util.*;
 
 public class LinuxSysfsTopology extends AbstractTopology {
 
-    private final Path root;
+    private final Path cpuRoot;
+    private final Path nodeRoot;
 
     private int readInt(Path path) throws IOException, TopologyParseException {
         List<String> lines = Files.readAllLines(path);
@@ -57,15 +58,16 @@ public class LinuxSysfsTopology extends AbstractTopology {
     }
 
     public LinuxSysfsTopology() throws TopologyParseException {
-        this(new File("/sys/devices/system/cpu/").toPath());
+        this(new File("/sys/devices/system/").toPath());
     }
 
     public LinuxSysfsTopology(Path root) throws TopologyParseException {
-        this.root = root;
+        this.cpuRoot = root.resolve("cpu");
+        this.nodeRoot = root.resolve("node");
 
         // Parse the number of available CPUs
         int cpuCount = 0;
-        try (DirectoryStream<Path> ds = Files.newDirectoryStream(root)) {
+        try (DirectoryStream<Path> ds = Files.newDirectoryStream(cpuRoot)) {
             for (Path d : ds) {
                 if (!Files.isDirectory(d.resolve("topology"))) continue;
 
@@ -80,7 +82,7 @@ public class LinuxSysfsTopology extends AbstractTopology {
 
         // Parse the package groups
         List<List<Integer>> coreGroups = new ArrayList<>();
-        try (DirectoryStream<Path> ds = Files.newDirectoryStream(root)) {
+        try (DirectoryStream<Path> ds = Files.newDirectoryStream(cpuRoot)) {
             for (Path d : ds) {
                 if (!Files.isDirectory(d.resolve("topology"))) continue;
 
@@ -114,8 +116,38 @@ public class LinuxSysfsTopology extends AbstractTopology {
             }
         }
 
-        try (DirectoryStream<Path> ds = Files.newDirectoryStream(root)) {
+        SortedMap<Integer, Integer> cpuToNuma = new TreeMap<>();
+        Set<Integer> numaNodes = new HashSet<>();
+
+        try (DirectoryStream<Path> ds = Files.newDirectoryStream(nodeRoot)) {
+            for (Path p : ds) {
+                String basename = p.getFileName().toString();
+                if (basename.matches("node[0-9]+")) {
+                    int numaId = Integer.parseInt(basename.substring(4));
+                    numaNodes.add(numaId);
+                    for (Integer cpu : readList(p.resolve("cpulist"))) {
+                        cpuToNuma.put(cpu, numaId);
+                    }
+                }
+            }
+
+            // Renumber numa nodes
+            Map<Integer, Integer> renumberNuma = renumber(numaNodes, x -> x);
+            cpuToNuma = remapValues(cpuToNuma, renumberNuma);
+        } catch (Exception e) {
+            // No NUMA support
+            cpuToNuma.clear();
+        }
+
+        // Check if there is only one NUMA node. Disable NUMA support then.
+        if (numaNodes.size() <= 1) {
+            cpuToNuma.clear();
+        }
+
+        try (DirectoryStream<Path> ds = Files.newDirectoryStream(cpuRoot)) {
             boolean found = false;
+            boolean numaMode = false;
+
             for (Path d : ds) {
                 if (!Files.isDirectory(d.resolve("topology"))) continue;
 
@@ -124,12 +156,22 @@ public class LinuxSysfsTopology extends AbstractTopology {
                     int threadId = Integer.parseInt(basename.substring(3));
                     int coreId = readInt(d.resolve("topology/core_id"));
                     int packageId = readInt(d.resolve("topology/physical_package_id"));
-                    if (packageId == -1) {
-                        List<Integer> list = readList(d.resolve("topology/package_cpus_list"));
-                        if (!knownPackage.containsKey(list)) {
-                            throw new TopologyParseException("Cannot figure out package ID");
+                    if (cpuToNuma.containsKey(threadId)) {
+                        // Prefer NUMA ID as "package"
+                        packageId = cpuToNuma.get(threadId);
+                        numaMode = true;
+                    } else {
+                        if (numaMode) {
+                            // Already have NUMA enabled, cannot fall back
+                            throw new TopologyParseException("Thread " + threadId + " not found in NUMA list");
                         }
-                        packageId = knownPackage.get(list);
+                        if (packageId == -1) {
+                            List<Integer> list = readList(d.resolve("topology/package_cpus_list"));
+                            if (!knownPackage.containsKey(list)) {
+                                throw new TopologyParseException("Cannot figure out package ID");
+                            }
+                            packageId = knownPackage.get(list);
+                        }
                     }
                     add(packageId, packageId*cpuCount + coreId, threadId);
                     found = true;
@@ -147,7 +189,7 @@ public class LinuxSysfsTopology extends AbstractTopology {
     }
 
     public void printStatus(PrintStream pw) {
-        pw.println("  Linux, using " + root);
+        pw.println("  Linux, using " + cpuRoot);
         super.printStatus(pw);
     }
 

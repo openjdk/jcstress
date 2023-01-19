@@ -53,7 +53,8 @@ public class LinuxSysfsTopologyTest extends AbstractTopologyTest {
 
     /*
        Saved sysfs snapshots are created on target systems with:
-         $ find /sys/devices/system/cpu/ -type f -path *topology* -printf "%P: " -exec cat {} \;
+         $ find /sys/devices/system/ -type f -path *topology* -printf "%P: " -exec cat {} \;
+         $ find /sys/devices/system/ -type f -name cpulist -path *node*  -printf "%P: " -exec cat {} \;
      */
 
     @Test
@@ -200,11 +201,28 @@ public class LinuxSysfsTopologyTest extends AbstractTopologyTest {
         Assert.assertEquals(24, topo.totalCores());
         Assert.assertEquals(48, topo.totalThreads());
 
-        topo.printStatus(System.out);
-
         for (int t = 0; t < topo.totalThreads(); t++) {
             Assert.assertEquals(t / 12, topo.threadToPackage(t));
             Assert.assertEquals(t / 2, topo.threadToCore(t));
+        }
+
+        checkGenericInvariants(topo);
+    }
+
+    @Test
+    public void test_Saved_9() throws TopologyParseException, IOException {
+        FileSystem fs = parse("/topology/sysfs-9.txt");
+        LinuxSysfsTopology topo = new LinuxSysfsTopology(fs.getPath(""));
+
+        Assert.assertEquals(4,  topo.packagesPerSystem());
+        Assert.assertEquals(8,  topo.coresPerPackage());
+        Assert.assertEquals(2,  topo.threadsPerCore());
+        Assert.assertEquals(32, topo.totalCores());
+        Assert.assertEquals(64, topo.totalThreads());
+
+        for (int t = 0; t < topo.totalThreads(); t++) {
+            Assert.assertEquals(t % 32 / 8, topo.threadToPackage(t));
+            Assert.assertEquals(t % 32, topo.threadToCore(t));
         }
 
         checkGenericInvariants(topo);

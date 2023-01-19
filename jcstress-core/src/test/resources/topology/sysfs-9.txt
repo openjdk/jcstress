@@ -1,3 +1,7 @@
+node/node2/cpulist: 16-23,48-55
+node/node0/cpulist: 0-7,32-39
+node/node3/cpulist: 24-31,56-63
+node/node1/cpulist: 8-15,40-47
 cpu/cpu21/topology/die_id: 0
 cpu/cpu21/topology/physical_package_id: 0
 cpu/cpu21/topology/core_cpus_list: 21,53

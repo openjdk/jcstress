@@ -87,10 +87,10 @@ public class CPUMap implements Serializable {
                 sb.append(threadToRealCPU[actorToThread[a]]);
                 sb.append(" (thread #");
                 sb.append(actorToThread[a]);
-                sb.append(", package #");
-                sb.append(packageMap[actorToThread[a]]);
                 sb.append(", core #");
                 sb.append(coreMap[actorToThread[a]]);
+                sb.append(", node/package #");
+                sb.append(packageMap[actorToThread[a]]);
                 sb.append(")");
                 sb.append(System.lineSeparator());
             }
@@ -105,10 +105,10 @@ public class CPUMap implements Serializable {
                 sb.append(threadToRealCPU[systemMap[a]]);
                 sb.append(" (thread #");
                 sb.append(systemMap[a]);
-                sb.append(", package #");
-                sb.append(packageMap[systemMap[a]]);
                 sb.append(", core #");
                 sb.append(coreMap[systemMap[a]]);
+                sb.append(", node/package #");
+                sb.append(packageMap[systemMap[a]]);
                 sb.append(")");
                 sb.append(System.lineSeparator());
             }

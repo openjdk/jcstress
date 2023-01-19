@@ -107,7 +107,7 @@ public abstract class AbstractTopology implements Topology {
         coreToThread.put(coreId, threadId);
     }
 
-    private <K, V> Multimap<K, V> remapKeys(Multimap<K, V> src, Map<K, K> remap) {
+    protected <K, V> Multimap<K, V> remapKeys(Multimap<K, V> src, Map<K, K> remap) {
         TreesetMultimap<K, V> dst = new TreesetMultimap<>();
         for (K k : src.keys()) {
             K nk = remap.get(k);
@@ -118,7 +118,7 @@ public abstract class AbstractTopology implements Topology {
         return dst;
     }
 
-    private <K, V> Multimap<K, V> remapValues(Multimap<K, V> src, Map<V, V> remap) {
+    protected <K, V> Multimap<K, V> remapValues(Multimap<K, V> src, Map<V, V> remap) {
         TreesetMultimap<K, V> dst = new TreesetMultimap<>();
         for (K k : src.keys()) {
             for (V v : src.get(k)) {
@@ -128,7 +128,7 @@ public abstract class AbstractTopology implements Topology {
         return dst;
     }
 
-    private <K, V> SortedMap<K, V> remapValues(SortedMap<K, V> src, Map<V, V> remap) {
+    protected <K, V> SortedMap<K, V> remapValues(SortedMap<K, V> src, Map<V, V> remap) {
         SortedMap<K, V> dst = new TreeMap<>();
         for (K k : src.keySet()) {
             dst.put(k, remap.get(src.get(k)));
@@ -136,7 +136,7 @@ public abstract class AbstractTopology implements Topology {
         return dst;
     }
 
-    private <K, V> SortedMap<K, V> remapKeys(SortedMap<K, V> src, Map<K, K> remap) {
+    protected <K, V> SortedMap<K, V> remapKeys(SortedMap<K, V> src, Map<K, K> remap) {
         SortedMap<K, V> dst = new TreeMap<>();
         for (K k : src.keySet()) {
             dst.put(remap.get(k), src.get(k));
@@ -144,7 +144,7 @@ public abstract class AbstractTopology implements Topology {
         return dst;
     }
 
-    private <K> Map<K, K> renumber(Set<K> src, Function<Integer, K> gen) {
+    protected <K> Map<K, K> renumber(Set<K> src, Function<Integer, K> gen) {
         Map<K, K> dst = new HashMap<>();
         int nid = 0;
         for (K k : src) {
@@ -249,8 +249,8 @@ public abstract class AbstractTopology implements Topology {
     @Override
     public void printStatus(PrintStream pw) {
         checkFinished();
-        pw.printf("  %d package%s, %d core%s per package, %d thread%s per core%n",
-                packagesPerSystem, packagesPerSystem > 1 ? "s" : "",
+        pw.printf("  %d node%s/package%s, %d core%s per package, %d thread%s per core%n",
+                packagesPerSystem, packagesPerSystem > 1 ? "s" : "", packagesPerSystem > 1 ? "s" : "",
                 coresPerPackage, coresPerPackage > 1 ? "s" : "",
                 threadsPerCore, threadsPerCore > 1 ? "s" : "");
         pw.println();
@@ -258,7 +258,7 @@ public abstract class AbstractTopology implements Topology {
         for (Integer pack : packages) {
             for (Integer core : packageToCore.get(pack)) {
                 for (Integer thread : coreToThread.get(core)) {
-                    pw.printf("    CPU %s: package #%d, core #%d, thread #%d%n",
+                    pw.printf("    CPU %s: node/package #%d, core #%d, thread #%d%n",
                             String.format("%3s", "#" + threadToRealCPU.get(thread)),
                             pack, core, thread);
                 }
