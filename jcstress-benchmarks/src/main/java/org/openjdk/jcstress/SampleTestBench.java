@@ -27,6 +27,7 @@ package org.openjdk.jcstress;
 
 import org.openjdk.jcstress.os.AffinityMode;
 import org.openjdk.jcstress.os.CPUMap;
+import org.openjdk.jcstress.os.NodeType;
 import org.openjdk.jcstress.os.SchedulingClass;
 import org.openjdk.jcstress.vm.CompileMode;
 import org.openjdk.jmh.annotations.State;
@@ -61,11 +62,11 @@ public class SampleTestBench {
         String runnerName = SampleTest_jcstress.class.getCanonicalName();
 
         TestInfo ti = new TestInfo(testName, testName, runnerName, "", 2, Arrays.asList("a1", "a2"), false);
-        TestConfig cfg = new TestConfig(opts, ti, 1, Collections.emptyList(), CompileMode.UNIFIED, new SchedulingClass(AffinityMode.NONE, 2));
+        TestConfig cfg = new TestConfig(opts, ti, 1, Collections.emptyList(), CompileMode.UNIFIED, new SchedulingClass(AffinityMode.NONE, 2, NodeType.PACKAGE));
         int[] map = new int[2];
         map[0] = -1;
         map[1] = -1;
-        cfg.setCPUMap(new CPUMap(map, map, map, map, map, map));
+        cfg.setCPUMap(new CPUMap(map, map, map, map, map, map, NodeType.PACKAGE));
 
         pool = Executors.newCachedThreadPool();
 

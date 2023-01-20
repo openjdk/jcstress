@@ -26,28 +26,30 @@ package org.openjdk.jcstress.os;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class SchedulingClass implements Serializable {
     final AffinityMode mode;
     final int actors;
-    final int[] packages;
+    final int[] nodes;
     final int[] cores;
+    final NodeType nodeType;
 
-    public SchedulingClass(AffinityMode mode, int actors) {
+    public SchedulingClass(AffinityMode mode, int actors, NodeType nodeType) {
         this.mode = mode;
-        this.packages = new int[actors];
+        this.nodes = new int[actors];
         this.cores = new int[actors];
         this.actors = actors;
-        Arrays.fill(packages, -1);
+        this.nodeType = nodeType;
+        Arrays.fill(nodes, -1);
         Arrays.fill(cores, -1);
     }
 
     public SchedulingClass(SchedulingClass copy) {
         this.actors = copy.actors;
         this.mode = copy.mode;
-        this.packages = Arrays.copyOf(copy.packages, copy.packages.length);
+        this.nodeType = copy.nodeType;
+        this.nodes = Arrays.copyOf(copy.nodes, copy.nodes.length);
         this.cores = Arrays.copyOf(copy.cores, copy.cores.length);
     }
 
@@ -59,9 +61,9 @@ public class SchedulingClass implements Serializable {
         return actors;
     }
 
-    public int numPackages() {
+    public int numNodes() {
         int m = -1;
-        for (int p : packages) {
+        for (int p : nodes) {
             m = Math.max(m, p);
         }
         return m + 1;
@@ -75,9 +77,9 @@ public class SchedulingClass implements Serializable {
         return m + 1;
     }
 
-    public int[] packageActors() {
-        int[] r = new int[numPackages()];
-        for (int p : packages) {
+    public int[] nodeActors() {
+        int[] r = new int[numNodes()];
+        for (int p : nodes) {
             if (p != -1) r[p]++;
         }
         return r;
@@ -91,12 +93,12 @@ public class SchedulingClass implements Serializable {
         return r;
     }
 
-    public void setPackage(int a, int p) {
-        packages[a] = p;
+    public void setNode(int a, int n) {
+        nodes[a] = n;
     }
 
-    public int getPackage(int a) {
-        return packages[a];
+    public int getNode(int a) {
+        return nodes[a];
     }
 
     public void setCore(int a, int c) {
@@ -107,13 +109,13 @@ public class SchedulingClass implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SchedulingClass scl = (SchedulingClass) o;
-        return Arrays.equals(packages, scl.packages) &&
+        return Arrays.equals(nodes, scl.nodes) &&
                 Arrays.equals(cores, scl.cores);
     }
 
     @Override
     public int hashCode() {
-        int result = Arrays.hashCode(packages);
+        int result = Arrays.hashCode(nodes);
         result = 31 * result + Arrays.hashCode(cores);
         return result;
     }
@@ -125,8 +127,10 @@ public class SchedulingClass implements Serializable {
             if (a != 0) {
                 sb.append(", ");
             }
-            sb.append("(PG ");
-            int p = packages[a];
+            sb.append("(");
+            sb.append(nodeType.shortDesc());
+            sb.append("G ");
+            int p = nodes[a];
             if (p != -1) {
                 sb.append(p);
             } else {
@@ -154,8 +158,9 @@ public class SchedulingClass implements Serializable {
                 sb.append(an);
                 sb.append(": ");
             }
-            sb.append("package group ");
-            int p = scl.packages[a];
+            sb.append(scl.nodeType.desc());
+            sb.append(" group ");
+            int p = scl.nodes[a];
             if (p != -1) {
                 sb.append(p);
             } else {

@@ -30,19 +30,22 @@ import java.util.List;
 public class CPUMap implements Serializable {
     private final int[] actorThreads;
     private final int[] systemThreads;
-    private final int[] threadToPackage;
+    private final int[] threadToNode;
     private final int[] threadToCore;
     private final int[] allocatedThreads;
     private final int[] threadToRealCPU;
+    private final NodeType nodeType;
 
     public CPUMap(int[] allocatedThreads, int[] actorThreads, int[] systemThreads,
-                  int[] threadToPackage, int[] threadToCore, int[] threadToRealCPU) {
+                  int[] threadToNode, int[] threadToCore, int[] threadToRealCPU,
+                  NodeType nodeType) {
         this.allocatedThreads = allocatedThreads;
         this.actorThreads = actorThreads;
         this.systemThreads = systemThreads;
-        this.threadToPackage = threadToPackage;
+        this.threadToNode = threadToNode;
         this.threadToCore = threadToCore;
         this.threadToRealCPU = threadToRealCPU;
+        this.nodeType = nodeType;
     }
 
     public int[] allocatedThreads() {
@@ -68,9 +71,10 @@ public class CPUMap implements Serializable {
     public static String description(CPUMap map, List<String> actorNames) {
         int[] actorToThread = map.actorThreads;
         int[] systemMap = map.systemThreads;
-        int[] packageMap = map.threadToPackage;
+        int[] nodeMap = map.threadToNode;
         int[] coreMap = map.threadToCore;
         int[] threadToRealCPU = map.threadToRealCPU;
+        NodeType nodeType = map.nodeType;
 
         boolean hasOne = false;
 
@@ -85,12 +89,14 @@ public class CPUMap implements Serializable {
                 sb.append(actorNames.get(a));
                 sb.append(": CPU #");
                 sb.append(threadToRealCPU[actorToThread[a]]);
-                sb.append(" (thread #");
-                sb.append(actorToThread[a]);
-                sb.append(", package #");
-                sb.append(packageMap[actorToThread[a]]);
+                sb.append(" (");
+                sb.append(nodeType.desc());
+                sb.append(" #");
+                sb.append(nodeMap[actorToThread[a]]);
                 sb.append(", core #");
                 sb.append(coreMap[actorToThread[a]]);
+                sb.append(", thread #");
+                sb.append(actorToThread[a]);
                 sb.append(")");
                 sb.append(System.lineSeparator());
             }
@@ -103,12 +109,14 @@ public class CPUMap implements Serializable {
                 }
                 sb.append("    <system>: CPU #");
                 sb.append(threadToRealCPU[systemMap[a]]);
-                sb.append(" (thread #");
-                sb.append(systemMap[a]);
-                sb.append(", package #");
-                sb.append(packageMap[systemMap[a]]);
+                sb.append(" (");
+                sb.append(nodeType.desc());
+                sb.append(" #");
+                sb.append(nodeMap[systemMap[a]]);
                 sb.append(", core #");
                 sb.append(coreMap[systemMap[a]]);
+                sb.append(", thread #");
+                sb.append(systemMap[a]);
                 sb.append(")");
                 sb.append(System.lineSeparator());
             }

@@ -48,15 +48,15 @@ public class LinuxProcfsTopologyTest extends AbstractTopologyTest {
         String s = FileUtils.copyFileToTemp("/topology/cpuinfo-1.txt", "jcstress", "test");
         LinuxProcfsTopology topo = new LinuxProcfsTopology(s);
 
-        Assert.assertEquals(1,  topo.packagesPerSystem());
-        Assert.assertEquals(32, topo.coresPerPackage());
+        Assert.assertEquals(1,  topo.nodesPerSystem());
+        Assert.assertEquals(32, topo.coresPerNode());
         Assert.assertEquals(2,  topo.threadsPerCore());
         Assert.assertEquals(32, topo.totalCores());
         Assert.assertEquals(64, topo.totalThreads());
 
         for (int t = 0; t < topo.totalThreads(); t++) {
-            Assert.assertEquals(0, topo.threadToPackage(t));
-            Assert.assertEquals(t % topo.coresPerPackage(), topo.threadToCore(t));
+            Assert.assertEquals(0, topo.threadToNode(t));
+            Assert.assertEquals(t % topo.coresPerNode(), topo.threadToCore(t));
         }
 
         checkGenericInvariants(topo);

@@ -24,11 +24,11 @@
  */
 package org.openjdk.jcstress.os.topology;
 
+import org.openjdk.jcstress.os.NodeType;
 import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.PrintStream;
 import java.util.Collection;
-import java.util.Objects;
 
 public interface Topology {
 
@@ -63,18 +63,20 @@ public interface Topology {
     boolean trustworthy();
 
     int threadsPerCore();
-    int coresPerPackage();
-    int packagesPerSystem();
+    int coresPerNode();
+    int nodesPerSystem();
     int totalThreads();
     int totalCores();
 
     Collection<Integer> coreThreads(int coreId);
-    Collection<Integer> packageCores(int packageId);
+    Collection<Integer> nodeCores(int nodeId);
 
     int threadToCore(int threadId);
-    int threadToPackage(int threadId);
-    int coreToPackage(int coreId);
+    int threadToNode(int threadId);
+    int coreToNode(int coreId);
 
     int threadToRealCPU(int threadId);
+
+    NodeType nodeType();
 
 }
