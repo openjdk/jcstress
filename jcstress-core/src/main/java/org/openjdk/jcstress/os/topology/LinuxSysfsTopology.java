@@ -24,6 +24,7 @@
  */
 package org.openjdk.jcstress.os.topology;
 
+import org.openjdk.jcstress.os.NodeType;
 import org.openjdk.jcstress.util.StringUtils;
 
 import java.io.File;
@@ -164,25 +165,25 @@ public class LinuxSysfsTopology extends AbstractTopology {
                 if (basename.matches("cpu[0-9]+")) {
                     int threadId = Integer.parseInt(basename.substring(3));
                     int coreId = readInt(d.resolve("topology/core_id"));
-                    int packageId = readInt(d.resolve("topology/physical_package_id"));
+                    int nodeId = readInt(d.resolve("topology/physical_package_id"));
                     if (cpuToNuma.containsKey(threadId)) {
-                        // Prefer NUMA ID as "package"
-                        packageId = cpuToNuma.get(threadId);
+                        // Prefer NUMA ID as node
+                        nodeId = cpuToNuma.get(threadId);
                         numaMode = true;
                     } else {
                         if (numaMode) {
                             // Already have NUMA enabled, cannot fall back
                             throw new TopologyParseException("Thread " + threadId + " not found in NUMA list");
                         }
-                        if (packageId == -1) {
+                        if (nodeId == -1) {
                             List<Integer> list = readList(d.resolve("topology/package_cpus_list"));
                             if (!knownPackage.containsKey(list)) {
                                 throw new TopologyParseException("Cannot figure out package ID");
                             }
-                            packageId = knownPackage.get(list);
+                            nodeId = knownPackage.get(list);
                         }
                     }
-                    add(packageId, packageId*cpuCount + coreId, threadId);
+                    add(nodeId, nodeId*cpuCount + coreId, threadId);
                     found = true;
                 }
             }
@@ -208,8 +209,8 @@ public class LinuxSysfsTopology extends AbstractTopology {
     }
 
     @Override
-    public boolean groupIsNUMA() {
-        return numaMode;
+    public NodeType nodeType() {
+        return numaMode ? NodeType.NUMA : NodeType.PACKAGE;
     }
 
 }

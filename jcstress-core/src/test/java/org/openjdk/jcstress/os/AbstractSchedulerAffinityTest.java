@@ -93,12 +93,12 @@ public class AbstractSchedulerAffinityTest {
 
             for (int a1 = 0; a1 < scl.numActors(); a1++) {
                 for (int a2 = 0; a2 < scl.numActors(); a2++) {
-                    if (scl.packages[a1] == scl.packages[a2]) {
+                    if (scl.nodes[a1] == scl.nodes[a2]) {
                         Assert.assertEquals("Should be scheduled at the same package",
-                                topo.threadToPackage(actorMap[a1]), topo.threadToPackage(actorMap[a2]));
+                                topo.threadToNode(actorMap[a1]), topo.threadToNode(actorMap[a2]));
                     } else {
                         Assert.assertNotEquals("Should be scheduled at the different packages",
-                                topo.threadToPackage(actorMap[a1]), topo.threadToPackage(actorMap[a2]));
+                                topo.threadToNode(actorMap[a1]), topo.threadToNode(actorMap[a2]));
                     }
                     if (scl.cores[a1] == scl.cores[a2]) {
                         Assert.assertEquals("Should be scheduled at the same core: " + scl,
