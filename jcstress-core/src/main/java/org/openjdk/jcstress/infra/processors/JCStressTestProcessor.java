@@ -52,10 +52,13 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
     private final List<TestInfo> tests = new ArrayList<>();
 
-    public static final String TASK_LOOP_PREFIX = "jcstress_task_";
-    public static final String RUN_LOOP_PREFIX = "jcstress_run_";
+    public static final String CHECK_LOOP_PREFIX = "jcstress_check_";
+    public static final String ITERATION_LOOP_PREFIX = "jcstress_iteration_";
+    public static final String STRIDE_LOOP_PREFIX = "jcstress_stride_";
+    public static final String SANITY_CHECK_PREFIX = "jcstress_sanityCheck_";
     public static final String CONSUME_PREFIX = "jcstress_consume_";
     public static final String CONSUME_NI_PREFIX = "jcstress_ni_consume_";
+    public static final String WORKER_PREFIX = "JcstressThread_";
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
@@ -360,12 +363,36 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         pw.println("    @Override");
         pw.println("    public void sanityCheck(Counter<" + r + "> counter) throws Throwable {");
-        pw.println("        sanityCheck_API(counter);");
-        pw.println("        sanityCheck_Footprints(counter);");
+        pw.println("        " + SANITY_CHECK_PREFIX + "API(counter);");
+        pw.println("        " + SANITY_CHECK_PREFIX + "Resource(counter);");
         pw.println("    }");
         pw.println();
-        pw.println("    private void sanityCheck_API(Counter<" + r + "> counter) throws Throwable {");
 
+        for (int a = 0; a < actorsCount; a++) {
+            ExecutableElement el = info.getActors().get(a);
+            String name = WORKER_PREFIX + "APICheck_" + el.getSimpleName();
+            pw.println("    private static class " + name + " extends VoidThread {");
+            pw.println("        final " + t + " t;");
+            pw.println("        final " + s + " s;");
+            pw.println("        final " + r + " r;");
+            pw.println();
+            pw.println("        public " + name + "(" + t + " t, " + s + " s, " + r + " r) {");
+            pw.println("            super(\"" + name + "\");");
+            pw.println("            this.t = t;");
+            pw.println("            this.s = s;");
+            pw.println("            this.r = r;");
+            pw.println("        }");
+            pw.println();
+            pw.println("        public void internalRun() {");
+            pw.print("            ");
+            emitMethod(pw, el, (isStateItself ? "s." : "t.") + el.getSimpleName(), "s", "r", false);
+            pw.println(";");
+            pw.println("        };");
+            pw.println("    }");
+            pw.println();
+        }
+
+        pw.println("    private void " + SANITY_CHECK_PREFIX + "API(Counter<" + r + "> counter) throws Throwable {");
         pw.println("        final " + s + " s = new " + s + "();");
         pw.println("        final " + r + " r = new " + r + "();");
         if (!isStateItself) {
@@ -374,11 +401,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         for (int a = 0; a < actorsCount; a++) {
             ExecutableElement el = info.getActors().get(a);
-            pw.println("        VoidThread a" + a + " = new VoidThread() { protected void internalRun() {");
-            pw.print("            ");
-            emitMethod(pw, el, (isStateItself ? "s." : "t.") + el.getSimpleName(), "s", "r", false);
-            pw.println(";");
-            pw.println("        }};");
+            String name = WORKER_PREFIX + "APICheck_" + el.getSimpleName();
+            pw.println("        VoidThread a" + a + " = new " + name + "(" + (isStateItself ? "null" : "t") + ", s, r);");
         }
 
         for (int a = 0; a < actorsCount; a++) {
@@ -401,7 +425,43 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    }");
         pw.println();
 
-        pw.println("    private void sanityCheck_Footprints(Counter<" + r + "> counter) throws Throwable {");
+        for (int a = 0; a < actorsCount; a++) {
+            ExecutableElement el = info.getActors().get(a);
+            String name = WORKER_PREFIX + "ResourceCheck_" + el.getSimpleName();
+            pw.println("    private class " + name + " extends LongThread {");
+            pw.println("        final " + s + "[] ss;");
+            pw.println("        final " + r + "[] rs;");
+            pw.println("        final int size;");
+            pw.println();
+            pw.println("        public " + name + "(" + s + "[] ss, " + r + "[] rs, int size) {");
+            pw.println("            super(\"" + name + "\");");
+            pw.println("            this.ss = ss;");
+            pw.println("            this.rs = rs;");
+            pw.println("            this.size = size;");
+            pw.println("        }");
+            pw.println();
+            pw.println("        public long internalRun() {");
+            pw.println("            long a1 = AllocProfileSupport.getAllocatedBytes();");
+            pw.println("            " + CHECK_LOOP_PREFIX + el.getSimpleName() + "(ss, rs, size);");
+            pw.println("            long a2 = AllocProfileSupport.getAllocatedBytes();");
+            pw.println("            return a2 - a1;");
+            pw.println("        }");
+            pw.println();
+            pw.println("        private void " + CHECK_LOOP_PREFIX + el.getSimpleName() + "(" + s + "[] ls, " + r + "[] lr, int size) {");
+            if (!isStateItself) {
+                pw.println("            final " + t + " t = new " + t + "();");
+            }
+            pw.println("            for (int c = 0; c < size; c++) {");
+            pw.print("                ");
+            emitMethod(pw, el, (isStateItself ? "ls[c]." : "t.") + el.getSimpleName(), "ls[c]", "lr[c]", false);
+            pw.println(";");
+            pw.println("            }");
+            pw.println("        }");
+            pw.println("    }");
+            pw.println();
+        }
+
+        pw.println("    private void " + SANITY_CHECK_PREFIX + "Resource(Counter<" + r + "> counter) throws Throwable {");
         pw.println("        config.adjustStrideCount(new FootprintEstimator() {");
         pw.println("          public void runWith(int size, long[] cnts) {");
         pw.println("            long time1 = System.nanoTime();");
@@ -422,16 +482,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         for (int a = 0; a < actorsCount; a++) {
             ExecutableElement el = info.getActors().get(a);
-            pw.println("            LongThread a" + a + " = new LongThread() { public long internalRun() {");
-            pw.println("                long a1 = AllocProfileSupport.getAllocatedBytes();");
-            pw.println("                for (int c = 0; c < size; c++) {");
-            pw.print("                    ");
-            emitMethod(pw, el, (isStateItself ? "ls[c]." : "t.") + el.getSimpleName(), "ls[c]", "lr[c]", false);
-            pw.println(";");
-            pw.println("                }");
-            pw.println("                long a2 = AllocProfileSupport.getAllocatedBytes();");
-            pw.println("                return a2 - a1;");
-            pw.println("            }};");
+            String name = WORKER_PREFIX + "ResourceCheck_" + el.getSimpleName();
+            pw.println("            LongThread a" + a + " = new " + name + "(ls, lr, size);");
         }
 
         for (int a = 0; a < actorsCount; a++) {
@@ -495,9 +547,8 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         pw.println("        ArrayList<CounterThread<" + r + ">> threads = new ArrayList<>(" + actorsCount + ");");
         for (ExecutableElement a : info.getActors()) {
-            pw.println("        threads.add(new CounterThread<" + r + ">() { public Counter<" + r + "> internalRun() {");
-            pw.println("            return " + TASK_LOOP_PREFIX + a.getSimpleName() + "();");
-            pw.println("        }});");
+            String name = WORKER_PREFIX + a.getSimpleName();
+            pw.println("        threads.add(new " + name + "());");
         }
         pw.println();
         pw.println("        for (CounterThread<" + r + "> t : threads) {");
@@ -519,10 +570,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         for (boolean reinit : new boolean[] { false, true }) {
             String name = reinit ? (CONSUME_PREFIX + "reinit") : (CONSUME_NI_PREFIX + "final");
-            pw.println("    private void " + name + "(Counter<" + r + "> cnt, int a) {");
-            pw.println("        " + s + "[] ls = gs;");
-            pw.println("        " + r + "[] lr = gr;");
-            pw.println("        int len = config.strideSize * config.strideCount;");
+            pw.println("    public static void " + name + "(Counter<" + r + "> cnt, " + s + "[] ls, " + r + "[] lr, " + t + " test, int len, int a) {");
             pw.println("        int left = a * len / " + actorsCount + ";");
             pw.println("        int right = (a + 1) * len / " + actorsCount + ";");
             pw.println("        for (int c = left; c < right; c++) {");
@@ -573,40 +621,51 @@ public class JCStressTestProcessor extends AbstractProcessor {
 
         int n = 0;
         for (ExecutableElement a : info.getActors()) {
-            pw.println();
-            pw.println("    private Counter<" + r + "> " + TASK_LOOP_PREFIX + a.getSimpleName() + "() {");
-            pw.println("        int len = config.strideSize * config.strideCount;");
-            pw.println("        int stride = config.strideSize;");
-            pw.println("        Counter<" + r + "> counter = new Counter<>();");
-            pw.println("        if (config.localAffinity) AffinitySupport.bind(config.localAffinityMap[" + n + "]);");
-            pw.println("        while (true) {");
-            pw.println("            WorkerSync sync = workerSync;");
-            pw.println("            int check = 0;");
-            pw.println("            for (int start = 0; start < len; start += stride) {");
-            pw.println("                " + RUN_LOOP_PREFIX + a.getSimpleName() + "(gs, gr, start, start + stride);");
-            pw.println("                check += " + actorsCount + ";");
-            pw.println("                sync.awaitCheckpoint(check);");
-            pw.println("            }");
-            pw.println("            if (sync.stopping) {");
-            pw.println("                " + CONSUME_NI_PREFIX + "final(counter, " + n + ");");
-            pw.println("                return counter;");
-            pw.println("            } else {");
-            pw.println("                " + CONSUME_PREFIX + "reinit(counter, " + n + ");");
-            pw.println("            }");
-            pw.println("            if (sync.tryStartUpdate()) {");
-            pw.println("                workerSync = new WorkerSync(control.stopping, " + actorsCount + ", config.spinLoopStyle);");
-            pw.println("            }");
-            pw.println("            sync.postUpdate();");
+            String name = WORKER_PREFIX + a.getSimpleName();
+            pw.println("    public class " + name + " extends CounterThread<" + r + "> {");
+            pw.println("        public " + name + "() {");
+            pw.println("            super(\"" + name + "\");");
             pw.println("        }");
-            pw.println("    }");
             pw.println();
-            pw.println("    private void " + RUN_LOOP_PREFIX + a.getSimpleName() + "(" + s + "[] gs, " + r + "[] gr, int start, int end) {");
+            pw.println("        public Counter<" + r + "> internalRun() {");
+            pw.println("            return " + ITERATION_LOOP_PREFIX + a.getSimpleName() + "();");
+            pw.println("        }");
+            pw.println();
+            pw.println("        private Counter<" + r + "> " + ITERATION_LOOP_PREFIX + a.getSimpleName() + "() {");
+            pw.println("            " + s + "[] ls = gs;");
+            pw.println("            " + r + "[] lr = gr;");
+            pw.println("            int len = config.strideSize * config.strideCount;");
+            pw.println("            int stride = config.strideSize;");
+            pw.println("            Counter<" + r + "> counter = new Counter<>();");
+            pw.println("            if (config.localAffinity) AffinitySupport.bind(config.localAffinityMap[" + n + "]);");
+            pw.println("            while (true) {");
+            pw.println("                WorkerSync sync = workerSync;");
+            pw.println("                int check = 0;");
+            pw.println("                for (int start = 0; start < len; start += stride) {");
+            pw.println("                    " + STRIDE_LOOP_PREFIX + a.getSimpleName() + "(ls, lr, start, start + stride);");
+            pw.println("                    check += " + actorsCount + ";");
+            pw.println("                    sync.awaitCheckpoint(check);");
+            pw.println("                }");
+            pw.println("                if (sync.stopping) {");
+            pw.println("                    " + CONSUME_NI_PREFIX + "final(counter, ls, lr, " + (isStateItself ? "null" : "test") + ", len, " + n + ");");
+            pw.println("                    return counter;");
+            pw.println("                } else {");
+            pw.println("                    " + CONSUME_PREFIX + "reinit(counter, ls, lr, " + (isStateItself ? "null" : "test") + ", len, " + n + ");");
+            pw.println("                }");
+            pw.println("                if (sync.tryStartUpdate()) {");
+            pw.println("                    workerSync = new WorkerSync(control.stopping, " + actorsCount + ", config.spinLoopStyle);");
+            pw.println("                }");
+            pw.println("                sync.postUpdate();");
+            pw.println("            }");
+            pw.println("        }");
+            pw.println();
+            pw.println("        private void " + STRIDE_LOOP_PREFIX + a.getSimpleName() + "(" + s + "[] gs, " + r + "[] gr, int start, int end) {");
             if (!isStateItself) {
-                pw.println("        " + t + " lt = test;");
+                pw.println("            " + t + " lt = test;");
             }
-            pw.println("        " + s + "[] ls = gs;");
-            pw.println("        " + r + "[] lr = gr;");
-            pw.println("        for (int c = start; c < end; c++) {");
+            pw.println("            " + s + "[] ls = gs;");
+            pw.println("            " + r + "[] lr = gr;");
+            pw.println("            for (int c = start; c < end; c++) {");
 
             // Try to access both state and result fields early. This will help
             // compiler to avoid null-pointer checks in the workload, which will
@@ -618,28 +677,29 @@ public class JCStressTestProcessor extends AbstractProcessor {
             // For states that are passed as arguments we can do the same.
             // For states that are receivers themselves, we already have the NP-check.
 
-            pw.println("            " + s + " s = ls[c];");
+            pw.println("                " + s + " s = ls[c];");
             if (hasResultArgs(a)) {
-                pw.println("            " + r + " r = lr[c];");
-                pw.println("            int trap_r = r.jcstress_trap;");
+                pw.println("                " + r + " r = lr[c];");
+                pw.println("                int trap_r = r.jcstress_trap;");
             }
 
             if (isStateItself) {
-                emitMethod(pw, a, "            s." + a.getSimpleName(), "s", "r", true);
+                emitMethod(pw, a, "                s." + a.getSimpleName(), "s", "r", true);
             } else {
                 String[] sf = selectSinkField(info.getState());
                 if (sf != null) {
-                    pw.println("            " + sf[0] + " trap_s = s." + sf[1] + ";");
+                    pw.println("                " + sf[0] + " trap_s = s." + sf[1] + ";");
                 }
-                emitMethod(pw, a, "           lt." + a.getSimpleName(), "s", "r", true);
+                emitMethod(pw, a, "               lt." + a.getSimpleName(), "s", "r", true);
             }
 
+            pw.println("            }");
             pw.println("        }");
             pw.println("    }");
+            pw.println();
             n++;
         }
 
-        pw.println();
         pw.println("}");
 
         pw.close();

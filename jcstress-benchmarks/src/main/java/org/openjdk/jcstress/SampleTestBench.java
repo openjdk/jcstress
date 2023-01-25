@@ -25,65 +25,111 @@
 
 package org.openjdk.jcstress;
 
+import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 import org.openjdk.jcstress.os.AffinityMode;
-import org.openjdk.jcstress.os.CPUMap;
 import org.openjdk.jcstress.os.NodeType;
 import org.openjdk.jcstress.os.SchedulingClass;
 import org.openjdk.jcstress.vm.CompileMode;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jcstress.infra.TestInfo;
-import org.openjdk.jcstress.infra.collectors.TestResultCollector;
-import org.openjdk.jcstress.infra.grading.ConsoleReportPrinter;
 import org.openjdk.jcstress.infra.runners.Runner;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.profile.LinuxPerfAsmProfiler;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.List;
 
 @State(Scope.Thread)
 public class SampleTestBench {
 
+    // Must match the source code.
+    private static final List<String> ACTOR_NAMES = Arrays.asList("actor1", "actor2");;
+
+    private static final TestConfig[] CFGS;
+    private static final Constructor<?> CNSTR;
+
+    static {
+        try {
+            Options opts = new Options(new String[] {
+                    "-v",
+                    "-iters", "1",
+                    "-time", "10000"});
+            opts.parse();
+
+            String testName = SampleTest.class.getCanonicalName();
+            String runnerName = SampleTest_jcstress.class.getCanonicalName();
+
+            TestInfo ti = new TestInfo(testName, testName, runnerName, "", 2, ACTOR_NAMES, false);
+            SchedulingClass sc = new SchedulingClass(AffinityMode.NONE, 2, NodeType.PACKAGE);
+
+            int[] casesFor = CompileMode.casesFor(2, true, true);
+            casesFor = Arrays.copyOf(casesFor, casesFor.length + 1);
+            casesFor[casesFor.length - 1] = CompileMode.UNIFIED;
+
+            CFGS = new TestConfig[casesFor.length];
+            for (int i = 0; i < casesFor.length; i++) {
+                CFGS[i] = new TestConfig(opts, ti, 1, Collections.emptyList(), casesFor[i], sc);
+            }
+
+            Class<?> aClass = Class.forName(runnerName);
+            CNSTR = aClass.getConstructor(ForkedTestConfig.class);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     private Runner<?> o;
-    private ExecutorService pool;
 
     @Setup
     public void setup() throws Throwable {
-        Options opts = new Options(new String[]{"-v", "-iters", "1", "-time", "5000", "-deoptMode", "NONE"});
-        opts.parse();
-        PrintWriter pw = new PrintWriter(System.out, true);
-        ConsoleReportPrinter sink = new ConsoleReportPrinter(opts, pw, 1);
-
-        String testName = SampleTest.class.getCanonicalName();
-        String runnerName = SampleTest_jcstress.class.getCanonicalName();
-
-        TestInfo ti = new TestInfo(testName, testName, runnerName, "", 2, Arrays.asList("a1", "a2"), false);
-        TestConfig cfg = new TestConfig(opts, ti, 1, Collections.emptyList(), CompileMode.UNIFIED, new SchedulingClass(AffinityMode.NONE, 2, NodeType.PACKAGE));
-        int[] map = new int[2];
-        map[0] = -1;
-        map[1] = -1;
-        cfg.setCPUMap(new CPUMap(map, map, map, map, map, map, NodeType.PACKAGE));
-
-        pool = Executors.newCachedThreadPool();
-
-        Class<?> aClass = Class.forName(runnerName);
-        Constructor<?> cnstr = aClass.getConstructor(TestConfig.class, TestResultCollector.class, ExecutorService.class);
-        o = (Runner<?>) cnstr.newInstance(cfg, sink, pool);
-    }
-
-    @TearDown
-    public void tearDown() {
-        pool.shutdown();
+        o = (Runner<?>) CNSTR.newInstance(new ForkedTestConfig(CFGS[0]));
     }
 
     @Benchmark
     @BenchmarkMode(Mode.SingleShotTime)
-    public void testMethod() throws Throwable {
+    @Fork(1)
+    public void testMethod() {
         o.run();
+    }
+
+    public static void main(String... args) throws IOException, RunnerException {
+        for (TestConfig cfg : CFGS) {
+            File cdFile = null;
+            try {
+                cdFile = File.createTempFile("jcstress", "directives");
+
+                PrintWriter pw = new PrintWriter(cdFile);
+                cfg.generateDirectives(pw, new Verbosity(1));
+                pw.close();
+
+                org.openjdk.jmh.runner.options.Options opts = new OptionsBuilder()
+                        .include(SampleTestBench.class.getName())
+                        .jvmArgsPrepend("-XX:+UnlockDiagnosticVMOptions", "-XX:CompilerDirectivesFile=" + cdFile.getAbsolutePath())
+                        .addProfiler(LinuxPerfAsmProfiler.class, "hotThreshold=0.05")
+                        .build();
+
+                System.out.println();
+                System.out.println("--------------------------------------------------------------------------------------------------");
+                System.out.println(CompileMode.description(cfg.getCompileMode(), ACTOR_NAMES));
+                System.out.println();
+                cfg.generateDirectives(new PrintWriter(System.out, true), new Verbosity(1));
+                System.out.println();
+
+                new org.openjdk.jmh.runner.Runner(opts).runSingle();
+            } finally {
+                if (cdFile != null) {
+                    cdFile.delete();
+                }
+            }
+        }
     }
 
 }
