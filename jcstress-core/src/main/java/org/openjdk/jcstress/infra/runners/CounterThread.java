@@ -31,7 +31,13 @@ public abstract class CounterThread<R> extends AbstractThread {
     public Counter<R> result() {
         return result;
     }
+    private CounterThread() { // Cannot touch this
+        super("N/A");
+    }
 
+    protected CounterThread(String name) {
+        super(name);
+    }
     @Override
     public void run() {
         try {

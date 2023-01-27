@@ -98,6 +98,10 @@ public class ForkedMain {
     }
 
     private static class WarmupAffinityTask extends VoidThread {
+        public WarmupAffinityTask() {
+            super("Warmup Affinity");
+        }
+
         @Override
         protected void internalRun() {
             try {
@@ -109,6 +113,10 @@ public class ForkedMain {
     }
 
     private static class WarmupAllocProfileTask extends VoidThread {
+        public WarmupAllocProfileTask() {
+            super("Warmup Alloc Profile");
+        }
+
         @Override
         protected void internalRun() {
             try {
