@@ -45,7 +45,7 @@ public class $name$ {
 
     @Actor
     public void actor1() {
-        $type$[] a = new $type$[2 * 1024 * 1024];
+        $type$[] a = new $type$[131072];
         for (int c = 0; c < a.length; c++) a[c] = $setLiteral$;
         arr = a;
     }

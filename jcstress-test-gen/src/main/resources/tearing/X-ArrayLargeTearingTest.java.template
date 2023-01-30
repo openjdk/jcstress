@@ -39,8 +39,8 @@ import java.util.concurrent.*;
 @State
 public class $name$ {
 
-    $modifier$$type$[] arr =  new $type$[2 * 1024 * 1024];
-    int idx1 = ThreadLocalRandom.current().nextInt(2 * 1024 * 1024 - 1);
+    $modifier$$type$[] arr =  new $type$[131072];
+    int idx1 = ThreadLocalRandom.current().nextInt(131072 - 1);
     int idx2 = idx1 + 1;
 
     @Actor

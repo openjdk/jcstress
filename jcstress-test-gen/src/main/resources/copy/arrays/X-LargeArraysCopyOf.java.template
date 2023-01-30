@@ -34,22 +34,22 @@ import org.openjdk.jcstress.infra.results.*;
  * Tests if arrays experience coherence failures.
  */
 @JCStressTest
-@Outcome(id = "true, 2097152, 0", expect = Expect.ACCEPTABLE,  desc = "Seeing array with all elements set.")
+@Outcome(id = "true, 131072, 0", expect = Expect.ACCEPTABLE,  desc = "Seeing array with all elements set.")
 #if[safe]
-@Outcome(id = "true, 2097152, 1", expect = Expect.FORBIDDEN,   desc = "Seeing array, but some contents are default")
-@Outcome(id = "true, 2097152, 2", expect = Expect.FORBIDDEN,   desc = "Seeing array, but some contents are weird")
-@Outcome(id = "true, 2097152, 3", expect = Expect.FORBIDDEN,   desc = "Seeing array, but some contents are default/weird")
+@Outcome(id = "true, 131072, 1", expect = Expect.FORBIDDEN,   desc = "Seeing array, but some contents are default")
+@Outcome(id = "true, 131072, 2", expect = Expect.FORBIDDEN,   desc = "Seeing array, but some contents are weird")
+@Outcome(id = "true, 131072, 3", expect = Expect.FORBIDDEN,   desc = "Seeing array, but some contents are default/weird")
 #else[safe]
-@Outcome(id = "true, 2097152, 1", expect = Expect.ACCEPTABLE,  desc = "Seeing array, but some contents are default")
-@Outcome(id = "true, 2097152, 2", expect = Expect.ACCEPTABLE,  desc = "Seeing array, but some contents are weird")
-@Outcome(id = "true, 2097152, 3", expect = Expect.FORBIDDEN,   desc = "Seeing array, but some contents are default/weird")
+@Outcome(id = "true, 131072, 1", expect = Expect.ACCEPTABLE,  desc = "Seeing array, but some contents are default")
+@Outcome(id = "true, 131072, 2", expect = Expect.ACCEPTABLE,  desc = "Seeing array, but some contents are weird")
+@Outcome(id = "true, 131072, 3", expect = Expect.FORBIDDEN,   desc = "Seeing array, but some contents are default/weird")
 #end[safe]
 @State
 public class $name$ {
 
     static final $type$[] src;
     static {
-       src = new $type$[2 * 1024 * 1024];
+       src = new $type$[131072];
        for (int c = 0; c < src.length; c++) {
          src[c] = $setLiteral$;
        }
@@ -59,7 +59,7 @@ public class $name$ {
 
     @Actor
     public void actor1() {
-        copy = Arrays.copyOf(src, 2097152);
+        copy = Arrays.copyOf(src, 131072);
     }
 
     @Actor
@@ -79,7 +79,7 @@ public class $name$ {
           r.r3 = (hasDefaults ? 1 : 0) + (hasWeird ? 2 : 0);
         } else {
           r.r1 = true;
-          r.r2 = 2097152;
+          r.r2 = 131072;
           r.r3 = 0;
         }
     }

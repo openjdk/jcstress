@@ -38,7 +38,7 @@ public class $name$ {
 
     @Actor
     public void actor1() {
-        arr = new $type$[2 * 1024 * 1024];
+        arr = new $type$[131072];
     }
 
     @Actor
