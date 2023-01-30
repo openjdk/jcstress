@@ -31,7 +31,7 @@ import org.openjdk.jcstress.infra.results.*;
 
 @JCStressTest
 @Outcome(id = "0", expect = Expect.ACCEPTABLE, desc = "Haven't seen yet.")
-@Outcome(id = "2097152", expect = Expect.ACCEPTABLE, desc = "Seeing good length.")
+@Outcome(id = "131072", expect = Expect.ACCEPTABLE, desc = "Seeing good length.")
 @State
 public class $name$ {
 
@@ -39,7 +39,7 @@ public class $name$ {
 
     @Actor
     public void actor1() {
-        arr = new $type$[2 * 1024 * 1024];
+        arr = new $type$[131072];
     }
 
     @Actor
