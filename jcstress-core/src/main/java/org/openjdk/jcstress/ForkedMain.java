@@ -110,6 +110,11 @@ public class ForkedMain {
                 // Do not care
             }
         }
+
+        @Override
+        public void purge() {
+            // Do nothing
+        }
     }
 
     private static class WarmupAllocProfileTask extends VoidThread {
@@ -124,6 +129,11 @@ public class ForkedMain {
             } catch (Exception e) {
                 // Do not care
             }
+        }
+
+        @Override
+        public void purge() {
+            // Do nothing
         }
     }
 

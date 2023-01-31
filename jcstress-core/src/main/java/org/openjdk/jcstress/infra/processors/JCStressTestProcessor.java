@@ -348,12 +348,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("public final class " + className + " extends Runner<" + r + "> {");
         pw.println();
 
-        if (!isStateItself) {
-            pw.println("    " + t + " test;");
-        }
         pw.println("    volatile WorkerSync workerSync;");
-        pw.println("    " + s + "[] gs;");
-        pw.println("    " + r + "[] gr;");
         pw.println();
 
         pw.println("    public " + className + "(ForkedTestConfig config) {");
@@ -372,9 +367,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
             ExecutableElement el = info.getActors().get(a);
             String name = WORKER_PREFIX + "APICheck_" + el.getSimpleName();
             pw.println("    private static class " + name + " extends VoidThread {");
-            pw.println("        final " + t + " t;");
-            pw.println("        final " + s + " s;");
-            pw.println("        final " + r + " r;");
+            pw.println("        " + t + " t;");
+            pw.println("        " + s + " s;");
+            pw.println("        " + r + " r;");
             pw.println();
             pw.println("        public " + name + "(" + t + " t, " + s + " s, " + r + " r) {");
             pw.println("            super(\"" + name + "\");");
@@ -388,6 +383,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
             emitMethod(pw, el, (isStateItself ? "s." : "t.") + el.getSimpleName(), "s", "r", false);
             pw.println(";");
             pw.println("        };");
+            pw.println();
+            pw.println("        public void purge() {");
+            pw.println("            t = null;");
+            pw.println("            s = null;");
+            pw.println("            r = null;");
+            pw.println("        }");
             pw.println("    }");
             pw.println();
         }
@@ -409,11 +410,13 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("        a" + a + ".start();");
         }
 
+        // TODO: What if one thread throws, but we are waiting for the join on another?
         for (int a = 0; a < actorsCount; a++) {
             pw.println("        a" + a + ".join();");
             pw.println("        if (a" + a + ".throwable() != null) {");
             pw.println("            throw a" + a + ".throwable();");
             pw.println("        }");
+            pw.println("        a" + a + ".purge();");
         }
 
         if (info.getArbiter() != null) {
@@ -429,9 +432,9 @@ public class JCStressTestProcessor extends AbstractProcessor {
             ExecutableElement el = info.getActors().get(a);
             String name = WORKER_PREFIX + "ResourceCheck_" + el.getSimpleName();
             pw.println("    private class " + name + " extends LongThread {");
-            pw.println("        final " + s + "[] ss;");
-            pw.println("        final " + r + "[] rs;");
-            pw.println("        final int size;");
+            pw.println("        " + s + "[] ss;");
+            pw.println("        " + r + "[] rs;");
+            pw.println("        int size;");
             pw.println();
             pw.println("        public " + name + "(" + s + "[] ss, " + r + "[] rs, int size) {");
             pw.println("            super(\"" + name + "\");");
@@ -456,6 +459,11 @@ public class JCStressTestProcessor extends AbstractProcessor {
             emitMethod(pw, el, (isStateItself ? "ls[c]." : "t.") + el.getSimpleName(), "ls[c]", "lr[c]", false);
             pw.println(";");
             pw.println("            }");
+            pw.println("        }");
+            pw.println();
+            pw.println("        public void purge() {");
+            pw.println("            ss = null;");
+            pw.println("            rs = null;");
             pw.println("        }");
             pw.println("    }");
             pw.println();
@@ -494,6 +502,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("            try {");
             pw.println("                a" + a + ".join();");
             pw.println("                cnts[0] += a" + a + ".result();");
+            pw.println("                a" + a + ".purge();");
             pw.println("            } catch (InterruptedException e) {");
             pw.println("            }");
         }
@@ -520,14 +529,14 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    @Override");
         pw.println("    public ArrayList<CounterThread<" + r + ">> internalRun() {");
         if (!isStateItself) {
-            pw.println("        test = new " + t + "();");
+            pw.println("        " + t + " test = new " + t + "();");
         }
         pw.println("        int len = config.strideSize * config.strideCount;");
-        pw.println("        gs = new " + s + "[len];");
-        pw.println("        gr = new " + r + "[len];");
+        pw.println("        " + s + "[] ls = new " + s + "[len];");
+        pw.println("        " + r + "[] lr = new " + r + "[len];");
         pw.println("        for (int c = 0; c < len; c++) {");
-        pw.println("            gs[c] = new " + s + "();");
-        pw.println("            gr[c] = new " + r + "();");
+        pw.println("            ls[c] = new " + s + "();");
+        pw.println("            lr[c] = new " + r + "();");
         pw.println("        }");
         pw.println("        workerSync = new WorkerSync(false, " + actorsCount + ", config.spinLoopStyle);");
         pw.println();
@@ -548,7 +557,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("        ArrayList<CounterThread<" + r + ">> threads = new ArrayList<>(" + actorsCount + ");");
         for (ExecutableElement a : info.getActors()) {
             String name = WORKER_PREFIX + a.getSimpleName();
-            pw.println("        threads.add(new " + name + "());");
+            pw.println("        threads.add(new " + name + "(ls, lr, " + (isStateItself ? "null" : "test") + "));");
         }
         pw.println();
         pw.println("        for (CounterThread<" + r + "> t : threads) {");
@@ -623,8 +632,15 @@ public class JCStressTestProcessor extends AbstractProcessor {
         for (ExecutableElement a : info.getActors()) {
             String name = WORKER_PREFIX + a.getSimpleName();
             pw.println("    public class " + name + " extends CounterThread<" + r + "> {");
-            pw.println("        public " + name + "() {");
+            pw.println("        " + s + "[] ss;");
+            pw.println("        " + r + "[] rs;");
+            pw.println("        " + t + " test;");
+            pw.println();
+            pw.println("        public " + name + "(" + s + "[] ss, " + r + "[] rs, " + t + " test) {");
             pw.println("            super(\"" + name + "\");");
+            pw.println("            this.ss = ss;");
+            pw.println("            this.rs = rs;");
+            pw.println("            this.test = test;");
             pw.println("        }");
             pw.println();
             pw.println("        public Counter<" + r + "> internalRun() {");
@@ -632,8 +648,6 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("        }");
             pw.println();
             pw.println("        private Counter<" + r + "> " + ITERATION_LOOP_PREFIX + a.getSimpleName() + "() {");
-            pw.println("            " + s + "[] ls = gs;");
-            pw.println("            " + r + "[] lr = gr;");
             pw.println("            int len = config.strideSize * config.strideCount;");
             pw.println("            int stride = config.strideSize;");
             pw.println("            Counter<" + r + "> counter = new Counter<>();");
@@ -642,15 +656,15 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("                WorkerSync sync = workerSync;");
             pw.println("                int check = 0;");
             pw.println("                for (int start = 0; start < len; start += stride) {");
-            pw.println("                    " + STRIDE_LOOP_PREFIX + a.getSimpleName() + "(ls, lr, start, start + stride);");
+            pw.println("                    " + STRIDE_LOOP_PREFIX + a.getSimpleName() + "(start, start + stride);");
             pw.println("                    check += " + actorsCount + ";");
             pw.println("                    sync.awaitCheckpoint(check);");
             pw.println("                }");
             pw.println("                if (sync.stopping) {");
-            pw.println("                    " + CONSUME_NI_PREFIX + "final(counter, ls, lr, " + (isStateItself ? "null" : "test") + ", len, " + n + ");");
+            pw.println("                    " + CONSUME_NI_PREFIX + "final(counter, ss, rs, " + (isStateItself ? "null" : "test") + ", len, " + n + ");");
             pw.println("                    return counter;");
             pw.println("                } else {");
-            pw.println("                    " + CONSUME_PREFIX + "reinit(counter, ls, lr, " + (isStateItself ? "null" : "test") + ", len, " + n + ");");
+            pw.println("                    " + CONSUME_PREFIX + "reinit(counter, ss, rs, " + (isStateItself ? "null" : "test") + ", len, " + n + ");");
             pw.println("                }");
             pw.println("                if (sync.tryStartUpdate()) {");
             pw.println("                    workerSync = new WorkerSync(control.stopping, " + actorsCount + ", config.spinLoopStyle);");
@@ -659,12 +673,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println("            }");
             pw.println("        }");
             pw.println();
-            pw.println("        private void " + STRIDE_LOOP_PREFIX + a.getSimpleName() + "(" + s + "[] gs, " + r + "[] gr, int start, int end) {");
+            pw.println("        private void " + STRIDE_LOOP_PREFIX + a.getSimpleName() + "(int start, int end) {");
             if (!isStateItself) {
                 pw.println("            " + t + " lt = test;");
             }
-            pw.println("            " + s + "[] ls = gs;");
-            pw.println("            " + r + "[] lr = gr;");
+            pw.println("            " + s + "[] ls = ss;");
+            pw.println("            " + r + "[] lr = rs;");
             pw.println("            for (int c = start; c < end; c++) {");
 
             // Try to access both state and result fields early. This will help
@@ -694,6 +708,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
             }
 
             pw.println("            }");
+            pw.println("        }");
+            pw.println();
+            pw.println("        public void purge() {");
+            pw.println("            ss = null;");
+            pw.println("            rs = null;");
+            pw.println("            test = null;");
             pw.println("        }");
             pw.println("    }");
             pw.println();
