@@ -39,4 +39,6 @@ public abstract class AbstractThread extends Thread {
 
     public Throwable throwable() { return throwable; }
 
+    public abstract void purge();
+
 }

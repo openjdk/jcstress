@@ -98,13 +98,14 @@ public class ForkedTestConfig {
             // success!
             succCount = count;
 
-            // do not go over the the limit
+            // do not go over the limit
             if (succCount >= strideSize * strideCount) {
                 succCount = strideSize * strideCount;
                 break;
             }
 
-            count *= 2;
+            // slightly adjust for the next try
+            count = Math.max((int)(count * 1.5), count + 1);
         }
 
         strideSize = Math.min(succCount, strideSize);

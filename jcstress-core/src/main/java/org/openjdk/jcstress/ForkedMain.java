@@ -48,6 +48,13 @@ public class ForkedMain {
             throw new IllegalStateException("Expected three arguments");
         }
 
+        Thread.currentThread().setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread thread, Throwable throwable) {
+                System.out.println(throwable.getMessage());
+            }
+        });
+
         // Pre-initialize the allocation profiling support, so that infrastructure
         // code does not have to do this on critical path during the execution.
         new WarmupAllocProfileTask().start();
@@ -110,6 +117,11 @@ public class ForkedMain {
                 // Do not care
             }
         }
+
+        @Override
+        public void purge() {
+            // Do nothing
+        }
     }
 
     private static class WarmupAllocProfileTask extends VoidThread {
@@ -124,6 +136,11 @@ public class ForkedMain {
             } catch (Exception e) {
                 // Do not care
             }
+        }
+
+        @Override
+        public void purge() {
+            // Do nothing
         }
     }
 
