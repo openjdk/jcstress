@@ -431,7 +431,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
         for (int a = 0; a < actorsCount; a++) {
             ExecutableElement el = info.getActors().get(a);
             String name = WORKER_PREFIX + "ResourceCheck_" + el.getSimpleName();
-            pw.println("    private class " + name + " extends LongThread {");
+            pw.println("    private static class " + name + " extends LongThread {");
             pw.println("        " + s + "[] ss;");
             pw.println("        " + r + "[] rs;");
             pw.println("        int size;");
@@ -469,9 +469,14 @@ public class JCStressTestProcessor extends AbstractProcessor {
             pw.println();
         }
 
-        pw.println("    private void " + SANITY_CHECK_PREFIX + "Resource(Counter<" + r + "> counter) throws Throwable {");
-        pw.println("        config.adjustStrideCount(new FootprintEstimator() {");
-        pw.println("          public void runWith(int size, long[] cnts) {");
+        pw.println("    private static class TestResourceEstimator implements ResourceEstimator {");
+        pw.println("        final Counter<" + r + "> counter;");
+        pw.println();
+        pw.println("        public TestResourceEstimator(Counter<" + r + "> counter) {");
+        pw.println("            this.counter = counter;");
+        pw.println("        }");
+        pw.println();
+        pw.println("        public void runWith(int size, long[] cnts) {");
         pw.println("            long time1 = System.nanoTime();");
         pw.println("            long alloc1 = AllocProfileSupport.getAllocatedBytes();");
         pw.println("            " + s + "[] ls = new " + s + "[size];");
@@ -522,7 +527,12 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("            long alloc2 = AllocProfileSupport.getAllocatedBytes();");
         pw.println("            cnts[0] += alloc2 - alloc1;");
         pw.println("            cnts[1] += time2 - time1;");
-        pw.println("        }});");
+        pw.println("        }");
+        pw.println("    }");
+        pw.println();
+
+        pw.println("    private void " + SANITY_CHECK_PREFIX + "Resource(Counter<" + r + "> counter) throws Throwable {");
+        pw.println("        config.adjustStrideCount(new TestResourceEstimator(counter));");
         pw.println("    }");
         pw.println();
 
@@ -1049,7 +1059,7 @@ public class JCStressTestProcessor extends AbstractProcessor {
                 ForkedTestConfig.class, TestResult.class,
                 Runner.class, WorkerSync.class, Counter.class,
                 AffinitySupport.class, AllocProfileSupport.class,
-                FootprintEstimator.class,
+                ResourceEstimator.class,
                 VoidThread.class, LongThread.class, CounterThread.class
         };
 

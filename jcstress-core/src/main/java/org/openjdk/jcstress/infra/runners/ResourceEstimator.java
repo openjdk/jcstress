@@ -24,6 +24,6 @@
  */
 package org.openjdk.jcstress.infra.runners;
 
-public interface FootprintEstimator {
+public interface ResourceEstimator {
     void runWith(int size, long[] counters);
 }
