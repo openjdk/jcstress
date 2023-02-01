@@ -91,7 +91,7 @@ public class ForkedTestConfig {
         }
     }
 
-    public void adjustStrideCount(FootprintEstimator estimator) {
+    public void adjustStrideCount(ResourceEstimator estimator) {
         int count = 1;
         int succCount = count;
         while (tryWith(estimator, count)) {
@@ -104,36 +104,42 @@ public class ForkedTestConfig {
                 break;
             }
 
-            // slightly adjust for the next try
-            count = Math.max((int)(count * 1.5), count + 1);
+            // adjust for the next try
+            count *= 2;
         }
 
         strideSize = Math.min(succCount, strideSize);
         strideCount = succCount / strideSize;
     }
 
-    private boolean tryWith(FootprintEstimator estimator, int count) {
+    private boolean tryWith(ResourceEstimator estimator, int count) {
         try {
-            long[] cnts = new long[2];
-            estimator.runWith(count, cnts);
-            long footprint = cnts[0];
-            long usedTime = cnts[1];
+            final long footprintThresh = maxFootprintMB * 1024 * 1024;
+            final long timeThresh = TimeUnit.MILLISECONDS.toNanos(time);
 
-            if (footprint > maxFootprintMB * 1024 * 1024) {
-                // blown the footprint estimate
-                return false;
+            // Try several times, to be more reliable when the test does not
+            // run with the similar time/footprint at the same count.
+            final int tries = 5;
+
+            for (int t = 0; t < tries; t++) {
+                long[] cnts = new long[2];
+                estimator.runWith(count, cnts);
+                long footprint = cnts[0];
+                long usedTime = cnts[1];
+
+                if (footprint > footprintThresh) {
+                    return false;
+                }
+
+                if (usedTime > timeThresh) {
+                    return false;
+                }
             }
-
-            if (TimeUnit.NANOSECONDS.toMillis(usedTime) > time) {
-                // blown the time estimate
-                return false;
-            }
-
+            return true;
         } catch (OutOfMemoryError err) {
             // blown the heap size
             return false;
         }
-        return true;
     }
 
 }
