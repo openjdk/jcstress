@@ -52,7 +52,7 @@ acceptable/forbidden/special. Even though harness will print the debug output in
 console if no description is given.
 
 You should have Git and Maven installed to check out and build the tests.
-You will need JDK 11+ to compile all the tests. Most tests are runnable on JDK 8+
+You will need JDK 17+ to compile all the tests. Most tests are runnable on JDK 8+
 afterwards.
 
 The vast majority of jcstress tests are auto-generated. The custom/hand-written tests
@@ -115,7 +115,7 @@ Two usual options are:
 
 ## Reporting Harness and Test Bugs
 
-If you have the access to [JDK Bug System](https://bugs.openjdk.org/secure/Dashboard.jspa), please submit the bug there:
+If you have the access to [JDK Bug System](https://bugs.openjdk.org/), please submit the bug there:
  * Project: CODETOOLS
  * Component: tools
  * Sub-component: jcstress
