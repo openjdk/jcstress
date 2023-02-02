@@ -208,6 +208,7 @@ public class Options {
         this.forksStressMultiplier = 5;
         this.strideSize = 256;
         this.strideCount = 40;
+        this.pretouchHeap = true;
 
         mode = orDefault(modeStr.value(set), "default");
         if (this.mode.equalsIgnoreCase("sanity")) {
@@ -217,6 +218,7 @@ public class Options {
             this.forksStressMultiplier = 1;
             this.strideSize = 1;
             this.strideCount = 1;
+            this.pretouchHeap = false;
         } else if (this.mode.equalsIgnoreCase("quick")) {
             this.time = 200;
             this.forksStressMultiplier = 1;
@@ -243,6 +245,7 @@ public class Options {
         this.forksStressMultiplier = orDefault(set.valueOf(forksStressMultiplier), this.forksStressMultiplier);
         this.strideSize = orDefault(set.valueOf(strideSize), this.strideSize);
         this.strideCount = orDefault(set.valueOf(strideCount), this.strideCount);
+        this.pretouchHeap = orDefault(set.valueOf(optPretouchHeap), this.pretouchHeap);
 
         this.heapPerFork = orDefault(set.valueOf(heapPerFork), 256);
 
@@ -251,8 +254,6 @@ public class Options {
 
         this.splitCompilation = orDefault(set.valueOf(optSplitCompilation), true);
         this.affinityMode = orDefault(set.valueOf(optAffinityMode), AffinityMode.LOCAL);
-
-        this.pretouchHeap = orDefault(set.valueOf(optPretouchHeap), true);
 
         return true;
     }
