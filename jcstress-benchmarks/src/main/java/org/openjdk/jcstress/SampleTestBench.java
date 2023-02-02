@@ -126,7 +126,10 @@ public class SampleTestBench {
                 new org.openjdk.jmh.runner.Runner(opts).runSingle();
             } finally {
                 if (cdFile != null) {
-                    cdFile.delete();
+                    boolean succ = cdFile.delete();
+                    if (!succ) {
+                        System.out.println("WARNING: Cannot delete compiler directives file");
+                    }
                 }
             }
         }
