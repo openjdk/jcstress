@@ -127,6 +127,20 @@ public class VMSupport {
                 GLOBAL_JVM_FLAGS,
                 "-Xms" + heap + "M", "-Xmx" + heap + "M");
 
+        // After heap size is set, check if we can pre-touch it. This would allow
+        // tests to run in fully committed heap without experiencing the occasional
+        // memory stalls. This also provides better safety in face of OS OOM-killers.
+        // On large heaps, this might take a while, so users are allowed to disable
+        // pre-touch for better performance.
+
+        if (opts.isPretouchHeap()) {
+            detect("Enabling Java heap pre-touch",
+                    SimpleTestMain.class,
+                    GLOBAL_JVM_FLAGS,
+                    "-XX:+AlwaysPreTouch"
+            );
+        }
+
         // The tests are usually not GC heavy. The minimum amount of threads a jcstress
         // test uses is 2, so we can expect the CPU affinity machinery to allocate at
         // least 2 CPUs per fork. This gives us the upper bound for the number of GC threads: 2,
