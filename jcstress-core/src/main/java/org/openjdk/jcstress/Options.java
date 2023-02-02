@@ -66,6 +66,7 @@ public class Options {
     private List<String> jvmArgsPrepend;
     private boolean splitCompilation;
     private AffinityMode affinityMode;
+    private boolean pretouchHeap;
 
     public Options(String[] args) {
         this.args = args;
@@ -140,6 +141,9 @@ public class Options {
 
         OptionSpec<AffinityMode> optAffinityMode = parser.accepts("af", "Use the specific affinity mode, if available.")
                 .withOptionalArg().ofType(AffinityMode.class).describedAs("mode");
+
+        OptionSpec<Boolean> optPretouchHeap = parser.accepts("pth", "Pre-touch Java heap, if possible.")
+                .withOptionalArg().ofType(Boolean.class).describedAs("bool");
 
         parser.accepts("v", "Be verbose.");
         parser.accepts("vv", "Be extra verbose.");
@@ -247,6 +251,8 @@ public class Options {
 
         this.splitCompilation = orDefault(set.valueOf(optSplitCompilation), true);
         this.affinityMode = orDefault(set.valueOf(optAffinityMode), AffinityMode.LOCAL);
+
+        this.pretouchHeap = orDefault(set.valueOf(optPretouchHeap), true);
 
         return true;
     }
@@ -380,4 +386,9 @@ public class Options {
     public AffinityMode affinityMode() {
         return affinityMode;
     }
+
+    public boolean isPretouchHeap() {
+        return pretouchHeap;
+    }
+
 }
