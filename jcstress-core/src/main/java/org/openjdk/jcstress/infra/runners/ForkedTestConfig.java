@@ -114,7 +114,7 @@ public class ForkedTestConfig {
 
     private boolean tryWith(ResourceEstimator estimator, int count) {
         try {
-            final long footprintThresh = maxFootprintMB * 1024 * 1024;
+            final long footprintThresh = (long) maxFootprintMB * 1024 * 1024;
             final long timeThresh = TimeUnit.MILLISECONDS.toNanos(time);
 
             // Try several times, to be more reliable when the test does not
