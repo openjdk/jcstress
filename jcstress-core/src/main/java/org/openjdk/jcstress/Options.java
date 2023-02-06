@@ -376,8 +376,14 @@ public class Options {
     }
 
     public int getMaxFootprintMb() {
-        // Half of heap size.
-        return getHeapPerForkMb() / 2;
+        // The tests can copy the entirety of their state, which means
+        // we need at least twice the space in heap. The copied state
+        // may also fragment the heap, especially with potential humongous
+        // allocations, which can also take "twice" the space in the heap.
+        //
+        // Adding some slack for testing infra itself, we better allocate
+        // about a quarter of heap size.
+        return getHeapPerForkMb() / 4;
     }
 
     public boolean isSplitCompilation() {

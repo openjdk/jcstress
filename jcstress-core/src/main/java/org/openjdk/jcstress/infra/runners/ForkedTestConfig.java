@@ -105,7 +105,7 @@ public class ForkedTestConfig {
             }
 
             // adjust for the next try
-            count *= 2;
+            count = Math.max((int)(count*1.2), count+1);
         }
 
         strideSize = Math.min(succCount, strideSize);
