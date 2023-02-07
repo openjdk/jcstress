@@ -144,7 +144,7 @@ public class Chapter0aTestGenerator {
                 dest,
                 GeneratorUtils.readFromResource("/accessAtomic/X-ArrayAtomicityTest.java.template"),
                 "accessAtomic.arrays",
-                new String[]{ "", "volatile" }
+                new String[]{ "", "volatile", "sync" }
         );
 
         makeTests(
