@@ -35,20 +35,33 @@ import org.openjdk.jcstress.infra.results.*;
 @State
 public class $name$ {
 
-    $modifier$ Object arr;
+    $modifier$ $type$[] arr;
 
     @Actor
     public void actor1() {
+#if[sync]
+        synchronized (this) {
+#end[sync]
         arr = new $type$[4];
+#if[sync]
+        }
+#end[sync]
     }
 
     @Actor
     public void actor2(I_Result r) {
-        Object a = arr;
+        $type$[] a;
+#if[sync]
+        synchronized (this) {
+#end[sync]
+        a = arr;
+#if[sync]
+        }
+#end[sync]
         if (a == null) {
             r.r1 = 0;
         } else {
-            r.r1 = (($type$[])a).length;
+            r.r1 = a.length;
         }
     }
 

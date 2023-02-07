@@ -52,20 +52,50 @@ public class Chapter0eTestGenerator {
         makeTests(
                 dest,
                 GeneratorUtils.readFromResource("/acqrel/X-FieldAcqRelTest.java.template"),
-                "acqrel.fields"
+                "acqrel.fields",
+                new String[]{ "volatile", "sync" }
         );
     }
 
-    private static void makeTests(String dest, String template, String label) throws IOException {
-        String pack = PREFIX + "." + label + ".volatiles";
-        for (String typeV : TYPES_V) {
-            for (String typeG : TYPES_G) {
-                String name = testName(typeG, typeV);
-                String res = Spp.spp(template,
-                        keys("volatile", typeG, label),
-                        vars("volatile", typeG, typeV, pack, name));
+    private static String packageModifier(String modifier) {
+        switch (modifier) {
+            case "":
+                return "plain";
+            case "sync":
+                return "sync";
+            case "volatile":
+            case "final":
+                return modifier + "s";
+            default:
+                throw new IllegalArgumentException("Unknown modifier: " + modifier);
+        }
+    }
 
-                GeneratorUtils.writeOut(dest, pack, name, res);
+    private static String fieldModifier(String modifier) {
+        switch (modifier) {
+            case "":
+            case "sync":
+                return "";
+            case "volatile":
+            case "final":
+                return modifier + " ";
+            default:
+                throw new IllegalArgumentException("Unknown modifier: " + modifier);
+        }
+    }
+
+    private static void makeTests(String dest, String template, String label, String[] modifiers) throws IOException {
+        for (String modifier : modifiers) {
+            String pack = PREFIX + "." + label + "." + packageModifier(modifier);
+            for (String typeV : TYPES_V) {
+                for (String typeG : TYPES_G) {
+                    String name = testName(typeG, typeV);
+                    String res = Spp.spp(template,
+                            keys(modifier, typeG, label),
+                            vars(modifier, typeG, typeV, pack, name));
+
+                    GeneratorUtils.writeOut(dest, pack, name, res);
+                }
             }
         }
     }
@@ -89,7 +119,7 @@ public class Chapter0eTestGenerator {
         map.put("setV", Values.VALUES.get(typeV));
         map.put("setGLiteral", Values.VALUES_LITERAL.get(typeG));
         map.put("setVLiteral", Values.VALUES_LITERAL.get(typeV));
-        map.put("modifier", (modifier.equals("") ? "" : modifier + " "));
+        map.put("modifier", fieldModifier(modifier));
         map.put("package", pack);
         return map;
     }
