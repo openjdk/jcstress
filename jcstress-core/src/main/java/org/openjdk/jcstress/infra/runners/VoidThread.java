@@ -25,6 +25,15 @@
 package org.openjdk.jcstress.infra.runners;
 
 public abstract class VoidThread extends AbstractThread {
+
+    private VoidThread() { // Cannot touch this
+        super("N/A");
+    }
+
+    protected VoidThread(String name) {
+        super(name);
+    }
+
     @Override
     public void run() {
         try {

@@ -75,13 +75,13 @@ public class SchedulingClassInvariantsTest {
             for (int ca : scl.coreActors()) {
                 Assert.assertNotEquals("Core classes should be consecutive: " + scl, 0, ca);
             }
-            for (int pa : scl.packageActors()) {
+            for (int pa : scl.nodeActors()) {
                 Assert.assertNotEquals("Package classes should be consecutive: " + scl, 0, pa);
             }
 
             for (int a1 = 0; a1 < scl.numActors(); a1++) {
                 for (int a2 = 0; a2 < scl.numActors(); a2++) {
-                    if (scl.packages[a1] != scl.packages[a2]) {
+                    if (scl.nodes[a1] != scl.nodes[a2]) {
                         Assert.assertNotEquals("Different packages should yield different core classes: " + scl,
                                 scl.cores[a1], scl.cores[a2]);
                     }

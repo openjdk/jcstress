@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Red Hat Inc. All rights reserved.
+ * Copyright (c) 2023, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,48 +22,31 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package $package$;
+package org.openjdk.jcstress.os;
 
-import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.*;
+public enum NodeType {
 
-#warn
+    // Cores are grouped in NUMA nodes first, then in packages
+    NUMA,
 
-/**
- * Tests if fields initialization is visible via racy publication.
- */
-@JCStressTest
-@Outcome(id = "true", expect = Expect.ACCEPTABLE, desc = "Consistent class for object.")
-@State
-public class $name$ {
+    // Cores are grouped in packages first
+    PACKAGE;
 
-    $modifier$ Object arr;
-
-    @Actor
-    public void actor1() {
-#if[sync]
-        synchronized (this) {
-#end[sync]
-        arr = new $type$[4];
-#if[sync]
+    public String desc() {
+        switch (this) {
+            case NUMA: return "NUMA node";
+            case PACKAGE: return "package";
+            default:
+                throw new IllegalStateException("Unknown enum");
         }
-#end[sync]
     }
 
-    @Actor
-    public void actor2(Z_Result r) {
-        Object a;
-#if[sync]
-        synchronized (this) {
-#end[sync]
-        a = arr;
-#if[sync]
-        }
-#end[sync]
-        if (a == null) {
-            r.r1 = true;
-        } else {
-            r.r1 = (a.getClass() == $type$[].class);
+    public String shortDesc() {
+        switch (this) {
+            case NUMA: return "N";
+            case PACKAGE: return "P";
+            default:
+                throw new IllegalStateException("Unknown enum");
         }
     }
 

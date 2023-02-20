@@ -44,13 +44,29 @@ public class $name$ {
 
     @Actor
     public void actor1() {
+#if[sync]
+        synchronized (this) {
+#end[sync]
         x = $setLiteral$;
+#if[sync]
+        }
+#end[sync]
     }
 
     @Actor
     public void actor2($T$$T$_Result r) {
+#if[sync]
+        synchronized (this) {
+#end[sync]
         r.r1 = x;
+#if[sync]
+        }
+        synchronized (this) {
+#end[sync]
         r.r2 = x;
+#if[sync]
+        }
+#end[sync]
     }
 
 }

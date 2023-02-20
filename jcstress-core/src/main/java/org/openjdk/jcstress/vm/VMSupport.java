@@ -55,6 +55,8 @@ public class VMSupport {
     private static volatile boolean C2_AVAILABLE;
     private static volatile boolean COMPILERS_AVAILABLE;
 
+    private static volatile boolean BIASED_LOCKING_AVAILABLE;
+
     public static boolean spinWaitHintAvailable() {
         return THREAD_SPIN_WAIT_AVAILABLE;
     }
@@ -106,6 +108,12 @@ public class VMSupport {
 
         COMPILERS_AVAILABLE = C1_AVAILABLE || C2_AVAILABLE;
 
+        BIASED_LOCKING_AVAILABLE = detect("Checking for biased locking support",
+                SimpleTestMain.class,
+                null,
+                "-XX:+UseBiasedLocking"
+        );
+
         // Tests are supposed to run in a very tight memory constraints:
         // the test objects are small and reused where possible. The footprint
         // testing machinery would select appropriate stride sizes to fit the heap.
@@ -118,6 +126,20 @@ public class VMSupport {
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
                 "-Xms" + heap + "M", "-Xmx" + heap + "M");
+
+        // After heap size is set, check if we can pre-touch it. This would allow
+        // tests to run in fully committed heap without experiencing the occasional
+        // memory stalls. This also provides better safety in face of OS OOM-killers.
+        // On large heaps, this might take a while, so users are allowed to disable
+        // pre-touch for better performance.
+
+        if (opts.isPretouchHeap()) {
+            detect("Enabling Java heap pre-touch",
+                    SimpleTestMain.class,
+                    GLOBAL_JVM_FLAGS,
+                    "-XX:+AlwaysPreTouch"
+            );
+        }
 
         // The tests are usually not GC heavy. The minimum amount of threads a jcstress
         // test uses is 2, so we can expect the CPU affinity machinery to allocate at
@@ -260,6 +282,17 @@ public class VMSupport {
         }
     }
 
+    private static Config prependArgs(Config orig, String... args) {
+        return prependArgs(orig, Arrays.asList(args));
+    }
+
+    private static Config prependArgs(Config orig, List<String> args) {
+        List<String> l = new ArrayList<>();
+        l.addAll(args);
+        l.addAll(orig.origArgs());
+        return new Config(l, orig.onlyIfC2(), orig.stress());
+    }
+
     public static void detectAvailableVMConfigs(boolean splitCompilation, List<String> jvmArgs, List<String> jvmArgsPrepend) {
         System.out.println("Probing what VM configurations are available:");
         System.out.println(" (failures are non-fatal, but may miss some interesting cases)");
@@ -291,6 +324,16 @@ public class VMSupport {
             }
         }
 
+        // Mix in locking arguments, if available
+        if (BIASED_LOCKING_AVAILABLE) {
+            LinkedHashSet<Config> newConfigs = new LinkedHashSet<>();
+            for (Config c : configs) {
+                newConfigs.add(prependArgs(c, "-XX:+UseBiasedLocking"));
+                newConfigs.add(prependArgs(c, "-XX:-UseBiasedLocking"));
+            }
+            configs = newConfigs;
+        }
+
         // Mix in input arguments, if available, skipping the debug options
         List<String> mxArgs;
         try {
@@ -305,22 +348,16 @@ public class VMSupport {
                 .collect(Collectors.toList());
 
         if (!inputArgs.isEmpty()) {
-            configs = configs.stream().map(c -> {
-                List<String> l = new ArrayList<>();
-                l.addAll(inputArgs);
-                l.addAll(c.origArgs());
-                return new Config(l, c.onlyIfC2(), c.stress());
-            }).collect(Collectors.toCollection(LinkedHashSet::new));
+            configs = configs.stream()
+                    .map(c -> prependArgs(c, inputArgs))
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
         }
 
         // Mix in prepends, if available
         if (jvmArgsPrepend != null) {
-            configs = configs.stream().map(c -> {
-                List<String> l = new ArrayList<>();
-                l.addAll(jvmArgsPrepend);
-                l.addAll(c.origArgs());
-                return new Config(l, c.onlyIfC2(), c.stress());
-            }).collect(Collectors.toCollection(LinkedHashSet::new));
+            configs = configs.stream()
+                    .map(c -> prependArgs(c, jvmArgsPrepend))
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
         }
 
         System.out.println();

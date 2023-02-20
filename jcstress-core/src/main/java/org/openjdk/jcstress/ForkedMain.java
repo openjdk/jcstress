@@ -98,6 +98,10 @@ public class ForkedMain {
     }
 
     private static class WarmupAffinityTask extends VoidThread {
+        public WarmupAffinityTask() {
+            super("Warmup Affinity");
+        }
+
         @Override
         protected void internalRun() {
             try {
@@ -106,9 +110,18 @@ public class ForkedMain {
                 // Do not care
             }
         }
+
+        @Override
+        public void purge() {
+            // Do nothing
+        }
     }
 
     private static class WarmupAllocProfileTask extends VoidThread {
+        public WarmupAllocProfileTask() {
+            super("Warmup Alloc Profile");
+        }
+
         @Override
         protected void internalRun() {
             try {
@@ -116,6 +129,11 @@ public class ForkedMain {
             } catch (Exception e) {
                 // Do not care
             }
+        }
+
+        @Override
+        public void purge() {
+            // Do nothing
         }
     }
 

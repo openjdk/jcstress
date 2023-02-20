@@ -26,11 +26,11 @@ package org.openjdk.jcstress.os.topology;
 
 public class PresetRegularTopology extends AbstractTopology {
 
-    public PresetRegularTopology(int packagesPerSystem, int coresPerPackage, int threadsPerCore) throws TopologyParseException {
+    public PresetRegularTopology(int nodesPerSystem, int coresPerNode, int threadsPerCore) throws TopologyParseException {
         for (int t = 0; t < threadsPerCore; t++) {
-            for (int p = 0; p < packagesPerSystem; p++) {
-                for (int c = 0; c < coresPerPackage; c++) {
-                    add(p, c + p*coresPerPackage, t*coresPerPackage*packagesPerSystem + c + p*coresPerPackage);
+            for (int p = 0; p < nodesPerSystem; p++) {
+                for (int c = 0; c < coresPerNode; c++) {
+                    add(p, c + p*coresPerNode, t*coresPerNode*nodesPerSystem + c + p*coresPerNode);
                 }
             }
         }

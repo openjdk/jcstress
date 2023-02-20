@@ -37,7 +37,7 @@ public class Scheduler {
     private final Topology topology;
     private final BitSet availableCores;
     private int currentUse;
-    private final PackageRecord[] freeMapPackage;
+    private final NodeRecord[] freeMapNode;
 
     public Scheduler(Topology t, int max) {
         topology = t;
@@ -46,9 +46,9 @@ public class Scheduler {
         availableCPUs.set(0, topology.totalThreads());
         availableCores = new BitSet(topology.totalCores());
         availableCores.set(0, topology.totalCores());
-        freeMapPackage = new PackageRecord[topology.packagesPerSystem()];
-        for (int p = 0; p < freeMapPackage.length; p++) {
-            freeMapPackage[p] = new PackageRecord(-1, -1);
+        freeMapNode = new NodeRecord[topology.nodesPerSystem()];
+        for (int p = 0; p < freeMapNode.length; p++) {
+            freeMapNode[p] = new NodeRecord(-1, -1);
         }
         recomputeFreeMaps();
     }
@@ -86,26 +86,26 @@ public class Scheduler {
     }
 
     private CPUMap scheduleLocal(SchedulingClass scl) {
-        // Perform initial assignment of package groups to packages.
-        // Take the least busy packages first, to guarantee the rest of
-        // the scheduling code sees as much cores on those packages as possible.
+        // Perform initial assignment of node groups to nodes.
+        // Take the least busy nodes first, to guarantee the rest of
+        // the scheduling code sees as many cores on those nodes as possible.
 
-        int[] packageGroupToPackage = new int[scl.numPackages()];
-        Arrays.fill(packageGroupToPackage, -1);
+        int[] nodeGroupToNode = new int[scl.numNodes()];
+        Arrays.fill(nodeGroupToNode, -1);
 
         int pIdx = 0;
-        int[] coreGroupToPackage = new int[scl.numCores()];
+        int[] coreGroupToNode = new int[scl.numCores()];
         for (int a = 0; a < scl.numActors(); a++) {
-            int packageGroup = scl.packages[a];
-            if (packageGroup == -1) {
+            int nodeGroup = scl.nodes[a];
+            if (nodeGroup == -1) {
                 throw new IllegalStateException("Bad actor map");
             }
-            int p = packageGroupToPackage[packageGroup];
+            int p = nodeGroupToNode[nodeGroup];
             if (p == -1) {
-                p = freeMapPackage[pIdx++].id;
-                packageGroupToPackage[packageGroup] = p;
+                p = freeMapNode[pIdx++].id;
+                nodeGroupToNode[nodeGroup] = p;
             }
-            coreGroupToPackage[scl.cores[a]] = p;
+            coreGroupToNode[scl.cores[a]] = p;
         }
 
         // Need to find enough cores and record them as allocated
@@ -113,8 +113,8 @@ public class Scheduler {
         Arrays.fill(coreGroupToCore, -1);
 
         for (int coreGroup = 0; coreGroup < scl.numCores(); coreGroup++) {
-            // Find next core in the required package
-            int wantPackage = coreGroupToPackage[coreGroup];
+            // Find next core in the required node
+            int wantNode = coreGroupToNode[coreGroup];
 
             int idx = 0;
             boolean found = false;
@@ -122,7 +122,7 @@ public class Scheduler {
                 int core = availableCores.nextSetBit(idx);
                 if (core < 0) break;
 
-                if (topology.coreToPackage(core) == wantPackage) {
+                if (topology.coreToNode(core) == wantNode) {
                     coreGroupToCore[coreGroup] = core;
                     availableCores.set(core, false);
                     found = true;
@@ -144,8 +144,8 @@ public class Scheduler {
         }
 
         // Roll over actors and fill their core assignments
-        int[] actorMap = new int[scl.numActors()];
-        Arrays.fill(actorMap, -1);
+        int[] actorToThread = new int[scl.numActors()];
+        Arrays.fill(actorToThread, -1);
 
         for (int aIdx = 0; aIdx < scl.numActors(); aIdx++) {
             int core = coreGroupToCore[scl.cores[aIdx]];
@@ -153,7 +153,7 @@ public class Scheduler {
             for (int thread : topology.coreThreads(core)) {
                 if (availableCPUs.get(thread)) {
                     availableCPUs.set(thread, false);
-                    actorMap[aIdx] = thread;
+                    actorToThread[aIdx] = thread;
                     currentUse++;
                     break;
                 }
@@ -173,31 +173,40 @@ public class Scheduler {
             }
         }
 
-        for (int a : actorMap) {
+        for (int a : actorToThread) {
             if (a == -1) {
                 throw new IllegalStateException("Scheduler error: allocation must have succeeded for " + scl +
-                        ", was: " + Arrays.toString(actorMap));
+                        ", was: " + Arrays.toString(actorToThread));
             }
         }
 
-        int[] systemMap = Arrays.copyOf(system, systemCnt);
+        int[] systemThreads = Arrays.copyOf(system, systemCnt);
 
-        int[] coreMap = new int[topology.totalThreads()];
-        int[] packageMap = new int[topology.totalThreads()];
-        for (int thread : actorMap) {
-            packageMap[thread] = topology.threadToPackage(thread);
-            coreMap[thread] = topology.threadToCore(thread);
+        int[] threadToCore = new int[topology.totalThreads()];
+        int[] threadToNode = new int[topology.totalThreads()];
+        int[] threadToRealCPU = new int[topology.totalThreads()];
+        Arrays.fill(threadToCore, -1);
+        Arrays.fill(threadToNode, -1);
+        Arrays.fill(threadToRealCPU, -1);
+
+        for (int thread : actorToThread) {
+            threadToNode[thread] = topology.threadToNode(thread);
+            threadToCore[thread] = topology.threadToCore(thread);
+            threadToRealCPU[thread] = topology.threadToRealCPU(thread);
         }
-        for (int thread : systemMap) {
-            packageMap[thread] = topology.threadToPackage(thread);
-            coreMap[thread] = topology.threadToCore(thread);
+        for (int thread : systemThreads) {
+            threadToNode[thread] = topology.threadToNode(thread);
+            threadToCore[thread] = topology.threadToCore(thread);
+            threadToRealCPU[thread] = topology.threadToRealCPU(thread);
         }
 
-        int[] allocatedMap = new int[actorMap.length + systemMap.length];
-        System.arraycopy(actorMap, 0, allocatedMap, 0, actorMap.length);
-        System.arraycopy(systemMap, 0, allocatedMap, actorMap.length, systemMap.length);
+        int[] allocatedThreads = new int[actorToThread.length + systemThreads.length];
+        System.arraycopy(actorToThread, 0, allocatedThreads, 0, actorToThread.length);
+        System.arraycopy(systemThreads, 0, allocatedThreads, actorToThread.length, systemThreads.length);
 
-        return new CPUMap(allocatedMap, actorMap, systemMap, packageMap, coreMap);
+        return new CPUMap(allocatedThreads, actorToThread, systemThreads,
+                threadToNode, threadToCore, threadToRealCPU,
+                topology.nodeType());
     }
 
     private CPUMap scheduleGlobalOrNone(SchedulingClass scl, boolean none) {
@@ -225,7 +234,7 @@ public class Scheduler {
         }
 
         // Take all affected cores as assignment
-        int[] allocatedMap = new int[topology.totalThreads()];
+        int[] allocatedThreads = new int[topology.totalThreads()];
         int cnt = 0;
 
         for (int core : actorToCore) {
@@ -234,34 +243,39 @@ public class Scheduler {
                     throw new IllegalStateException("Thread should be free");
                 }
                 availableCPUs.set(thread, false);
-                allocatedMap[cnt++] = thread;
+                allocatedThreads[cnt++] = thread;
                 currentUse++;
             }
         }
 
-        int[] actorMap = new int[scl.numActors()];
-        Arrays.fill(actorMap, -1);
+        int[] actorThreads = new int[scl.numActors()];
+        Arrays.fill(actorThreads, -1);
 
-        allocatedMap = Arrays.copyOf(allocatedMap, cnt);
-        int[] systemMap;
+        allocatedThreads = Arrays.copyOf(allocatedThreads, cnt);
+        int[] systemThreads;
         if (none) {
             // No assignments for system
-            systemMap = new int[0];
+            systemThreads = new int[0];
         } else {
             // All assignments go to system
-            systemMap = Arrays.copyOf(allocatedMap, cnt);
+            systemThreads = Arrays.copyOf(allocatedThreads, cnt);
         }
 
-        int[] coreMap = new int[topology.totalThreads()];
-        int[] packageMap = new int[topology.totalThreads()];
-        Arrays.fill(coreMap, -1);
-        Arrays.fill(packageMap, -1);
-        for (int thread : allocatedMap) {
-            packageMap[thread] = topology.threadToPackage(thread);
-            coreMap[thread] = topology.threadToCore(thread);
+        int[] threadToCore = new int[topology.totalThreads()];
+        int[] threadToNode = new int[topology.totalThreads()];
+        int[] threadToRealCPU = new int[topology.totalThreads()];
+        Arrays.fill(threadToCore, -1);
+        Arrays.fill(threadToNode, -1);
+        Arrays.fill(threadToRealCPU, -1);
+        for (int thread : allocatedThreads) {
+            threadToNode[thread] = topology.threadToNode(thread);
+            threadToCore[thread] = topology.threadToCore(thread);
+            threadToRealCPU[thread] = topology.threadToRealCPU(thread);
         }
 
-        return new CPUMap(allocatedMap, actorMap, systemMap, packageMap, coreMap);
+        return new CPUMap(allocatedThreads, actorThreads, systemThreads,
+                threadToNode, threadToCore, threadToRealCPU,
+                topology.nodeType());
     }
 
     private void checkInvariants(String when) {
@@ -292,16 +306,16 @@ public class Scheduler {
             throw new IllegalStateException(when + ": CPU use counts are inconsistent, counter = " + expected + ", actually taken = " + use);
         }
 
-        for (int p = 0; p < topology.packagesPerSystem(); p++) {
+        for (int n = 0; n < topology.nodesPerSystem(); n++) {
             int avail = 0;
-            for (int core : topology.packageCores(p)) {
+            for (int core : topology.nodeCores(n)) {
                 if (availableCores.get(core)) {
                     avail++;
                 }
             }
-            for (PackageRecord pr : freeMapPackage) {
-                if (pr.id == p && pr.avail != avail) {
-                    throw new IllegalStateException(when + ": Package-core availability counts are inconsistent");
+            for (NodeRecord pr : freeMapNode) {
+                if (pr.id == n && pr.avail != avail) {
+                    throw new IllegalStateException(when + ": Node-core availability counts are inconsistent");
                 }
             }
         }
@@ -310,7 +324,7 @@ public class Scheduler {
     public synchronized void release(CPUMap cpuMap) {
         checkInvariants("Before release");
 
-        for (int c : cpuMap.allocatedMap()) {
+        for (int c : cpuMap.allocatedThreads()) {
             availableCPUs.set(c, true);
             availableCores.set(topology.threadToCore(c), true);
             currentUse--;
@@ -322,35 +336,35 @@ public class Scheduler {
     }
 
     private void recomputeFreeMaps() {
-        for (int p = 0; p < topology.packagesPerSystem(); p++) {
+        for (int n = 0; n < topology.nodesPerSystem(); n++) {
             int avail = 0;
-            for (int core : topology.packageCores(p)) {
+            for (int core : topology.nodeCores(n)) {
                 if (availableCores.get(core)) {
                     avail++;
                 }
             }
-            freeMapPackage[p].id = p;
-            freeMapPackage[p].avail = avail;
+            freeMapNode[n].id = n;
+            freeMapNode[n].avail = avail;
         }
 
-        Arrays.sort(freeMapPackage);
+        Arrays.sort(freeMapNode);
     }
 
     public int getCpus() {
         return currentUse;
     }
 
-    private static class PackageRecord implements Comparable<PackageRecord> {
+    private static class NodeRecord implements Comparable<NodeRecord> {
         int id;
         int avail;
 
-        private PackageRecord(int id, int avail) {
+        private NodeRecord(int id, int avail) {
             this.id = id;
             this.avail = avail;
         }
 
         @Override
-        public int compareTo(PackageRecord other) {
+        public int compareTo(NodeRecord other) {
             int compare = Integer.compare(other.avail, avail);
             if (compare != 0) {
                 return compare;
@@ -364,45 +378,45 @@ public class Scheduler {
     }
 
     public List<SchedulingClass> localAffinityFor(int actors, int threadLimit) {
-        List<SchedulingClass> packageCases = new ArrayList<>();
+        List<SchedulingClass> nodeCases = new ArrayList<>();
 
-        // Assign package groups
-        int[][] packagePerms = classPermutation(actors, topology.packagesPerSystem());
-        for (int[] pp : packagePerms) {
-            SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, actors);
+        // Assign node groups
+        int[][] nodePerms = classPermutation(actors, topology.nodesPerSystem());
+        for (int[] pp : nodePerms) {
+            SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, actors, topology.nodeType());
             for (int a = 0; a < actors; a++) {
-                scl.setPackage(a, pp[a]);
+                scl.setNode(a, pp[a]);
             }
-            packageCases.add(scl);
+            nodeCases.add(scl);
         }
 
         // Assign core groups
         List<SchedulingClass> coreCases = new ArrayList<>();
-        for (SchedulingClass scl : packageCases) {
-            int numPackages = scl.numPackages();
-            int[] packageActors = scl.packageActors();
+        for (SchedulingClass scl : nodeCases) {
+            int numNodes = scl.numNodes();
+            int[] nodeActors = scl.nodeActors();
 
-            int[][][] packageCoreAssignments = new int[numPackages][][];
-            for (int p = 0; p < numPackages; p++) {
-                int[][] perms = classPermutation(packageActors[p], topology.coresPerPackage());
-                packageCoreAssignments[p] = perms;
+            int[][][] nodeCoreAssignments = new int[numNodes][][];
+            for (int p = 0; p < numNodes; p++) {
+                int[][] perms = classPermutation(nodeActors[p], topology.coresPerNode());
+                nodeCoreAssignments[p] = perms;
             }
 
             List<SchedulingClass> temp = new ArrayList<>();
             temp.add(scl);
 
-            for (int p = 0; p < numPackages; p++) {
+            for (int p = 0; p < numNodes; p++) {
                 List<SchedulingClass> newCases = new ArrayList<>();
                 for (SchedulingClass tscl : temp) {
-                    // Compute last assigned core class for other packages
+                    // Compute last assigned core class for other nodes
                     int coreShift = tscl.numCores();
                     if (coreShift < 0) coreShift = 0;
 
-                    for (int[] coreClasses : packageCoreAssignments[p]) {
+                    for (int[] coreClasses : nodeCoreAssignments[p]) {
                         SchedulingClass nscl = new SchedulingClass(tscl);
                         int ccIdx = 0;
                         for (int i = 0; i < actors; i++) {
-                            if (scl.getPackage(i) == p) {
+                            if (scl.getNode(i) == p) {
                                 int coreClass = coreClasses[ccIdx++] + coreShift;
                                 nscl.setCore(i, coreClass);
                             }
@@ -512,9 +526,9 @@ public class Scheduler {
         if (threads > threadLimit) {
             return Collections.emptyList();
         }
-        SchedulingClass scl = new SchedulingClass(mode, threads);
+        SchedulingClass scl = new SchedulingClass(mode, threads, topology.nodeType());
         for (int t = 0; t < threads; t++) {
-            scl.setPackage(t, -1);
+            scl.setNode(t, -1);
             scl.setCore(t, -1);
         }
         return Collections.singletonList(scl);

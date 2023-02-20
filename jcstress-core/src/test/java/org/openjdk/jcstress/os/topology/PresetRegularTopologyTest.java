@@ -35,13 +35,13 @@ import java.util.List;
 @RunWith(Parameterized.class)
 public class PresetRegularTopologyTest extends AbstractTopologyTest {
 
-    @Parameterized.Parameters(name = "p={0} c={1} t={2}")
+    @Parameterized.Parameters(name = "n={0} c={1} t={2}")
     public static Iterable<Object[]> data() {
         List<Object[]> r = new ArrayList<>();
-        for (int p = 1; p <= 4; p++) {
+        for (int n = 1; n <= 4; n++) {
             for (int c = 1; c <= 64; c++) {
                 for (int t = 1; t <= 8; t++) {
-                    r.add(new Object[] { p, c, t });
+                    r.add(new Object[] { n, c, t });
                 }
             }
         }
@@ -49,7 +49,7 @@ public class PresetRegularTopologyTest extends AbstractTopologyTest {
     }
 
     @Parameterized.Parameter(0)
-    public int p;
+    public int n;
 
     @Parameterized.Parameter(1)
     public int c;
@@ -59,10 +59,10 @@ public class PresetRegularTopologyTest extends AbstractTopologyTest {
 
     @Test
     public void test() throws TopologyParseException {
-        Topology topo = new PresetRegularTopology(p, c, t);
+        Topology topo = new PresetRegularTopology(n, c, t);
 
-        Assert.assertEquals(p, topo.packagesPerSystem());
-        Assert.assertEquals(c, topo.coresPerPackage());
+        Assert.assertEquals(n, topo.nodesPerSystem());
+        Assert.assertEquals(c, topo.coresPerNode());
         Assert.assertEquals(t, topo.threadsPerCore());
 
         for (int t = 0; t < topo.totalThreads(); t++) {
@@ -70,7 +70,7 @@ public class PresetRegularTopologyTest extends AbstractTopologyTest {
         }
 
         for (int c = 0; c < topo.totalCores(); c++) {
-            Assert.assertEquals(c / topo.coresPerPackage(), topo.coreToPackage(c));
+            Assert.assertEquals(c / topo.coresPerNode(), topo.coreToNode(c));
         }
 
         checkGenericInvariants(topo);

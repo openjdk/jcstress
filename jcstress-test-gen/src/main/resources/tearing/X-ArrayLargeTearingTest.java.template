@@ -39,18 +39,30 @@ import java.util.concurrent.*;
 @State
 public class $name$ {
 
-    $modifier$$type$[] arr =  new $type$[2 * 1024 * 1024];
-    int idx1 = ThreadLocalRandom.current().nextInt(2 * 1024 * 1024 - 1);
+    $modifier$$type$[] arr =  new $type$[131072];
+    int idx1 = ThreadLocalRandom.current().nextInt(131072 - 1);
     int idx2 = idx1 + 1;
 
     @Actor
     public void actor1() {
+#if[sync]
+        synchronized (this) {
+#end[sync]
         arr[idx1] = $setLiteral$;
+#if[sync]
+        }
+#end[sync]
     }
 
     @Actor
     public void actor2() {
+#if[sync]
+        synchronized (this) {
+#end[sync]
         arr[idx2] = $setLiteral$;
+#if[sync]
+        }
+#end[sync]
     }
 
     @Arbiter

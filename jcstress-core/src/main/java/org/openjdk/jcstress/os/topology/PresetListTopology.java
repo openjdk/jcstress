@@ -26,11 +26,12 @@ package org.openjdk.jcstress.os.topology;
 
 public class PresetListTopology extends AbstractTopology {
 
-    public void add(int packageId, int coreId, int threadId) throws TopologyParseException {
-        super.add(packageId, coreId, threadId);
+    public void add(int nodeId, int coreId, int threadId) throws TopologyParseException {
+        super.add(nodeId, coreId, threadId);
     }
 
     public void finish() throws TopologyParseException {
+        renumberAll();
         super.finish();
     }
 

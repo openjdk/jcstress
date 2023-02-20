@@ -66,6 +66,7 @@ public class Options {
     private List<String> jvmArgsPrepend;
     private boolean splitCompilation;
     private AffinityMode affinityMode;
+    private boolean pretouchHeap;
 
     public Options(String[] args) {
         this.args = args;
@@ -141,6 +142,9 @@ public class Options {
         OptionSpec<AffinityMode> optAffinityMode = parser.accepts("af", "Use the specific affinity mode, if available.")
                 .withOptionalArg().ofType(AffinityMode.class).describedAs("mode");
 
+        OptionSpec<Boolean> optPretouchHeap = parser.accepts("pth", "Pre-touch Java heap, if possible.")
+                .withOptionalArg().ofType(Boolean.class).describedAs("bool");
+
         parser.accepts("v", "Be verbose.");
         parser.accepts("vv", "Be extra verbose.");
         parser.accepts("vvv", "Be extra extra verbose.");
@@ -204,6 +208,7 @@ public class Options {
         this.forksStressMultiplier = 5;
         this.strideSize = 256;
         this.strideCount = 40;
+        this.pretouchHeap = true;
 
         mode = orDefault(modeStr.value(set), "default");
         if (this.mode.equalsIgnoreCase("sanity")) {
@@ -213,6 +218,7 @@ public class Options {
             this.forksStressMultiplier = 1;
             this.strideSize = 1;
             this.strideCount = 1;
+            this.pretouchHeap = false;
         } else if (this.mode.equalsIgnoreCase("quick")) {
             this.time = 200;
             this.forksStressMultiplier = 1;
@@ -239,6 +245,7 @@ public class Options {
         this.forksStressMultiplier = orDefault(set.valueOf(forksStressMultiplier), this.forksStressMultiplier);
         this.strideSize = orDefault(set.valueOf(strideSize), this.strideSize);
         this.strideCount = orDefault(set.valueOf(strideCount), this.strideCount);
+        this.pretouchHeap = orDefault(set.valueOf(optPretouchHeap), this.pretouchHeap);
 
         this.heapPerFork = orDefault(set.valueOf(heapPerFork), 256);
 
@@ -369,8 +376,14 @@ public class Options {
     }
 
     public int getMaxFootprintMb() {
-        // Half of heap size.
-        return getHeapPerForkMb() / 2;
+        // The tests can copy the entirety of their state, which means
+        // we need at least twice the space in heap. The copied state
+        // may also fragment the heap, especially with potential humongous
+        // allocations, which can also take "twice" the space in the heap.
+        //
+        // Adding some slack for testing infra itself, we better allocate
+        // about a quarter of heap size.
+        return getHeapPerForkMb() / 4;
     }
 
     public boolean isSplitCompilation() {
@@ -380,4 +393,9 @@ public class Options {
     public AffinityMode affinityMode() {
         return affinityMode;
     }
+
+    public boolean isPretouchHeap() {
+        return pretouchHeap;
+    }
+
 }

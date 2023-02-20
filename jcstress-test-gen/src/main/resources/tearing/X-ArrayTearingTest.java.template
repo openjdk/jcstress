@@ -42,12 +42,24 @@ public class $name$ {
 
     @Actor
     public void actor1() {
+#if[sync]
+        synchronized (this) {
+#end[sync]
         arr[0] = $setLiteral$;
+#if[sync]
+        }
+#end[sync]
     }
 
     @Actor
     public void actor2() {
+#if[sync]
+        synchronized (this) {
+#end[sync]
         arr[1] = $setLiteral$;
+#if[sync]
+        }
+#end[sync]
     }
 
     @Arbiter

@@ -56,13 +56,13 @@ public class AbstractSchedulerAffinityTest {
 
             takenMaps.offer(cpuMap);
 
-            Assert.assertEquals(scl.numActors(), cpuMap.actorMap().length);
-            for (int c : cpuMap.actorMap()) {
+            Assert.assertEquals(scl.numActors(), cpuMap.actorThreads().length);
+            for (int c : cpuMap.actorThreads()) {
                 Assert.assertEquals(-1, c);
             }
-            Assert.assertNotEquals(0, cpuMap.systemMap().length);
+            Assert.assertNotEquals(0, cpuMap.systemThreads().length);
             Assert.assertNotEquals("", cpuMap.globalAffinityMap());
-            Assert.assertNotEquals(0, cpuMap.allocatedMap().length);
+            Assert.assertNotEquals(0, cpuMap.allocatedThreads().length);
         }
     }
 
@@ -89,16 +89,16 @@ public class AbstractSchedulerAffinityTest {
             }
 
             takenMaps.offer(cpuMap);
-            int[] actorMap = cpuMap.actorMap();
+            int[] actorMap = cpuMap.actorThreads();
 
             for (int a1 = 0; a1 < scl.numActors(); a1++) {
                 for (int a2 = 0; a2 < scl.numActors(); a2++) {
-                    if (scl.packages[a1] == scl.packages[a2]) {
+                    if (scl.nodes[a1] == scl.nodes[a2]) {
                         Assert.assertEquals("Should be scheduled at the same package",
-                                topo.threadToPackage(actorMap[a1]), topo.threadToPackage(actorMap[a2]));
+                                topo.threadToNode(actorMap[a1]), topo.threadToNode(actorMap[a2]));
                     } else {
                         Assert.assertNotEquals("Should be scheduled at the different packages",
-                                topo.threadToPackage(actorMap[a1]), topo.threadToPackage(actorMap[a2]));
+                                topo.threadToNode(actorMap[a1]), topo.threadToNode(actorMap[a2]));
                     }
                     if (scl.cores[a1] == scl.cores[a2]) {
                         Assert.assertEquals("Should be scheduled at the same core: " + scl,
@@ -137,13 +137,13 @@ public class AbstractSchedulerAffinityTest {
             }
 
             takenMaps.offer(cpuMap);
-            Assert.assertEquals(scl.numActors(), cpuMap.actorMap().length);
-            for (int c : cpuMap.actorMap()) {
+            Assert.assertEquals(scl.numActors(), cpuMap.actorThreads().length);
+            for (int c : cpuMap.actorThreads()) {
                 Assert.assertEquals(-1, c);
             }
-            Assert.assertEquals(0, cpuMap.systemMap().length);
+            Assert.assertEquals(0, cpuMap.systemThreads().length);
             Assert.assertEquals("", cpuMap.globalAffinityMap());
-            Assert.assertNotEquals(0, cpuMap.allocatedMap().length);
+            Assert.assertNotEquals(0, cpuMap.allocatedThreads().length);
         }
     }
 

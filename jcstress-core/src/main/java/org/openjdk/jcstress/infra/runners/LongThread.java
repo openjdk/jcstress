@@ -25,11 +25,19 @@
 package org.openjdk.jcstress.infra.runners;
 
 public abstract class LongThread extends AbstractThread {
+
+    private LongThread() { // Cannot touch this
+        super("N/A");
+    }
+
+    protected LongThread(String name) {
+        super(name);
+    }
+
     private long result;
     public long result() {
         return result;
     }
-
     @Override
     public void run() {
         try {
