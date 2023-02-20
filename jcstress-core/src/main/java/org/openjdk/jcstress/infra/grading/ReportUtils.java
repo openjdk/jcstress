@@ -238,6 +238,10 @@ public class ReportUtils {
             return true;
         }
 
+        if (data.contains("Option UseBiasedLocking was deprecated")) {
+            return true;
+        }
+
         return false;
     }
 

@@ -51,8 +51,8 @@ You are encouraged to provide the thorough explanation why particular test outco
 acceptable/forbidden/special. Even though harness will print the debug output into the
 console if no description is given.
 
-You should have Mercurial and Maven installed to check out and build the tests.
-You will need JDK 11+ to compile all the tests. Most tests are runnable on JDK 8+
+You should have Git and Maven installed to check out and build the tests.
+You will need JDK 17+ to compile all the tests. Most tests are runnable on JDK 8+
 afterwards.
 
 The vast majority of jcstress tests are auto-generated. The custom/hand-written tests
@@ -90,7 +90,7 @@ Then you can build and use it:
 
 The tests are arranged so that a few threads are executing the test concurrently, sometimes
 rendezvous'ing over the shared state. There are multiple state objects generated per each run.
-Threads then either mutate observe that state object. Test harness is collecting statistics on
+Threads then either mutate or observe that state object. Test harness is collecting statistics on
 the observed states. In many cases this is enough to catch the reorderings or contract violations
 for concurrent code.
 
@@ -115,19 +115,17 @@ Two usual options are:
 
 ## Reporting Harness and Test Bugs
 
-If you have the access to [JDK Bug System](https://bugs.openjdk.java.net/), please submit the bug there:
+If you have the access to [JDK Bug System](https://bugs.openjdk.org/), please submit the bug there:
  * Project: CODETOOLS
  * Component: tools
  * Sub-component: jcstress
 
-If you don't have the access to JDK Bug System, submit the bug report at "Issues" here, and wait for maintainers to pick that up.
-
 ## Development
 
 jcstress project accepts pull requests, like other OpenJDK projects.
-If you have never contributed to OpenJDK before, then bots would require you to [sign OCA first](http://openjdk.java.net/contribute).
+If you have never contributed to OpenJDK before, then bots would require you to [sign OCA first](https://openjdk.org/contribute/).
 Normally, you don't need to post patches anywhere else, or post to mailing lists, etc.
-If you do want to have a wider discussion about jcstress, please refer to [jcstress-dev](https://mail.openjdk.java.net/mailman/listinfo/jcstress-dev).
+If you do want to have a wider discussion about jcstress, please refer to [jcstress-dev](https://mail.openjdk.org/mailman/listinfo/jcstress-dev).
 
 Compile and run internal tests:
 

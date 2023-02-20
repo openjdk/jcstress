@@ -53,7 +53,8 @@ public class LinuxSysfsTopologyTest extends AbstractTopologyTest {
 
     /*
        Saved sysfs snapshots are created on target systems with:
-         $ find /sys/devices/system/cpu/ -type f -path *topology* -printf "%P: " -exec cat {} \;
+         $ find /sys/devices/system/ -type f -path *topology* -printf "%P: " -exec cat {} \;
+         $ find /sys/devices/system/ -type f -name cpulist -path *node*  -printf "%P: " -exec cat {} \;
      */
 
     @Test
@@ -61,14 +62,14 @@ public class LinuxSysfsTopologyTest extends AbstractTopologyTest {
         FileSystem fs = parse("/topology/sysfs-1.txt");
         LinuxSysfsTopology topo = new LinuxSysfsTopology(fs.getPath(""));
 
-        Assert.assertEquals(1,  topo.packagesPerSystem());
-        Assert.assertEquals(32, topo.coresPerPackage());
+        Assert.assertEquals(1,  topo.nodesPerSystem());
+        Assert.assertEquals(32, topo.coresPerNode());
         Assert.assertEquals(2,  topo.threadsPerCore());
         Assert.assertEquals(32, topo.totalCores());
         Assert.assertEquals(64, topo.totalThreads());
 
         for (int t = 0; t < topo.totalThreads(); t++) {
-            Assert.assertEquals(0, topo.threadToPackage(t));
+            Assert.assertEquals(0, topo.threadToNode(t));
             Assert.assertEquals(t % 32, topo.threadToCore(t));
         }
 
@@ -80,14 +81,14 @@ public class LinuxSysfsTopologyTest extends AbstractTopologyTest {
         FileSystem fs = parse("/topology/sysfs-2.txt");
         LinuxSysfsTopology topo = new LinuxSysfsTopology(fs.getPath(""));
 
-        Assert.assertEquals(1, topo.packagesPerSystem());
-        Assert.assertEquals(4, topo.coresPerPackage());
+        Assert.assertEquals(1, topo.nodesPerSystem());
+        Assert.assertEquals(4, topo.coresPerNode());
         Assert.assertEquals(1, topo.threadsPerCore());
         Assert.assertEquals(4, topo.totalCores());
         Assert.assertEquals(4, topo.totalThreads());
 
         for (int t = 0; t < topo.totalThreads(); t++) {
-            Assert.assertEquals(0, topo.threadToPackage(t));
+            Assert.assertEquals(0, topo.threadToNode(t));
             Assert.assertEquals(t, topo.threadToCore(t));
         }
 
@@ -99,14 +100,14 @@ public class LinuxSysfsTopologyTest extends AbstractTopologyTest {
         FileSystem fs = parse("/topology/sysfs-3.txt");
         LinuxSysfsTopology topo = new LinuxSysfsTopology(fs.getPath(""));
 
-        Assert.assertEquals(2,  topo.packagesPerSystem());
-        Assert.assertEquals(5,  topo.coresPerPackage());
+        Assert.assertEquals(2,  topo.nodesPerSystem());
+        Assert.assertEquals(5,  topo.coresPerNode());
         Assert.assertEquals(8,  topo.threadsPerCore());
         Assert.assertEquals(10, topo.totalCores());
         Assert.assertEquals(80, topo.totalThreads());
 
         for (int t = 0; t < topo.totalThreads(); t++) {
-            Assert.assertEquals(t / 40, topo.threadToPackage(t));
+            Assert.assertEquals(t / 40, topo.threadToNode(t));
             Assert.assertEquals(t / 8, topo.threadToCore(t));
         }
 
@@ -118,14 +119,14 @@ public class LinuxSysfsTopologyTest extends AbstractTopologyTest {
         FileSystem fs = parse("/topology/sysfs-4.txt");
         LinuxSysfsTopology topo = new LinuxSysfsTopology(fs.getPath(""));
 
-        Assert.assertEquals(10, topo.packagesPerSystem());
-        Assert.assertEquals(1,  topo.coresPerPackage());
+        Assert.assertEquals(10, topo.nodesPerSystem());
+        Assert.assertEquals(1,  topo.coresPerNode());
         Assert.assertEquals(8,  topo.threadsPerCore());
         Assert.assertEquals(10, topo.totalCores());
         Assert.assertEquals(80, topo.totalThreads());
 
         for (int t = 0; t < topo.totalThreads(); t++) {
-            Assert.assertEquals(t / 8, topo.threadToPackage(t));
+            Assert.assertEquals(t / 8, topo.threadToNode(t));
             Assert.assertEquals(t / 8, topo.threadToCore(t));
         }
 
@@ -137,14 +138,14 @@ public class LinuxSysfsTopologyTest extends AbstractTopologyTest {
         FileSystem fs = parse("/topology/sysfs-5.txt");
         LinuxSysfsTopology topo = new LinuxSysfsTopology(fs.getPath(""));
 
-        Assert.assertEquals(1,  topo.packagesPerSystem());
-        Assert.assertEquals(64, topo.coresPerPackage());
+        Assert.assertEquals(1,  topo.nodesPerSystem());
+        Assert.assertEquals(64, topo.coresPerNode());
         Assert.assertEquals(1,  topo.threadsPerCore());
         Assert.assertEquals(64, topo.totalCores());
         Assert.assertEquals(64, topo.totalThreads());
 
         for (int t = 0; t < topo.totalThreads(); t++) {
-            Assert.assertEquals(0, topo.threadToPackage(t));
+            Assert.assertEquals(0, topo.threadToNode(t));
             Assert.assertEquals(t, topo.threadToCore(t));
         }
 
@@ -156,14 +157,14 @@ public class LinuxSysfsTopologyTest extends AbstractTopologyTest {
         FileSystem fs = parse("/topology/sysfs-6.txt");
         LinuxSysfsTopology topo = new LinuxSysfsTopology(fs.getPath(""));
 
-        Assert.assertEquals(2,  topo.packagesPerSystem());
-        Assert.assertEquals(1, topo.coresPerPackage());
+        Assert.assertEquals(2,  topo.nodesPerSystem());
+        Assert.assertEquals(1, topo.coresPerNode());
         Assert.assertEquals(1,  topo.threadsPerCore());
         Assert.assertEquals(2, topo.totalCores());
         Assert.assertEquals(2, topo.totalThreads());
 
         for (int t = 0; t < topo.totalThreads(); t++) {
-            Assert.assertEquals(t, topo.threadToPackage(t));
+            Assert.assertEquals(t, topo.threadToNode(t));
             Assert.assertEquals(t, topo.threadToCore(t));
         }
 
@@ -175,15 +176,53 @@ public class LinuxSysfsTopologyTest extends AbstractTopologyTest {
         FileSystem fs = parse("/topology/sysfs-7.txt");
         LinuxSysfsTopology topo = new LinuxSysfsTopology(fs.getPath(""));
 
-        Assert.assertEquals(2, topo.packagesPerSystem());
-        Assert.assertEquals(4, topo.coresPerPackage());
+        Assert.assertEquals(2, topo.nodesPerSystem());
+        Assert.assertEquals(4, topo.coresPerNode());
         Assert.assertEquals(1, topo.threadsPerCore());
         Assert.assertEquals(8, topo.totalCores());
         Assert.assertEquals(8, topo.totalThreads());
 
         for (int t = 0; t < topo.totalThreads(); t++) {
-            Assert.assertEquals(t % 2, topo.threadToPackage(t));
+            Assert.assertEquals(t % 2, topo.threadToNode(t));
             Assert.assertEquals((t % 2) * 4 + (t / 2), topo.threadToCore(t));
+        }
+
+        checkGenericInvariants(topo);
+    }
+
+    @Test
+    public void test_Saved_8() throws TopologyParseException, IOException {
+        FileSystem fs = parse("/topology/sysfs-8.txt");
+        LinuxSysfsTopology topo = new LinuxSysfsTopology(fs.getPath(""));
+
+        Assert.assertEquals(4, topo.nodesPerSystem());
+        Assert.assertEquals(6, topo.coresPerNode());
+        Assert.assertEquals(2, topo.threadsPerCore());
+        Assert.assertEquals(24, topo.totalCores());
+        Assert.assertEquals(48, topo.totalThreads());
+
+        for (int t = 0; t < topo.totalThreads(); t++) {
+            Assert.assertEquals(t / 12, topo.threadToNode(t));
+            Assert.assertEquals(t / 2, topo.threadToCore(t));
+        }
+
+        checkGenericInvariants(topo);
+    }
+
+    @Test
+    public void test_Saved_9() throws TopologyParseException, IOException {
+        FileSystem fs = parse("/topology/sysfs-9.txt");
+        LinuxSysfsTopology topo = new LinuxSysfsTopology(fs.getPath(""));
+
+        Assert.assertEquals(4,  topo.nodesPerSystem());
+        Assert.assertEquals(8,  topo.coresPerNode());
+        Assert.assertEquals(2,  topo.threadsPerCore());
+        Assert.assertEquals(32, topo.totalCores());
+        Assert.assertEquals(64, topo.totalThreads());
+
+        for (int t = 0; t < topo.totalThreads(); t++) {
+            Assert.assertEquals(t % 32 / 8, topo.threadToNode(t));
+            Assert.assertEquals(t % 32, topo.threadToCore(t));
         }
 
         checkGenericInvariants(topo);

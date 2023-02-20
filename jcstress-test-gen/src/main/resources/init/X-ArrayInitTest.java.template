@@ -45,14 +45,27 @@ public class $name$ {
 
     @Actor
     public void actor1() {
+#if[sync]
+        synchronized (this) {
+#end[sync]
         $type$[] a = new $type$[4];
         a[0] = a[1] = a[2] = a[3] = $setLiteral$;
         arr = a;
+#if[sync]
+        }
+#end[sync]
     }
 
     @Actor
     public void actor2(I_Result r) {
-        $type$[] a = arr;
+        $type$[] a;
+#if[sync]
+        synchronized (this) {
+#end[sync]
+        a = arr;
+#if[sync]
+        }
+#end[sync]
         if (a == null) {
             r.r1 = -1;
         } else {

@@ -35,15 +35,15 @@ public class SchedulerTest {
         Topology t = new PresetRegularTopology(2, 4, 4);
         Scheduler s = new Scheduler(t, t.totalThreads());
 
-        SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, 2);
-        scl.setPackage(0, 0);
-        scl.setPackage(1, 0);
+        SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, 2, NodeType.PACKAGE);
+        scl.setNode(0, 0);
+        scl.setNode(1, 0);
         scl.setCore(0, 0);
         scl.setCore(1, 1);
 
         CPUMap cpuMap = s.tryAcquire(scl);
         Assert.assertNotNull("Should be scheduled", cpuMap);
-        int[] schedule = cpuMap.actorMap();
+        int[] schedule = cpuMap.actorThreads();
 
         Assert.assertTrue("Should be scheduled at the different cores",
                 t.threadToCore(schedule[0]) != t.threadToCore(schedule[1]));
@@ -54,15 +54,15 @@ public class SchedulerTest {
         Topology t = new PresetRegularTopology(2, 4, 4);
         Scheduler s = new Scheduler(t, t.totalThreads());
 
-        SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, 2);
-        scl.setPackage(0, 0);
-        scl.setPackage(1, 0);
+        SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, 2, NodeType.PACKAGE);
+        scl.setNode(0, 0);
+        scl.setNode(1, 0);
         scl.setCore(0, 0);
         scl.setCore(1, 0);
 
         CPUMap cpuMap = s.tryAcquire(scl);
         Assert.assertNotNull("Should be scheduled", cpuMap);
-        int[] schedule = cpuMap.actorMap();
+        int[] schedule = cpuMap.actorThreads();
 
         Assert.assertTrue("Should be scheduled at the same core",
                 t.threadToCore(schedule[0]) == t.threadToCore(schedule[1]));
@@ -73,18 +73,18 @@ public class SchedulerTest {
         Topology t = new PresetRegularTopology(2, 4, 4);
         Scheduler s = new Scheduler(t, t.totalThreads());
 
-        SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, 2);
-        scl.setPackage(0, 0);
-        scl.setPackage(1, 1);
+        SchedulingClass scl = new SchedulingClass(AffinityMode.LOCAL, 2, NodeType.PACKAGE);
+        scl.setNode(0, 0);
+        scl.setNode(1, 1);
         scl.setCore(0, 0);
         scl.setCore(1, 1);
 
         CPUMap cpuMap = s.tryAcquire(scl);
         Assert.assertNotNull("Should be scheduled", cpuMap);
-        int[] schedule = cpuMap.actorMap();
+        int[] schedule = cpuMap.actorThreads();
 
         Assert.assertTrue("Should be scheduled at the different packages",
-                t.threadToPackage(schedule[0]) != t.threadToPackage(schedule[1]));
+                t.threadToNode(schedule[0]) != t.threadToNode(schedule[1]));
         Assert.assertTrue("Should be scheduled at the different cores",
                 t.threadToCore(schedule[0]) != t.threadToCore(schedule[1]));
     }

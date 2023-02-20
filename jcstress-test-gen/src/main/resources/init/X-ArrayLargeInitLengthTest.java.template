@@ -31,24 +31,37 @@ import org.openjdk.jcstress.infra.results.*;
 
 @JCStressTest
 @Outcome(id = "0", expect = Expect.ACCEPTABLE, desc = "Haven't seen yet.")
-@Outcome(id = "2097152", expect = Expect.ACCEPTABLE, desc = "Seeing good length.")
+@Outcome(id = "131072", expect = Expect.ACCEPTABLE, desc = "Seeing good length.")
 @State
 public class $name$ {
 
-    $modifier$ Object arr;
+    $modifier$ $type$[] arr;
 
     @Actor
     public void actor1() {
-        arr = new $type$[2 * 1024 * 1024];
+#if[sync]
+        synchronized (this) {
+#end[sync]
+        arr = new $type$[131072];
+#if[sync]
+        }
+#end[sync]
     }
 
     @Actor
     public void actor2(I_Result r) {
-        Object a = arr;
+        $type$[] a;
+#if[sync]
+        synchronized (this) {
+#end[sync]
+        a = arr;
+#if[sync]
+        }
+#end[sync]
         if (a == null) {
             r.r1 = 0;
         } else {
-            r.r1 = (($type$[])a).length;
+            r.r1 = a.length;
         }
     }
 

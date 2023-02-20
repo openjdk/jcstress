@@ -24,37 +24,40 @@
  */
 package org.openjdk.jcstress.os.topology;
 
+import org.openjdk.jcstress.os.NodeType;
 import org.openjdk.jcstress.util.Multimap;
-import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.util.TreesetMultimap;
 
 import java.io.PrintStream;
 import java.util.*;
+import java.util.function.Function;
 
 public abstract class AbstractTopology implements Topology {
 
-    private SortedSet<Integer> packages = new TreeSet<>();
-    private SortedSet<Integer> cores    = new TreeSet<>();
-    private SortedSet<Integer> threads  = new TreeSet<>();
+    private SortedSet<Integer> nodes   = new TreeSet<>();
+    private SortedSet<Integer> cores   = new TreeSet<>();
+    private SortedSet<Integer> threads = new TreeSet<>();
 
-    private SortedMap<Integer, Integer> threadToPackage = new TreeMap<>();
-    private SortedMap<Integer, Integer> threadToCore    = new TreeMap<>();
-    private SortedMap<Integer, Integer> coreToPackage   = new TreeMap<>();
+    private SortedMap<Integer, Integer> threadToNode = new TreeMap<>();
+    private SortedMap<Integer, Integer> threadToCore = new TreeMap<>();
+    private SortedMap<Integer, Integer> coreToNode   = new TreeMap<>();
 
-    private Multimap<Integer, Integer>  coreToThread    = new TreesetMultimap<>();
-    private Multimap<Integer, Integer>  packageToCore   = new TreesetMultimap<>();
+    private Multimap<Integer, Integer> coreToThread = new TreesetMultimap<>();
+    private Multimap<Integer, Integer> nodeToCore   = new TreesetMultimap<>();
 
-    private int packagesPerSystem = -1;
-    private int coresPerPackage = -1;
+    private SortedMap<Integer, Integer> threadToRealCPU = new TreeMap<>();
+
+    private int nodesPerSystem = -1;
+    private int coresPerNode = -1;
     private int threadsPerCore = -1;
 
     private boolean finished;
 
-    protected void add(int packageId, int coreId, int threadId) throws TopologyParseException {
-        String triplet = "P" + packageId + ", C" + coreId + ", T" + threadId;
+    protected void add(int nodeId, int coreId, int threadId) throws TopologyParseException {
+        String triplet = "N" + nodeId + ", C" + coreId + ", T" + threadId;
 
-        if (packageId == -1) {
-            throw new TopologyParseException("Package is not initialized: " + triplet);
+        if (nodeId == -1) {
+            throw new TopologyParseException("Node is not initialized: " + triplet);
         }
 
         if (coreId == -1) {
@@ -65,29 +68,30 @@ public abstract class AbstractTopology implements Topology {
             throw new TopologyParseException("Thread is not initialized: " + triplet);
         }
 
-        packages.add(packageId);
+        nodes.add(nodeId);
         cores.add(coreId);
+        threadToRealCPU.put(threadId, threadId);
 
         if (!threads.add(threadId)) {
             throw new TopologyParseException("Duplicate thread ID: " + triplet);
         }
 
-        if (coreToPackage.containsKey(coreId)) {
-            Integer ex = coreToPackage.get(coreId);
-            if (!ex.equals(packageId)) {
-                throw new TopologyParseException("Core belongs to different packages: " + triplet + ", " + ex);
+        if (coreToNode.containsKey(coreId)) {
+            Integer ex = coreToNode.get(coreId);
+            if (!ex.equals(nodeId)) {
+                throw new TopologyParseException("Core belongs to different nodes: " + triplet + ", " + ex);
             }
         } else {
-            coreToPackage.put(coreId, packageId);
+            coreToNode.put(coreId, nodeId);
         }
 
-        if (threadToPackage.containsKey(threadId)) {
-            Integer ex = threadToPackage.get(threadId);
-            if (!ex.equals(packageId)) {
-                throw new TopologyParseException("Thread belongs to different packages: " + triplet + ", " + ex);
+        if (threadToNode.containsKey(threadId)) {
+            Integer ex = threadToNode.get(threadId);
+            if (!ex.equals(nodeId)) {
+                throw new TopologyParseException("Thread belongs to different nodes: " + triplet + ", " + ex);
             }
         } else {
-            threadToPackage.put(threadId, packageId);
+            threadToNode.put(threadId, nodeId);
         }
 
         if (threadToCore.containsKey(threadId)) {
@@ -99,102 +103,104 @@ public abstract class AbstractTopology implements Topology {
             threadToCore.put(threadId, coreId);
         }
 
-        packageToCore.put(packageId, coreId);
+        nodeToCore.put(nodeId, coreId);
         coreToThread.put(coreId, threadId);
     }
 
-    protected void renumberCores() {
-        checkNotFinished();
-
-        Map<Integer, Integer> renumberCores = new HashMap<>();
-        SortedSet<Integer> nCores = new TreeSet<>();
-        {
-            int ncId = 0;
-            for (int ocId : cores) {
-                if (!renumberCores.containsKey(ocId)) {
-                    renumberCores.put(ocId, ncId++);
-                }
-                nCores.add(renumberCores.get(ocId));
+    protected <K, V> Multimap<K, V> remapKeys(Multimap<K, V> src, Map<K, K> remap) {
+        TreesetMultimap<K, V> dst = new TreesetMultimap<>();
+        for (K k : src.keys()) {
+            K nk = remap.get(k);
+            for (V v : src.get(k)) {
+                dst.put(nk, v);
             }
         }
-
-        Multimap<Integer, Integer> nCoreToThread = new TreesetMultimap<>();
-        for (int ocId : cores) {
-            int ncId = renumberCores.get(ocId);
-            for (int thread : coreToThread.get(ocId)) {
-                nCoreToThread.put(ncId, thread);
-            }
-        }
-
-        SortedMap<Integer, Integer> nThreadToCore = new TreeMap<>();
-        for (int thread : threadToCore.keySet()) {
-            nThreadToCore.put(thread, renumberCores.get(threadToCore.get(thread)));
-        }
-
-        SortedMap<Integer, Integer> nCoreToPackage = new TreeMap<>();
-        for (int ocId : coreToPackage.keySet()) {
-            nCoreToPackage.put(renumberCores.get(ocId), coreToPackage.get(ocId));
-        }
-
-        Multimap<Integer, Integer> nPackageToCore = new TreesetMultimap<>();
-        for (int p : packageToCore.keys()) {
-            for (int ocId : packageToCore.get(p)) {
-                int ncId = renumberCores.get(ocId);
-                nPackageToCore.put(p, ncId);
-            }
-        }
-
-        cores = nCores;
-        coreToThread = nCoreToThread;
-        coreToPackage = nCoreToPackage;
-        threadToCore = nThreadToCore;
-        packageToCore = nPackageToCore;
+        return dst;
     }
 
-    protected void renumberPackages() {
+    protected <K, V> Multimap<K, V> remapValues(Multimap<K, V> src, Map<V, V> remap) {
+        TreesetMultimap<K, V> dst = new TreesetMultimap<>();
+        for (K k : src.keys()) {
+            for (V v : src.get(k)) {
+                dst.put(k, remap.get(v));
+            }
+        }
+        return dst;
+    }
+
+    protected <K, V> SortedMap<K, V> remapValues(SortedMap<K, V> src, Map<V, V> remap) {
+        SortedMap<K, V> dst = new TreeMap<>();
+        for (K k : src.keySet()) {
+            dst.put(k, remap.get(src.get(k)));
+        }
+        return dst;
+    }
+
+    protected <K, V> SortedMap<K, V> remapKeys(SortedMap<K, V> src, Map<K, K> remap) {
+        SortedMap<K, V> dst = new TreeMap<>();
+        for (K k : src.keySet()) {
+            dst.put(remap.get(k), src.get(k));
+        }
+        return dst;
+    }
+
+    protected <K> Map<K, K> renumber(Set<K> src, Function<Integer, K> gen) {
+        Map<K, K> dst = new HashMap<>();
+        int nid = 0;
+        for (K k : src) {
+            dst.put(k, gen.apply(nid++));
+        }
+        return dst;
+    }
+
+    protected void renumberAll() {
+        renumberNodes();
+        renumberCores();
+        renumberThreads();
+    }
+
+    private void renumberCores() {
         checkNotFinished();
 
-        Map<Integer, Integer> renumberPackages = new HashMap<>();
-        SortedSet<Integer> nPackages = new TreeSet<>();
-        {
-            int npId = 0;
-            for (int opId : packages) {
-                if (!renumberPackages.containsKey(opId)) {
-                    renumberPackages.put(opId, npId++);
-                }
-                nPackages.add(renumberPackages.get(opId));
-            }
+        Map<Integer, Integer> renumber = renumber(cores, x -> x);
+
+        cores = new TreeSet<>(renumber.values());
+        coreToThread  = remapKeys(coreToThread, renumber);
+        coreToNode = remapKeys(coreToNode, renumber);
+        threadToCore  = remapValues(threadToCore, renumber);
+        nodeToCore = remapValues(nodeToCore, renumber);
+    }
+
+    private void renumberThreads() {
+        checkNotFinished();
+
+        Map<Integer, Integer> renumber = renumber(threads, x -> x);
+        for (Integer ot : threads) {
+            threadToRealCPU.put(renumber.get(ot), ot);
         }
 
-        Multimap<Integer, Integer> nPackageToCore = new TreesetMultimap<>();
-        for (int opId : packages) {
-            int npId = renumberPackages.get(opId);
-            for (int core : packageToCore.get(opId)) {
-                nPackageToCore.put(npId, core);
-            }
-        }
+        threads = new TreeSet<>(renumber.values());
+        coreToThread = remapValues(coreToThread, renumber);
+        threadToCore = remapKeys(threadToCore, renumber);
+        threadToNode = remapKeys(threadToNode, renumber);
+    }
 
-        SortedMap<Integer, Integer> nThreadToPackage = new TreeMap<>();
-        for (int thread : threadToPackage.keySet()) {
-            nThreadToPackage.put(thread, renumberPackages.get(threadToPackage.get(thread)));
-        }
+    private void renumberNodes() {
+        checkNotFinished();
 
-        SortedMap<Integer, Integer> nCoreToPackage = new TreeMap<>();
-        for (int core : coreToPackage.keySet()) {
-            nCoreToPackage.put(core, renumberPackages.get(coreToPackage.get(core)));
-        }
+        Map<Integer, Integer> renumber = renumber(nodes, x -> x);
 
-        packages = nPackages;
-        threadToPackage = nThreadToPackage;
-        coreToPackage = nCoreToPackage;
-        packageToCore = nPackageToCore;
+        nodes = new TreeSet<>(renumber.values());
+        threadToNode = remapValues(threadToNode, renumber);
+        coreToNode = remapValues(coreToNode, renumber);
+        nodeToCore = remapKeys(nodeToCore, renumber);
     }
 
     protected void finish() throws TopologyParseException {
         checkNotFinished();
 
-        if (packages.first() != 0 || packages.last() != packages.size() - 1) {
-            throw new TopologyParseException("Package IDs are not consecutive: " + packages);
+        if (nodes.first() != 0 || nodes.last() != nodes.size() - 1) {
+            throw new TopologyParseException("Node IDs are not consecutive: " + nodes);
         }
 
         if (cores.first() != 0 || cores.last() != cores.size() - 1) {
@@ -205,19 +211,19 @@ public abstract class AbstractTopology implements Topology {
             throw new TopologyParseException("Thread IDs are not consecutive: " + threads);
         }
 
-        packagesPerSystem = packages.size();
+        nodesPerSystem = nodes.size();
 
-        for (int p : packageToCore.keys()) {
-            int size = packageToCore.get(p).size();
-            if (coresPerPackage == -1) {
-                coresPerPackage = size;
+        for (Integer p : nodeToCore.keys()) {
+            int size = nodeToCore.get(p).size();
+            if (coresPerNode == -1) {
+                coresPerNode = size;
             } else {
-                coresPerPackage = Math.min(coresPerPackage, size);
+                coresPerNode = Math.min(coresPerNode, size);
             }
         }
 
-        for (int p : coreToThread.keys()) {
-            int size = coreToThread.get(p).size();
+        for (Integer c : coreToThread.keys()) {
+            int size = coreToThread.get(c).size();
             if (threadsPerCore == -1) {
                 threadsPerCore = size;
             } else {
@@ -243,16 +249,25 @@ public abstract class AbstractTopology implements Topology {
     @Override
     public void printStatus(PrintStream pw) {
         checkFinished();
-        pw.printf("  %d package%s, %d core%s per package, %d thread%s per core%n",
-                packagesPerSystem, packagesPerSystem > 1 ? "s" : "",
-                coresPerPackage, coresPerPackage > 1 ? "s" : "",
-                threadsPerCore, threadsPerCore > 1 ? "s" : "");
+        pw.printf("  %d %s%s, %d core%s per %s, %d thread%s per core%n",
+                nodesPerSystem,
+                nodeType().desc(),
+                nodesPerSystem > 1 ? "s" : "",
+                coresPerNode,
+                coresPerNode > 1 ? "s" : "",
+                nodeType().desc(),
+                threadsPerCore,
+                threadsPerCore > 1 ? "s" : "");
         pw.println();
-        pw.println("  CPU lists:");
-        for (int pack : packages) {
-            for (int core : packageToCore.get(pack)) {
-                String tl = StringUtils.join(coreToThread.get(core), ", ");
-                pw.println("    Package #" + pack + ", Core #" + core + ", Threads: " + tl);
+        pw.println("  CPU topology:");
+        for (Integer pack : nodes) {
+            for (Integer core : nodeToCore.get(pack)) {
+                for (Integer thread : coreToThread.get(core)) {
+                    pw.printf("    CPU %s: %s #%d, core #%d, thread #%d%n",
+                            String.format("%3s", "#" + threadToRealCPU.get(thread)),
+                            nodeType().desc(),
+                            pack, core, thread);
+                }
             }
         }
     }
@@ -262,14 +277,14 @@ public abstract class AbstractTopology implements Topology {
         return threadsPerCore;
     }
 
-    public int coresPerPackage() {
+    public int coresPerNode() {
         checkFinished();
-        return coresPerPackage;
+        return coresPerNode;
     }
 
-    public int packagesPerSystem() {
+    public int nodesPerSystem() {
         checkFinished();
-        return packagesPerSystem;
+        return nodesPerSystem;
     }
 
     public int totalThreads() {
@@ -290,23 +305,23 @@ public abstract class AbstractTopology implements Topology {
     }
 
     @Override
-    public Collection<Integer> packageCores(int packageId) {
+    public Collection<Integer> nodeCores(int nodeId) {
         checkFinished();
-        return packageToCore.get(packageId);
+        return nodeToCore.get(nodeId);
     }
 
     @Override
-    public int coreToPackage(int coreId) {
+    public int coreToNode(int coreId) {
         checkFinished();
-        return coreToPackage.get(coreId);
+        return coreToNode.get(coreId);
     }
 
     @Override
-    public int threadToPackage(int thread) {
+    public int threadToNode(int thread) {
         checkFinished();
-        Integer v = threadToPackage.get(thread);
+        Integer v = threadToNode.get(thread);
         if (v == null) {
-            throw new IllegalArgumentException("Cannot find package mapping for thread " + thread);
+            throw new IllegalArgumentException("Cannot find node mapping for thread " + thread);
         }
         return v;
     }
@@ -321,4 +336,18 @@ public abstract class AbstractTopology implements Topology {
         return v;
     }
 
+    @Override
+    public int threadToRealCPU(int thread) {
+        checkFinished();
+        Integer v = threadToRealCPU.get(thread);
+        if (v == null) {
+            throw new IllegalArgumentException("Cannot find real CPU mapping for thread " + thread);
+        }
+        return v;
+    }
+
+    @Override
+    public NodeType nodeType() {
+        return NodeType.PACKAGE;
+    }
 }

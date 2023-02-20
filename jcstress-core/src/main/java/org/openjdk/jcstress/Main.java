@@ -62,16 +62,12 @@ public class Main {
     }
 
     static void printVersion(PrintStream out) {
-        Class<?> clazz = Main.class;
-        String className = clazz.getSimpleName() + ".class";
-        String classPath = clazz.getResource(className).toString();
-        if (!classPath.startsWith("jar")) {
-            return;
-        }
-        String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
-        InputStream stream = null;
-        try {
-            stream = new URL(manifestPath).openStream();
+        try (InputStream stream = Main.class.getResourceAsStream("/META-INF/MANIFEST.MF")) {
+            if (stream == null) {
+                // No manifest?
+                out.println("Rev: unknown");
+                return;
+            }
             Manifest manifest = new Manifest(stream);
             Attributes attr = manifest.getMainAttributes();
             out.printf("Rev: %s, built by %s with %s at %s%n",
@@ -82,14 +78,6 @@ public class Main {
             );
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            try {
-                if (stream != null) {
-                    stream.close();
-                }
-            } catch (IOException e) {
-                // swallow
-            }
         }
     }
 

@@ -43,12 +43,24 @@ public class $name$ {
 
     @Actor
     public void actor1() {
+#if[sync]
+        synchronized (this) {
+#end[sync]
         x = $defaultLiteral$;
+#if[sync]
+        }
+#end[sync]
     }
 
     @Actor
     public void actor2() {
+#if[sync]
+        synchronized (this) {
+#end[sync]
         x = $setLiteral$;
+#if[sync]
+        }
+#end[sync]
     }
 
     @Arbiter
