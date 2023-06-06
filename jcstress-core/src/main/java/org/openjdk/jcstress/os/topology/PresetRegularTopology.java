@@ -26,6 +26,7 @@ package org.openjdk.jcstress.os.topology;
 
 public class PresetRegularTopology extends AbstractTopology {
 
+    @SuppressWarnings("this-escape")
     public PresetRegularTopology(int nodesPerSystem, int coresPerNode, int threadsPerCore) throws TopologyParseException {
         for (int t = 0; t < threadsPerCore; t++) {
             for (int p = 0; p < nodesPerSystem; p++) {

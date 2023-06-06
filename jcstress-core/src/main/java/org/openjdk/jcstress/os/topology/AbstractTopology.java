@@ -107,7 +107,7 @@ public abstract class AbstractTopology implements Topology {
         coreToThread.put(coreId, threadId);
     }
 
-    protected <K, V> Multimap<K, V> remapKeys(Multimap<K, V> src, Map<K, K> remap) {
+    protected static <K, V> Multimap<K, V> remapKeys(Multimap<K, V> src, Map<K, K> remap) {
         TreesetMultimap<K, V> dst = new TreesetMultimap<>();
         for (K k : src.keys()) {
             K nk = remap.get(k);
@@ -118,7 +118,7 @@ public abstract class AbstractTopology implements Topology {
         return dst;
     }
 
-    protected <K, V> Multimap<K, V> remapValues(Multimap<K, V> src, Map<V, V> remap) {
+    protected static <K, V> Multimap<K, V> remapValues(Multimap<K, V> src, Map<V, V> remap) {
         TreesetMultimap<K, V> dst = new TreesetMultimap<>();
         for (K k : src.keys()) {
             for (V v : src.get(k)) {
@@ -128,7 +128,7 @@ public abstract class AbstractTopology implements Topology {
         return dst;
     }
 
-    protected <K, V> SortedMap<K, V> remapValues(SortedMap<K, V> src, Map<V, V> remap) {
+    protected static <K, V> SortedMap<K, V> remapValues(SortedMap<K, V> src, Map<V, V> remap) {
         SortedMap<K, V> dst = new TreeMap<>();
         for (K k : src.keySet()) {
             dst.put(k, remap.get(src.get(k)));
@@ -136,7 +136,7 @@ public abstract class AbstractTopology implements Topology {
         return dst;
     }
 
-    protected <K, V> SortedMap<K, V> remapKeys(SortedMap<K, V> src, Map<K, K> remap) {
+    protected static <K, V> SortedMap<K, V> remapKeys(SortedMap<K, V> src, Map<K, K> remap) {
         SortedMap<K, V> dst = new TreeMap<>();
         for (K k : src.keySet()) {
             dst.put(remap.get(k), src.get(k));
@@ -144,7 +144,7 @@ public abstract class AbstractTopology implements Topology {
         return dst;
     }
 
-    protected <K> Map<K, K> renumber(Set<K> src, Function<Integer, K> gen) {
+    protected static <K> Map<K, K> renumber(Set<K> src, Function<Integer, K> gen) {
         Map<K, K> dst = new HashMap<>();
         int nid = 0;
         for (K k : src) {
