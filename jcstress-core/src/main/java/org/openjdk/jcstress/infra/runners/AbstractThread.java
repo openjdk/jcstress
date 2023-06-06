@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class AbstractThread extends Thread {
     protected volatile Throwable throwable;
 
+    @SuppressWarnings("this-escape")
     public AbstractThread(String name) {
         setDaemon(true);
         setName(name);

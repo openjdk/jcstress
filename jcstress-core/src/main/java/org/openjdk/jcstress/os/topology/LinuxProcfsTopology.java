@@ -41,6 +41,7 @@ public class LinuxProcfsTopology extends AbstractTopology {
         this("/proc/cpuinfo");
     }
 
+    @SuppressWarnings("this-escape")
     public LinuxProcfsTopology(String file) throws TopologyParseException {
         this.file = file;
         try {

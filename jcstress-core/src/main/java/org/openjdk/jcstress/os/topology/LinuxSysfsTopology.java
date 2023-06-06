@@ -63,6 +63,7 @@ public class LinuxSysfsTopology extends AbstractTopology {
         this(new File("/sys/devices/system/").toPath());
     }
 
+    @SuppressWarnings("this-escape")
     public LinuxSysfsTopology(Path root) throws TopologyParseException {
         this.cpuRoot = root.resolve("cpu");
         this.nodeRoot = root.resolve("node");
