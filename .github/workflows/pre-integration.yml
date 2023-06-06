@@ -30,6 +30,7 @@ jobs:
         distribution: temurin
         java-version: ${{ matrix.build-java }}
         cache: maven
+        check-latest: true
     - name: Build/test
       run: mvn clean install -T 1C -B --file pom.xml
     - name: Set up run JDK ${{ matrix.run-java }}
@@ -37,5 +38,6 @@ jobs:
       with:
         distribution: temurin
         java-version: ${{ matrix.run-java }}
+        check-latest: true
     - name: Run a trial test
       run: java -jar tests-custom/target/jcstress.jar -t UnfencedDekker
