@@ -886,13 +886,10 @@ public class JCStressTestProcessor extends AbstractProcessor {
         pw.println("    public TestResult run() {");
         pw.println("        Counter<Outcome> results = new Counter<>();");
         pw.println();
-        pw.println("        for (int c = 0; c < config.iters; c++) {");
-        pw.println("            run(results);");
+        pw.println("        run(results);");
         pw.println();
-        pw.println("            if (results.count(Outcome.STALE) > 0) {");
-        pw.println("                forceExit = true;");
-        pw.println("                break;");
-        pw.println("            }");
+        pw.println("        if (results.count(Outcome.STALE) > 0) {");
+        pw.println("            forceExit = true;");
         pw.println("        }");
         pw.println();
         pw.println("        return dump(results);");

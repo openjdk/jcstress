@@ -37,7 +37,11 @@ import org.openjdk.jcstress.util.*;
 import org.openjdk.jcstress.vm.CompileMode;
 
 import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class ReportUtils {
 
@@ -281,4 +285,43 @@ public class ReportUtils {
                 throw new IllegalStateException("Illegal status: " + result.status());
         }
     }
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("E, yyyy-MM-dd HH:mm:ss");
+
+    public static String msToDate(long ms, boolean finalDate) {
+        LocalDateTime ldt = LocalDateTime.now().plus(ms, ChronoUnit.MILLIS);
+
+        String result = "";
+
+        boolean overtime = ms < 0;
+        if (overtime) {
+            ms = -ms;
+        }
+
+        long days = TimeUnit.MILLISECONDS.toDays(ms);
+        if (days > 0) {
+            result += days + "d+";
+            ms -= TimeUnit.DAYS.toMillis(days);
+        }
+        long hours = TimeUnit.MILLISECONDS.toHours(ms);
+        ms -= TimeUnit.HOURS.toMillis(hours);
+
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(ms);
+        ms -= TimeUnit.MINUTES.toMillis(minutes);
+
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(ms);
+
+        if (overtime) {
+            result += "overtime ";
+        }
+        result += String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        if (!overtime) {
+            result += " left";
+        }
+        if (finalDate) {
+            result += "; at " + ldt.format(DATE_TIME_FORMATTER);
+        }
+        return result;
+    }
+
 }

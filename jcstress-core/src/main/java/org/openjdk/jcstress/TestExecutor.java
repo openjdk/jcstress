@@ -27,13 +27,11 @@ package org.openjdk.jcstress;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
-import org.openjdk.jcstress.infra.processors.JCStressTestProcessor;
 import org.openjdk.jcstress.infra.runners.*;
 import org.openjdk.jcstress.link.BinaryLinkServer;
 import org.openjdk.jcstress.link.ServerListener;
 import org.openjdk.jcstress.os.*;
 import org.openjdk.jcstress.util.*;
-import org.openjdk.jcstress.vm.CompileMode;
 import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.*;
@@ -67,7 +65,9 @@ public class TestExecutor {
 
     private final ExecutorService supportTasks;
 
-    public TestExecutor(Verbosity verbosity, TestResultCollector sink, Scheduler scheduler) throws IOException {
+    private final TimeBudget timeBudget;
+
+    public TestExecutor(Verbosity verbosity, TestResultCollector sink, Scheduler scheduler, TimeBudget tb) throws IOException {
         this.verbosity = verbosity;
         this.sink = sink;
         this.vmByToken = new ConcurrentHashMap<>();
@@ -102,6 +102,8 @@ public class TestExecutor {
                 return t;
             }
         });
+
+        this.timeBudget = tb;
     }
 
     private void awaitNotification() {
@@ -316,7 +318,8 @@ public class TestExecutor {
                 return null;
             }
             processed = true;
-            return new ForkedTestConfig(task);
+            timeBudget.startTest();
+            return new ForkedTestConfig(task, timeBudget.targetTestTimeMs());
         }
 
         public synchronized boolean checkCompleted() {
@@ -384,6 +387,7 @@ public class TestExecutor {
             }
 
             jvmsFinishing.decrementAndGet();
+            timeBudget.finishTest();
         }
 
         public synchronized void recordResult(TestResult r) {

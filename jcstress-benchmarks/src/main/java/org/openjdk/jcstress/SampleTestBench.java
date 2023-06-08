@@ -58,10 +58,7 @@ public class SampleTestBench {
 
     static {
         try {
-            Options opts = new Options(new String[] {
-                    "-v",
-                    "-iters", "1",
-                    "-time", "10000"});
+            Options opts = new Options(new String[] {"-v"});
             opts.parse();
 
             String testName = SampleTest.class.getCanonicalName();
@@ -90,7 +87,7 @@ public class SampleTestBench {
 
     @Setup
     public void setup() throws Throwable {
-        o = (Runner<?>) CNSTR.newInstance(new ForkedTestConfig(CFGS[0]));
+        o = (Runner<?>) CNSTR.newInstance(new ForkedTestConfig(CFGS[0], 10_000));
     }
 
     @Benchmark

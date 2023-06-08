@@ -86,12 +86,15 @@ public class JCStress {
             return;
         }
 
-        ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), configs.size());
+        TimeBudget timeBudget = new TimeBudget(configs.size(), opts.timeBudget());
+        timeBudget.printOn(out);
+
+        ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), configs.size(), timeBudget);
         DiskWriteCollector diskCollector = new DiskWriteCollector(opts.getResultFile());
         TestResultCollector mux = MuxCollector.of(printer, diskCollector);
         SerializedBufferCollector sink = new SerializedBufferCollector(mux);
 
-        TestExecutor executor = new TestExecutor(opts.verbosity(), sink, scheduler);
+        TestExecutor executor = new TestExecutor(opts.verbosity(), sink, scheduler, timeBudget);
         printer.setExecutor(executor);
 
         executor.runAll(configs);
