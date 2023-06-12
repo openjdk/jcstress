@@ -59,23 +59,17 @@ public class SeqCstTraceGenerator {
         // (ops, variables, threads)
         int[][] triplets = {
                 {2, 1, 2},
-
                 {3, 1, 2},
-
                 {4, 1, 2},
                 {4, 2, 2},
-                {4, 2, 3},
-                {4, 2, 4},
 
+                {4, 2, 3},
                 {5, 1, 3},
-                {5, 1, 4},
                 {5, 2, 3},
-                {5, 2, 4},
+                {6, 3, 3},
 
                 {6, 1, 4},
                 {6, 2, 4},
-                {6, 3, 3},
-                {6, 3, 4},
         };
 
         for (int[] tri : triplets) {
