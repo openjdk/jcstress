@@ -281,9 +281,16 @@ public class SeqCstTraceGenerator {
         pw.println("    @Arbiter");
         pw.println("    public void arbiter(" + resultName + " r) {");
         int idx = mt.loadCount() + 1;
+        if (target == Target.SYNCHRONIZED) {
+            pw.println("        synchronized (this) {");
+            pw.print("    ");
+        }
         for (Integer varId : mt.allVariables()) {
             pw.println("        r.r" + idx + " = x" + varId + ";");
             idx++;
+        }
+        if (target == Target.SYNCHRONIZED) {
+            pw.println("        }");
         }
         pw.println("    }");
         pw.println();
