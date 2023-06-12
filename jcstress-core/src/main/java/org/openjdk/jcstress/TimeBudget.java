@@ -33,6 +33,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class TimeBudget {
 
+    static final int MIN_TIME_MS = Integer.getInteger("jcstress.timeBudget.minTimeMs", 10);
+    static final int MAX_TIME_MS = Integer.getInteger("jcstress.timeBudget.maxTimeMs", 60_000);
+
     final long endTime;
     final boolean zeroBudget;
     final int expectedTests;
@@ -91,9 +94,7 @@ public class TimeBudget {
 
         // Enforce reasonable target brackets and leave some time
         // for test infrastructure to run.
-        final int MIN_TIME_MS = 30;
-        final int MAX_TIME_MS = 60_000;
-        if (msPerTest > MIN_TIME_MS * 2) {
+        if (msPerTest > MIN_TIME_MS * 2L) {
             msPerTest -= MIN_TIME_MS;
         }
         msPerTest = Math.max(MIN_TIME_MS, msPerTest);
@@ -115,7 +116,7 @@ public class TimeBudget {
         if (isZero()) {
             out.println("    Zero budget, sanity test mode");
         } else {
-            out.println("    Target completion: in " + ReportUtils.msToDate(timeLeftMs(), true));
+            out.println("    Initial completion estimate: " + ReportUtils.msToDate(timeLeftMs(), true));
             out.println("    Initial test time: " + targetTestTimeMs() + " ms");
         }
         out.println();

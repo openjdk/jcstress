@@ -144,7 +144,9 @@ public class Options {
         OptionSpec<Boolean> optPretouchHeap = parser.accepts("pth", "Pre-touch Java heap, if possible.")
                 .withOptionalArg().ofType(Boolean.class).describedAs("bool");
 
-        OptionSpec<TimeValue> optTimeBudget = parser.accepts("tb", "Time budget to run the tests. Common time suffixes are accepted.")
+        OptionSpec<TimeValue> optTimeBudget = parser.accepts("tb", "Time budget to run the tests. Harness code would try to fit the entire " +
+                "run in the desired time-frame. This value is expected to be reasonable, as it is not guaranteed that tests would succeed " +
+                "in arbitrarily low time budget. Common time suffixes (s/m/h/d) are accepted.")
                 .withRequiredArg().ofType(TimeValue.class).describedAs("time").defaultsTo(new TimeValue(1, TimeUnit.HOURS));
 
         parser.accepts("v", "Be verbose.");
