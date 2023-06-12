@@ -145,9 +145,10 @@ public class Options {
                 .withOptionalArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<TimeValue> optTimeBudget = parser.accepts("tb", "Time budget to run the tests. Harness code would try to fit the entire " +
-                "run in the desired time-frame. This value is expected to be reasonable, as it is not guaranteed that tests would succeed " +
-                "in arbitrarily low time budget. Common time suffixes (s/m/h/d) are accepted.")
-                .withRequiredArg().ofType(TimeValue.class).describedAs("time").defaultsTo(new TimeValue(1, TimeUnit.HOURS));
+                "run in the desired timeframe. This value is expected to be reasonable, as it is not guaranteed that tests would succeed " +
+                "in arbitrarily low time budget. If not set, harness would try to decide a reasonable time, given the number of tests to run. " +
+                "Common time suffixes (s/m/h/d) are accepted.")
+                .withRequiredArg().ofType(TimeValue.class).describedAs("time");
 
         parser.accepts("v", "Be verbose.");
         parser.accepts("vv", "Be extra verbose.");
@@ -208,7 +209,7 @@ public class Options {
 
         this.timeBudget = optTimeBudget.value(set);
 
-        if (timeBudget.isZero()) {
+        if (timeBudget != null && timeBudget.isZero()) {
             // Special, extra-fast mode, good only for sanity testing
             this.forks = 1;
             this.forksStressMultiplier = 1;

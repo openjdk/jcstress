@@ -33,24 +33,33 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class TimeBudget {
 
+    static final int DEFAULT_PER_TEST_MS = Integer.getInteger("jcstress.timeBudget.defaultPerTestMs", 1000);
     static final int MIN_TIME_MS = Integer.getInteger("jcstress.timeBudget.minTimeMs", 10);
     static final int MAX_TIME_MS = Integer.getInteger("jcstress.timeBudget.maxTimeMs", 60_000);
 
     final long endTime;
-    final boolean zeroBudget;
     final int expectedTests;
 
     final AtomicInteger inflightTests;
     final AtomicInteger maxInflightTests;
     final AtomicInteger leftoverTests;
+    final TimeValue budget;
 
     public TimeBudget(int expectedTests, TimeValue timeBudget) {
+        this.budget = estimateDefault(expectedTests, timeBudget);
         this.expectedTests = expectedTests;
-        this.endTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime()) + timeBudget.milliseconds();
-        this.zeroBudget = timeBudget.isZero();
+        this.endTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime()) + budget.milliseconds();
         this.inflightTests = new AtomicInteger();
         this.maxInflightTests = new AtomicInteger();
         this.leftoverTests = new AtomicInteger(expectedTests);
+    }
+
+    public static TimeValue estimateDefault(int expectedTests, TimeValue timeBudget) {
+        if (timeBudget != null) {
+            return timeBudget;
+        }
+
+        return new TimeValue((long) expectedTests * DEFAULT_PER_TEST_MS, TimeUnit.MILLISECONDS);
     }
 
     public void finishTest() {
@@ -123,6 +132,6 @@ public class TimeBudget {
     }
 
     public boolean isZero() {
-        return zeroBudget;
+        return budget.isZero();
     }
 }
