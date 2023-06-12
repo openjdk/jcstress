@@ -246,10 +246,13 @@ public class SeqCstTraceGenerator {
         pw.println();
 
         for (int t = 0; t < threads; t++) {
-            pw.println("    @Actor");
-            pw.println("    public void actor" + (t+1) + "(" + resultName + " r) {");
+            Trace trace = mt.threads().get(t);
 
-            for (Op op : mt.threads().get(t).ops()) {
+            pw.println("    @Actor");
+            String sig = trace.hasLoads() ? "(" + resultName + " r)" : "()";
+            pw.println("    public void actor" + (t + 1) + sig + " {");
+
+            for (Op op : trace.ops()) {
                 switch (op.getType()) {
                     case LOAD:
                         if (target == Target.SYNCHRONIZED) {
