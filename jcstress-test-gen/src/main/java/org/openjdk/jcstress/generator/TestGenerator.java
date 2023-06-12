@@ -128,7 +128,7 @@ public class TestGenerator {
         pw.println("    public " + types.type(1) + " a;");
         pw.println();
         pw.println("    @Actor");
-        pw.println("    public void actor1(" + resultName +" r) {");
+        pw.println("    public void actor1() {");
         pw.println("        " + prim.printRelease("        a = " + getRValue(types.type(1)) +";"));
         pw.println("    }");
         pw.println();
