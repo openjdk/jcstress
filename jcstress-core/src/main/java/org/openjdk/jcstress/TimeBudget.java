@@ -26,6 +26,7 @@ package org.openjdk.jcstress;
 
 import org.openjdk.jcstress.infra.grading.ReportUtils;
 import org.openjdk.jcstress.util.TimeValue;
+import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
@@ -33,8 +34,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class TimeBudget {
 
-    static final int DEFAULT_PER_TEST_MS = Integer.getInteger("jcstress.timeBudget.defaultPerTestMs", 1000);
-    static final int MIN_TIME_MS = Integer.getInteger("jcstress.timeBudget.minTimeMs", 10);
+    static final int DEFAULT_PER_TEST_MS = Integer.getInteger("jcstress.timeBudget.defaultPerTestMs", 5000);
+    static final int MIN_TIME_MS = Integer.getInteger("jcstress.timeBudget.minTimeMs", 30);
     static final int MAX_TIME_MS = Integer.getInteger("jcstress.timeBudget.maxTimeMs", 60_000);
 
     final long endTime;
@@ -59,7 +60,10 @@ public class TimeBudget {
             return timeBudget;
         }
 
-        return new TimeValue((long) expectedTests * DEFAULT_PER_TEST_MS, TimeUnit.MILLISECONDS);
+        // Assume the nearly worst case, all 4-actor tests taking the cores exclusively.
+        long expectedTotalTime = (long) expectedTests * DEFAULT_PER_TEST_MS;
+        long expectedPerTest = expectedTotalTime / Math.max(1, VMSupport.figureOutHotCPUs() / 8);
+        return new TimeValue(expectedPerTest, TimeUnit.MILLISECONDS);
     }
 
     public void finishTest() {
