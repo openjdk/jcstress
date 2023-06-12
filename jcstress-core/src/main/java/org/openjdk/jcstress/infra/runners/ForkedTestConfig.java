@@ -34,7 +34,6 @@ import java.util.concurrent.TimeUnit;
 public class ForkedTestConfig {
     public final SpinLoopStyle spinLoopStyle;
     public final int time;
-    public final int iters;
     public final String generatedRunnerName;
     public final int maxFootprintMB;
     public int strideSize;
@@ -42,10 +41,9 @@ public class ForkedTestConfig {
     public boolean localAffinity;
     public int[] localAffinityMap;
 
-    public ForkedTestConfig(TestConfig cfg) {
+    public ForkedTestConfig(TestConfig cfg, int testTime) {
         spinLoopStyle = cfg.spinLoopStyle;
-        time = cfg.time;
-        iters = cfg.iters;
+        time = testTime;
         generatedRunnerName = cfg.generatedRunnerName;
         maxFootprintMB = cfg.maxFootprintMB;
         strideSize = cfg.strideSize;
@@ -59,7 +57,6 @@ public class ForkedTestConfig {
     public ForkedTestConfig(DataInputStream dis) throws IOException {
         spinLoopStyle = SpinLoopStyle.values()[dis.readInt()];
         time = dis.readInt();
-        iters = dis.readInt();
         generatedRunnerName = dis.readUTF();
         maxFootprintMB = dis.readInt();
         strideSize = dis.readInt();
@@ -77,7 +74,6 @@ public class ForkedTestConfig {
     public void write(DataOutputStream dos) throws IOException {
         dos.writeInt(spinLoopStyle.ordinal());
         dos.writeInt(time);
-        dos.writeInt(iters);
         dos.writeUTF(generatedRunnerName);
         dos.writeInt(maxFootprintMB);
         dos.writeInt(strideSize);

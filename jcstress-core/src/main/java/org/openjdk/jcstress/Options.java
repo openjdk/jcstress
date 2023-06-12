@@ -32,12 +32,14 @@ import org.openjdk.jcstress.infra.runners.SpinLoopStyle;
 import org.openjdk.jcstress.os.AffinityMode;
 import org.openjdk.jcstress.util.OptionFormatter;
 import org.openjdk.jcstress.util.StringUtils;
+import org.openjdk.jcstress.util.TimeValue;
 import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Options.
@@ -49,8 +51,6 @@ public class Options {
     private String testFilter;
     private int strideSize;
     private int strideCount;
-    private int time;
-    private int iters;
     private final String[] args;
     private boolean parse;
     private boolean list;
@@ -59,7 +59,6 @@ public class Options {
     private int heapPerFork;
     private int forks;
     private int forksStressMultiplier;
-    private String mode;
     private SpinLoopStyle spinStyle;
     private String resultFile;
     private List<String> jvmArgs;
@@ -67,6 +66,7 @@ public class Options {
     private boolean splitCompilation;
     private AffinityMode affinityMode;
     private boolean pretouchHeap;
+    private TimeValue timeBudget;
 
     public Options(String[] args) {
         this.args = args;
@@ -96,11 +96,10 @@ public class Options {
                 "Larger value increases cache footprint.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
-        OptionSpec<Integer> time = parser.accepts("time", "Time to spend in single test iteration. Larger value improves " +
-                "test reliability, since schedulers do better job in the long run.")
+        OptionSpec<Integer> optTime = parser.accepts("time", "(Deprecated, to be removed in next releases.)")
                 .withRequiredArg().ofType(Integer.class).describedAs("ms");
 
-        OptionSpec<Integer> iters = parser.accepts("iters", "Iterations per test.")
+        OptionSpec<Integer> optIters = parser.accepts("iters", "(Deprecated, to be removed in next releases.)")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
         OptionSpec<Integer> cpus = parser.accepts("c", "Number of CPUs to use. Defaults to all CPUs in the system. " +
@@ -123,7 +122,7 @@ public class Options {
                 "This allows more efficient randomized testing, as each fork would use a different seed.")
                 .withOptionalArg().ofType(Integer.class).describedAs("multiplier");
 
-        OptionSpec<String> modeStr = parser.accepts("m", "Test mode preset: sanity, quick, default, tough, stress.")
+        OptionSpec<String> optModeStr = parser.accepts("m", "(Deprecated, to be removed in next releases).")
                 .withRequiredArg().ofType(String.class).describedAs("mode");
 
         OptionSpec<String> optJvmArgs = parser.accepts("jvmArgs", "Use given JVM arguments. This disables JVM flags auto-detection, " +
@@ -144,6 +143,12 @@ public class Options {
 
         OptionSpec<Boolean> optPretouchHeap = parser.accepts("pth", "Pre-touch Java heap, if possible.")
                 .withOptionalArg().ofType(Boolean.class).describedAs("bool");
+
+        OptionSpec<TimeValue> optTimeBudget = parser.accepts("tb", "Time budget to run the tests. Harness code would try to fit the entire " +
+                "run in the desired timeframe. This value is expected to be reasonable, as it is not guaranteed that tests would succeed " +
+                "in arbitrarily low time budget. If not set, harness would try to decide a reasonable time, given the number of tests to run. " +
+                "Common time suffixes (s/m/h/d) are accepted.")
+                .withRequiredArg().ofType(TimeValue.class).describedAs("time");
 
         parser.accepts("v", "Be verbose.");
         parser.accepts("vv", "Be extra verbose.");
@@ -202,45 +207,45 @@ public class Options {
 
         this.spinStyle = orDefault(set.valueOf(spinStyle), SpinLoopStyle.THREAD_SPIN_WAIT);
 
-        this.time = 1000;
-        this.iters = 5;
-        this.forks = 1;
-        this.forksStressMultiplier = 5;
-        this.strideSize = 256;
-        this.strideCount = 40;
-        this.pretouchHeap = true;
+        this.timeBudget = optTimeBudget.value(set);
 
-        mode = orDefault(modeStr.value(set), "default");
-        if (this.mode.equalsIgnoreCase("sanity")) {
-            this.time = 0;
-            this.iters = 1;
+        if (timeBudget != null && timeBudget.isZero()) {
+            // Special, extra-fast mode, good only for sanity testing
             this.forks = 1;
             this.forksStressMultiplier = 1;
             this.strideSize = 1;
             this.strideCount = 1;
             this.pretouchHeap = false;
-        } else if (this.mode.equalsIgnoreCase("quick")) {
-            this.time = 200;
-            this.forksStressMultiplier = 1;
-        } else if (this.mode.equalsIgnoreCase("default")) {
-            // Nothing changed.
-        } else if (this.mode.equalsIgnoreCase("tough")) {
-            this.iters = 10;
-            this.forks = 10;
-        } else if (this.mode.equalsIgnoreCase("stress")) {
-            this.iters = 50;
-            this.forks = 10;
-            this.forksStressMultiplier = 10;
         } else {
-            System.err.println("Unknown test mode: " + this.mode);
+            this.forks = 1;
+            this.forksStressMultiplier = 5;
+            this.strideSize = 256;
+            this.strideCount = 40;
+            this.pretouchHeap = true;
+        }
+
+        if (optModeStr.value(set) != null) {
+            System.err.println("-m option is not supported anymore, please use -tb.");
+            System.err.println();
+            parser.printHelpOn(System.err);
+            return false;
+        }
+
+        if (optTime.value(set) != null) {
+            System.err.println("-time option is not supported anymore, please use -tb.");
+            System.err.println();
+            parser.printHelpOn(System.err);
+            return false;
+        }
+
+        if (optIters.value(set) != null) {
+            System.err.println("-iters option is not supported anymore, please use -tb.");
             System.err.println();
             parser.printHelpOn(System.err);
             return false;
         }
 
         // override these, if present
-        this.time = orDefault(set.valueOf(time), this.time);
-        this.iters = orDefault(set.valueOf(iters), this.iters);
         this.forks = orDefault(set.valueOf(forks), this.forks);
         this.forksStressMultiplier = orDefault(set.valueOf(forksStressMultiplier), this.forksStressMultiplier);
         this.strideSize = orDefault(set.valueOf(strideSize), this.strideSize);
@@ -289,13 +294,10 @@ public class Options {
 
     public void printSettingsOn(PrintStream out) {
         out.println("  Test configuration:");
-        out.printf("    Test preset mode: \"%s\"%n", mode);
         out.printf("    Hardware CPUs in use: %d%n", getCPUCount());
         out.printf("    Spinning style: %s%n", getSpinStyle());
         out.printf("    Test selection: \"%s\"%n", getTestFilter());
         out.printf("    Forks per test: %d normal, %d stress%n", getForks(), getForks()*getForksStressMultiplier());
-        out.printf("    Iterations per fork: %d%n", getIterations());
-        out.printf("    Time per iteration: %d ms%n", getTime());
         out.printf("    Test stride: %d strides x %d tests, but taking no more than %d Mb%n", getStrideCount(), getStrideSize(), getMaxFootprintMb());
         out.printf("    Test result blob: \"%s\"%n", resultFile);
         out.printf("    Test results: \"%s\"%n", resultDir);
@@ -312,10 +314,6 @@ public class Options {
 
     public String getResultDest() {
         return resultDir;
-    }
-
-    public int getTime() {
-        return time;
     }
 
     public SpinLoopStyle getSpinStyle() {
@@ -345,10 +343,6 @@ public class Options {
 
     public String getTestFilter() {
         return testFilter;
-    }
-
-    public int getIterations() {
-        return iters;
     }
 
     public Verbosity verbosity() {
@@ -397,5 +391,7 @@ public class Options {
     public boolean isPretouchHeap() {
         return pretouchHeap;
     }
+
+    public TimeValue timeBudget() { return timeBudget; }
 
 }

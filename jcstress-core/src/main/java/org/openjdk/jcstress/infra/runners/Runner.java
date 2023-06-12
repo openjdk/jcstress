@@ -68,39 +68,37 @@ public abstract class Runner<R> {
             return dumpFailure(Status.CHECK_TEST_ERROR, "Check test failed", e);
         }
 
-        for (int c = 0; c < config.iters; c++) {
-            ArrayList<CounterThread<R>> workers = internalRun();
+        ArrayList<CounterThread<R>> workers = internalRun();
 
-            long startTime = System.nanoTime();
-            do {
-                ArrayList<CounterThread<R>> leftovers = new ArrayList<>();
-                for (CounterThread<R> t : workers) {
-                    try {
-                        t.join(1000);
+        long startTime = System.nanoTime();
+        do {
+            ArrayList<CounterThread<R>> leftovers = new ArrayList<>();
+            for (CounterThread<R> t : workers) {
+                try {
+                    t.join(1000);
 
-                        if (t.throwable() != null) {
-                            return dumpFailure(Status.TEST_ERROR, "Unrecoverable error while running", t.throwable());
-                        }
-                        Counter<R> res = t.result();
-                        if (res != null) {
-                            result.merge(res);
-                        } else {
-                            leftovers.add(t);
-                        }
-                    } catch (InterruptedException e) {
-                        return dumpFailure(Status.TEST_ERROR, "Unrecoverable error while running", e.getCause());
+                    if (t.throwable() != null) {
+                        return dumpFailure(Status.TEST_ERROR, "Unrecoverable error while running", t.throwable());
                     }
+                    Counter<R> res = t.result();
+                    if (res != null) {
+                        result.merge(res);
+                    } else {
+                        leftovers.add(t);
+                    }
+                } catch (InterruptedException e) {
+                    return dumpFailure(Status.TEST_ERROR, "Unrecoverable error while running", e.getCause());
                 }
+            }
 
-                long timeSpent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
-                if (timeSpent > Math.max(10*config.time, MIN_TIMEOUT_MS)) {
-                    forceExit = true;
-                    return dumpFailure(Status.TIMEOUT_ERROR, "Timeout waiting for tasks to complete: " + timeSpent + " ms");
-                }
+            long timeSpent = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
+            if (timeSpent > Math.max(10 * config.time, MIN_TIMEOUT_MS)) {
+                forceExit = true;
+                return dumpFailure(Status.TIMEOUT_ERROR, "Timeout waiting for tasks to complete: " + timeSpent + " ms");
+            }
 
-                workers = leftovers;
-            } while (!workers.isEmpty());
-        }
+            workers = leftovers;
+        } while (!workers.isEmpty());
 
         return dump(result);
     }

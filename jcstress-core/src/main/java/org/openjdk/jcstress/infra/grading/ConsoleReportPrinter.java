@@ -26,15 +26,13 @@ package org.openjdk.jcstress.infra.grading;
 
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.TestExecutor;
+import org.openjdk.jcstress.TimeBudget;
 import org.openjdk.jcstress.Verbosity;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.PrintWriter;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -50,12 +48,10 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private final Verbosity verbosity;
     private final PrintWriter output;
 
+    private final long startTime;
     private final long expectedResults;
 
     private long sampleCount;
-    private long sampleResults;
-
-    private long startTime;
 
     private final long printIntervalMs;
     private long lastPrint;
@@ -65,7 +61,6 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private final boolean progressAnsi;
     private boolean progressFirstLine;
     private final int[] progressLen;
-    private final DateTimeFormatter fmt;
 
     private long passed;
     private long failed;
@@ -74,7 +69,9 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private TestExecutor executor;
     private final int totalCpuCount;
 
-    public ConsoleReportPrinter(Options opts, PrintWriter pw, long expectedForks) {
+    private final TimeBudget timeBudget;
+
+    public ConsoleReportPrinter(Options opts, PrintWriter pw, long expectedForks, TimeBudget tb) {
         this.output = pw;
         this.expectedResults = expectedForks;
         totalCpuCount = opts.getCPUCount();
@@ -85,8 +82,6 @@ public class ConsoleReportPrinter implements TestResultCollector {
         progressFirstLine = true;
         progressInteractive = (System.console() != null);
         progressAnsi = VMSupport.isLinux();
-        fmt = DateTimeFormatter.ofPattern("E, yyyy-MM-dd HH:mm:ss");
-
         output.println("  Attached the " + (progressInteractive ? "interactive console" : "non-interactive output stream") + ".");
 
         printIntervalMs = (PRINT_INTERVAL_MS != null) ?
@@ -97,13 +92,13 @@ public class ConsoleReportPrinter implements TestResultCollector {
         output.println();
 
         startTime = System.nanoTime();
+
+        timeBudget = tb;
     }
 
     @Override
     public synchronized void add(TestResult r) {
         sampleCount += r.getTotalCount();
-        sampleResults++;
-
         printResult(r);
     }
 
@@ -163,8 +158,11 @@ public class ConsoleReportPrinter implements TestResultCollector {
         long currentTime = System.nanoTime();
         final int cpus = executor.getCpus();
 
-        String l0 = String.format("(ETA: %s)",
-                computeETA());
+        String l0 = timeBudget.isZero() ? "(Sanity test mode)" :
+                String.format("(Time: %s, %d tests in flight, %d ms per test)",
+                        ReportUtils.msToDate(timeBudget.timeLeftMs(), false),
+                        timeBudget.inflightTests() + 1,
+                        timeBudget.targetTestTimeMs());
         String l1 = String.format("(Sampling Rate: %s)",
                 computeSpeed());
         String l2 = String.format("(JVMs: %d starting, %d running, %d finishing)",
@@ -250,39 +248,6 @@ public class ConsoleReportPrinter implements TestResultCollector {
         }
 
         return String.format("%3.2f #/sec", v);
-    }
-
-    private String computeETA() {
-        long timeSpent = System.nanoTime() - startTime;
-        long resultsGot = sampleResults;
-        if (resultsGot == 0) {
-            return "N/A";
-        }
-
-        long nsToGo = (long)(timeSpent * (1.0 * (expectedResults - 1) / resultsGot - 1));
-        if (nsToGo > 0) {
-            LocalDateTime ldt = LocalDateTime.now().plus(nsToGo, ChronoUnit.NANOS);
-
-            String result = "in ";
-            long days = TimeUnit.NANOSECONDS.toDays(nsToGo);
-            if (days > 0) {
-                result += days + "d+";
-                nsToGo -= TimeUnit.DAYS.toNanos(days);
-            }
-            long hours = TimeUnit.NANOSECONDS.toHours(nsToGo);
-            nsToGo -= TimeUnit.HOURS.toNanos(hours);
-
-            long minutes = TimeUnit.NANOSECONDS.toMinutes(nsToGo);
-            nsToGo -= TimeUnit.MINUTES.toNanos(minutes);
-
-            long seconds = TimeUnit.NANOSECONDS.toSeconds(nsToGo);
-
-            result += String.format("%02d:%02d:%02d", hours, minutes, seconds);
-            result += "; at " + ldt.format(fmt);
-            return result;
-        } else {
-            return "now";
-        }
     }
 
     public void setExecutor(TestExecutor executor) {

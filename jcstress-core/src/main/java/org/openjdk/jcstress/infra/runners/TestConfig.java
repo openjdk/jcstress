@@ -39,8 +39,6 @@ import java.util.List;
 
 public class TestConfig implements Serializable {
     public final SpinLoopStyle spinLoopStyle;
-    public final int time;
-    public final int iters;
     public final int threads;
     public final String name;
     public final String binaryName;
@@ -62,10 +60,8 @@ public class TestConfig implements Serializable {
     public TestConfig(Options opts, TestInfo info, int forkId, List<String> jvmArgs, int compileMode, SchedulingClass scl) {
         this.forkId = forkId;
         this.jvmArgs = jvmArgs;
-        time = opts.getTime();
         strideSize = opts.getStrideSize();
         strideCount = opts.getStrideCount();
-        iters = opts.getIterations();
         spinLoopStyle = opts.getSpinStyle();
         maxFootprintMB = opts.getMaxFootprintMb();
         threads = info.threads();
@@ -96,8 +92,6 @@ public class TestConfig implements Serializable {
         if (spinLoopStyle != that.spinLoopStyle) return false;
         if (strideSize != that.strideSize) return false;
         if (strideCount != that.strideCount) return false;
-        if (time != that.time) return false;
-        if (iters != that.iters) return false;
         if (threads != that.threads) return false;
         if (compileMode != that.compileMode) return false;
         if (!jvmArgs.equals(that.jvmArgs)) return false;
