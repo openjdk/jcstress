@@ -214,6 +214,12 @@ public class VMSupport {
                     "-XX:+StressCCP"
             );
 
+            detect("Unlocking C2 incremental inlining randomizer",
+                    SimpleTestMain.class,
+                    C2_STRESS_JVM_FLAGS,
+                    "-XX:+StressIncrementalInlining"
+            );
+
             STRESS_SEED_AVAILABLE = detect("Checking if C2 randomizers accept stress seed",
                     SimpleTestMain.class,
                     null,
