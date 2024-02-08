@@ -220,6 +220,12 @@ public class VMSupport {
                     "-XX:+StressIncrementalInlining"
             );
 
+            detect("Unlocking C2 macro expansion randomizer",
+                    SimpleTestMain.class,
+                    C2_STRESS_JVM_FLAGS,
+                    "-XX:+StressMacroExpansion"
+            );
+
             STRESS_SEED_AVAILABLE = detect("Checking if C2 randomizers accept stress seed",
                     SimpleTestMain.class,
                     null,
