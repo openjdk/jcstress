@@ -27,14 +27,9 @@ package org.openjdk.jcstress.infra.runners;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.util.Counter;
-import org.openjdk.jcstress.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Basic runner for concurrency tests.
@@ -62,10 +57,12 @@ public abstract class Runner<R> {
 
         try {
             sanityCheck(result);
-        } catch (ClassFormatError | NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
-            return dumpFailure(Status.API_MISMATCH, "Test sanity check failed, skipping", e);
         } catch (Throwable e) {
-            return dumpFailure(Status.CHECK_TEST_ERROR, "Check test failed", e);
+            if (isAPIMismatchException(e)) {
+                return dumpFailure(Status.API_MISMATCH, "Test sanity check failed, skipping", e);
+            } else {
+                return dumpFailure(Status.CHECK_TEST_ERROR, "Check test failed", e);
+            }
         }
 
         ArrayList<CounterThread<R>> workers = internalRun();
@@ -101,6 +98,20 @@ public abstract class Runner<R> {
         } while (!workers.isEmpty());
 
         return dump(result);
+    }
+
+    private static boolean isAPIMismatchException(Throwable e) {
+        while (e != null) {
+            if (e instanceof ClassFormatError ||
+                    e instanceof NoClassDefFoundError ||
+                    e instanceof NoSuchMethodError ||
+                    e instanceof NoSuchFieldError ||
+                    e instanceof UnsupportedOperationException) {
+                return true;
+            }
+            e = e.getCause();
+        }
+        return false;
     }
 
     protected TestResult dumpFailure(Status status, String message) {
