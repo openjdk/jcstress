@@ -83,24 +83,28 @@ public class VMSupport {
         System.out.println();
 
         detect("Unlocking diagnostic VM options",
+                true,
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
                 "-XX:+UnlockDiagnosticVMOptions"
         );
 
         detect("Disabling performance data collection",
+                true,
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
                 "-XX:-UsePerfData"
         );
 
         C1_AVAILABLE = detect("Checking for C1 availability",
+                true,
                 SimpleTestMain.class,
                 null,
                 "-XX:+C1ProfileCalls"
         );
 
         C2_AVAILABLE = detect("Checking for C2 availability",
+                true,
                 SimpleTestMain.class,
                 null,
                 "-XX:+UseLoopPredicate"
@@ -109,6 +113,7 @@ public class VMSupport {
         COMPILERS_AVAILABLE = C1_AVAILABLE || C2_AVAILABLE;
 
         BIASED_LOCKING_AVAILABLE = detect("Checking for biased locking support",
+                false,
                 SimpleTestMain.class,
                 null,
                 "-XX:+UseBiasedLocking"
@@ -123,6 +128,7 @@ public class VMSupport {
 
         int heap = opts.getHeapPerForkMb();
         detect("Trimming down the VM heap size to " + heap + "M",
+                true,
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
                 "-Xms" + heap + "M", "-Xmx" + heap + "M");
@@ -135,6 +141,7 @@ public class VMSupport {
 
         if (opts.isPretouchHeap()) {
             detect("Enabling Java heap pre-touch",
+                    true,
                     SimpleTestMain.class,
                     GLOBAL_JVM_FLAGS,
                     "-XX:+AlwaysPreTouch"
@@ -152,18 +159,21 @@ public class VMSupport {
         // modes instead.
 
         detect("Trimming down the number of parallel GC threads",
+                true,
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
                 "-XX:ParallelGCThreads=2"
         );
 
         detect("Trimming down the number of concurrent GC threads",
+                true,
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
                 "-XX:ConcGCThreads=2"
         );
 
         detect("Trimming down the number of G1 concurrent refinement GC threads",
+                true,
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
                 "-XX:G1ConcRefinementThreads=2"
@@ -171,6 +181,7 @@ public class VMSupport {
 
         if (COMPILERS_AVAILABLE) {
             detect("Trimming down the number of compiler threads",
+                    true,
                     SimpleTestMain.class,
                     GLOBAL_JVM_FLAGS,
                     "-XX:CICompilerCount=2" // This is the absolute minimum for tiered configurations
@@ -178,55 +189,127 @@ public class VMSupport {
         }
 
         detect("Testing @Contended works on all results and infra objects",
+                true,
                 ContendedTestMain.class,
                 GLOBAL_JVM_FLAGS,
                 "-XX:-RestrictContended"
         );
 
         detect("Unlocking debug information for non-safepoints",
+                true,
                 SimpleTestMain.class,
                 GLOBAL_JVM_FLAGS,
                 "-XX:+DebugNonSafepoints"
         );
 
+        detect("Disabling verification on exit",
+                true,
+                SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
+                "-XX:-VerifyBeforeExit"
+        );
+
+        detect("Disabling Thread SMR statistics",
+                true,
+                SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
+                "-XX:-EnableThreadSMRStatistics"
+        );
+
+        detect("Disabling debug JVM zapping: unused heap",
+                false,
+                SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
+                "-XX:-ZapUnusedHeapArea"
+        );
+
+        detect("Disabling debug JVM zapping: TLABs",
+                false,
+                SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
+                "-XX:-ZapTLAB"
+        );
+
+        detect("Disabling debug JVM zapping: filler objects",
+                false,
+                SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
+                "-XX:-ZapFillerObjects"
+        );
+
+        detect("Disabling debug JVM zapping: resource area",
+                false,
+                SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
+                "-XX:-ZapResourceArea"
+        );
+
+        detect("Disabling debug JVM zapping: VM handle area",
+                false,
+                SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
+                "-XX:-ZapVMHandleArea"
+        );
+
+        detect("Disabling debug JVM zapping: stack segments",
+                false,
+                SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
+                "-XX:-ZapStackSegments"
+        );
+
+        detect("Disabling debug JVM verification: compilation dependencies",
+                false,
+                SimpleTestMain.class,
+                GLOBAL_JVM_FLAGS,
+                "-XX:-VerifyDependencies"
+        );
+
         if (C2_AVAILABLE) {
             detect("Unlocking C2 local code motion randomizer",
+                    true,
                     SimpleTestMain.class,
                     C2_STRESS_JVM_FLAGS,
                     "-XX:+StressLCM"
             );
 
             detect("Unlocking C2 global code motion randomizer",
+                    true,
                     SimpleTestMain.class,
                     C2_STRESS_JVM_FLAGS,
                     "-XX:+StressGCM"
             );
 
             detect("Unlocking C2 iterative global value numbering randomizer",
+                    true,
                     SimpleTestMain.class,
                     C2_STRESS_JVM_FLAGS,
                     "-XX:+StressIGVN"
             );
 
             detect("Unlocking C2 conditional constant propagation randomizer",
+                    true,
                     SimpleTestMain.class,
                     C2_STRESS_JVM_FLAGS,
                     "-XX:+StressCCP"
             );
 
             detect("Unlocking C2 incremental inlining randomizer",
+                    true,
                     SimpleTestMain.class,
                     C2_STRESS_JVM_FLAGS,
                     "-XX:+StressIncrementalInlining"
             );
 
             detect("Unlocking C2 macro expansion randomizer",
+                    true,
                     SimpleTestMain.class,
                     C2_STRESS_JVM_FLAGS,
                     "-XX:+StressMacroExpansion"
             );
 
             STRESS_SEED_AVAILABLE = detect("Checking if C2 randomizers accept stress seed",
+                    true,
                     SimpleTestMain.class,
                     null,
                     "-XX:StressSeed=42"
@@ -237,12 +320,14 @@ public class VMSupport {
         }
 
         detect("Testing allocation profiling",
+                true,
                 AllocProfileMain.class,
                 null
         );
 
         THREAD_SPIN_WAIT_AVAILABLE =
                 detect("Testing Thread.onSpinWait",
+                        true,
                         ThreadSpinWaitTestMain.class,
                         null
                 );
@@ -250,6 +335,7 @@ public class VMSupport {
         if (COMPILERS_AVAILABLE) {
             PRINT_ASSEMBLY_AVAILABLE =
                 detect("Testing PrintAssembly",
+                        true,
                         SimpleTestMain.class,
                         null,
                         "-XX:+PrintAssembly"
@@ -264,6 +350,7 @@ public class VMSupport {
 
                 COMPILER_DIRECTIVES_AVAILABLE =
                         detect("Testing compiler directives",
+                                true,
                                 SimpleTestMain.class,
                                 null,
                                 "-XX:CompilerDirectivesFile=" + temp.getAbsolutePath()
@@ -278,7 +365,7 @@ public class VMSupport {
         System.out.println();
     }
 
-    private static boolean detect(String label, Class<?> mainClass, List<String> list, String... opts) {
+    private static boolean detect(String label, boolean expectPass, Class<?> mainClass, List<String> list, String... opts) {
         try {
             String[] arguments = ArrayUtils.concat(opts, mainClass.getName());
             tryWith(arguments);
@@ -289,7 +376,9 @@ public class VMSupport {
             return true;
         } catch (VMSupportException ex) {
             System.out.printf("----- %s %s%n", "[N/A]", label);
-            System.out.println(ex.getMessage());
+            if (expectPass) {
+                System.out.println(ex.getMessage());
+            }
             return false;
         }
     }
