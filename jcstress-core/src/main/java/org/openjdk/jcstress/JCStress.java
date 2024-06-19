@@ -56,6 +56,35 @@ public class JCStress {
     }
 
     public void run() throws Exception {
+        ConfigsWithScheduler configsWithScheduler = getConfigs();
+        if (configsWithScheduler == null) return;
+
+        TimeBudget timeBudget = new TimeBudget(configsWithScheduler.configs.size(), opts.timeBudget());
+        timeBudget.printOn(out);
+
+        ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), configsWithScheduler.configs.size(), timeBudget);
+        DiskWriteCollector diskCollector = new DiskWriteCollector(opts.getResultFile());
+        TestResultCollector mux = MuxCollector.of(printer, diskCollector);
+        SerializedBufferCollector sink = new SerializedBufferCollector(mux);
+
+        TestExecutor executor = new TestExecutor(opts.verbosity(), sink, configsWithScheduler.scheduler, timeBudget);
+        printer.setExecutor(executor);
+
+        executor.runAll(configsWithScheduler.configs);
+
+        sink.close();
+        diskCollector.close();
+
+        printer.printFinishLine();
+
+        out.println();
+        out.println();
+
+        parseResults();
+    }
+
+
+    public ConfigsWithScheduler getConfigs() {
         OSSupport.init();
 
         VMSupport.initFlags(opts);
@@ -63,7 +92,7 @@ public class JCStress {
         VMSupport.detectAvailableVMConfigs(opts.isSplitCompilation(), opts.getJvmArgs(), opts.getJvmArgsPrepend());
         if (VMSupport.getAvailableVMConfigs().isEmpty()) {
             out.println("FATAL: No JVM configurations to run with.");
-            return;
+            return null;
         }
 
         SortedSet<String> tests = getTests();
@@ -83,31 +112,20 @@ public class JCStress {
 
         if (configs.isEmpty()) {
             out.println("FATAL: No matching tests.");
-            return;
+            return null;
         }
+        ConfigsWithScheduler configsWithScheduler = new ConfigsWithScheduler(scheduler, configs);
+        return configsWithScheduler;
+    }
 
-        TimeBudget timeBudget = new TimeBudget(configs.size(), opts.timeBudget());
-        timeBudget.printOn(out);
+    public static class ConfigsWithScheduler {
+        public final Scheduler scheduler;
+        public final List<TestConfig> configs;
 
-        ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), configs.size(), timeBudget);
-        DiskWriteCollector diskCollector = new DiskWriteCollector(opts.getResultFile());
-        TestResultCollector mux = MuxCollector.of(printer, diskCollector);
-        SerializedBufferCollector sink = new SerializedBufferCollector(mux);
-
-        TestExecutor executor = new TestExecutor(opts.verbosity(), sink, scheduler, timeBudget);
-        printer.setExecutor(executor);
-
-        executor.runAll(configs);
-
-        sink.close();
-        diskCollector.close();
-
-        printer.printFinishLine();
-
-        out.println();
-        out.println();
-
-        parseResults();
+        public ConfigsWithScheduler(Scheduler scheduler, List<TestConfig> configs) {
+            this.scheduler = scheduler;
+            this.configs = configs;
+        }
     }
 
     private Map<Integer, List<SchedulingClass>> computeSchedulingClasses(SortedSet<String> tests, Scheduler scheduler) {
