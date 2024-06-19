@@ -40,6 +40,7 @@ import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Options.
@@ -393,5 +394,9 @@ public class Options {
     }
 
     public TimeValue timeBudget() { return timeBudget; }
+
+    public static List<String> filterAgentLib(List<String> originalArgs ) {
+        return originalArgs.stream().filter(s -> !s.startsWith("-agentlib")).collect(Collectors.toList());
+    }
 
 }
