@@ -36,6 +36,7 @@ import org.openjdk.jcstress.vm.VMSupport;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TestConfig implements Serializable {
     public final SpinLoopStyle spinLoopStyle;
@@ -243,5 +244,24 @@ public class TestConfig implements Serializable {
         }
         pw.println("]");
         pw.flush();
+    }
+
+
+    public String toDetailedTest() {
+        //binaryName have correct $ instead of . in name; omitted
+        //generatedRunnerName name with suffix (usually _Test_jcstress) omitted
+        //super.toString() as TestConfig@hash - omitted
+        return name +
+                " {" + actorNames +
+                ", spinLoopStyle=" + spinLoopStyle +
+                ", threads=" + threads +
+                ", forkId=" + forkId +
+                ", maxFootprintMB=" + maxFootprintMB +
+                ", compileMode=" + compileMode +
+                ", shClass=" + shClass +
+                ", strideSize=" + strideSize +
+                ", strideCount=" + strideCount +
+                ", cpuMap=" + cpuMap +
+                ", " + jvmArgs + "}";
     }
 }

@@ -24,10 +24,14 @@
  */
 package org.openjdk.jcstress;
 
+import org.openjdk.jcstress.infra.runners.TestConfig;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.URL;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -51,7 +55,21 @@ public class Main {
 
         JCStress jcstress = new JCStress(opts);
         if (opts.shouldList()) {
-            for (String test : jcstress.getTests()) {
+            JCStress.ConfigsWithScheduler configsWithScheduler = jcstress.getConfigs();
+            Set<String> testsToPrint = new TreeSet<>();
+            for (TestConfig test : configsWithScheduler.configs) {
+                if (opts.verbosity().printAllTests()) {
+                    testsToPrint.add(test.toDetailedTest());
+                } else {
+                    testsToPrint.add(test.name);
+                }
+            }
+            if (opts.verbosity().printAllTests()) {
+                System.out.println("All matching tests combinations - " + testsToPrint.size());
+            } else {
+                System.out.println("All matching tests - " + testsToPrint.size());
+            }
+            for (String test : testsToPrint) {
                 System.out.println(test);
             }
         } else if (opts.shouldParse()) {
