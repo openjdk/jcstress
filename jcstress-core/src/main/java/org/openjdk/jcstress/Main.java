@@ -55,27 +55,31 @@ public class Main {
 
         JCStress jcstress = new JCStress(opts);
         if (opts.shouldList()) {
-            JCStress.ConfigsWithScheduler configsWithScheduler = jcstress.getConfigs();
-            Set<String> testsToPrint = new TreeSet<>();
-            for (TestConfig test : configsWithScheduler.configs) {
-                if (opts.verbosity().printAllTests()) {
-                    testsToPrint.add(test.toDetailedTest());
-                } else {
-                    testsToPrint.add(test.name);
-                }
-            }
-            if (opts.verbosity().printAllTests()) {
-                System.out.println("All matching tests combinations - " + testsToPrint.size());
-            } else {
-                System.out.println("All matching tests - " + testsToPrint.size());
-            }
-            for (String test : testsToPrint) {
-                System.out.println(test);
-            }
+            listTests(opts, jcstress);
         } else if (opts.shouldParse()) {
             jcstress.parseResults();
         } else {
             jcstress.run();
+        }
+    }
+
+    private static void listTests(Options opts, JCStress jcstress) {
+        JCStress.ConfigsWithScheduler configsWithScheduler = jcstress.getConfigs();
+        Set<String> testsToPrint = new TreeSet<>();
+        for (TestConfig test : configsWithScheduler.configs) {
+            if (opts.verbosity().printAllTests()) {
+                testsToPrint.add(test.toDetailedTest());
+            } else {
+                testsToPrint.add(test.name);
+            }
+        }
+        if (opts.verbosity().printAllTests()) {
+            System.out.println("All matching tests combinations - " + testsToPrint.size());
+        } else {
+            System.out.println("All matching tests - " + testsToPrint.size());
+        }
+        for (String test : testsToPrint) {
+            System.out.println(test);
         }
     }
 
