@@ -395,8 +395,12 @@ public class VMSupport {
     }
 
     private static Config cleanArgs(Config orig) {
-        List<String> l = Options.filterAgentLib(orig.args);
+        List<String> l = removeJdwpAgentLib(orig.args);
         return new Config(l, orig.onlyIfC2(), orig.stress());
+    }
+
+    private static List<String> removeJdwpAgentLib(List<String> originalArgs ) {
+        return originalArgs.stream().filter(s -> !s.startsWith("-agentlib:jdwp")).collect(Collectors.toList());
     }
 
     public static void detectAvailableVMConfigs(boolean splitCompilation, List<String> jvmArgs, List<String> jvmArgsPrepend) {
