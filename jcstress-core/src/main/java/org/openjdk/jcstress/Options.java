@@ -395,8 +395,8 @@ public class Options {
 
     public TimeValue timeBudget() { return timeBudget; }
 
-    public static List<String> filterAgentLib(List<String> originalArgs ) {
-        return originalArgs.stream().filter(s -> !s.startsWith("-agentlib")).collect(Collectors.toList());
+    private static List<String> removeJdwpAgentLib(List<String> originalArgs ) {
+        return originalArgs.stream().filter(s -> !s.startsWith("-agentlib:jdwp")).collect(Collectors.toList());
     }
 
 }
