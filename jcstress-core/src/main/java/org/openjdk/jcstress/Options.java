@@ -47,7 +47,8 @@ import java.util.*;
  */
 public class Options {
 
-    private static final String LIST_OPTION_DESCRIPTION="List the available tests matching the requested settings, after all filters (like CPU count) are applied. In verbose mode it prints all real combinations which will run.";
+    private static final String LIST_OPTION_DESCRIPTION="List the available tests matching the requested settings, " +
+            "after all filters (like CPU count) are applied. In verbose mode it prints all real combinations which will run.";
     private String resultDir;
     private String testFilter;
     private int strideSize;
