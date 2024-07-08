@@ -227,8 +227,8 @@ public class JCStress {
         return s;
    }
 
-    public int listTests(Options opts, JCStress jcstress) {
-        JCStress.ConfigsWithScheduler configsWithScheduler = jcstress.getConfigs();
+    public int listTests(Options opts) {
+        JCStress.ConfigsWithScheduler configsWithScheduler = getConfigs();
         Set<String> testsToPrint = new TreeSet<>();
         for (TestConfig test : configsWithScheduler.configs) {
             if (opts.verbosity().printAllTests()) {

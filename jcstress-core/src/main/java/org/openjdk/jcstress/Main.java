@@ -24,8 +24,6 @@
  */
 package org.openjdk.jcstress;
 
-import org.openjdk.jcstress.infra.runners.TestConfig;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -52,7 +50,7 @@ public class Main {
 
         JCStress jcstress = new JCStress(opts);
         if (opts.shouldList()) {
-            jcstress.listTests(opts, jcstress);
+            jcstress.listTests(opts);
         } else if (opts.shouldParse()) {
             jcstress.parseResults();
         } else {
