@@ -114,8 +114,8 @@ public class JCStress {
             out.println("FATAL: No matching tests.");
             return null;
         }
-        ConfigsWithScheduler configsWithScheduler = new ConfigsWithScheduler(scheduler, configs);
-        return configsWithScheduler;
+
+        return new ConfigsWithScheduler(scheduler, configs);
     }
 
     public static class ConfigsWithScheduler {
