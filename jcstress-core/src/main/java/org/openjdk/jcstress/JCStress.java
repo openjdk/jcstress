@@ -56,8 +56,8 @@ public class JCStress {
     }
 
     public void run() throws Exception {
-        ConfigsWithScheduler configs = getConfigs();
-        if (configs == null) {
+        ConfigsWithScheduler configsWithScheduler = getConfigs();
+        if (configsWithScheduler == null) {
             return;
         }
 
@@ -84,7 +84,7 @@ public class JCStress {
 
         parseResults();
     }
-    public ConfigsWithScheduler getConfigs() {
+    private ConfigsWithScheduler getConfigs() {
         OSSupport.init();
 
         VMSupport.initFlags(opts);
@@ -118,7 +118,7 @@ public class JCStress {
         return new ConfigsWithScheduler(scheduler, configs);
     }
 
-    public static class ConfigsWithScheduler {
+    private static class ConfigsWithScheduler {
         public final Scheduler scheduler;
         public final List<TestConfig> configs;
 
@@ -225,5 +225,26 @@ public class JCStress {
         }
         return s;
    }
+
+    public int listTests(Options opts, JCStress jcstress) {
+        JCStress.ConfigsWithScheduler configsWithScheduler = jcstress.getConfigs();
+        Set<String> testsToPrint = new TreeSet<>();
+        for (TestConfig test : configsWithScheduler.configs) {
+            if (opts.verbosity().printAllTests()) {
+                testsToPrint.add(test.toDetailedTest());
+            } else {
+                testsToPrint.add(test.name);
+            }
+        }
+        if (opts.verbosity().printAllTests()) {
+            System.out.println("All matching tests combinations - " + testsToPrint.size());
+        } else {
+            System.out.println("All matching tests - " + testsToPrint.size());
+        }
+        for (String test : testsToPrint) {
+            System.out.println(test);
+        }
+        return testsToPrint.size();
+    }
 
 }
