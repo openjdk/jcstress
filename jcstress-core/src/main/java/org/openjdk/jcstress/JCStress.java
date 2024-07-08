@@ -56,8 +56,10 @@ public class JCStress {
     }
 
     public void run() throws Exception {
-        ConfigsWithScheduler configsWithScheduler = getConfigs();
-        if (configsWithScheduler == null) return;
+        ConfigsWithScheduler configs = getConfigs();
+        if (configs == null) {
+            return;
+        }
 
         TimeBudget timeBudget = new TimeBudget(configsWithScheduler.configs.size(), opts.timeBudget());
         timeBudget.printOn(out);
