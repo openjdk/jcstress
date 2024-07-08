@@ -84,8 +84,6 @@ public class JCStress {
 
         parseResults();
     }
-
-
     public ConfigsWithScheduler getConfigs() {
         OSSupport.init();
 
