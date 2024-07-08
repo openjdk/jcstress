@@ -456,6 +456,8 @@ public class VMSupport {
                     .map(c -> prependArgs(c, inputArgs))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         }
+
+        // Filter out unwanted arguments.
         configs = configs.stream()
                 .map(c -> cleanArgs(c))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
