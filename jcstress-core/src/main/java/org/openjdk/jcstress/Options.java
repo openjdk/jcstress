@@ -46,9 +46,6 @@ import java.util.*;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class Options {
-
-    private static final String LIST_OPTION_DESCRIPTION="List the available tests matching the requested settings, " +
-            "after all filters (like CPU count) are applied. In verbose mode it prints all real combinations which will run.";
     private String resultDir;
     private String testFilter;
     private int strideSize;
@@ -84,7 +81,8 @@ public class Options {
         OptionSpec<String> parse = parser.accepts("p", "Re-run parser on the result file. This will not run any tests.")
                 .withRequiredArg().ofType(String.class).describedAs("result file");
 
-        OptionSpec<Boolean> list = parser.accepts("l", LIST_OPTION_DESCRIPTION)
+        OptionSpec<Boolean> list = parser.accepts("l", "List the available tests matching the requested settings, " +
+                        "after all filters (like CPU count) are applied. In verbose mode it prints all real combinations which will run.")
                 .withOptionalArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<String> testFilter = parser.accepts("t", "Regexp selector for tests.")
