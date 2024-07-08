@@ -399,7 +399,7 @@ public class VMSupport {
         return new Config(l, orig.onlyIfC2(), orig.stress());
     }
 
-    private static List<String> removeJdwpAgentLib(List<String> originalArgs ) {
+    private static List<String> removeJdwpAgentLib(List<String> originalArgs) {
         return originalArgs.stream().filter(s -> !s.startsWith("-agentlib:jdwp")).collect(Collectors.toList());
     }
 
