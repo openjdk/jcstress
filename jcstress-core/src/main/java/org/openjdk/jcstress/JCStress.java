@@ -56,23 +56,23 @@ public class JCStress {
     }
 
     public void run() throws Exception {
-        ConfigsWithScheduler configsWithScheduler = getConfigs();
-        if (configsWithScheduler == null) {
+        ConfigsWithScheduler config = getConfigs();
+        if (config == null) {
             return;
         }
 
-        TimeBudget timeBudget = new TimeBudget(configsWithScheduler.configs.size(), opts.timeBudget());
+        TimeBudget timeBudget = new TimeBudget(config.configs.size(), opts.timeBudget());
         timeBudget.printOn(out);
 
-        ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), configsWithScheduler.configs.size(), timeBudget);
+        ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), config.configs.size(), timeBudget);
         DiskWriteCollector diskCollector = new DiskWriteCollector(opts.getResultFile());
         TestResultCollector mux = MuxCollector.of(printer, diskCollector);
         SerializedBufferCollector sink = new SerializedBufferCollector(mux);
 
-        TestExecutor executor = new TestExecutor(opts.verbosity(), sink, configsWithScheduler.scheduler, timeBudget);
+        TestExecutor executor = new TestExecutor(opts.verbosity(), sink, config.scheduler, timeBudget);
         printer.setExecutor(executor);
 
-        executor.runAll(configsWithScheduler.configs);
+        executor.runAll(config.configs);
 
         sink.close();
         diskCollector.close();
