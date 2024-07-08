@@ -395,7 +395,9 @@ public class VMSupport {
     }
 
     private static Config cleanArgs(Config orig) {
-        List<String> l = orig.args.stream().filter(s -> !s.startsWith("-agentlib:jdwp")).collect(Collectors.toList());
+        List<String> l = orig.args.stream()
+            .filter(s -> !s.startsWith("-agentlib:jdwp"))
+            .collect(Collectors.toList());
         return new Config(l, orig.onlyIfC2(), orig.stress());
     }
 
