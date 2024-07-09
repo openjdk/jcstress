@@ -394,6 +394,13 @@ public class VMSupport {
         return new Config(l, orig.onlyIfC2(), orig.stress());
     }
 
+    private static Config cleanArgs(Config orig) {
+        List<String> l = orig.args.stream()
+            .filter(s -> !s.startsWith("-agentlib:jdwp"))
+            .collect(Collectors.toList());
+        return new Config(l, orig.onlyIfC2(), orig.stress());
+    }
+
     public static void detectAvailableVMConfigs(boolean splitCompilation, List<String> jvmArgs, List<String> jvmArgsPrepend) {
         System.out.println("Probing what VM configurations are available:");
         System.out.println(" (failures are non-fatal, but may miss some interesting cases)");
@@ -450,6 +457,10 @@ public class VMSupport {
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         }
 
+        // Filter out unwanted arguments.
+        configs = configs.stream()
+                .map(c -> cleanArgs(c))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
         // Mix in prepends, if available
         if (jvmArgsPrepend != null) {
             configs = configs.stream()
