@@ -56,6 +56,36 @@ public class JCStress {
     }
 
     public void run() throws Exception {
+        ConfigsWithScheduler config = getConfigs();
+        if (config == null) {
+            return;
+        }
+
+        TimeBudget timeBudget = new TimeBudget(config.configs.size(), opts.timeBudget());
+        timeBudget.printOn(out);
+
+        ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), config.configs.size(), timeBudget);
+        DiskWriteCollector diskCollector = new DiskWriteCollector(opts.getResultFile());
+        TestResultCollector mux = MuxCollector.of(printer, diskCollector);
+        SerializedBufferCollector sink = new SerializedBufferCollector(mux);
+
+        TestExecutor executor = new TestExecutor(opts.verbosity(), sink, config.scheduler, timeBudget);
+        printer.setExecutor(executor);
+
+        executor.runAll(config.configs);
+
+        sink.close();
+        diskCollector.close();
+
+        printer.printFinishLine();
+
+        out.println();
+        out.println();
+
+        parseResults();
+    }
+
+    private ConfigsWithScheduler getConfigs() {
         OSSupport.init();
 
         VMSupport.initFlags(opts);
@@ -63,7 +93,7 @@ public class JCStress {
         VMSupport.detectAvailableVMConfigs(opts.isSplitCompilation(), opts.getJvmArgs(), opts.getJvmArgsPrepend());
         if (VMSupport.getAvailableVMConfigs().isEmpty()) {
             out.println("FATAL: No JVM configurations to run with.");
-            return;
+            return null;
         }
 
         SortedSet<String> tests = getTests();
@@ -83,31 +113,20 @@ public class JCStress {
 
         if (configs.isEmpty()) {
             out.println("FATAL: No matching tests.");
-            return;
+            return null;
         }
 
-        TimeBudget timeBudget = new TimeBudget(configs.size(), opts.timeBudget());
-        timeBudget.printOn(out);
+        return new ConfigsWithScheduler(scheduler, configs);
+    }
 
-        ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), configs.size(), timeBudget);
-        DiskWriteCollector diskCollector = new DiskWriteCollector(opts.getResultFile());
-        TestResultCollector mux = MuxCollector.of(printer, diskCollector);
-        SerializedBufferCollector sink = new SerializedBufferCollector(mux);
+    private static class ConfigsWithScheduler {
+        public final Scheduler scheduler;
+        public final List<TestConfig> configs;
 
-        TestExecutor executor = new TestExecutor(opts.verbosity(), sink, scheduler, timeBudget);
-        printer.setExecutor(executor);
-
-        executor.runAll(configs);
-
-        sink.close();
-        diskCollector.close();
-
-        printer.printFinishLine();
-
-        out.println();
-        out.println();
-
-        parseResults();
+        public ConfigsWithScheduler(Scheduler scheduler, List<TestConfig> configs) {
+            this.scheduler = scheduler;
+            this.configs = configs;
+        }
     }
 
     private Map<Integer, List<SchedulingClass>> computeSchedulingClasses(SortedSet<String> tests, Scheduler scheduler) {
@@ -207,5 +226,26 @@ public class JCStress {
         }
         return s;
    }
+
+    public int listTests(Options opts) {
+        JCStress.ConfigsWithScheduler configsWithScheduler = getConfigs();
+        Set<String> testsToPrint = new TreeSet<>();
+        for (TestConfig test : configsWithScheduler.configs) {
+            if (opts.verbosity().printAllTests()) {
+                testsToPrint.add(test.toDetailedTest());
+            } else {
+                testsToPrint.add(test.name);
+            }
+        }
+        if (opts.verbosity().printAllTests()) {
+            System.out.println("All matching tests combinations - " + testsToPrint.size());
+        } else {
+            System.out.println("All matching tests - " + testsToPrint.size());
+        }
+        for (String test : testsToPrint) {
+            System.out.println(test);
+        }
+        return testsToPrint.size();
+    }
 
 }

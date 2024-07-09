@@ -27,7 +27,6 @@ package org.openjdk.jcstress;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.net.URL;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -51,9 +50,7 @@ public class Main {
 
         JCStress jcstress = new JCStress(opts);
         if (opts.shouldList()) {
-            for (String test : jcstress.getTests()) {
-                System.out.println(test);
-            }
+            jcstress.listTests(opts);
         } else if (opts.shouldParse()) {
             jcstress.parseResults();
         } else {

@@ -244,4 +244,26 @@ public class TestConfig implements Serializable {
         pw.println("]");
         pw.flush();
     }
+
+
+    public String toDetailedTest() {
+        //binaryName have correct $ instead of . in name; omitted
+        //generatedRunnerName name with suffix (usually _Test_jcstress) omitted
+        //super.toString() as TestConfig@hash - omitted
+        StringBuilder verboseOutput = new StringBuilder(name);
+        verboseOutput.append(" {")
+                .append(actorNames)
+                .append(", spinLoopStyle: ").append(spinLoopStyle)
+                .append(", threads: ").append(threads)
+                .append(", forkId: ").append(forkId)
+                .append(", maxFootprintMB: ").append(maxFootprintMB)
+                .append(", compileMode: ").append(compileMode)
+                .append(", shClass: ").append(shClass)
+                .append(", strideSize: ").append(strideSize)
+                .append(", strideCount: ").append(strideCount)
+                .append(", cpuMap: ").append(cpuMap)
+                .append(", ").append(jvmArgs)
+                .append("}");
+        return verboseOutput.toString();
+    }
 }
