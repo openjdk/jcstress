@@ -99,8 +99,8 @@ public class JCStress {
         SortedSet<String> tests = getTests();
 
         Topology topology = Topology.get();
-        System.out.println("Detecting CPU topology and computing scheduling classes:");
-        topology.printStatus(System.out);
+        out.println("Detecting CPU topology and computing scheduling classes:");
+        topology.printStatus(out);
         out.println();
 
         out.println("  Scheduling classes for matching tests:");
@@ -238,12 +238,12 @@ public class JCStress {
             }
         }
         if (opts.verbosity().printAllTests()) {
-            System.out.println("All matching tests combinations - " + testsToPrint.size());
+            out.println("All matching tests combinations - " + testsToPrint.size());
         } else {
-            System.out.println("All matching tests - " + testsToPrint.size());
+            out.println("All matching tests - " + testsToPrint.size());
         }
         for (String test : testsToPrint) {
-            System.out.println(test);
+            out.println(test);
         }
         return testsToPrint.size();
     }
