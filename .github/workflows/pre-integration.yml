@@ -18,7 +18,7 @@ jobs:
       matrix:
         build-java: [17, 21]
         run-java: [8, 11, 17, 21]
-        os: [ubuntu-22.04, windows-2022, macos-11]
+        os: [ubuntu-22.04, windows-2022, macos-13]
       fail-fast: false
     name: Build JDK ${{ matrix.build-java }}, run JDK ${{ matrix.run-java }}, ${{ matrix.os }}
 
