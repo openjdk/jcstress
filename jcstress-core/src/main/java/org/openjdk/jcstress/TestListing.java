@@ -44,11 +44,11 @@ public class TestListing {
             return "Optional parameter is: "
                     + ALL + " all tests; "
                     + ALL_MATCHING + " all tests eligible for this system and configuration (like CPU count); "
-                    + ALL_MATCHING_COMBINATIONS + " all real combinations which will run in this setup."
-                    + MATCHING_GROUPS + " similar to above but the shared part is printed only once"
-                    + MATCHING_GROUPS_COUNT + " same as above, only instead of lsiting, just count is used"
-                    + MATCHING_IGROUPS + ", " + MATCHING_IGROUPS_COUNT + " same as above, only inverted"
-                    + " Defaults to " + ALL_MATCHING + " if none provided.";
+                    + ALL_MATCHING_COMBINATIONS + " all real combinations which will run in this setup; "
+                    + MATCHING_GROUPS + " similar to above but the shared part is printed only once; "
+                    + MATCHING_GROUPS_COUNT + " same as above, only instead of lsiting, just count is used; "
+                    + MATCHING_IGROUPS + ", " + MATCHING_IGROUPS_COUNT + " same as above, only inverted; "
+                    + "Defaults to " + ALL_MATCHING + " if none provided.";
         }
     }
 
