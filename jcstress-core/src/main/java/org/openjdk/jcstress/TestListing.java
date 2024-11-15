@@ -42,7 +42,7 @@ public class TestListing {
 
         public static String toDescription() {
             return "Optional parameter is: "
-                    + ALL + " - all tests; "
+                    + ALL + " all tests; "
                     + ALL_MATCHING + " all tests eligible for this system and configuration (like CPU count); "
                     + ALL_MATCHING_COMBINATIONS + " all real combinations which will run in this setup."
                     + MATCHING_GROUPS + " similar to above but the shared part is printed only once"
