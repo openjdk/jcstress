@@ -48,10 +48,10 @@ public class TextReportPrinter {
     private final PrintWriter pw;
     private final Set<TestResult> emittedTests;
 
-    public TextReportPrinter(Options opts, InProcessCollector collector) {
+    public TextReportPrinter(Verbosity verbosity, InProcessCollector collector) {
         this.collector = collector;
         this.pw = new PrintWriter(System.out, true);
-        this.verbosity = opts.verbosity();
+        this.verbosity = verbosity;
         this.emittedTests = new HashSet<>();
     }
 

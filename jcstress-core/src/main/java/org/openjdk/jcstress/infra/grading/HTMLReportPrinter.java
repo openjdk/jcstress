@@ -25,7 +25,6 @@
 package org.openjdk.jcstress.infra.grading;
 
 
-import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.TestInfo;
@@ -57,19 +56,23 @@ public class HTMLReportPrinter {
     private final InProcessCollector collector;
     private int cellStyle = 1;
 
-    public HTMLReportPrinter(Options opts, InProcessCollector collector, PrintStream out) {
+    public HTMLReportPrinter(String resultDir, InProcessCollector collector, PrintStream out) {
         this.collector = collector;
-        this.resultDir = opts.getResultDest();
+        this.resultDir = resultDir;
         File dir = new File(resultDir);
         dir.mkdirs();
-        out.println("  HTML report generated at " + dir.getAbsolutePath() + File.separator + "index.html");
+        out.println("  HTML report generated at " + dir.getAbsolutePath() + File.separator + getMainFileName());
+    }
+
+    public String getMainFileName() {
+        return "index.html";
     }
 
     public void work() throws FileNotFoundException {
         List<TestResult> byName = ReportUtils.mergedByName(collector.getTestResults());
         Collections.sort(byName, Comparator.comparing(TestResult::getName));
 
-        PrintWriter output = new PrintWriter(resultDir + "/index.html");
+        PrintWriter output = new PrintWriter(resultDir + File.separator + getMainFileName());
 
         printHeader(output);
 
