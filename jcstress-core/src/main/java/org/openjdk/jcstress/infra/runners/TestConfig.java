@@ -251,6 +251,7 @@ public class TestConfig implements Serializable {
         //binaryName have correct $ instead of . in name; omitted
         //generatedRunnerName name with suffix (usually _Test_jcstress) omitted
         //super.toString() as TestConfig@hash - omitted
+        //cpumap - null in listing, no reasonable toString method => omitted
         StringBuilder idString = new StringBuilder();
         idString.append(actorNames)
                 .append(", spinLoopStyle: ").append(spinLoopStyle)
@@ -261,7 +262,6 @@ public class TestConfig implements Serializable {
                 .append(", shClass: ").append(shClass)
                 .append(", strideSize: ").append(strideSize)
                 .append(", strideCount: ").append(strideCount)
-                .append(", cpuMap: ").append(cpuMap)
                 .append(", ").append(seed ? jvmArgs : maskSeed(jvmArgs));
         return idString.toString();
     }
