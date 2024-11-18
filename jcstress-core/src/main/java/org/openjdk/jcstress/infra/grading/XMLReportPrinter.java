@@ -94,7 +94,7 @@ public class XMLReportPrinter {
         out.println("  " + getSparseString() + " XML report generated at " + dir.getAbsolutePath() + File.separator + getMainFileName() + ". " + ERROR_AS_FAILURE + "=" + errorAsFailure + ", " + USE_TESTSUITES + "=" + useTestsuites);
     }
 
-    public String getMainFileName() {
+    private String getMainFileName() {
         return "junit-" + getSparseString() + ".xml";
     }
 

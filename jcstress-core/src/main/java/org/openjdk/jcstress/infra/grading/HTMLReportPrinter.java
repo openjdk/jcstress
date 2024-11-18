@@ -64,7 +64,7 @@ public class HTMLReportPrinter {
         out.println("  HTML report generated at " + dir.getAbsolutePath() + File.separator + getMainFileName());
     }
 
-    public String getMainFileName() {
+    private String getMainFileName() {
         return "index.html";
     }
 
