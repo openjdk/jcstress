@@ -174,7 +174,11 @@ public class XMLReportPrinter {
                 "All tests",
                 "",
                 r -> true);
-        emitTestReports(ReportUtils.byName(collector.getTestResults()), output);
+        if (sparse) {
+            emitTestReports(ReportUtils.byName(collector.getTestResults()), output);
+        } else {
+            emitTestReports(ReportUtils.byDetailedName(collector.getTestResults()), output);
+        }
         output.close();
     }
 
@@ -272,8 +276,8 @@ public class XMLReportPrinter {
     }
 
     private void emitTestReports(Multimap<String, TestResult> multiByName, PrintWriter local) {
-        multiByName.keys().parallelStream().forEach(name -> {
-            TestInfo test = TestList.getInfo(name);
+        multiByName.keys().stream().forEach(name -> {
+            TestInfo test = TestList.getInfo(name.split(" ")[0]);
             local.println(resultDir + "/" + name + ".html would be...");
             emitTestReport(local, multiByName.get(name), test);
             local.close();
@@ -383,11 +387,6 @@ public class XMLReportPrinter {
             o.println("<pre>" + cfg.jvmArgs + "</pre>");
         }
         o.println("</b></p>");
-    }
-
-    public String selectHTMLColor(Expect type, boolean isZero) {
-        String rgb = Integer.toHexString(selectColor(type, isZero).getRGB());
-        return "#" + rgb.substring(2);
     }
 
     public Color selectColor(Expect type, boolean isZero) {
