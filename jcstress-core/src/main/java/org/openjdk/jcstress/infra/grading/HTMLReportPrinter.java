@@ -174,7 +174,7 @@ public class HTMLReportPrinter {
         emitTestReports(ReportUtils.byName(collector.getTestResults()));
     }
 
-    private SortedMap<String, String> getEnv(List<TestResult> ts) {
+    static SortedMap<String, String> getEnv(List<TestResult> ts) {
         SortedMap<String, String> env = new TreeMap<>();
         for (TestResult result : ts) {
             if (result != null) {
@@ -356,10 +356,7 @@ public class HTMLReportPrinter {
         }
 
         List<TestResult> sorted = new ArrayList<>(results);
-        sorted.sort(Comparator
-                .comparing((TestResult t) -> t.getConfig().getCompileMode())
-                .thenComparing((TestResult t) -> t.getConfig().getSchedulingClass().toString())
-                .thenComparing((TestResult t) -> StringUtils.join(t.getConfig().jvmArgs, ",")));
+        resultsOrder(sorted);
 
         o.println("<h3>Environment</h3>");
         o.println("<table>");
@@ -493,6 +490,13 @@ public class HTMLReportPrinter {
         }
 
         printFooter(o);
+    }
+
+    static void resultsOrder(List<TestResult> sorted) {
+        sorted.sort(Comparator
+                .comparing((TestResult t) -> t.getConfig().getCompileMode())
+                .thenComparing((TestResult t) -> t.getConfig().getSchedulingClass().toString())
+                .thenComparing((TestResult t) -> StringUtils.join(t.getConfig().jvmArgs, ",")));
     }
 
     private void resultHeader(PrintWriter o, TestResult r) {

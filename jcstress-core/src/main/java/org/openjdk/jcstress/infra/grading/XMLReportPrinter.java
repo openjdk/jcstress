@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -130,6 +131,12 @@ public class XMLReportPrinter {
 
             int totalCount = passedCount + failedCount + sanityFailedCount;
 
+            String hostname="localhost";
+            try {
+                hostname = InetAddress.getLocalHost().getHostName();
+            }catch (Exception ex) {
+                //no interest
+            }
             output.println("<?xml version='1.0' encoding='UTF-8'?>");
             output.println("<testsuite name='jcstress'" +
                     " tests='" + totalCount + "'" +
@@ -137,11 +144,12 @@ public class XMLReportPrinter {
                     " errors='" + 0/*fixme*/ + "'" +
                     " skipped='" + sanityFailedCount + "' " +
                     " time='" + 0/*fixme*/ + "'" +
-                    " timestamp='" + new Date().toString() + ">");
+                    " timestamp='" + new Date().toString() +
+                    " hostname='" + hostname + ">");
 
         }
         {
-            SortedMap<String, String> env = getEnv(byName);
+            SortedMap<String, String> env = HTMLReportPrinter.getEnv(byName);
 
             output.println("  <properties>");
             for (Map.Entry<String, String> entry : env.entrySet()) {
@@ -152,6 +160,9 @@ public class XMLReportPrinter {
             output.println("    <property name='"+ERROR_AS_FAILURE+"' value='"+isErrorAsFailure()+"' />");
             output.println("  </properties>");
         }
+// we have create dsummary, lets try to prnt the rest from merged info
+        byName = ReportUtils.mergedByName(collector.getTestResults());
+        Collections.sort(byName, Comparator.comparing(TestResult::getName));
 
         output.println("<!--");
         printXTests(byName, output,
@@ -170,46 +181,9 @@ public class XMLReportPrinter {
                 r -> r.status() == Status.NORMAL && r.grading().hasInteresting);
         output.println("-->");
 
-        printXTests(byName, output,
-                "All tests",
-                "",
-                r -> true);
-        if (sparse) {
-            emitTestReports(ReportUtils.byName(collector.getTestResults()), output);
-        } else {
-            emitTestReports(ReportUtils.byDetailedName(collector.getTestResults()), output);
-        }
+        emitTestReports(ReportUtils.byName(collector.getTestResults()), output);
         output.close();
     }
-
-    private SortedMap<String, String> getEnv(List<TestResult> ts) {
-        SortedMap<String, String> env = new TreeMap<>();
-        for (TestResult result : ts) {
-            if (result != null) {
-                for (Map.Entry<String, String> kv : result.getEnv().entries().entrySet()) {
-                    String key = kv.getKey();
-                    String value = kv.getValue();
-                    String lastV = env.get(key);
-                    if (lastV == null) {
-                        env.put(key, value);
-                    } else {
-                        // Some VMs have these keys pre-populated with the command line,
-                        // which can have port definitions, PIDs, etc, and naturally
-                        // clash from launch to launch.
-                        if (key.equals("cmdLine")) continue;
-                        if (key.equals("launcher")) continue;
-
-                        if (!lastV.equalsIgnoreCase(value)) {
-                            System.err.println("Mismatched environment for key = " + key + ", was = " + lastV + ", now = " + value);
-                        }
-                    }
-                }
-            }
-        }
-        return env;
-    }
-
-
 
     private void printXTests(List<TestResult> byName,
                              PrintWriter output,
@@ -277,7 +251,7 @@ public class XMLReportPrinter {
 
     private void emitTestReports(Multimap<String, TestResult> multiByName, PrintWriter local) {
         multiByName.keys().stream().forEach(name -> {
-            TestInfo test = TestList.getInfo(name.split(" ")[0]);
+            TestInfo test = TestList.getInfo(name);
             local.println(resultDir + "/" + name + ".html would be...");
             emitTestReport(local, multiByName.get(name), test);
             local.close();
@@ -285,93 +259,138 @@ public class XMLReportPrinter {
     }
 
     public void emitTestReport(PrintWriter o, Collection<TestResult> results, TestInfo test) {
-        o.println("subtests of: " + test.name());
-        o.println("  Description and references:");
-        o.println("  * " + test.description() + "");
-        for (String ref : test.refs()) {
-            o.println("    " + ref);
-        }
+        //in sparse mode we print only test.name as test, with result based on cumulative
+        //otherwise we weill be printing only its individual combinations (to mach the summary)
+        if (sparse) {
+            List<TestResult> sorted = new ArrayList<>(results);
+            HTMLReportPrinter.resultsOrder(sorted);
 
-        List<TestResult> sorted = new ArrayList<>(results);
-        sorted.sort(Comparator
-                .comparing((TestResult t) -> t.getConfig().getCompileMode())
-                .thenComparing((TestResult t) -> t.getConfig().getSchedulingClass().toString())
-                .thenComparing((TestResult t) -> StringUtils.join(t.getConfig().jvmArgs, ",")));
-
-
-        o.println("<properties>");
-        for (Map.Entry<String, String> entry : getEnv(sorted).entrySet()) {
-            o.println("<property  name='" + entry.getKey() + "' value=" + entry.getValue() + "' />");
-        }
-        o.println("</properties>");
-
-        Set<String> keys = new TreeSet<>();
-        for (TestResult r : sorted) {
-            keys.addAll(r.getStateKeys());
-        }
-
-// fixme use later? Defiitley ther emust be for (String key : keys) {for (TestResult r : sorted) {}} of results
-//                GradingResult c = r.grading().gradingResults.get(key);
-//                    o.println("<td>" + c.expect + "</td>");
-//                    o.println("<td>" + c.description + "</td>");
-
-
-
-        for (TestResult r : sorted) {
-            String color = ReportUtils.statusToPassed(r) ? "green" : "red";
-            String label = ReportUtils.statusToLabel(r);
-            o.println(color + " " + label + " " + r.getConfig().toDetailedTest(false)); //TODO, keep using  the seed shading
-// this is that multiplication. Probably just span it to failure if any?
-//            for (String key : keys) {
-//                GradingResult c = r.grading().gradingResults.get(key);
-//                if (c != null) {
-//                    o.println("<td align='right' width='" + 100D / keys.size() + "%' bgColor=" + selectHTMLColor(c.expect, c.count == 0) + ">" + c.count + "</td>");
-//                } else {
-//                    o.println("<td align='right' width='" + 100D / keys.size() + "%' bgColor=" + selectHTMLColor(Expect.ACCEPTABLE, true) + ">0</td>");
-//                }
-//            }
-        }
-
-
-        o.println("<h3>Messages</h3>");
-
-        for (TestResult r : sorted) {
-            if (!r.getMessages().isEmpty()) {
-                resultHeader(o, r);
-                o.println("<pre>");
-                for (String data : r.getMessages()) {
-                    o.println(data);
-                }
-                o.println("</pre>");
-                o.println();
+            o.println("  <testcase class='jcstress' name='"+test.name());
+            o.println("      <properties>");
+            o.println("          <property name='description' value='"+test.description()+"'>");
+            for (String ref : test.refs()) {
+                o.println("          <property name='bug' value='"+ref+"'>");
             }
-        }
-
-        o.println("<h3>VM Output Streams</h3>");
-
-        for (TestResult r : sorted) {
-            if (!r.getVmOut().isEmpty()) {
-                resultHeader(o, r);
-                o.println("<pre>");
-                for (String data : r.getVmOut()) {
-                    o.println(data);
-                }
-                o.println("</pre>");
-                o.println();
+            for (Map.Entry<String, String> entry : HTMLReportPrinter.getEnv(sorted).entrySet()) {
+                o.println("          <property name='"+entry.getKey()+"' value='"+entry.getValue()+"'>");
             }
-        }
+            o.println("      </properties>");
 
-        o.println("<h3>VM Error Streams</h3>");
 
-        for (TestResult r : sorted) {
-            if (!r.getVmErr().isEmpty()) {
-                resultHeader(o, r);
-                o.println("<pre>");
-                for (String data : r.getVmErr()) {
-                    o.println(data);
+            Set<String> keys = new TreeSet<>();
+            for (TestResult r : sorted) {
+                keys.addAll(r.getStateKeys());
+            }
+            for (TestResult r : sorted) {
+                o.println("<failure>");
+                o.println(r.getConfig().toDetailedTest(false));
+                String color = ReportUtils.statusToPassed(r) ? "green" : "red";
+                String label = ReportUtils.statusToLabel(r);
+                o.println(color + " - " + label);
+
+                for (String key : keys) {
+                    GradingResult c = r.grading().gradingResults.get(key);
+                    if (c != null) {
+                        o.println(selectColor(c.expect, c.count == 0) + "/" + c.count + "");
+                    } else {
+                        o.println(selectColor(Expect.ACCEPTABLE, true) + "/0");
+                    }
                 }
-                o.println("</pre>");
-                o.println();
+                o.println("</failure>");
+            }
+
+            o.println("<system-out>");
+            for (TestResult r : sorted) {
+                if (!r.getMessages().isEmpty()) {
+                    resultHeader(o, r);
+                    for (String data : r.getMessages()) {
+                        o.println(data);
+                    }
+                    o.println();
+                }
+                if (!r.getVmOut().isEmpty()) {
+                    resultHeader(o, r);
+                    for (String data : r.getVmOut()) {
+                        o.println(data);
+                    }
+                    o.println();
+                }
+            }
+            o.println("</system-out>");
+            o.println("<system-err>");
+            for (TestResult r : sorted) {
+                if (!r.getVmErr().isEmpty()) {
+                    resultHeader(o, r);                TestConfig cfg = r.getConfig();
+                    for (String data : r.getVmErr()) {
+                        o.println(data);
+                    }
+                    o.println();
+                }
+            }
+            o.println("</system-err>\n");
+
+            o.println("</testcase>");
+        } else {
+            List<TestResult> sorted = new ArrayList<>(results);
+            HTMLReportPrinter.resultsOrder(sorted);
+            for (TestResult r : sorted) {
+                o.println("  <testcase class='jcstress' name='" + r.getConfig().toDetailedTest(false));
+                o.println("      <properties>");
+                o.println("          <property name='description' value='" + test.description() + "'>");
+                for (String ref : test.refs()) {
+                    o.println("          <property name='bug' value='" + ref + "'>");
+                }
+                for (Map.Entry<String, String> entry : HTMLReportPrinter.getEnv(sorted).entrySet()) {
+                    o.println("          <property name='" + entry.getKey() + "' value='" + entry.getValue() + "'>");
+                }
+                o.println("      </properties>");
+
+                Set<String> keys = new TreeSet<>();
+                keys.addAll(r.getStateKeys());
+                o.println("<failure>");
+
+                TestConfig cfg = r.getConfig();
+                o.println(r.getConfig().toDetailedTest(false));
+                String color = ReportUtils.statusToPassed(r) ? "green" : "red";
+                String label = ReportUtils.statusToLabel(r);
+                o.println(color + " - " + label);
+
+                for (String key : keys) {
+                    GradingResult c = r.grading().gradingResults.get(key);
+                    if (c != null) {
+                        o.println(selectColor(c.expect, c.count == 0) + "/" + c.count + "");
+                    } else {
+                        o.println(selectColor(Expect.ACCEPTABLE, true) + "/0");
+                    }
+                }
+                o.println("</failure>");
+                o.println("<system-out>");
+                if (!r.getMessages().isEmpty()) {
+                    resultHeader(o, r);
+                    for (String data : r.getMessages()) {
+                        o.println(data);
+                    }
+                    o.println();
+                }
+                if (!r.getVmOut().isEmpty()) {
+                    resultHeader(o, r);
+                    for (String data : r.getVmOut()) {
+                        o.println(data);
+                    }
+                    o.println();
+                }
+                o.println("</system-out>");
+                o.println("<system-err>");
+                if (!r.getVmErr().isEmpty()) {
+                    resultHeader(o, r);
+                    for (String data : r.getVmErr()) {
+                        o.println(data);
+                    }
+                    o.println();
+                }
+                o.println("</system-err>\n");
+
+                o.println("</testcase>");
             }
         }
 
@@ -379,26 +398,24 @@ public class XMLReportPrinter {
 
     private void resultHeader(PrintWriter o, TestResult r) {
         TestConfig cfg = r.getConfig();
-        o.println("<p><b>");
-        o.println("<pre>" + CompileMode.description(cfg.compileMode, cfg.actorNames) + "</pre>");
-        o.println("<pre>" + SchedulingClass.description(cfg.shClass, cfg.actorNames) + "</pre>");
+        o.println("CompileMode: " + CompileMode.description(cfg.compileMode, cfg.actorNames));
+        o.println("SchedulingClass" + SchedulingClass.description(cfg.shClass, cfg.actorNames));
         o.println("");
         if (!cfg.jvmArgs.isEmpty()) {
-            o.println("<pre>" + cfg.jvmArgs + "</pre>");
+            o.println("jvmargs:" + cfg.jvmArgs);
         }
-        o.println("</b></p>");
     }
 
-    public Color selectColor(Expect type, boolean isZero) {
+    public String selectColor(Expect type, boolean isZero) {
         switch (type) {
             case ACCEPTABLE:
-                return isZero ? Color.LIGHT_GRAY : Color.GREEN;
+                return isZero ? "LIGHT_GRAY" : "GREEN";
             case FORBIDDEN:
-                return isZero ? Color.LIGHT_GRAY : Color.RED;
+                return isZero ? "LIGHT_GRAY" : "RED";
             case ACCEPTABLE_INTERESTING:
-                return isZero ? Color.LIGHT_GRAY : Color.CYAN;
+                return isZero ? "LIGHT_GRAY" : "CYAN";
             case UNKNOWN:
-                return Color.RED;
+                return "RED";
             default:
                 throw new IllegalStateException();
         }

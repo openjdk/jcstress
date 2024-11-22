@@ -247,7 +247,7 @@ public class TestConfig implements Serializable {
     }
 
 
-    public String getTestVariant(boolean seed) {
+    public String getTestVariant(boolean keepSeed) {
         //binaryName have correct $ instead of . in name; omitted
         //generatedRunnerName name with suffix (usually _Test_jcstress) omitted
         //super.toString() as TestConfig@hash - omitted
@@ -262,7 +262,7 @@ public class TestConfig implements Serializable {
                 .append(", shClass: ").append(shClass)
                 .append(", strideSize: ").append(strideSize)
                 .append(", strideCount: ").append(strideCount)
-                .append(", ").append(seed ? jvmArgs : maskSeed(jvmArgs));
+                .append(", ").append(keepSeed ? jvmArgs : maskSeed(jvmArgs));
         return idString.toString();
     }
 
@@ -278,10 +278,10 @@ public class TestConfig implements Serializable {
         return argsCopy;
     }
 
-    public String toDetailedTest(boolean seed) {
+    public String toDetailedTest(boolean keepSeed) {
         StringBuilder verboseOutput = new StringBuilder(name);
         verboseOutput.append(" {")
-                .append(getTestVariant(seed))
+                .append(getTestVariant(keepSeed))
                 .append("}");
         return verboseOutput.toString();
     }
