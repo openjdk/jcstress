@@ -148,8 +148,8 @@ public class XMLReportPrinter {
                 output.println("    <property name='"+entry.getKey()+"' value='"+entry.getValue()+"' />");
             }
             output.println("    <property name='sparse' value='"+sparse+"' />");
-            output.println("    <property name='"+useTestsuites+"' value='"+isTestsuiteUsed()+"' />");
-            output.println("    <property name='"+errorAsFailure+"' value='"+isErrorAsFailure()+"' />");
+            output.println("    <property name='"+USE_TESTSUITES+"' value='"+isTestsuiteUsed()+"' />");
+            output.println("    <property name='"+ERROR_AS_FAILURE+"' value='"+isErrorAsFailure()+"' />");
             output.println("  </properties>");
         }
 
