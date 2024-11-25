@@ -262,7 +262,7 @@ public class TestConfig implements Serializable {
                 .append(", shClass: ").append(shClass)
                 .append(", strideSize: ").append(strideSize)
                 .append(", strideCount: ").append(strideCount)
-                .append(", ").append(keepSeed ? jvmArgs : maskSeed(jvmArgs));
+                .append(", ").append(keepSeed ? jvmArgs : maskSeed(jvmArgs)); //this is intentionally last to keep remaining prefix easily searchable
         return idString.toString();
     }
 
@@ -276,6 +276,15 @@ public class TestConfig implements Serializable {
             }
         }
         return argsCopy;
+    }
+
+    public String getSeed() {
+        for (String arg : jvmArgs) {
+            if (arg.startsWith("-XX:StressSeed=")) {
+                return arg;
+            }
+        }
+        return null;
     }
 
     public String toDetailedTest(boolean keepSeed) {

@@ -36,13 +36,27 @@ import org.openjdk.jcstress.os.SchedulingClass;
 import org.openjdk.jcstress.util.Multimap;
 import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.vm.CompileMode;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-import java.awt.Color;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -52,7 +66,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 
@@ -63,24 +76,17 @@ import java.util.function.Predicate;
  */
 public class XMLReportPrinter {
 
-    public static final String ERROR_AS_FAILURE = "jcstress.xml.error2failure";
-    public static final String USE_TESTSUITES = "jcstress.xml.testsuites";
+    public static final String ERROR_AS = "jcstress.report.xml.errorAs"; //pass/fail
+    public static final String USE_TESTSUITES = "jcstress.report.xml.sparse.testsuites";
+    public static final String DUPLICATE_PROPERTIES = "jcstress.report.xml.properties.dupliate";
+    public static final String VALIDATE = "jcstress.report.xml.validate";
+    public static final String NO_COMMENTS = "jcstress.report.xml.nocomments";
     private final String resultDir;
     private final InProcessCollector collector;
     private final boolean sparse;
-    private final boolean errorAsFailure;
-    private final boolean useTestsuites;
+    private final PrintStream out;
 
-
-    public static boolean isErrorAsFailure() {
-        return "true".equals(System.getProperty(XMLReportPrinter.ERROR_AS_FAILURE));
-    }
-
-    public static boolean isTestsuiteUsed() {
-        return "true".equals(System.getProperty(XMLReportPrinter.USE_TESTSUITES));
-    }
-
-    public XMLReportPrinter(String resultDir, InProcessCollector collector, PrintStream out, boolean sparse, boolean errorAsFailure, boolean useTestsuites) {
+    public XMLReportPrinter(String resultDir, InProcessCollector collector, PrintStream out, boolean sparse) {
         //sparse true -ALL_MATCHING
         //sparse false - as ALL_MATCHING_COMBINATIONS
         //jednou smichat, jednou ne. Varovani kolik jich bude
@@ -88,11 +94,68 @@ public class XMLReportPrinter {
         this.collector = collector;
         this.resultDir = resultDir;
         this.sparse = sparse;
-        this.errorAsFailure = errorAsFailure;
-        this.useTestsuites = useTestsuites;
         File dir = new File(resultDir);
         dir.mkdirs();
-        out.println("  " + getSparseString() + " XML report generated at " + dir.getAbsolutePath() + File.separator + getMainFileName() + ". " + ERROR_AS_FAILURE + "=" + errorAsFailure + ", " + USE_TESTSUITES + "=" + useTestsuites);
+        out.println("  " + getSparseString() + " XML report generated at " + dir.getAbsolutePath() + File.separator + getMainFileName());
+        this.out = out;
+    }
+
+    public static ErrorAs getErrorAs() {
+        if (System.getProperty(XMLReportPrinter.ERROR_AS) == null) {
+            return ErrorAs.error;
+        }
+        return Enum.valueOf(ErrorAs.class, System.getProperty(XMLReportPrinter.ERROR_AS));
+    }
+
+    public static boolean isTestsuiteUsed() {
+        return System.getProperty(XMLReportPrinter.USE_TESTSUITES) != null;
+    }
+
+    public static boolean isValidate() {
+        return System.getProperty(XMLReportPrinter.VALIDATE) != null;
+    }
+
+    public static boolean isDuplicateProperties() {
+        return System.getProperty(XMLReportPrinter.DUPLICATE_PROPERTIES) != null;
+    }
+
+    public static boolean isNoComments() {
+        return System.getProperty(XMLReportPrinter.NO_COMMENTS) != null;
+    }
+
+    private static void printBaseProperties(List<TestResult> sorted, PrintWriter o) {
+        for (Map.Entry<String, String> entry : HTMLReportPrinter.getEnv(sorted).entrySet()) {
+            o.println("          <property name='" + entry.getKey() + "' value='" + entry.getValue() + "'/>");
+        }
+    }
+
+    public static String getRoughCount(TestResult r) {
+        long sum = r.getTotalCount();
+        if (sum > 10) {
+            return "10^" + (int) Math.floor(Math.log10(sum));
+        } else {
+            return String.valueOf(sum);
+        }
+    }
+
+    private static void printSeed(PrintWriter o, TestResult r) {
+        if (r.getConfig().getSeed() != null) {
+            o.println("          <property name='seed' value='" + r.getConfig().getSeed() + "'/>");
+        }
+    }
+
+    private static void printRefs(PrintWriter o, TestInfo test) {
+        for (String ref : test.refs()) {
+            if (ref != null) {
+                o.println("          <property name='bug' value='" + ref + "'/>");
+            }
+        }
+    }
+
+    private static void printDescription(PrintWriter o, TestInfo test) {
+        if (test.description() != null) {
+            o.println("          <property name='description' value='" + test.description() + "'/>");
+        }
     }
 
     private String getMainFileName() {
@@ -107,7 +170,8 @@ public class XMLReportPrinter {
         List<TestResult> byName = sparse ? ReportUtils.mergedByName(collector.getTestResults()) : new ArrayList<>(collector.getTestResults());
         Collections.sort(byName, Comparator.comparing(TestResult::getName));
 
-        PrintWriter output = new PrintWriter(resultDir + File.separator + getMainFileName());
+        String filePath = resultDir + File.separator + getMainFileName();
+        PrintWriter output = new PrintWriter(filePath);
 
         {
             int passedCount = 0;
@@ -131,33 +195,35 @@ public class XMLReportPrinter {
 
             int totalCount = passedCount + failedCount + sanityFailedCount;
 
-            String hostname="localhost";
+            String hostname = "localhost";
             try {
                 hostname = InetAddress.getLocalHost().getHostName();
-            }catch (Exception ex) {
+            } catch (Exception ex) {
                 //no interest
             }
             output.println("<?xml version='1.0' encoding='UTF-8'?>");
+            //in case of testsuites used
+            //consuilt <testsuites name="Test run" tests="8" failures="1" errors="1" skipped="1" time="16.082687" timestamp="2021-04-02T15:48:23">
+            //check whether both writings ar eok for jtreg plugin
             output.println("<testsuite name='jcstress'" +
                     " tests='" + totalCount + "'" +
                     " failures='" + failedCount + "'" +
                     " errors='" + 0/*fixme*/ + "'" +
                     " skipped='" + sanityFailedCount + "' " +
                     " time='" + 0/*fixme*/ + "'" +
-                    " timestamp='" + new Date().toString() +
-                    " hostname='" + hostname + ">");
+                    " timestamp='" + new Date().toString() +  "' " +
+                    " hostname='" + hostname + "'>");
 
         }
         {
-            SortedMap<String, String> env = HTMLReportPrinter.getEnv(byName);
 
             output.println("  <properties>");
-            for (Map.Entry<String, String> entry : env.entrySet()) {
-                output.println("    <property name='"+entry.getKey()+"' value='"+entry.getValue()+"' />");
-            }
-            output.println("    <property name='sparse' value='"+sparse+"' />");
-            output.println("    <property name='"+USE_TESTSUITES+"' value='"+isTestsuiteUsed()+"' />");
-            output.println("    <property name='"+ERROR_AS_FAILURE+"' value='"+isErrorAsFailure()+"' />");
+            printBaseProperties(byName, output);
+            output.println("    <property name='sparse' value='" + sparse + "' />");
+            output.println("    <property name='" + USE_TESTSUITES + "' value='" + isTestsuiteUsed() + "' />");
+            output.println("    <property name='" + ERROR_AS + "' value='" + getErrorAs() + "' />");
+            output.println("    <property name='" + DUPLICATE_PROPERTIES + "' value='" + isDuplicateProperties() + "' />");
+            output.println("    <property name='" + NO_COMMENTS + "' value='" + isNoComments() + "' />");
             output.println("  </properties>");
         }
 // we have create dsummary, lets try to prnt the rest from merged info
@@ -182,7 +248,12 @@ public class XMLReportPrinter {
         output.println("-->");
 
         emitTestReports(ReportUtils.byName(collector.getTestResults()), output);
+        output.println("</testsuite>");
+        output.flush();
         output.close();
+        if (isValidate()) {
+            validate(filePath);
+        }
     }
 
     private void printXTests(List<TestResult> byName,
@@ -211,9 +282,9 @@ public class XMLReportPrinter {
     public void emitTest(PrintWriter output, TestResult result) {
         TestGrading grading = result.grading();
         if (grading.isPassed) {
-            output.println("  Passed - " + StringUtils.chunkName(result.getName()) + " " +getRoughCount(result));
+            output.println("  Passed - " + StringUtils.chunkName(result.getName()) + " " + getRoughCount(result));
         } else {
-            output.println("  FAILED - " + StringUtils.chunkName(result.getName()) + " " +getRoughCount(result));
+            output.println("  FAILED - " + StringUtils.chunkName(result.getName()) + " " + getRoughCount(result));
         }
 
         if (grading.hasInteresting) {
@@ -222,7 +293,7 @@ public class XMLReportPrinter {
     }
 
     public void emitTestFailure(PrintWriter output, TestResult result) {
-        output.println("   FAILED - " + StringUtils.chunkName(result.getName()) + " " +getRoughCount(result));
+        output.println("   FAILED - " + StringUtils.chunkName(result.getName()) + " " + getRoughCount(result));
         switch (result.status()) {
             case API_MISMATCH:
                 output.println("      API MISMATCH - Sanity check failed, API mismatch?");
@@ -240,54 +311,38 @@ public class XMLReportPrinter {
         }
     }
 
-    public static String getRoughCount(TestResult r) {
-        long sum = r.getTotalCount();
-        if (sum > 10) {
-            return "10^" + (int) Math.floor(Math.log10(sum));
-        } else {
-            return String.valueOf(sum);
-        }
-    }
-
     private void emitTestReports(Multimap<String, TestResult> multiByName, PrintWriter local) {
         multiByName.keys().stream().forEach(name -> {
             TestInfo test = TestList.getInfo(name);
             local.println(resultDir + "/" + name + ".html would be...");
             emitTestReport(local, multiByName.get(name), test);
-            local.close();
         });
     }
 
     public void emitTestReport(PrintWriter o, Collection<TestResult> results, TestInfo test) {
         //in sparse mode we print only test.name as test, with result based on cumulative
-        //otherwise we weill be printing only its individual combinations (to mach the summary)
+        //otherwise we will be printing only its individual combinations (to mach the summary)
         if (sparse) {
             List<TestResult> sorted = new ArrayList<>(results);
             HTMLReportPrinter.resultsOrder(sorted);
-
-            o.println("  <testcase class='jcstress' name='"+test.name());
+            o.println("  <testcase class='jcstress' name='" + test.name() + "'>");
             o.println("      <properties>");
-            o.println("          <property name='description' value='"+test.description()+"'>");
-            for (String ref : test.refs()) {
-                o.println("          <property name='bug' value='"+ref+"'>");
-            }
-            for (Map.Entry<String, String> entry : HTMLReportPrinter.getEnv(sorted).entrySet()) {
-                o.println("          <property name='"+entry.getKey()+"' value='"+entry.getValue()+"'>");
+            printDescription(o, test);
+            printRefs(o, test);
+            if (isDuplicateProperties()) {
+                printBaseProperties(sorted, o);
             }
             o.println("      </properties>");
-
-
             Set<String> keys = new TreeSet<>();
             for (TestResult r : sorted) {
                 keys.addAll(r.getStateKeys());
             }
+            o.println("<failure>"); //or error //or <!-- if pass?
             for (TestResult r : sorted) {
-                o.println("<failure>");
-                o.println(r.getConfig().toDetailedTest(false));
+                o.println(r.getConfig().toDetailedTest(true));
                 String color = ReportUtils.statusToPassed(r) ? "green" : "red";
                 String label = ReportUtils.statusToLabel(r);
                 o.println(color + " - " + label);
-
                 for (String key : keys) {
                     GradingResult c = r.grading().gradingResults.get(key);
                     if (c != null) {
@@ -296,8 +351,8 @@ public class XMLReportPrinter {
                         o.println(selectColor(Expect.ACCEPTABLE, true) + "/0");
                     }
                 }
-                o.println("</failure>");
             }
+            o.println("</failure>");//or error //or <!-- if pass?
 
             o.println("<system-out>");
             for (TestResult r : sorted) {
@@ -320,7 +375,8 @@ public class XMLReportPrinter {
             o.println("<system-err>");
             for (TestResult r : sorted) {
                 if (!r.getVmErr().isEmpty()) {
-                    resultHeader(o, r);                TestConfig cfg = r.getConfig();
+                    resultHeader(o, r);
+                    TestConfig cfg = r.getConfig();
                     for (String data : r.getVmErr()) {
                         o.println(data);
                     }
@@ -331,23 +387,24 @@ public class XMLReportPrinter {
 
             o.println("</testcase>");
         } else {
+            //if (isTestsuiteUsed()) then      o.println("  <testsuite name='"+test.name());
             List<TestResult> sorted = new ArrayList<>(results);
             HTMLReportPrinter.resultsOrder(sorted);
             for (TestResult r : sorted) {
-                o.println("  <testcase class='jcstress' name='" + r.getConfig().toDetailedTest(false));
+                o.println("  <testcase class='jcstress' name='" + r.getConfig().toDetailedTest(false) + "'>");
                 o.println("      <properties>");
-                o.println("          <property name='description' value='" + test.description() + "'>");
-                for (String ref : test.refs()) {
-                    o.println("          <property name='bug' value='" + ref + "'>");
+                printDescription(o, test);
+                printRefs(o, test);
+                printSeed(o, r);
+                if (isDuplicateProperties()) {
+                    printBaseProperties(sorted, o);
                 }
-                for (Map.Entry<String, String> entry : HTMLReportPrinter.getEnv(sorted).entrySet()) {
-                    o.println("          <property name='" + entry.getKey() + "' value='" + entry.getValue() + "'>");
-                }
+
                 o.println("      </properties>");
 
                 Set<String> keys = new TreeSet<>();
                 keys.addAll(r.getStateKeys());
-                o.println("<failure>");
+                o.println("<failure>");//or error //or <!-- if pass?
 
                 TestConfig cfg = r.getConfig();
                 o.println(r.getConfig().toDetailedTest(false));
@@ -363,7 +420,7 @@ public class XMLReportPrinter {
                         o.println(selectColor(Expect.ACCEPTABLE, true) + "/0");
                     }
                 }
-                o.println("</failure>");
+                o.println("</failure>");//or error //or <!-- if pass?
                 o.println("<system-out>");
                 if (!r.getMessages().isEmpty()) {
                     resultHeader(o, r);
@@ -419,6 +476,40 @@ public class XMLReportPrinter {
             default:
                 throw new IllegalStateException();
         }
+    }
+
+    public void validate(String xml) {
+        try {
+            out.println("Checking: " + xml);
+            wellFormed(xml);
+            validByXsd(xml);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private void wellFormed(String xml) throws ParserConfigurationException, SAXException, IOException {
+        out.println("Well formed?");
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setValidating(false);
+        factory.setNamespaceAware(true);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document document = builder.parse(new InputSource(xml));
+        out.println("Well formed!");
+    }
+
+    private void validByXsd(String xml) throws ParserConfigurationException, SAXException, IOException, URISyntaxException {
+        String url = "https://raw.githubusercontent.com/junit-team/junit5/refs/heads/main/platform-tests/src/test/resources/jenkins-junit.xsd";
+        out.println("Valid by " + url + " ?");
+        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        Schema schema = factory.newSchema(new URI(url).toURL());
+        Validator validator = schema.newValidator();
+        validator.validate(new StreamSource(new File(xml)));
+        out.println("Valid!");
+    }
+
+    private enum ErrorAs {
+        error, fail, pass
     }
 
 }
