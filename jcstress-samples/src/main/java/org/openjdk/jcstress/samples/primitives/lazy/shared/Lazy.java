@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,19 +22,25 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.singletons;
+package org.openjdk.jcstress.samples.primitives.lazy.shared;
 
-public interface Singleton {
+public interface Lazy<T> {
+    T get();
 
-    Byte x();
-
-    public static int map(Singleton singleton) {
-        if (singleton == null) {
-            return 0;
+    static String map(Lazy<Holder> lazy) {
+        if (lazy == null) {
+            return "null-lazy";
         }
-        if (singleton.x() == null) {
-            return 1;
+        try {
+            Holder holder = lazy.get();
+            if (holder == null) {
+                return "null-holder";
+            }
+            return holder.data;
+        } catch (SupplierDupException e) {
+            return "dup";
+        } catch (Exception e) {
+            return "exception";
         }
-        return singleton.x();
     }
 }
