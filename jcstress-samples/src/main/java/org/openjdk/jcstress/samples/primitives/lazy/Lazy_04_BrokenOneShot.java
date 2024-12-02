@@ -56,7 +56,7 @@ public class Lazy_04_BrokenOneShot {
         after first use and the acquire on fast path should give us the memory ordering we want.
      */
 
-    static class BrokenOneShotLazy<T> implements Lazy<T> {
+    public static class BrokenOneShotLazy<T> implements Lazy<T> {
         private volatile Supplier<T> factory;
         private T instance;
 

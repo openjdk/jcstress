@@ -59,7 +59,7 @@ public class Lazy_01_BrokenFactory {
         See Lazy.map(...) to understand the state that test verifies.
      */
 
-    static class BrokenFactoryLazy<T> implements Lazy<T> {
+    public static class BrokenFactoryLazy<T> implements Lazy<T> {
         private Supplier<T> factory;
         private volatile T instance;
 

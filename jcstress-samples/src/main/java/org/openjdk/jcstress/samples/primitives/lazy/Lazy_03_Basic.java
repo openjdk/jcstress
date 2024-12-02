@@ -51,7 +51,7 @@ public class Lazy_03_Basic {
         stores and loads of `set` form.
      */
 
-    static class BasicLazy<T> implements Lazy<T> {
+    public static class BasicLazy<T> implements Lazy<T> {
         private final Supplier<T> factory;
         private volatile boolean set;
         private T instance;

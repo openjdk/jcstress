@@ -58,21 +58,21 @@ public class Singleton_08_FinalWrapper {
         public T get(Supplier<T> supplier) {
             Wrapper<T> w = wrapper;
             if (w != null) {
-                return w.value;
+                return w.instance;
             }
 
             synchronized (this) {
                 if (wrapper == null) {
                     wrapper = new Wrapper<>(supplier.get());
                 }
-                return wrapper.value;
+                return wrapper.instance;
             }
         }
 
         private static class Wrapper<T> {
-            public final T value;
-            public Wrapper(T value) {
-                this.value = value;
+            public final T instance;
+            public Wrapper(T instance) {
+                this.instance = instance;
             }
         }
     }

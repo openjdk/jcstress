@@ -48,7 +48,7 @@ public class Singleton_10_ThreadLocalWitness {
         lookup on fast path.
      */
 
-    static class ThreadLocalWitness<T> implements Factory<T> {
+    public static class ThreadLocalWitness<T> implements Factory<T> {
         private final ThreadLocal<String> witness;
         private T instance;
 

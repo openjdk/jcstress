@@ -53,7 +53,7 @@ public class Lazy_02_BrokenNulls {
         pass it well.
      */
 
-    static class BrokenNullsLazy<T> implements Lazy<T> {
+    public static class BrokenNullsLazy<T> implements Lazy<T> {
         private final Supplier<T> factory;
         private volatile T instance;
 
