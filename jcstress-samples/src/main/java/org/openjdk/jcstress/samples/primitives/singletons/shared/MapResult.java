@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,15 +22,25 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.singletons;
+package org.openjdk.jcstress.samples.primitives.singletons.shared;
 
-import org.openjdk.jcstress.annotations.Description;
-import org.openjdk.jcstress.annotations.Expect;
-import org.openjdk.jcstress.annotations.Outcome;
+import java.util.function.Supplier;
 
-@Description("Tests the safe singleton pattern.")
-@Outcome(id = "0",  expect = Expect.FORBIDDEN,  desc = "Factory returned null singleton.")
-@Outcome(id = "1",  expect = Expect.FORBIDDEN,  desc = "The singleton data is null.")
-@Outcome(id = "42", expect = Expect.ACCEPTABLE, desc = "The singleton is observed in full.")
-public class GradingSafe {
+public class MapResult {
+
+    public static String map(Factory<Singleton> factory, Supplier<Singleton> supplier) {
+        if (factory == null) {
+            return "null-factory";
+        }
+        Singleton singleton = factory.get(supplier);
+        if (singleton == null) {
+            return "null-singleton";
+        }
+        String data = singleton.data();
+        if (data == null) {
+            return "null-data";
+        }
+        return data;
+    }
+
 }

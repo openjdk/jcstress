@@ -54,6 +54,11 @@ questions.
             <artifactId>jcstress-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjdk.jcstress</groupId>
+            <artifactId>jcstress-samples</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <properties>
@@ -62,7 +67,7 @@ questions.
         <!--
             JMH version to use with this project.
           -->
-        <jmh.version>1.36</jmh.version>
+        <jmh.version>1.37</jmh.version>
 
         <!--
             Java source/target to use for compilation.
