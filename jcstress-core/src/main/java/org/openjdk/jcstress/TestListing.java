@@ -38,7 +38,13 @@ public class TestListing {
     public enum ListingTypes {
         NONE, ALL, ALL_MATCHING, ALL_MATCHING_COMBINATIONS,
         MATCHING_GROUPS, MATCHING_GROUPS_COUNT,
-        MATCHING_IGROUPS, MATCHING_IGROUPS_COUNT;
+        MATCHING_IGROUPS, MATCHING_IGROUPS_COUNT,
+        TOTAL_ALL, TOTAL_ALL_MATCHING, TOTAL_ALL_MATCHING_COMBINATIONS,
+        TOTAL_MATCHING_GROUPS, TOTAL_MATCHING_GROUPS_COUNT,
+        TOTAL_MATCHING_IGROUPS, TOTAL_MATCHING_IGROUPS_COUNT,
+        JSON_ALL, JSON_ALL_MATCHING, JSON_ALL_MATCHING_COMBINATIONS,
+        JSON_MATCHING_GROUPS, JSON_MATCHING_GROUPS_COUNT,
+        JSON_MATCHING_IGROUPS, JSON_MATCHING_IGROUPS_COUNT;
 
         public static String toDescription() {
             return "Optional parameter is: "
@@ -48,7 +54,8 @@ public class TestListing {
                     + MATCHING_GROUPS + " similar to above but the shared part is printed only once; "
                     + MATCHING_GROUPS_COUNT + " same as above, only instead of lsiting, just count is used; "
                     + MATCHING_IGROUPS + ", " + MATCHING_IGROUPS_COUNT + " same as above, only inverted; "
-                    + "Defaults to " + ALL_MATCHING + " if none provided.";
+                    + "Defaults to " + ALL_MATCHING + " if none provided. You can prefix by TOTAL_ or JSON_"
+                    + "to print only summary line or to print valid jsons";
         }
     }
 
@@ -64,12 +71,16 @@ public class TestListing {
         Map<String, Object> testsToPrint = new TreeMap<>();
         switch (jcstress.opts.listingType()) {
             case ALL_MATCHING_COMBINATIONS:
+            case TOTAL_ALL_MATCHING_COMBINATIONS:
+            case JSON_ALL_MATCHING_COMBINATIONS:
                 for (TestConfig test : configsWithScheduler.configs) {
                     testsToPrint.put(test.toDetailedTest(), null);
                 }
                 jcstress.out.println("All matching tests combinations - " + testsToPrint.size());
                 break;
             case MATCHING_GROUPS_COUNT:
+            case TOTAL_MATCHING_GROUPS_COUNT:
+            case JSON_MATCHING_GROUPS_COUNT:
                 for (TestConfig test : configsWithScheduler.configs) {
                     Integer counter = (Integer) testsToPrint.getOrDefault(test.getTestVariant(false), 0);
                     counter++;
@@ -78,6 +89,8 @@ public class TestListing {
                 jcstress.out.println("All existing combinations (each with count of test) " + testsToPrint.size());
                 break;
             case MATCHING_IGROUPS_COUNT:
+            case TOTAL_MATCHING_IGROUPS_COUNT:
+            case JSON_MATCHING_IGROUPS_COUNT:
                 for (TestConfig test : configsWithScheduler.configs) {
                     Integer counter = (Integer) testsToPrint.getOrDefault(test.name, 0);
                     counter++;
@@ -86,6 +99,8 @@ public class TestListing {
                 jcstress.out.println("All matching tests (each with count of combinations) " + testsToPrint.size());
                 break;
             case MATCHING_GROUPS:
+            case TOTAL_MATCHING_GROUPS:
+            case JSON_MATCHING_GROUPS:
                 for (TestConfig test : configsWithScheduler.configs) {
                     Set<String> items = (Set<String>) testsToPrint.getOrDefault(test.getTestVariant(false), new TreeSet<String>());
                     items.add(test.name);
@@ -94,20 +109,26 @@ public class TestListing {
                 jcstress.out.println("All existing combinations " + testsToPrint.size());
                 break;
             case MATCHING_IGROUPS:
+            case TOTAL_MATCHING_IGROUPS:
+            case JSON_MATCHING_IGROUPS:
                 for (TestConfig test : configsWithScheduler.configs) {
                     Set<String> items = (Set<String>) (testsToPrint.getOrDefault(test.name, new TreeSet<String>()));
                     items.add(test.getTestVariant(false));
                     testsToPrint.put(test.name, items);
                 }
-                jcstress.out.println("All matching tests" + testsToPrint.size());
+                jcstress.out.println("All matching tests " + testsToPrint.size());
                 break;
             case ALL_MATCHING:
+            case TOTAL_ALL_MATCHING:
+            case JSON_ALL_MATCHING:
                 for (TestConfig test : configsWithScheduler.configs) {
                     testsToPrint.put(test.name, null);
                 }
                 jcstress.out.println("All matching tests - " + testsToPrint.size());
                 break;
             case ALL:
+            case TOTAL_ALL:
+            case JSON_ALL:
                 for (String test : jcstress.getTests()) {
                     testsToPrint.put(test, null);
                 }
@@ -115,6 +136,13 @@ public class TestListing {
                 break;
             default:
                 throw new RuntimeException("Invalid option for listing: " + jcstress.opts.listingType());
+        }
+        if (jcstress.opts.listingType().toString().startsWith("TOTAL_")) {
+            return testsToPrint.size();
+        }
+        if (jcstress.opts.listingType().toString().startsWith("JSON_")) {
+            jcstress.out.println("{");
+            jcstress.out.println("\"toal\": " + testsToPrint.size() + ", \"list\": {");
         }
         for (Map.Entry<String, Object> test : testsToPrint.entrySet()) {
             if (test.getValue() == null) {
@@ -131,6 +159,9 @@ public class TestListing {
                     jcstress.out.println(test.getKey() + "=?=" + test.getValue());
                 }
             }
+        }
+        if (jcstress.opts.listingType().toString().startsWith("JSON_")) {
+            jcstress.out.println("}}");
         }
         return testsToPrint.size();
     }
