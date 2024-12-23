@@ -74,6 +74,7 @@ public class TestListing {
             case TOTAL_ALL_MATCHING_COMBINATIONS:
             case JSON_ALL_MATCHING_COMBINATIONS:
                 for (TestConfig test : configsWithScheduler.configs) {
+                    //in json mode, see FIXME lower
                     testsToPrint.put(test.toDetailedTest(), null);
                 }
                 jcstress.out.println("All matching tests combinations - " + testsToPrint.size());
@@ -82,6 +83,7 @@ public class TestListing {
             case TOTAL_MATCHING_GROUPS_COUNT:
             case JSON_MATCHING_GROUPS_COUNT:
                 for (TestConfig test : configsWithScheduler.configs) {
+                    //in json mode, see FIXME lower
                     Integer counter = (Integer) testsToPrint.getOrDefault(test.getTestVariant(false), 0);
                     counter++;
                     testsToPrint.put(test.getTestVariant(false), counter);
@@ -103,6 +105,7 @@ public class TestListing {
             case JSON_MATCHING_GROUPS:
                 for (TestConfig test : configsWithScheduler.configs) {
                     Set<String> items = (Set<String>) testsToPrint.getOrDefault(test.getTestVariant(false), new TreeSet<String>());
+                    //in json mode, see FIXME lower
                     items.add(test.name);
                     testsToPrint.put(test.getTestVariant(false), items);
                 }
@@ -142,18 +145,49 @@ public class TestListing {
         }
         if (jcstress.opts.listingType().toString().startsWith("JSON_")) {
             jcstress.out.println("{");
-            jcstress.out.println("\"toal\": " + testsToPrint.size() + ", \"list\": {");
+            jcstress.out.println("\"toal\": " + testsToPrint.size() + ", \"list\": [");
         }
-        for (Map.Entry<String, Object> test : testsToPrint.entrySet()) {
+        Set<Map.Entry<String, Object>> entries = testsToPrint.entrySet();
+        int counter = entries.size();
+        for (Map.Entry<String, Object> test : entries) {
+            counter--;
             if (test.getValue() == null) {
-                jcstress.out.println(test.getKey());
+                if (jcstress.opts.listingType().toString().startsWith("JSON_")) {
+                    jcstress.out.print("\"" + test.getKey() + "\"");
+                    jsonArrayDelimiter(counter);
+                } else {
+                    jcstress.out.println(test.getKey());
+                }
             } else {
                 if (test.getValue() instanceof Integer) {
-                    jcstress.out.println(test.getValue() + " " + test.getKey());
+                    //"[publish, consume], spinLoopStyle: Thread.onSpinWait(), threads: 2, forkId: 2, maxFootprintMB: 64, compileMode: 8, shClass: (PG 0, CG 0), (PG 0, CG 1), strideSize: 256, strideCount: 40, cpuMap: null, [-XX:+UseBiasedLocking, -XX:+StressLCM, -XX:+StressGCM, -XX:+StressIGVN,
+                    // -XX:+StressCCP, -XX:StressSeed=yyyyyyyy]": 1
+                    //x
+                    // "org.openjdk.jcstress.tests.unsafe.UnsafeAddLong1": 96
+                    //FIXME, refactor the first, long one, so individual parts are json elements
+                    if (jcstress.opts.listingType().toString().startsWith("JSON_")) {
+                        jcstress.out.println("{\"" + test.getKey() + "\": " + test.getValue() + "}");
+                        jsonArrayDelimiter(counter);
+                    } else {
+                        jcstress.out.println(test.getValue() + " " + test.getKey());
+                    }
                 } else if (test.getValue() instanceof Collection) {
-                    jcstress.out.println(test.getKey() + " " + ((Collection) test.getValue()).size());
-                    for (Object item : (Collection) test.getValue()) {
-                        jcstress.out.println("    " + item);
+                    //FIXME, same as above
+                    if (jcstress.opts.listingType().toString().startsWith("JSON_")) {
+                        jcstress.out.println("{\"" + test.getKey() + "\": [");
+                        int subcounter = ((Collection) test.getValue()).size();
+                        for (Object item : (Collection) test.getValue()) {
+                            subcounter--;
+                            jcstress.out.println("\"" + item + "\"");
+                            jsonArrayDelimiter(subcounter);
+                        }
+                        jcstress.out.println("]}");
+                        jsonArrayDelimiter(counter);
+                    } else {
+                        jcstress.out.println(test.getKey() + " " + ((Collection) test.getValue()).size());
+                        for (Object item : (Collection) test.getValue()) {
+                            jcstress.out.println("    " + item);
+                        }
                     }
                 } else {
                     jcstress.out.println(test.getKey() + "=?=" + test.getValue());
@@ -161,9 +195,17 @@ public class TestListing {
             }
         }
         if (jcstress.opts.listingType().toString().startsWith("JSON_")) {
-            jcstress.out.println("}}");
+            jcstress.out.println("]}");
         }
         return testsToPrint.size();
+    }
+
+    private void jsonArrayDelimiter(int counter) {
+        if (counter != 0) {
+            jcstress.out.println(",");
+        } else {
+            jcstress.out.println();
+        }
     }
 
 }
