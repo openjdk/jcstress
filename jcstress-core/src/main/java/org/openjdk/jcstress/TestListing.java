@@ -35,6 +35,8 @@ import java.util.TreeSet;
 
 public class TestListing {
 
+    public static final String FLAT_JSON_VARIANTS = "jcstress.list.json.flat";
+
     public enum ListingTypes {
         NONE, ALL, ALL_MATCHING, ALL_MATCHING_COMBINATIONS,
         MATCHING_GROUPS, MATCHING_GROUPS_COUNT,
