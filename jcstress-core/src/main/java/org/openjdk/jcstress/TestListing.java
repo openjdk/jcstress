@@ -134,7 +134,7 @@ public class TestListing {
             case ALL:
             case TOTAL_ALL:
             case JSON_ALL:
-                for (String test : jcstress.getTests()) {
+                for (String test : jcstress.getTests(".*")) {
                     testsToPrint.put(test, null);
                 }
                 jcstress.out.println("All existing tests combinations - " + testsToPrint.size());

@@ -236,8 +236,11 @@ public class JCStress {
 
     public SortedSet<String> getTests() {
         String filter = opts.getTestFilter();
-        SortedSet<String> s = new TreeSet<>();
+        return getTests(filter);
+    }
 
+    public SortedSet<String> getTests(String filter) {
+        SortedSet<String> s = new TreeSet<>();
         Pattern pattern = Pattern.compile(filter);
         for (String testName : TestList.tests()) {
             if (pattern.matcher(testName).find()) {
