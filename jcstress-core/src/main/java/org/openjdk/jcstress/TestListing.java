@@ -26,7 +26,9 @@
 package org.openjdk.jcstress;
 
 import org.openjdk.jcstress.infra.runners.TestConfig;
+import org.openjdk.jcstress.util.StringUtils;
 
+import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +37,12 @@ import java.util.TreeSet;
 
 public class TestListing {
 
+    //Will flatten the header of complex json headers, if it is undesired by user for some reason
     public static final String FLAT_JSON_VARIANTS = "jcstress.list.json.flat";
+    //with json mixed to stdout, onehave to sed the header off, which may be inconvenient. This property will move it to stderr
+    //it may be better to move all the diagnostics to stderr, but that would bw quite invasive touch
+    //jcstress is strongly redirecting all stderrs of nested vms to stdout, so the list/json should remain clear
+    public static final String LIST_TO_STDERR = "jcstress.list.stderr";
 
     public enum ListingTypes {
         NONE, ALL, ALL_MATCHING, ALL_MATCHING_COMBINATIONS,
@@ -61,14 +68,42 @@ public class TestListing {
         }
     }
 
+    private final PrintStream listingOut;
     private final JCStress jcstress;
 
     public TestListing(JCStress jcstress) {
         this.jcstress = jcstress;
+        if (isStderr()) {
+            this.listingOut = System.err;
+        } else {
+            this.listingOut = jcstress.out;
+        }
+    }
+
+    private boolean isJsonHeader() {
+        if (jcstress.opts.listingType() == ListingTypes.JSON_ALL || jcstress.opts.listingType() == ListingTypes.JSON_ALL_MATCHING) {
+            return false;
+        }
+        return System.getProperty(FLAT_JSON_VARIANTS) == null;
+    }
+
+    private boolean isStderr() {
+        return System.getProperty(LIST_TO_STDERR) != null;
     }
 
     @SuppressWarnings("unchecked")
     public int listTests() {
+        Map<String, Object> testsToPrint = gatherTests();
+        if (jcstress.opts.listingType().toString().startsWith("TOTAL_")) {
+            return testsToPrint.size();
+        } else {
+            printTests(testsToPrint);
+            return testsToPrint.size();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> gatherTests() {
         JCStress.ConfigsWithScheduler configsWithScheduler = jcstress.getConfigs();
         Map<String, Object> testsToPrint = new TreeMap<>();
         switch (jcstress.opts.listingType()) {
@@ -76,8 +111,8 @@ public class TestListing {
             case TOTAL_ALL_MATCHING_COMBINATIONS:
             case JSON_ALL_MATCHING_COMBINATIONS:
                 for (TestConfig test : configsWithScheduler.configs) {
-                    //in json mode, see FIXME lower
-                    testsToPrint.put(test.toDetailedTest(), null);
+                    String id = test.toDetailedTest(isJsonWithHeader(), true, true, true);
+                    testsToPrint.put(id, null);
                 }
                 jcstress.out.println("All matching tests combinations - " + testsToPrint.size());
                 break;
@@ -85,10 +120,10 @@ public class TestListing {
             case TOTAL_MATCHING_GROUPS_COUNT:
             case JSON_MATCHING_GROUPS_COUNT:
                 for (TestConfig test : configsWithScheduler.configs) {
-                    //in json mode, see FIXME lower
-                    Integer counter = (Integer) testsToPrint.getOrDefault(test.getTestVariant(false), 0);
+                    String id = test.toDetailedTest(isJsonWithHeader(), false, false, isJsonWithHeader());
+                    Integer counter = (Integer) testsToPrint.getOrDefault(id, 0);
                     counter++;
-                    testsToPrint.put(test.getTestVariant(false), counter);
+                    testsToPrint.put(id, counter);
                 }
                 jcstress.out.println("All existing combinations (each with count of test) " + testsToPrint.size());
                 break;
@@ -96,9 +131,10 @@ public class TestListing {
             case TOTAL_MATCHING_IGROUPS_COUNT:
             case JSON_MATCHING_IGROUPS_COUNT:
                 for (TestConfig test : configsWithScheduler.configs) {
-                    Integer counter = (Integer) testsToPrint.getOrDefault(test.name, 0);
+                    String id = StringUtils.fieldToString("name", isJson(), false, test.name);
+                    Integer counter = (Integer) testsToPrint.getOrDefault(id, 0);
                     counter++;
-                    testsToPrint.put(test.name, counter);
+                    testsToPrint.put(id, counter);
                 }
                 jcstress.out.println("All matching tests (each with count of combinations) " + testsToPrint.size());
                 break;
@@ -106,10 +142,10 @@ public class TestListing {
             case TOTAL_MATCHING_GROUPS:
             case JSON_MATCHING_GROUPS:
                 for (TestConfig test : configsWithScheduler.configs) {
-                    Set<String> items = (Set<String>) testsToPrint.getOrDefault(test.getTestVariant(false), new TreeSet<String>());
-                    //in json mode, see FIXME lower
+                    String id = test.toDetailedTest(isJsonWithHeader(), false, false, isJsonWithHeader());
+                    Set<String> items = (Set<String>) testsToPrint.getOrDefault(id, new TreeSet<String>());
                     items.add(test.name);
-                    testsToPrint.put(test.getTestVariant(false), items);
+                    testsToPrint.put(id, items);
                 }
                 jcstress.out.println("All existing combinations " + testsToPrint.size());
                 break;
@@ -117,9 +153,10 @@ public class TestListing {
             case TOTAL_MATCHING_IGROUPS:
             case JSON_MATCHING_IGROUPS:
                 for (TestConfig test : configsWithScheduler.configs) {
-                    Set<String> items = (Set<String>) (testsToPrint.getOrDefault(test.name, new TreeSet<String>()));
-                    items.add(test.getTestVariant(false));
-                    testsToPrint.put(test.name, items);
+                    String id = StringUtils.fieldToString("name", isJson(), false, test.name);
+                    Set<String> items = (Set<String>) (testsToPrint.getOrDefault(id, new TreeSet<String>()));
+                    items.add(test.toDetailedTest(isJsonWithHeader(), false, false, isJsonWithHeader()));
+                    testsToPrint.put(id, items);
                 }
                 jcstress.out.println("All matching tests " + testsToPrint.size());
                 break;
@@ -142,71 +179,97 @@ public class TestListing {
             default:
                 throw new RuntimeException("Invalid option for listing: " + jcstress.opts.listingType());
         }
-        if (jcstress.opts.listingType().toString().startsWith("TOTAL_")) {
-            return testsToPrint.size();
-        }
-        if (jcstress.opts.listingType().toString().startsWith("JSON_")) {
-            jcstress.out.println("{");
-            jcstress.out.println("\"toal\": " + testsToPrint.size() + ", \"list\": [");
+        return testsToPrint;
+    }
+
+    private void printTests(Map<String, Object> testsToPrint) {
+        if (isJson()) {
+            listingOut.println("{");
+            listingOut.println("\"toal\": " + testsToPrint.size() + ", \"list\": [");
         }
         Set<Map.Entry<String, Object>> entries = testsToPrint.entrySet();
         int counter = entries.size();
         for (Map.Entry<String, Object> test : entries) {
             counter--;
             if (test.getValue() == null) {
-                if (jcstress.opts.listingType().toString().startsWith("JSON_")) {
-                    jcstress.out.print("\"" + test.getKey() + "\"");
+                if (isJson()) {
+                    if (isJsonHeader()) {
+                        listingOut.println("{" + test.getKey() + "}");
+                    } else {
+                        listingOut.print("\"" + test.getKey() + "\"");
+                    }
                     jsonArrayDelimiter(counter);
                 } else {
-                    jcstress.out.println(test.getKey());
+                    listingOut.println(test.getKey());
                 }
             } else {
                 if (test.getValue() instanceof Integer) {
-                    //"[publish, consume], spinLoopStyle: Thread.onSpinWait(), threads: 2, forkId: 2, maxFootprintMB: 64, compileMode: 8, shClass: (PG 0, CG 0), (PG 0, CG 1), strideSize: 256, strideCount: 40, cpuMap: null, [-XX:+UseBiasedLocking, -XX:+StressLCM, -XX:+StressGCM, -XX:+StressIGVN,
-                    // -XX:+StressCCP, -XX:StressSeed=yyyyyyyy]": 1
-                    //x
-                    // "org.openjdk.jcstress.tests.unsafe.UnsafeAddLong1": 96
-                    //FIXME, refactor the first, long one, so individual parts are json elements
-                    if (jcstress.opts.listingType().toString().startsWith("JSON_")) {
-                        jcstress.out.println("{\"" + test.getKey() + "\": " + test.getValue() + "}");
+                    if (isJson()) {
+                        if (isJsonHeader() || isInvertedGroup()) {
+                            listingOut.println("{" + test.getKey() + ", \"testcount\":" + test.getValue() + "}");
+                        } else {
+                            listingOut.println("{\"" + test.getKey() + "\": " + test.getValue() + "}");
+                        }
                         jsonArrayDelimiter(counter);
                     } else {
-                        jcstress.out.println(test.getValue() + " " + test.getKey());
+                        listingOut.println(test.getValue() + " " + test.getKey());
                     }
                 } else if (test.getValue() instanceof Collection) {
-                    //FIXME, same as above
-                    if (jcstress.opts.listingType().toString().startsWith("JSON_")) {
-                        jcstress.out.println("{\"" + test.getKey() + "\": [");
+                    if (isJson()) {
+                        if (isJsonHeader() || isInvertedGroup()) {
+                            listingOut.println("{" + test.getKey() + ", \"testlist\": [");
+                        } else {
+                            listingOut.println("{\"" + test.getKey() + "\": [");
+                        }
                         int subcounter = ((Collection) test.getValue()).size();
                         for (Object item : (Collection) test.getValue()) {
                             subcounter--;
-                            jcstress.out.println("\"" + item + "\"");
+                            if (jcstress.opts.listingType() == ListingTypes.JSON_MATCHING_GROUPS) {
+                                //?
+                                listingOut.println("\"" + item + "\"");
+                            } else if (isJsonHeader()) {
+                                listingOut.println("{" + item + "}");
+                            } else {
+                                listingOut.println("\"" + item + "\"");
+                            }
                             jsonArrayDelimiter(subcounter);
                         }
-                        jcstress.out.println("]}");
+                        listingOut.println("]}");
                         jsonArrayDelimiter(counter);
                     } else {
-                        jcstress.out.println(test.getKey() + " " + ((Collection) test.getValue()).size());
+                        listingOut.println(test.getKey() + " " + ((Collection) test.getValue()).size());
                         for (Object item : (Collection) test.getValue()) {
-                            jcstress.out.println("    " + item);
+                            listingOut.println("    " + item);
                         }
                     }
                 } else {
-                    jcstress.out.println(test.getKey() + "=?=" + test.getValue());
+                    listingOut.println(test.getKey() + "=?=" + test.getValue());
                 }
             }
         }
-        if (jcstress.opts.listingType().toString().startsWith("JSON_")) {
-            jcstress.out.println("]}");
+        if (isJson()) {
+            listingOut.println("]}");
         }
-        return testsToPrint.size();
     }
+
+    private boolean isJsonWithHeader() {
+        return isJson() && isJsonHeader();
+    }
+
+    private boolean isJson() {
+        return jcstress.opts.listingType().toString().startsWith("JSON_");
+    }
+
+    private boolean isInvertedGroup() {
+        return jcstress.opts.listingType().toString().contains("IGROUPS");
+    }
+
 
     private void jsonArrayDelimiter(int counter) {
         if (counter != 0) {
-            jcstress.out.println(",");
+            listingOut.println(",");
         } else {
-            jcstress.out.println();
+            listingOut.println();
         }
     }
 
