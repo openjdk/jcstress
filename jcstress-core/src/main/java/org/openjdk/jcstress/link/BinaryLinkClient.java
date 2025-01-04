@@ -24,6 +24,7 @@
  */
 package org.openjdk.jcstress.link;
 
+import org.openjdk.jcstress.UsedProperties;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 
@@ -32,7 +33,7 @@ import java.net.Socket;
 
 public final class BinaryLinkClient {
 
-    private static final int LINK_TIMEOUT_MS = Integer.getInteger("jcstress.link.timeoutMs", 30 * 1000);
+    private static final int LINK_TIMEOUT_MS = UsedProperties.getJcstressLinkTimeoutMs();
 
     private final String hostName;
     private final int hostPort;

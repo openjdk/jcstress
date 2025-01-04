@@ -27,6 +27,7 @@ package org.openjdk.jcstress.infra.grading;
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.TestExecutor;
 import org.openjdk.jcstress.TimeBudget;
+import org.openjdk.jcstress.UsedProperties;
 import org.openjdk.jcstress.Verbosity;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
@@ -42,8 +43,6 @@ import java.util.concurrent.TimeUnit;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class ConsoleReportPrinter implements TestResultCollector {
-
-    private static final Integer PRINT_INTERVAL_MS = Integer.getInteger("jcstress.console.printIntervalMs");
 
     private final Verbosity verbosity;
     private final PrintWriter output;
@@ -80,13 +79,11 @@ public class ConsoleReportPrinter implements TestResultCollector {
         Arrays.fill(progressLen, 1);
 
         progressFirstLine = true;
-        progressInteractive = (System.console() != null);
+        progressInteractive = UsedProperties.isProgressInteractive();
         progressAnsi = VMSupport.isLinux();
         output.println("  Attached the " + (progressInteractive ? "interactive console" : "non-interactive output stream") + ".");
 
-        printIntervalMs = (PRINT_INTERVAL_MS != null) ?
-                PRINT_INTERVAL_MS :
-                progressInteractive ? 1_000 : 15_000;
+        printIntervalMs = UsedProperties.getPrintIntervalMs();
 
         output.println("  Printing the progress line at most every " + printIntervalMs + " milliseconds.");
         output.println();
