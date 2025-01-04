@@ -27,71 +27,168 @@ package org.openjdk.jcstress;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Known Properties affecting JCStress. Some of them publicly document themselves, some do not need to.
  */
 public class UsedProperties {
-    private static final String JCSTRESS_TIMEBUDGET_DEFAULTPERTESTMS = "jcstress.timeBudget.defaultPerTestMs";
-    private static final int JCSTRESS_TIMEBUDGET_DEFAULTPERTESTMS_DEFAULT = 3000;
-    private static final String JCSTRESS_TIMEBUDGET_DEFAULTPERTESTMS_COMMENT = JCSTRESS_TIMEBUDGET_DEFAULTPERTESTMS +
-            " set default time the individual test executes. Defaults to " + JCSTRESS_TIMEBUDGET_DEFAULTPERTESTMS_DEFAULT +
-            "ms set to " + getJcstressTimeBudgetDefaultPerTestMs() + "ms";
 
-    private static final String JCSTRESS_TIMEBUDGET_MINTIMEMS = "jcstress.timeBudget.minTimeMs";
-    private static final int JCSTRESS_TIMEBUDGET_MINTIMEMS_DEFAULT = 30;
-    private static final String JCSTRESS_TIMEBUDGET_MINTIMEMS_COMMENT = JCSTRESS_TIMEBUDGET_MINTIMEMS +
-            " set minimal time the individual test executes. Defaults to " + JCSTRESS_TIMEBUDGET_MINTIMEMS_DEFAULT +
-            "ms set to " + getJcstressTimeBudgetMinTimeMs() + "ms";
+    private static abstract class JcstressProperty<T> {
+        private final String key;
+        private final List<T> defaults;
 
-    private static final String JCSTRESS_TIMEBUDGET_MAXTIMEMS = "jcstress.timeBudget.maxTimeMs";
-    private static final int JCSTRESS_TIMEBUDGET_MAXTIMEMS_DEFAULT = 60_000;
-    private static final String JCSTRESS_TIMEBUDGET_MAXTIMEMS_COMMENT = JCSTRESS_TIMEBUDGET_MAXTIMEMS +
-            " set maximum time the individual test executes. Defaults to " + JCSTRESS_TIMEBUDGET_MAXTIMEMS_DEFAULT +
-            "ms set to " + getJcstressTimeBudgetMaxTimeMs() + "ms";
+        public JcstressProperty(String key, T[] defaults) {
+            this.key = key;
+            this.defaults = Collections.unmodifiableList(Arrays.asList(defaults));
+        }
 
-    private static final String JCSTRESS_TIMEBUDGET_ADDITIONAL_COMMENT = "The time each test is run is (simplified) calculated as value of " + Options.TIME_BUDGET_SWITCH + " switch divided by number of tests (after all filters applied)" +
-            " If te resulting time is smaller then " + JCSTRESS_TIMEBUDGET_MINTIMEMS + ", it is used.  If it si bigger then " + JCSTRESS_TIMEBUDGET_MAXTIMEMS + " it is used. If no " + Options.TIME_BUDGET_SWITCH + "  is set," +
-            " then " + JCSTRESS_TIMEBUDGET_DEFAULTPERTESTMS + " is used. See " + Options.TIME_BUDGET_SWITCH + " for more info. Properties do not accept unit suffixes.";
+        public String getKey() {
+            return key;
+        }
 
-    private static final String JCSTRESS_LINK_ADDRESS = "jcstress.link.address";
-    private static final String JCSTRESS_LINK_ADDRESS_COMMENT = JCSTRESS_LINK_ADDRESS + " is address where to connect to forked VMs. Defaults to loop-back. Set to '" + getListenAddressForInfo() + "'";
+        public List<T> getDefaults() {
+            return defaults;
+        }
 
-    private static final String JCSTRESS_LINK_PORT = "jcstress.link.port";
-    private static final int JCSTRESS_LINK_PORT_DEFAULT = 0;
-    private static final String JCSTRESS_LINK_PORT_COMMENT = JCSTRESS_LINK_PORT + " is port where to connect to forked VMs on " + JCSTRESS_LINK_ADDRESS + ". Defaults to " + JCSTRESS_LINK_PORT_DEFAULT + " (random free port)." +
-            " Set to " + getJcstressLinkPort();
+        public T getDefault() {
+            return defaults.get(0);
+        }
 
-    private static final String JCSTRESS_LINK_TIMEOUTMS = "jcstress.link.timeoutMs";
-    private static final int JCSTRESS_LINK_TIMEOUTMS_DEFAULT = 30 * 1000;
-    private static final String JCSTRESS_LINK_TIMEOUTMS_COMMENT = JCSTRESS_LINK_TIMEOUTMS + " set timeout to forked VM communication ms." +
-            " Defaults to " + JCSTRESS_LINK_TIMEOUTMS_DEFAULT + "ms. Set to " + getJcstressLinkTimeoutMs() + "ms.";
+        public boolean isCustom(){
+            return System.getProperty(getKey()) != null;
+        }
 
-    private static final String JCSTRESS_CONSOLE_PRINTINTERVALMS = "jcstress.console.printIntervalMs";
-    private static final long JCSTRESS_CONSOLE_PRINTINTERVALMS_INTERACTIVE_DEFAULT = 1_000;
-    private static final long JCSTRESS_CONSOLE_PRINTINTERVALMS_NONINTERACTIVE_DEFAULT = 15_000;
-    private static final String JCSTRESS_CONSOLE_PRINTINTERVALMS_COMMENT = JCSTRESS_CONSOLE_PRINTINTERVALMS + " sets interval how often to print results to console in ms. Have two defaults: " +
-            JCSTRESS_CONSOLE_PRINTINTERVALMS_INTERACTIVE_DEFAULT + "ms in interactive mode and " +
-            JCSTRESS_CONSOLE_PRINTINTERVALMS_NONINTERACTIVE_DEFAULT + "ms in noninteractive mode. Set to " +
-            getPrintIntervalMs() + "ms";
+        public abstract String getDescription();
+
+        public abstract T getValue();
+    }
+
+    private static abstract class IntJcstressProperty extends JcstressProperty<Integer> {
+
+        public IntJcstressProperty(String key, Integer... defaults) {
+            super(key, defaults);
+        }
+
+        @Override
+        public Integer getValue() {
+            return Integer.getInteger(getKey(), getDefault());
+        }
+    }
+
+    private static abstract class LongJcstressProperty extends JcstressProperty<Long> {
+
+        public LongJcstressProperty(String key, Long... defaults) {
+            super(key, defaults);
+        }
+
+        @Override
+        public Long getValue() {
+            return Long.getLong(getKey(), getDefault());
+        }
+    }
+
+
+    private static abstract class StringJcstressProperty extends JcstressProperty<String> {
+
+        public StringJcstressProperty(String key, String... defaults) {
+            super(key, defaults);
+        }
+
+        @Override
+        public String getValue() {
+            return System.getProperty(getKey(), getDefault());
+        }
+    }
+
+    private static final IntJcstressProperty TIMEBUDGET_DEFAULTPERTESTMS = new IntJcstressProperty("jcstress.timeBudget.defaultPerTestMs", 3000) {
+        @Override
+        public String getDescription() {
+            return getKey() + " set default time the individual test executes. Defaults to " + getDefault() +
+                    "ms set to " + getValue() + "ms";
+        }
+    };
+
+    private static final IntJcstressProperty TIMEBUDGET_MINTIMEMS = new IntJcstressProperty("jcstress.timeBudget.minTimeMs", 30) {
+        @Override
+        public String getDescription() {
+            return getKey() + " set minimal time the individual test executes. Defaults to " + getDefault() +
+                    "ms set to " + getValue() + "ms";
+        }
+    };
+
+    private static final IntJcstressProperty TIMEBUDGET_MAXTIMEMS = new IntJcstressProperty("jcstress.timeBudget.maxTimeMs", 60_000) {
+        @Override
+        public String getDescription() {
+            return getKey() +
+                    " set maximum time the individual test executes. Defaults to " + getDefault() +
+                    "ms set to " + getValue() + "ms";
+        }
+    };
+
+    private static final String TIMEBUDGET_ADDITIONAL_COMMENT = "The time each test is run is (simplified) calculated as value of " + Options.TIME_BUDGET_SWITCH + " switch divided by number of tests (after all filters applied)" +
+            " If te resulting time is smaller then " + TIMEBUDGET_MINTIMEMS.getKey() + ", it is used.  If it si bigger then " + TIMEBUDGET_MAXTIMEMS.getKey() + " it is used. If no " + Options.TIME_BUDGET_SWITCH + "  is set," +
+            " then " + TIMEBUDGET_DEFAULTPERTESTMS.getKey() + " is used. See " + Options.TIME_BUDGET_SWITCH + " for more info. Properties do not accept unit suffixes.";
+
+    private static final StringJcstressProperty LINK_ADDRESS = new StringJcstressProperty("jcstress.link.address", new String[]{null}) {
+        @Override
+        public String getDescription() {
+            return getKey() + " is address where to connect to forked VMs. Defaults to loop-back. Set to '" + getListenAddressForInfo() + "'";
+        }
+    };
+
+
+    private static final IntJcstressProperty LINK_PORT = new IntJcstressProperty("jcstress.link.port", 0) {
+        @Override
+        public String getDescription() {
+            return getKey() + " is port where to connect to forked VMs on " + LINK_ADDRESS.getKey() + ". Defaults to " + getDefault() + " (random free port)." +
+                    " Set to " + getJcstressLinkPort();
+        }
+    };
+
+    private static final IntJcstressProperty LINK_TIMEOUTMS = new IntJcstressProperty("jcstress.link.timeoutMs", 30 * 1000) {
+        @Override
+        public String getDescription() {
+            return getKey() + " set timeout to forked VM communication ms." +
+                    " Defaults to " + getDefault() + "ms. Set to " + getValue() + "ms.";
+        }
+    };
+
+    private static final LongJcstressProperty CONSOLE_PRINTINTERVALMS = new LongJcstressProperty("jcstress.console.printIntervalMs", 1_000L, 15_000L) {
+
+        @Override
+        public Long getValue() {
+            return Long.getLong(getKey(), null);
+        }
+
+        @Override
+        public String getDescription() {
+            return getKey() + " sets interval how often to print results to console in ms. Have two defaults: " +
+                    getDefaults().get(0) + "ms in interactive mode and " +
+                    getDefaults().get(1) + "ms in noninteractive mode. Set to " +
+                    getPrintIntervalMs() + "ms";
+        }
+    };
 
     public static int getJcstressTimeBudgetDefaultPerTestMs() {
-        return Integer.getInteger(JCSTRESS_TIMEBUDGET_DEFAULTPERTESTMS, JCSTRESS_TIMEBUDGET_DEFAULTPERTESTMS_DEFAULT);
+        return TIMEBUDGET_DEFAULTPERTESTMS.getValue();
     }
 
     public static int getJcstressTimeBudgetMinTimeMs() {
-        return Integer.getInteger(JCSTRESS_TIMEBUDGET_MINTIMEMS, JCSTRESS_TIMEBUDGET_MINTIMEMS_DEFAULT);
+        return TIMEBUDGET_MINTIMEMS.getValue();
     }
 
     public static int getJcstressTimeBudgetMaxTimeMs() {
-        return Integer.getInteger(JCSTRESS_TIMEBUDGET_MAXTIMEMS, JCSTRESS_TIMEBUDGET_MAXTIMEMS_DEFAULT);
+        return TIMEBUDGET_MAXTIMEMS.getValue();
     }
 
     private static String getJcstressLinkAddress() {
-        return System.getProperty(JCSTRESS_LINK_ADDRESS);
+        return LINK_ADDRESS.getValue();
     }
 
-    public static String getListenAddressForInfo() {
+    private static String getListenAddressForInfo() {
         try {
             return getListenAddress().toString();
         } catch (Exception ex) {
@@ -114,39 +211,33 @@ public class UsedProperties {
     }
 
     public static int getJcstressLinkPort() {
-        return Integer.getInteger(JCSTRESS_LINK_PORT, JCSTRESS_LINK_PORT_DEFAULT);
+        return LINK_PORT.getValue();
     }
 
 
     public static int getJcstressLinkTimeoutMs() {
-        return Integer.getInteger(JCSTRESS_LINK_TIMEOUTMS, JCSTRESS_LINK_TIMEOUTMS_DEFAULT);
+        return LINK_TIMEOUTMS.getValue();
     }
 
     public static boolean isProgressInteractive() {
         return System.console() != null;
     }
 
-    private static String getJcstressConsolePrintIntervalMs() {
-        return System.getProperty(JCSTRESS_CONSOLE_PRINTINTERVALMS);
-    }
-
     public static long getPrintIntervalMs() {
-        return (getJcstressConsolePrintIntervalMs() != null) ?
-                Long.parseLong(getJcstressConsolePrintIntervalMs()) :
-                isProgressInteractive() ? JCSTRESS_CONSOLE_PRINTINTERVALMS_INTERACTIVE_DEFAULT : JCSTRESS_CONSOLE_PRINTINTERVALMS_NONINTERACTIVE_DEFAULT;
+        return (CONSOLE_PRINTINTERVALMS.isCustom()) ?
+                CONSOLE_PRINTINTERVALMS.getValue() :
+                isProgressInteractive() ? CONSOLE_PRINTINTERVALMS.getDefaults().get(0) : CONSOLE_PRINTINTERVALMS.getDefaults().get(1);
     }
 
     public static void printHelpOn(PrintStream ouer) {
         ouer.println("JCStress recognize several internal properties:");
-        ouer.println("  " + JCSTRESS_TIMEBUDGET_DEFAULTPERTESTMS_COMMENT);
-        ouer.println("  " + JCSTRESS_TIMEBUDGET_MINTIMEMS_COMMENT);
-        ouer.println("  " + JCSTRESS_TIMEBUDGET_MAXTIMEMS_COMMENT);
-        ouer.println("  " + JCSTRESS_TIMEBUDGET_ADDITIONAL_COMMENT);
-        ouer.println("  " + JCSTRESS_LINK_ADDRESS_COMMENT);
-        ouer.println("  " + JCSTRESS_LINK_PORT_COMMENT);
-        ouer.println("  " + JCSTRESS_LINK_TIMEOUTMS_COMMENT);
-        ouer.println("  " + JCSTRESS_CONSOLE_PRINTINTERVALMS_COMMENT);
-
-
+        ouer.println("  " + TIMEBUDGET_DEFAULTPERTESTMS.getDescription());
+        ouer.println("  " + TIMEBUDGET_MINTIMEMS.getDescription());
+        ouer.println("  " + TIMEBUDGET_MAXTIMEMS.getDescription());
+        ouer.println("  " + TIMEBUDGET_ADDITIONAL_COMMENT);
+        ouer.println("  " + LINK_ADDRESS.getDescription());
+        ouer.println("  " + LINK_PORT.getDescription());
+        ouer.println("  " + LINK_TIMEOUTMS.getDescription());
+        ouer.println("  " + CONSOLE_PRINTINTERVALMS.getDescription());
     }
 }
