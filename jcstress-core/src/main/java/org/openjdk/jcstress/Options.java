@@ -91,11 +91,11 @@ public class Options {
                 .withRequiredArg().ofType(String.class).describedAs("regexp");
 
         OptionSpec<Integer> strideSize = parser.accepts("strideSize", "Internal stride size. Larger value decreases " +
-                        "the synchronization overhead, but also reduces the number of collisions.")
+                "the synchronization overhead, but also reduces the number of collisions.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
         OptionSpec<Integer> strideCount = parser.accepts("strideCount", "Internal stride count per epoch. " +
-                        "Larger value increases cache footprint.")
+                 "Larger value increases cache footprint.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
         OptionSpec<Integer> optTime = parser.accepts("time", "(Deprecated, to be removed in next releases.)")
@@ -105,36 +105,36 @@ public class Options {
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
         OptionSpec<Integer> cpus = parser.accepts("c", "Number of CPUs to use. Defaults to all CPUs in the system. " +
-                        "Reducing the number of CPUs limits the amount of resources (including memory) the run is using.")
+                "Reducing the number of CPUs limits the amount of resources (including memory) the run is using.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
         OptionSpec<Integer> heapPerFork = parser.accepts("hs", "Java heap size per fork, in megabytes. This " +
-                        "affects the stride size: maximum footprint will never be exceeded, regardless of min/max stride sizes.")
+                "affects the stride size: maximum footprint will never be exceeded, regardless of min/max stride sizes.")
                 .withRequiredArg().ofType(Integer.class).describedAs("MB");
 
         OptionSpec<SpinLoopStyle> spinStyle = parser.accepts("spinStyle", "Busy loop wait style. " +
-                        "HARD = hard busy loop; THREAD_YIELD = use Thread.yield(); THREAD_SPIN_WAIT = use Thread.onSpinWait(); LOCKSUPPORT_PARK_NANOS = use LockSupport.parkNanos().")
+                "HARD = hard busy loop; THREAD_YIELD = use Thread.yield(); THREAD_SPIN_WAIT = use Thread.onSpinWait(); LOCKSUPPORT_PARK_NANOS = use LockSupport.parkNanos().")
                 .withRequiredArg().ofType(SpinLoopStyle.class).describedAs("style");
 
         OptionSpec<Integer> forks = parser.accepts("f", "Should fork each test N times. \"0\" to run in the embedded mode " +
-                        "with occasional forking.")
+                "with occasional forking.")
                 .withOptionalArg().ofType(Integer.class).describedAs("count");
 
         OptionSpec<Integer> forksStressMultiplier = parser.accepts("fsm", "Fork multiplier for randomized/stress tests. " +
-                        "This allows more efficient randomized testing, as each fork would use a different seed.")
+                "This allows more efficient randomized testing, as each fork would use a different seed.")
                 .withOptionalArg().ofType(Integer.class).describedAs("multiplier");
 
         OptionSpec<String> optModeStr = parser.accepts("m", "(Deprecated, to be removed in next releases).")
                 .withRequiredArg().ofType(String.class).describedAs("mode");
 
         OptionSpec<String> optJvmArgs = parser.accepts("jvmArgs", "Use given JVM arguments. This disables JVM flags auto-detection, " +
-                        "and runs only the single JVM mode. Either a single space-separated option line, or multiple options are accepted. " +
-                        "This option only affects forked runs.")
+                "and runs only the single JVM mode. Either a single space-separated option line, or multiple options are accepted. " +
+                "This option only affects forked runs.")
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
         OptionSpec<String> optJvmArgsPrepend = parser.accepts("jvmArgsPrepend", "Prepend given JVM arguments to auto-detected configurations. " +
-                        "Either a single space-separated option line, or multiple options are accepted. " +
-                        "This option only affects forked runs.")
+                "Either a single space-separated option line, or multiple options are accepted. " +
+                "This option only affects forked runs.")
                 .withRequiredArg().ofType(String.class).describedAs("string");
 
         OptionSpec<Boolean> optSplitCompilation = parser.accepts("sc", "Use split per-actor compilation mode, if available.")
@@ -147,9 +147,9 @@ public class Options {
                 .withOptionalArg().ofType(Boolean.class).describedAs("bool");
 
         OptionSpec<TimeValue> optTimeBudget = parser.accepts(TIME_BUDGET_SWITCH, "Time budget to run the tests. Harness code would try to fit the entire " +
-                        "run in the desired timeframe. This value is expected to be reasonable, as it is not guaranteed that tests would succeed " +
-                        "in arbitrarily low time budget. If not set, harness would try to decide a reasonable time, given the number of tests to run. " +
-                        "Common time suffixes (s/m/h/d) are accepted.")
+                "run in the desired timeframe. This value is expected to be reasonable, as it is not guaranteed that tests would succeed " +
+                "in arbitrarily low time budget. If not set, harness would try to decide a reasonable time, given the number of tests to run. " +
+                "Common time suffixes (s/m/h/d) are accepted.")
                 .withRequiredArg().ofType(TimeValue.class).describedAs("time");
 
         parser.accepts("v", "Be verbose. Will print known properties in help");
