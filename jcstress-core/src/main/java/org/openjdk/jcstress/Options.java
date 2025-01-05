@@ -434,7 +434,7 @@ public class Options {
 
     private void checkFailFast() {
         if (failFastVariants!=null && failFastTests != null) {
-            throw new IllegalArgumentException("Both " + FAIL_FAST_TESTS + " and " + FAIL_FAST_VARIANTS + " was declared, thatr is illegal");
+            throw new IllegalArgumentException("Both " + FAIL_FAST_TESTS + " and " + FAIL_FAST_VARIANTS + " was declared, that is illegal");
         }
     }
 
