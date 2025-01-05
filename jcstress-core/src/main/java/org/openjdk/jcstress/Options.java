@@ -46,6 +46,10 @@ import java.util.*;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class Options {
+
+    public static final String FAIL_FAST_TESTS = "failFast";
+    public static final String FAIL_FAST_VARIANTS = "failFAST";
+
     private String resultDir;
     private String testFilter;
     private int strideSize;
@@ -66,6 +70,8 @@ public class Options {
     private AffinityMode affinityMode;
     private boolean pretouchHeap;
     private TimeValue timeBudget;
+    private String failFastTests;
+    private String failFastVariants;
 
     public Options(String[] args) {
         this.args = args;
@@ -150,6 +156,15 @@ public class Options {
                 "Common time suffixes (s/m/h/d) are accepted.")
                 .withRequiredArg().ofType(TimeValue.class).describedAs("time");
 
+        OptionSpec<String> optFaiFastTests = parser.accepts(FAIL_FAST_TESTS, "Tells the framework to exit after specified number of failures. " +
+                        "It can be absolute number, to simply set deadline. It can be suffixed by %. The deadline is then percent from al tests, " +
+                        "or by %%, when the deadline will be calculated not from all tests, but from summ of currently finished tests. Soft errors do not count/")
+                .withRequiredArg().ofType(String.class).describedAs("N");
+
+        OptionSpec<String> optFaiFastVariants = parser.accepts(FAIL_FAST_VARIANTS, "Same as " + FAIL_FAST_TESTS + " only the calculation is based on all test variants. " +
+                        "See listing to clear up difference.")
+                .withRequiredArg().ofType(String.class).describedAs("N");
+
         parser.accepts("v", "Be verbose.");
         parser.accepts("vv", "Be extra verbose.");
         parser.accepts("vvv", "Be extra extra verbose.");
@@ -162,6 +177,13 @@ public class Options {
             System.err.println("ERROR: " + e.getMessage());
             System.err.println();
             parser.printHelpOn(System.err);
+            return false;
+        }
+
+        if (set.has(FAIL_FAST_TESTS) && set.has(FAIL_FAST_VARIANTS)) {
+            System.err.println("Only one from " + FAIL_FAST_TESTS +" and " + FAIL_FAST_VARIANTS +
+                    " is allowed. You had set both.");
+            System.err.println();
             return false;
         }
 
@@ -259,6 +281,9 @@ public class Options {
 
         this.splitCompilation = orDefault(set.valueOf(optSplitCompilation), true);
         this.affinityMode = orDefault(set.valueOf(optAffinityMode), AffinityMode.LOCAL);
+
+        this.failFastTests = orDefault(set.valueOf(optFaiFastTests), null);
+        this.failFastVariants = orDefault(set.valueOf(optFaiFastVariants), null);
 
         return true;
     }
@@ -390,6 +415,27 @@ public class Options {
 
     public boolean isPretouchHeap() {
         return pretouchHeap;
+    }
+
+    public boolean isFailFast() {
+        checkFailFast();
+        return getFailFast() != null;
+    }
+
+    public String getFailFast() {
+        checkFailFast();
+        return isFailFastAllVariants()?failFastVariants:failFastTests;
+    }
+
+    public boolean isFailFastAllVariants() {
+        checkFailFast();
+        return failFastVariants != null;
+    }
+
+    private void checkFailFast() {
+        if (failFastVariants!=null && failFastTests != null) {
+            throw new IllegalArgumentException("Both " + FAIL_FAST_TESTS + " and " + FAIL_FAST_VARIANTS + " was declared, thatr is illegal");
+        }
     }
 
     public TimeValue timeBudget() { return timeBudget; }

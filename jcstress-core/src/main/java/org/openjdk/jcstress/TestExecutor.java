@@ -66,6 +66,7 @@ public class TestExecutor {
     private final ExecutorService supportTasks;
 
     private final TimeBudget timeBudget;
+    private boolean diedFast = false;
 
     public TestExecutor(Verbosity verbosity, TestResultCollector sink, Scheduler scheduler, TimeBudget tb) throws IOException {
         this.verbosity = verbosity;
@@ -142,7 +143,6 @@ public class TestExecutor {
         }
 
         while (!byScl.isEmpty()) {
-
             // Roll over the scheduling classes and try to greedily cram most
             // of the tasks for it. This exits when no scheduling classes can fit
             // the current state of the machine.
@@ -167,8 +167,17 @@ public class TestExecutor {
             while (!processReadyVMs()) {
                 awaitNotification();
             }
+            if (diedFast) {
+                System.err.println("fail1");
+                cleanup();
+                return;
+            }
         }
 
+        cleanup();
+    }
+
+    private void cleanup() {
         // Wait until all threads are done, which means everything got processed
         while (!vmByToken.isEmpty()) {
             while (!processReadyVMs()) {
@@ -213,6 +222,10 @@ public class TestExecutor {
 
     public int getJVMsFinishing() {
         return jvmsFinishing.get();
+    }
+
+    public void setDiedFast() {
+        diedFast=true;
     }
 
     private class VM {
