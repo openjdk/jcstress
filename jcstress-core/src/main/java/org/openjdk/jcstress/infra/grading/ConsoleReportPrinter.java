@@ -187,6 +187,11 @@ public class ConsoleReportPrinter extends CountingResultCollector {
     public void printFinishLine() {
         clearStatusLine();
         printStatusLine();
+        if (executor.isDiedFast()) {
+            System.out.println("****************************************************");
+            System.out.println("To much failures occurred. Failing fast as requested");
+            System.out.println("****************************************************");
+        }
     }
 
     private String computeSpeed() {

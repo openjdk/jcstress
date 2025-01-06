@@ -168,7 +168,6 @@ public class TestExecutor {
                 awaitNotification();
             }
             if (diedFast) {
-                System.err.println("fail1");
                 cleanup();
                 return;
             }
@@ -226,6 +225,10 @@ public class TestExecutor {
 
     public void setDiedFast() {
         diedFast=true;
+    }
+
+    public boolean isDiedFast() {
+        return diedFast;
     }
 
     private class VM {
