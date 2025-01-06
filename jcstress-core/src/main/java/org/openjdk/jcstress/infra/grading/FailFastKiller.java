@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2014, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,20 +27,15 @@ package org.openjdk.jcstress.infra.grading;
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.TestExecutor;
 import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 
 import java.io.PrintWriter;
 
 
-public class FailFastKiller implements TestResultCollector {
+public class FailFastKiller extends CountingResultCollector {
 
     private final PrintWriter output;
     private final long expectedResults;
 
-    private long passed;
-    private long failed;
-    private long softErrors;
-    private long hardErrors;
     private TestExecutor executor;
     private int numericDeadline;
 
@@ -65,29 +60,7 @@ public class FailFastKiller implements TestResultCollector {
 
     private void addResult(TestResult r) {
         TestGrading grading = r.grading();
-
-        boolean inHardError = false;
-        switch (r.status()) {
-            case TIMEOUT_ERROR:
-            case CHECK_TEST_ERROR:
-            case TEST_ERROR:
-            case VM_ERROR:
-                hardErrors++;
-                inHardError = true;
-                break;
-            case API_MISMATCH:
-                softErrors++;
-                break;
-            case NORMAL:
-                if (grading.isPassed) {
-                    passed++;
-                } else {
-                    failed++;
-                }
-                break;
-            default:
-                throw new IllegalStateException("Illegal status: " + r.status());
-        }
+        countResult(r);
         verifyState();
     }
 
