@@ -140,7 +140,7 @@ public class FailFastKiller extends CountingResultCollector {
             }
             double currentAbsoluteThreshold = (relativeThreshold * totalFinishedUpToNow) / 100d;
             //there must be enough finished to get to some reasonable numbers
-            if (currentAbsoluteThreshold > 1 && totalFinishedUpToNow > currentAbsoluteThreshold) {
+            if (currentAbsoluteThreshold > 1 && totalFailed > currentAbsoluteThreshold) {
                 executor.setDiedFast();
             }
         } else {
