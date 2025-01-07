@@ -70,7 +70,7 @@ public class JCStress {
         FailFastKiller failFastKiller = null;
         TestResultCollector mux;
         if (opts.isFailFast()) {
-            failFastKiller = new FailFastKiller(opts, new PrintWriter(out, true), config.configs.size());
+            failFastKiller = new FailFastKiller(opts, new PrintWriter(out, true), config.configs);
             mux = MuxCollector.of(printer, diskCollector, failFastKiller);
         } else {
             mux = MuxCollector.of(printer, diskCollector);
