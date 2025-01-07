@@ -136,7 +136,7 @@ public class FailFastKiller extends CountingResultCollector {
             if (isFailFastAllVariants) {
                 totalFinishedUpToNow = passed + failed + softErrors + hardErrors;
             } else {
-                totalFinishedUpToNow = tests.values().stream().filter(a -> a <= 0).collect(Collectors.toList()).size();
+                totalFinishedUpToNow = tests.values().stream().filter(a -> a <= 0).collect(Collectors.counting());
             }
             double currentAbsoluteThreshold = (relativeThreshold * totalFinishedUpToNow) / 100d;
             //there must be enough finished to get to some reasonable numbers
