@@ -160,8 +160,12 @@ public class JCStress {
 
         new TextReportPrinter(opts.verbosity(), collector).work();
         new HTMLReportPrinter(opts.getResultDest(), collector, out).work();
-        new XMLReportPrinter(opts.getResultDest(), collector, out, false).work();
-        new XMLReportPrinter(opts.getResultDest(), collector, out, true).work();
+        if (XMLReportPrinter.getSparse(out)!=null) {
+            new XMLReportPrinter(opts.getResultDest(), collector, out, XMLReportPrinter.getSparse(out)).work();
+        } else {
+            new XMLReportPrinter(opts.getResultDest(), collector, out, false).work();
+            new XMLReportPrinter(opts.getResultDest(), collector, out, true).work();
+        }
         new ExceptionReportPrinter(collector).work();
     }
 

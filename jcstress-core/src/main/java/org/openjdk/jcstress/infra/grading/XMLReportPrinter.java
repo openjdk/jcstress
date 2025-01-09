@@ -56,7 +56,6 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -65,7 +64,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 
@@ -76,11 +74,14 @@ import java.util.function.Predicate;
  */
 public class XMLReportPrinter {
 
-    public static final String ERROR_AS = "jcstress.report.xml.errorAs"; //pass/fail
+    public static final String SOFT_ERROR_AS = "jcstress.report.xml.softErrorAs"; //pass/fail defaults to pass
+    public static final String HARD_ERROR_AS = "jcstress.report.xml.hardErrorAs"; //pass/fail defaults to fail
     public static final String USE_TESTSUITES = "jcstress.report.xml.sparse.testsuites";
+    public static final String TESTSUITES_STRIPNAMES = "jcstress.report.xml.sparse.stripNames";
     public static final String DUPLICATE_PROPERTIES = "jcstress.report.xml.properties.dupliate";
     public static final String VALIDATE = "jcstress.report.xml.validate";
     public static final String NO_COMMENTS = "jcstress.report.xml.nocomments";
+    public static final String SPARSE = "jcstress.report.xml.sparse";
     private final String resultDir;
     private final InProcessCollector collector;
     private final boolean sparse;
@@ -100,26 +101,52 @@ public class XMLReportPrinter {
         this.out = out;
     }
 
-    public static ErrorAs getErrorAs() {
-        if (System.getProperty(XMLReportPrinter.ERROR_AS) == null) {
-            return ErrorAs.error;
+    private static ErrorAs getSoftErrorAs() {
+        if (System.getProperty(XMLReportPrinter.SOFT_ERROR_AS) == null) {
+            return ErrorAs.pass;
         }
-        return Enum.valueOf(ErrorAs.class, System.getProperty(XMLReportPrinter.ERROR_AS));
+        return Enum.valueOf(ErrorAs.class, System.getProperty(XMLReportPrinter.SOFT_ERROR_AS));
     }
 
-    public static boolean isTestsuiteUsed() {
+    private static ErrorAs getHardErrorAs() {
+        if (System.getProperty(XMLReportPrinter.HARD_ERROR_AS) == null) {
+            return ErrorAs.fail;
+        }
+        return Enum.valueOf(ErrorAs.class, System.getProperty(XMLReportPrinter.HARD_ERROR_AS));
+    }
+
+    public static Boolean getSparse(PrintStream out) {
+        String sparse = System.getProperty(SPARSE);
+        if (sparse == null) {
+            return null;
+        } else {
+            if ("true".equals(sparse) || "false".equals(sparse )) {
+                return Boolean.getBoolean(XMLReportPrinter.SPARSE);
+            } else {
+                out.println("Invalid " + SPARSE + " value of " + sparse + "Should be true/false or missing");
+                return null;
+            }
+        }
+    }
+
+
+    private static boolean isTestsuiteUsed() {
         return System.getProperty(XMLReportPrinter.USE_TESTSUITES) != null;
     }
 
-    public static boolean isValidate() {
+    private static boolean isStripNames() {
+        return System.getProperty(XMLReportPrinter.TESTSUITES_STRIPNAMES) != null;
+    }
+
+    private static boolean isValidate() {
         return System.getProperty(XMLReportPrinter.VALIDATE) != null;
     }
 
-    public static boolean isDuplicateProperties() {
+    private static boolean isDuplicateProperties() {
         return System.getProperty(XMLReportPrinter.DUPLICATE_PROPERTIES) != null;
     }
 
-    public static boolean isNoComments() {
+    private static boolean isNoComments() {
         return System.getProperty(XMLReportPrinter.NO_COMMENTS) != null;
     }
 
@@ -129,7 +156,7 @@ public class XMLReportPrinter {
         }
     }
 
-    public static String getRoughCount(TestResult r) {
+    private static String getRoughCount(TestResult r) {
         long sum = r.getTotalCount();
         if (sum > 10) {
             return "10^" + (int) Math.floor(Math.log10(sum));
@@ -221,7 +248,9 @@ public class XMLReportPrinter {
             printBaseProperties(byName, output);
             output.println("    <property name='sparse' value='" + sparse + "' />");
             output.println("    <property name='" + USE_TESTSUITES + "' value='" + isTestsuiteUsed() + "' />");
-            output.println("    <property name='" + ERROR_AS + "' value='" + getErrorAs() + "' />");
+            output.println("    <property name='" + TESTSUITES_STRIPNAMES + "' value='" + isStripNames() + "' />");
+            output.println("    <property name='" + SOFT_ERROR_AS + "' value='" + getSoftErrorAs() + "' />");
+            output.println("    <property name='" + HARD_ERROR_AS + "' value='" + getHardErrorAs() + "' />");
             output.println("    <property name='" + DUPLICATE_PROPERTIES + "' value='" + isDuplicateProperties() + "' />");
             output.println("    <property name='" + NO_COMMENTS + "' value='" + isNoComments() + "' />");
             output.println("  </properties>");
@@ -279,7 +308,7 @@ public class XMLReportPrinter {
         }
     }
 
-    public void emitTest(PrintWriter output, TestResult result) {
+    private void emitTest(PrintWriter output, TestResult result) {
         TestGrading grading = result.grading();
         if (grading.isPassed) {
             output.println("  Passed - " + StringUtils.chunkName(result.getName()) + " " + getRoughCount(result));
@@ -292,7 +321,7 @@ public class XMLReportPrinter {
         }
     }
 
-    public void emitTestFailure(PrintWriter output, TestResult result) {
+    private void emitTestFailure(PrintWriter output, TestResult result) {
         output.println("   FAILED - " + StringUtils.chunkName(result.getName()) + " " + getRoughCount(result));
         switch (result.status()) {
             case API_MISMATCH:
@@ -314,12 +343,11 @@ public class XMLReportPrinter {
     private void emitTestReports(Multimap<String, TestResult> multiByName, PrintWriter local) {
         multiByName.keys().stream().forEach(name -> {
             TestInfo test = TestList.getInfo(name);
-            local.println(resultDir + "/" + name + ".html would be...");
-            emitTestReport(local, multiByName.get(name), test);
+            emitTestReport(local, multiByName.get(name), test, name);
         });
     }
 
-    public void emitTestReport(PrintWriter o, Collection<TestResult> results, TestInfo test) {
+    private void emitTestReport(PrintWriter o, Collection<TestResult> results, TestInfo test, String suiteCandidate) {
         //in sparse mode we print only test.name as test, with result based on cumulative
         //otherwise we will be printing only its individual combinations (to mach the summary)
         if (sparse) {
@@ -337,7 +365,7 @@ public class XMLReportPrinter {
             for (TestResult r : sorted) {
                 keys.addAll(r.getStateKeys());
             }
-            o.println("<failure>"); //or error //or <!-- if pass?
+            o.println("<failure><![CDATA["); //or error //or <!-- if pass?
             for (TestResult r : sorted) {
                 o.println(r.getConfig().toDetailedTest(true));
                 String color = ReportUtils.statusToPassed(r) ? "green" : "red";
@@ -352,9 +380,9 @@ public class XMLReportPrinter {
                     }
                 }
             }
-            o.println("</failure>");//or error //or <!-- if pass?
+            o.println("]]></failure>");//or error //or <!-- if pass?
 
-            o.println("<system-out>");
+            o.println("<system-out><![CDATA[");
             for (TestResult r : sorted) {
                 if (!r.getMessages().isEmpty()) {
                     resultHeader(o, r);
@@ -371,8 +399,8 @@ public class XMLReportPrinter {
                     o.println();
                 }
             }
-            o.println("</system-out>");
-            o.println("<system-err>");
+            o.println("]]></system-out>");
+            o.println("<system-err><![CDATA[");
             for (TestResult r : sorted) {
                 if (!r.getVmErr().isEmpty()) {
                     resultHeader(o, r);
@@ -383,15 +411,21 @@ public class XMLReportPrinter {
                     o.println();
                 }
             }
-            o.println("</system-err>\n");
+            o.println("]]></system-err>\n");
 
             o.println("</testcase>");
         } else {
-            //if (isTestsuiteUsed()) then      o.println("  <testsuite name='"+test.name());
+            if (isTestsuiteUsed()) {
+                o.println("  <testsuite name='"+suiteCandidate + "'>");
+            }
             List<TestResult> sorted = new ArrayList<>(results);
             HTMLReportPrinter.resultsOrder(sorted);
             for (TestResult r : sorted) {
-                o.println("  <testcase class='jcstress' name='" + r.getConfig().toDetailedTest(false) + "'>");
+                String testName=r.getConfig().toDetailedTest(false);
+                if (isTestsuiteUsed() && isStripNames()) {
+                    testName=r.getConfig().getTestVariant(false);
+                }
+                o.println("  <testcase class='jcstress' name='" + testName + "'>");
                 o.println("      <properties>");
                 printDescription(o, test);
                 printRefs(o, test);
@@ -404,7 +438,7 @@ public class XMLReportPrinter {
 
                 Set<String> keys = new TreeSet<>();
                 keys.addAll(r.getStateKeys());
-                o.println("<failure>");//or error //or <!-- if pass?
+                o.println("<failure><![CDATA[");//or error //or <!-- if pass?
 
                 TestConfig cfg = r.getConfig();
                 o.println(r.getConfig().toDetailedTest(false));
@@ -420,8 +454,8 @@ public class XMLReportPrinter {
                         o.println(selectColor(Expect.ACCEPTABLE, true) + "/0");
                     }
                 }
-                o.println("</failure>");//or error //or <!-- if pass?
-                o.println("<system-out>");
+                o.println("]]></failure>");//or error //or <!-- if pass?
+                o.println("<system-out><![CDATA[");
                 if (!r.getMessages().isEmpty()) {
                     resultHeader(o, r);
                     for (String data : r.getMessages()) {
@@ -436,8 +470,8 @@ public class XMLReportPrinter {
                     }
                     o.println();
                 }
-                o.println("</system-out>");
-                o.println("<system-err>");
+                o.println("]]></system-out>");
+                o.println("<system-err><![CDATA[");
                 if (!r.getVmErr().isEmpty()) {
                     resultHeader(o, r);
                     for (String data : r.getVmErr()) {
@@ -445,9 +479,12 @@ public class XMLReportPrinter {
                     }
                     o.println();
                 }
-                o.println("</system-err>\n");
+                o.println("]]></system-err>\n");
 
                 o.println("</testcase>");
+            }
+            if (isTestsuiteUsed()) {
+                o.println("  </testsuite>");
             }
         }
 
@@ -463,7 +500,7 @@ public class XMLReportPrinter {
         }
     }
 
-    public String selectColor(Expect type, boolean isZero) {
+    private String selectColor(Expect type, boolean isZero) {
         switch (type) {
             case ACCEPTABLE:
                 return isZero ? "LIGHT_GRAY" : "GREEN";
@@ -478,7 +515,7 @@ public class XMLReportPrinter {
         }
     }
 
-    public void validate(String xml) {
+    private void validate(String xml) {
         try {
             out.println("Checking: " + xml);
             wellFormed(xml);
