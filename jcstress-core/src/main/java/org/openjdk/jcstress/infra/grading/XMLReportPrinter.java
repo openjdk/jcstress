@@ -79,6 +79,7 @@ public class XMLReportPrinter {
     public static final String USE_TESTSUITES = "jcstress.report.xml.sparse.testsuites";
     public static final String TESTSUITES_STRIPNAMES = "jcstress.report.xml.sparse.stripNames";
     public static final String DUPLICATE_PROPERTIES = "jcstress.report.xml.properties.dupliate";
+    public static final String STDOUTERR_TO_FAILURE = "jcstress.report.xml.souterr2failure";
     public static final String VALIDATE = "jcstress.report.xml.validate";
     public static final String NO_COMMENTS = "jcstress.report.xml.nocomments";
     public static final String SPARSE = "jcstress.report.xml.sparse";
@@ -132,6 +133,10 @@ public class XMLReportPrinter {
 
     private static boolean isTestsuiteUsed() {
         return System.getProperty(XMLReportPrinter.USE_TESTSUITES) != null;
+    }
+
+    private static boolean isStdoutErrToFailure() {
+        return System.getProperty(XMLReportPrinter.STDOUTERR_TO_FAILURE) != null;
     }
 
     private static boolean isStripNames() {
