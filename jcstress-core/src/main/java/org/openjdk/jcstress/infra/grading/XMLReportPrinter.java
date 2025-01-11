@@ -63,6 +63,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Predicate;
@@ -74,7 +75,11 @@ import java.util.function.Predicate;
  */
 public class XMLReportPrinter {
 
-    public static final String SOFT_ERROR_AS = "jcstress.report.xml.softErrorAs"; //pass/fail defaults to pass
+    private enum JunitResult  {
+        pass, fail, error, skip
+    }
+
+    public static final String SOFT_ERROR_AS = "jcstress.report.xml.softErrorAs"; //pass/fail/skip defaults to skip
     public static final String HARD_ERROR_AS = "jcstress.report.xml.hardErrorAs"; //pass/fail defaults to fail
     public static final String USE_TESTSUITES = "jcstress.report.xml.sparse.testsuites";
     public static final String TESTSUITES_STRIPNAMES = "jcstress.report.xml.sparse.stripNames";
@@ -102,18 +107,18 @@ public class XMLReportPrinter {
         this.out = out;
     }
 
-    private static ErrorAs getSoftErrorAs() {
+    private static JunitResult getSoftErrorAs() {
         if (System.getProperty(XMLReportPrinter.SOFT_ERROR_AS) == null) {
-            return ErrorAs.pass;
+            return JunitResult.skip;
         }
-        return Enum.valueOf(ErrorAs.class, System.getProperty(XMLReportPrinter.SOFT_ERROR_AS));
+        return Enum.valueOf(JunitResult.class, System.getProperty(XMLReportPrinter.SOFT_ERROR_AS));
     }
 
-    private static ErrorAs getHardErrorAs() {
+    private static JunitResult getHardErrorAs() {
         if (System.getProperty(XMLReportPrinter.HARD_ERROR_AS) == null) {
-            return ErrorAs.fail;
+            return JunitResult.fail;
         }
-        return Enum.valueOf(ErrorAs.class, System.getProperty(XMLReportPrinter.HARD_ERROR_AS));
+        return Enum.valueOf(JunitResult.class, System.getProperty(XMLReportPrinter.HARD_ERROR_AS));
     }
 
     public static Boolean getSparse(PrintStream out) {
@@ -124,7 +129,9 @@ public class XMLReportPrinter {
             if ("true".equals(sparse) || "false".equals(sparse )) {
                 return Boolean.getBoolean(XMLReportPrinter.SPARSE);
             } else {
-                out.println("Invalid " + SPARSE + " value of " + sparse + "Should be true/false or missing");
+                if (out!=null) {
+                    out.println("Invalid " + SPARSE + " value of " + sparse + "Should be true/false or missing");
+                }
                 return null;
             }
         }
@@ -258,9 +265,11 @@ public class XMLReportPrinter {
             output.println("    <property name='" + HARD_ERROR_AS + "' value='" + getHardErrorAs() + "' />");
             output.println("    <property name='" + DUPLICATE_PROPERTIES + "' value='" + isDuplicateProperties() + "' />");
             output.println("    <property name='" + NO_COMMENTS + "' value='" + isNoComments() + "' />");
+            output.println("    <property name='" + STDOUTERR_TO_FAILURE + "' value='" + isStdoutErrToFailure() + "' />");
+            output.println("    <property name='" + SPARSE + "' value='" + Objects.toString(getSparse(null)) + "' />");
             output.println("  </properties>");
         }
-// we have create dsummary, lets try to prnt the rest from merged info
+// we have create dsummary, lets try to prnit the rest from merged info
         byName = ReportUtils.mergedByName(collector.getTestResults());
         Collections.sort(byName, Comparator.comparing(TestResult::getName));
 
@@ -352,76 +361,66 @@ public class XMLReportPrinter {
         });
     }
 
-    private void emitTestReport(PrintWriter o, Collection<TestResult> results, TestInfo test, String suiteCandidate) {
+    private void emitTestReport(PrintWriter outw, Collection<TestResult> results, TestInfo test, String suiteCandidate) {
         //in sparse mode we print only test.name as test, with result based on cumulative
         //otherwise we will be printing only its individual combinations (to mach the summary)
         if (sparse) {
             List<TestResult> sorted = new ArrayList<>(results);
             HTMLReportPrinter.resultsOrder(sorted);
-            o.println("  <testcase class='jcstress' name='" + test.name() + "'>");
-            o.println("      <properties>");
-            printDescription(o, test);
-            printRefs(o, test);
+            outw.println("  <testcase class='jcstress' name='" + test.name() + "'>");
+            outw.println("      <properties>");
+            printDescription(outw, test);
+            printRefs(outw, test);
             if (isDuplicateProperties()) {
-                printBaseProperties(sorted, o);
+                printBaseProperties(sorted, outw);
             }
-            o.println("      </properties>");
+            outw.println("      </properties>");
             Set<String> keys = new TreeSet<>();
             for (TestResult r : sorted) {
                 keys.addAll(r.getStateKeys());
             }
-            o.println("<failure><![CDATA["); //or error //or <!-- if pass?
-            for (TestResult r : sorted) {
-                o.println(r.getConfig().toDetailedTest(true));
-                String color = ReportUtils.statusToPassed(r) ? "green" : "red";
-                String label = ReportUtils.statusToLabel(r);
-                o.println(color + " - " + label);
-                for (String key : keys) {
-                    GradingResult c = r.grading().gradingResults.get(key);
-                    if (c != null) {
-                        o.println(selectColor(c.expect, c.count == 0) + "/" + c.count + "");
-                    } else {
-                        o.println(selectColor(Expect.ACCEPTABLE, true) + "/0");
-                    }
-                }
+            outw.println("<failure><![CDATA["); //or error //or <!-- if pass?
+            for (TestResult result : sorted) {
+                outw.println(result.getConfig().toDetailedTest(true));
+                printHtmlInfo(result, outw, keys);
             }
-            o.println("]]></failure>");//or error //or <!-- if pass?
+            outw.println("]]></failure>");//or error //or <!-- if pass?
 
-            o.println("<system-out><![CDATA[");
+            outw.println("<system-out><![CDATA[");
             for (TestResult r : sorted) {
                 if (!r.getMessages().isEmpty()) {
-                    resultHeader(o, r);
+                    resultHeader(outw, r);
                     for (String data : r.getMessages()) {
-                        o.println(data);
+                        outw.println(data);
                     }
-                    o.println();
+                    outw.println();
                 }
                 if (!r.getVmOut().isEmpty()) {
-                    resultHeader(o, r);
+                    resultHeader(outw, r);
                     for (String data : r.getVmOut()) {
-                        o.println(data);
+                        outw.println(data);
                     }
-                    o.println();
+                    outw.println();
                 }
             }
-            o.println("]]></system-out>");
-            o.println("<system-err><![CDATA[");
+            outw.println("]]></system-out>");
+            outw.println("<system-err><![CDATA[");
             for (TestResult r : sorted) {
                 if (!r.getVmErr().isEmpty()) {
-                    resultHeader(o, r);
+                    resultHeader(outw, r);
                     TestConfig cfg = r.getConfig();
                     for (String data : r.getVmErr()) {
-                        o.println(data);
+                        outw.println(data);
                     }
-                    o.println();
+                    outw.println();
                 }
             }
-            o.println("]]></system-err>\n");
+            outw.println("]]></system-err>\n");
 
-            o.println("</testcase>");
+            outw.println("</testcase>");
         } else {
             if (isTestsuiteUsed()) {
-                o.println("  <testsuite name='"+suiteCandidate + "'>");
+                outw.println("  <testsuite name='"+suiteCandidate + "'>");
             }
             List<TestResult> sorted = new ArrayList<>(results);
             HTMLReportPrinter.resultsOrder(sorted);
@@ -430,69 +429,76 @@ public class XMLReportPrinter {
                 if (isTestsuiteUsed() && isStripNames()) {
                     testName=r.getConfig().getTestVariant(false);
                 }
-                o.println("  <testcase class='jcstress' name='" + testName + "'>");
-                o.println("      <properties>");
-                printDescription(o, test);
-                printRefs(o, test);
-                printSeed(o, r);
+                outw.println("  <testcase class='jcstress' name='" + testName + "'>");
+                outw.println("      <properties>");
+                printDescription(outw, test);
+                printRefs(outw, test);
+                printSeed(outw, r);
                 if (isDuplicateProperties()) {
-                    printBaseProperties(sorted, o);
+                    printBaseProperties(sorted, outw);
                 }
 
-                o.println("      </properties>");
+                outw.println("      </properties>");
 
                 Set<String> keys = new TreeSet<>();
                 keys.addAll(r.getStateKeys());
-                o.println("<failure><![CDATA[");//or error //or <!-- if pass?
+                outw.println("<failure><![CDATA[");//or error //or <!-- if pass?
 
                 TestConfig cfg = r.getConfig();
-                o.println(r.getConfig().toDetailedTest(false));
-                String color = ReportUtils.statusToPassed(r) ? "green" : "red";
-                String label = ReportUtils.statusToLabel(r);
-                o.println(color + " - " + label);
-
-                for (String key : keys) {
-                    GradingResult c = r.grading().gradingResults.get(key);
-                    if (c != null) {
-                        o.println(selectColor(c.expect, c.count == 0) + "/" + c.count + "");
-                    } else {
-                        o.println(selectColor(Expect.ACCEPTABLE, true) + "/0");
-                    }
-                }
-                o.println("]]></failure>");//or error //or <!-- if pass?
-                o.println("<system-out><![CDATA[");
+                outw.println(r.getConfig().toDetailedTest(false));
+                printHtmlInfo(r, outw, keys);
+                outw.println("]]></failure>");//or error //or <!-- if pass?
+                outw.println("<system-out><![CDATA[");
                 if (!r.getMessages().isEmpty()) {
-                    resultHeader(o, r);
+                    resultHeader(outw, r);
                     for (String data : r.getMessages()) {
-                        o.println(data);
+                        outw.println(data);
                     }
-                    o.println();
+                    outw.println();
                 }
                 if (!r.getVmOut().isEmpty()) {
-                    resultHeader(o, r);
+                    resultHeader(outw, r);
                     for (String data : r.getVmOut()) {
-                        o.println(data);
+                        outw.println(data);
                     }
-                    o.println();
+                    outw.println();
                 }
-                o.println("]]></system-out>");
-                o.println("<system-err><![CDATA[");
+                outw.println("]]></system-out>");
+                outw.println("<system-err><![CDATA[");
                 if (!r.getVmErr().isEmpty()) {
-                    resultHeader(o, r);
+                    resultHeader(outw, r);
                     for (String data : r.getVmErr()) {
-                        o.println(data);
+                        outw.println(data);
                     }
-                    o.println();
+                    outw.println();
                 }
-                o.println("]]></system-err>\n");
+                outw.println("]]></system-err>\n");
 
-                o.println("</testcase>");
+                outw.println("</testcase>");
             }
             if (isTestsuiteUsed()) {
-                o.println("  </testsuite>");
+                outw.println("  </testsuite>");
             }
         }
 
+    }
+
+    private static void printHtmlInfo(TestResult result, PrintWriter out, Set<String> keys) {
+        String color = ReportUtils.statusToPassed(result) ? "green" : "red";
+        String label = ReportUtils.statusToLabel(result);
+        out.println("html signatue: " + color + " - " + label);
+        getGradings(result, out, keys);
+    }
+
+    private static void getGradings(TestResult result, PrintWriter out, Set<String> keys) {
+        for (String key : keys) {
+            GradingResult c = result.grading().gradingResults.get(key);
+            if (c != null) {
+                out.println(selectHtmlGradingColor(c.expect, c.count == 0) + "/" + c.count + "");
+            } else {
+                out.println(selectHtmlGradingColor(Expect.ACCEPTABLE, true) + "/0");
+            }
+        }
     }
 
     private void resultHeader(PrintWriter o, TestResult r) {
@@ -505,7 +511,7 @@ public class XMLReportPrinter {
         }
     }
 
-    private String selectColor(Expect type, boolean isZero) {
+    private static String selectHtmlGradingColor(Expect type, boolean isZero) {
         switch (type) {
             case ACCEPTABLE:
                 return isZero ? "LIGHT_GRAY" : "GREEN";
@@ -550,8 +556,22 @@ public class XMLReportPrinter {
         out.println("Valid!");
     }
 
-    private enum ErrorAs {
-        error, fail, pass
+    public static JunitResult statusToJunitResult(TestResult result) {
+        switch (result.status()) {
+            case TIMEOUT_ERROR:
+                return JunitResult.error;
+            case CHECK_TEST_ERROR:
+                return JunitResult.error;
+            case TEST_ERROR:
+            case VM_ERROR:
+                return getHardErrorAs();
+            case API_MISMATCH:
+                return getSoftErrorAs();
+            case NORMAL:
+                return JunitResult.pass;
+            default:
+                throw new IllegalStateException("Illegal status: " + result.status());
+        }
     }
 
 }
