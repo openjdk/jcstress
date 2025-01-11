@@ -57,6 +57,7 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -75,19 +76,31 @@ import java.util.function.Predicate;
  */
 public class XMLReportPrinter {
 
-    private enum JunitResult  {
-        pass, fail, error, skip
+    private enum JunitResult {
+        pass, failure, error, skipped
     }
 
+    //how to deal with sofrt errors like api mishmash or similar
     public static final String SOFT_ERROR_AS = "jcstress.report.xml.softErrorAs"; //pass/fail/skip defaults to skip
+    //how to deal with hard errors. Those may be timout, but also segfaulting vm
     public static final String HARD_ERROR_AS = "jcstress.report.xml.hardErrorAs"; //pass/fail defaults to fail
+    //only for full (non-saprse) output, will wrap each family by its <testsuite name> FIXME missing statistics/counters
     public static final String USE_TESTSUITES = "jcstress.report.xml.sparse.testsuites";
+    //in case of sued testsuiotes, will not replicate the name of suite in test name.
     public static final String TESTSUITES_STRIPNAMES = "jcstress.report.xml.sparse.stripNames";
+    //will repritn system and jvm info in each test (may significantly waste sapce)
     public static final String DUPLICATE_PROPERTIES = "jcstress.report.xml.properties.dupliate";
+    //will move stdout/err to failure/error message for failures/errors and omit for passes
+    //this is for tools,m which do nto show stdout/err properly
+    //also it is saving a bit of space, but is loosing the granularity
     public static final String STDOUTERR_TO_FAILURE = "jcstress.report.xml.souterr2failure";
+    //vill validate final xmls
     public static final String VALIDATE = "jcstress.report.xml.validate";
+    //will nto include comments (if any)
     public static final String NO_COMMENTS = "jcstress.report.xml.nocomments";
-    public static final String SPARSE = "jcstress.report.xml.sparse";
+    //by default both reprots are printed. By setting it to true or false, wil linclude only sparse ot full
+    public static final String SPARSE = "jcstress.report.xml.sparse"; //true/false/null
+
     private final String resultDir;
     private final InProcessCollector collector;
     private final boolean sparse;
@@ -109,14 +122,14 @@ public class XMLReportPrinter {
 
     private static JunitResult getSoftErrorAs() {
         if (System.getProperty(XMLReportPrinter.SOFT_ERROR_AS) == null) {
-            return JunitResult.skip;
+            return JunitResult.skipped;
         }
         return Enum.valueOf(JunitResult.class, System.getProperty(XMLReportPrinter.SOFT_ERROR_AS));
     }
 
     private static JunitResult getHardErrorAs() {
         if (System.getProperty(XMLReportPrinter.HARD_ERROR_AS) == null) {
-            return JunitResult.fail;
+            return JunitResult.failure;
         }
         return Enum.valueOf(JunitResult.class, System.getProperty(XMLReportPrinter.HARD_ERROR_AS));
     }
@@ -126,10 +139,10 @@ public class XMLReportPrinter {
         if (sparse == null) {
             return null;
         } else {
-            if ("true".equals(sparse) || "false".equals(sparse )) {
+            if ("true".equals(sparse) || "false".equals(sparse)) {
                 return Boolean.getBoolean(XMLReportPrinter.SPARSE);
             } else {
-                if (out!=null) {
+                if (out != null) {
                     out.println("Invalid " + SPARSE + " value of " + sparse + "Should be true/false or missing");
                 }
                 return null;
@@ -213,6 +226,7 @@ public class XMLReportPrinter {
         PrintWriter output = new PrintWriter(filePath);
 
         {
+            //FIXME not honouring user setup! use junit result
             int passedCount = 0;
             int failedCount = 0;
             int sanityFailedCount = 0;
@@ -250,7 +264,7 @@ public class XMLReportPrinter {
                     " errors='" + 0/*fixme*/ + "'" +
                     " skipped='" + sanityFailedCount + "' " +
                     " time='" + 0/*fixme*/ + "'" +
-                    " timestamp='" + new Date().toString() +  "' " +
+                    " timestamp='" + new Date().toString() + "' " +
                     " hostname='" + hostname + "'>");
 
         }
@@ -298,6 +312,257 @@ public class XMLReportPrinter {
             validate(filePath);
         }
     }
+
+    private void emitTestReports(Multimap<String, TestResult> multiByName, PrintWriter local) {
+        multiByName.keys().stream().forEach(name -> {
+            TestInfo test = TestList.getInfo(name);
+            emitTestReport(local, multiByName.get(name), test, name);
+        });
+    }
+
+    private void emitTestReport(PrintWriter outw, Collection<TestResult> results, TestInfo test, String suiteCandidate) {
+        //in sparse mode we print only test.name as test, with result based on cumulative
+        //otherwise we will be printing only its individual combinations (to mach the summary)
+        if (sparse) {
+            List<TestResult> sorted = new ArrayList<>(results);
+            HTMLReportPrinter.resultsOrder(sorted);
+            outw.println("  <testcase class='jcstress' name='" + test.name() + "'>");
+            outw.println("      <properties>");
+            printDescription(outw, test);
+            printRefs(outw, test);
+            if (isDuplicateProperties()) {
+                printBaseProperties(sorted, outw);
+            }
+            outw.println("      </properties>");
+            printMainTestBody(outw, sorted, true);
+            outw.println("</testcase>");
+        } else {
+            if (isTestsuiteUsed()) {
+                outw.println("  <testsuite name='" + suiteCandidate + "'>");
+            }
+            List<TestResult> sorted = new ArrayList<>(results);
+            HTMLReportPrinter.resultsOrder(sorted);
+            for (TestResult r : sorted) {
+                String testName = r.getConfig().toDetailedTest(false);
+                if (isTestsuiteUsed() && isStripNames()) {
+                    testName = r.getConfig().getTestVariant(false);
+                }
+                outw.println("  <testcase class='jcstress' name='" + testName + "'>");
+                outw.println("      <properties>");
+                printDescription(outw, test);
+                printRefs(outw, test);
+                printSeed(outw, r);
+                if (isDuplicateProperties()) {
+                    printBaseProperties(sorted, outw);
+                }
+                outw.println("      </properties>");
+                printMainTestBody(outw, Arrays.asList(r), null);
+                outw.println("</testcase>");
+            }
+            if (isTestsuiteUsed()) {
+                outw.println("  </testsuite>");
+            }
+        }
+
+    }
+
+    private static void printMainTestBody(PrintWriter outw, List<TestResult> results, Boolean header) {
+        Set<String> keys = new TreeSet<>();
+        for (TestResult result : results) {
+            keys.addAll(result.getStateKeys());
+        }
+        printStatusElement(outw, results, keys, header);
+        if (!isStdoutErrToFailure()) {
+            printSystemOutElement(outw, results, header);
+            printSystemErrElement(outw, results, header);
+        }
+    }
+
+    private static void printStatusElement(PrintWriter outw, List<TestResult> results, Set<String> keys, Boolean header) {
+        JunitResult junitResult = testsToJunitResult(results);
+        if (junitResult == JunitResult.failure || junitResult == JunitResult.error) {
+            outw.println("<" + junitResult + "><![CDATA[");
+            for (TestResult result : results) {
+                outw.println(result.getConfig().toDetailedTest(true));
+                printHtmlInfo(result, outw, keys);
+                if (isStdoutErrToFailure()) {
+                    printMessages(outw, result, header);
+                    printVmOut(outw, result, null);
+                    printVmErr(outw, result, header);
+                }
+            }
+            outw.println("]]></" + junitResult + ">");
+        }
+        if (junitResult == JunitResult.skipped) {
+            outw.println(" <skipped message='api missmastch?' />");
+        }
+    }
+
+    private static void printSystemErrElement(PrintWriter outw, Collection<TestResult> results, Boolean header) {
+        outw.println("<system-err><![CDATA[");
+        for (TestResult r : results) {
+            printVmErr(outw, r, header);
+        }
+        outw.println("]]></system-err>\n");
+    }
+
+    private static void printSystemOutElement(PrintWriter outw, Collection<TestResult> results, Boolean header) {
+        outw.println("<system-out><![CDATA[");
+        for (TestResult r : results) {
+            printMessages(outw, r, header);
+            printVmOut(outw, r, null);
+        }
+        outw.println("]]></system-out>");
+    }
+
+    private static void printVmErr(PrintWriter outw, TestResult result, Boolean header) {
+        printTestLines(result.getVmErr(), outw, result, header);
+    }
+
+    private static void printVmOut(PrintWriter outw, TestResult result, Boolean header) {
+        printTestLines(result.getVmOut(), outw, result, header);
+    }
+
+    private static void printMessages(PrintWriter outw, TestResult result, Boolean header) {
+        printTestLines(result.getMessages(), outw, result, header);
+    }
+
+    private static void printTestLines(List<String> lines, PrintWriter outw, TestResult originalResult, Boolean header) {
+        if (!lines.isEmpty()) {
+            resultHeader(outw, originalResult, header);
+            for (String data : lines) {
+                outw.println(data);
+            }
+            outw.println();
+        }
+    }
+
+    private static void printHtmlInfo(TestResult result, PrintWriter out, Set<String> keys) {
+        String color = ReportUtils.statusToPassed(result) ? "green" : "red";
+        String label = ReportUtils.statusToLabel(result);
+        out.println("html signatue: " + color + " - " + label);
+        getGradings(result, out, keys);
+    }
+
+    private static void getGradings(TestResult result, PrintWriter out, Set<String> keys) {
+        for (String key : keys) {
+            GradingResult c = result.grading().gradingResults.get(key);
+            if (c != null) {
+                out.println(selectHtmlGradingColor(c.expect, c.count == 0) + "/" + c.count + "");
+            } else {
+                out.println(selectHtmlGradingColor(Expect.ACCEPTABLE, true) + "/0");
+            }
+        }
+    }
+
+    private static void resultHeader(PrintWriter outw, TestResult r, Boolean full) {
+        if (full != null) {
+            TestConfig cfg = r.getConfig();
+            if (full) {
+                outw.println(cfg.toDetailedTest(false));
+            } else {
+                outw.println("CompileMode: " + CompileMode.description(cfg.compileMode, cfg.actorNames));
+                outw.println("SchedulingClass" + SchedulingClass.description(cfg.shClass, cfg.actorNames));
+                outw.println("");
+                if (!cfg.jvmArgs.isEmpty()) {
+                    outw.println("jvmargs:" + cfg.jvmArgs);
+                }
+            }
+        }
+    }
+
+    private static String selectHtmlGradingColor(Expect type, boolean isZero) {
+        switch (type) {
+            case ACCEPTABLE:
+                return isZero ? "LIGHT_GRAY" : "GREEN";
+            case FORBIDDEN:
+                return isZero ? "LIGHT_GRAY" : "RED";
+            case ACCEPTABLE_INTERESTING:
+                return isZero ? "LIGHT_GRAY" : "CYAN";
+            case UNKNOWN:
+                return "RED";
+            default:
+                throw new IllegalStateException();
+        }
+    }
+
+    private void validate(String xml) {
+        try {
+            out.println("Checking: " + xml);
+            wellFormed(xml);
+            validByXsd(xml);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private void wellFormed(String xml) throws ParserConfigurationException, SAXException, IOException {
+        out.println("Well formed?");
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setValidating(false);
+        factory.setNamespaceAware(true);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document document = builder.parse(new InputSource(xml));
+        out.println("Well formed!");
+    }
+
+    private void validByXsd(String xml) throws ParserConfigurationException, SAXException, IOException, URISyntaxException {
+        String url = "https://raw.githubusercontent.com/junit-team/junit5/refs/heads/main/platform-tests/src/test/resources/jenkins-junit.xsd";
+        out.println("Valid by " + url + " ?");
+        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        Schema schema = factory.newSchema(new URI(url).toURL());
+        Validator validator = schema.newValidator();
+        validator.validate(new StreamSource(new File(xml)));
+        out.println("Valid!");
+    }
+
+    public static JunitResult testsToJunitResult(Collection<TestResult> results) {
+        boolean hadError = false;
+        int coutSkipped = 0;
+        for (TestResult result : results) {
+            if (testToJunitResult(result) == JunitResult.failure) {
+                //if there was failure in sub set, return whole group as failure
+                return JunitResult.failure;
+            }
+            if (testToJunitResult(result) == JunitResult.error) {
+                hadError = true;
+            }
+            if (testToJunitResult(result) == JunitResult.skipped) {
+                coutSkipped++;
+            }
+        }
+        //no failure, bute errors presented
+        if (hadError) {
+            return JunitResult.error;
+        }
+        //no failure, no error, was all skipped?
+        if (coutSkipped == results.size()) {
+            return JunitResult.skipped;
+        }
+        return JunitResult.pass;
+    }
+
+    public static JunitResult testToJunitResult(TestResult result) {
+        switch (result.status()) {
+            case TIMEOUT_ERROR:
+                return JunitResult.error;
+            case CHECK_TEST_ERROR:
+                return JunitResult.error;
+            case TEST_ERROR:
+            case VM_ERROR:
+                return getHardErrorAs();
+            case API_MISMATCH:
+                return getSoftErrorAs();
+            case NORMAL:
+                return JunitResult.pass;
+            default:
+                throw new IllegalStateException("Illegal status: " + result.status());
+        }
+    }
+
+    /// /// /////////candidates to remove
+    /// /// /////////candidates to remove
+    /// /// /////////candidates to remove
 
     private void printXTests(List<TestResult> byName,
                              PrintWriter output,
@@ -351,226 +616,6 @@ public class XMLReportPrinter {
             case VM_ERROR:
                 output.println("      VM ERROR - Error running the VM");
                 break;
-        }
-    }
-
-    private void emitTestReports(Multimap<String, TestResult> multiByName, PrintWriter local) {
-        multiByName.keys().stream().forEach(name -> {
-            TestInfo test = TestList.getInfo(name);
-            emitTestReport(local, multiByName.get(name), test, name);
-        });
-    }
-
-    private void emitTestReport(PrintWriter outw, Collection<TestResult> results, TestInfo test, String suiteCandidate) {
-        //in sparse mode we print only test.name as test, with result based on cumulative
-        //otherwise we will be printing only its individual combinations (to mach the summary)
-        if (sparse) {
-            List<TestResult> sorted = new ArrayList<>(results);
-            HTMLReportPrinter.resultsOrder(sorted);
-            outw.println("  <testcase class='jcstress' name='" + test.name() + "'>");
-            outw.println("      <properties>");
-            printDescription(outw, test);
-            printRefs(outw, test);
-            if (isDuplicateProperties()) {
-                printBaseProperties(sorted, outw);
-            }
-            outw.println("      </properties>");
-            Set<String> keys = new TreeSet<>();
-            for (TestResult r : sorted) {
-                keys.addAll(r.getStateKeys());
-            }
-            outw.println("<failure><![CDATA["); //or error //or <!-- if pass?
-            for (TestResult result : sorted) {
-                outw.println(result.getConfig().toDetailedTest(true));
-                printHtmlInfo(result, outw, keys);
-            }
-            outw.println("]]></failure>");//or error //or <!-- if pass?
-
-            outw.println("<system-out><![CDATA[");
-            for (TestResult r : sorted) {
-                if (!r.getMessages().isEmpty()) {
-                    resultHeader(outw, r);
-                    for (String data : r.getMessages()) {
-                        outw.println(data);
-                    }
-                    outw.println();
-                }
-                if (!r.getVmOut().isEmpty()) {
-                    resultHeader(outw, r);
-                    for (String data : r.getVmOut()) {
-                        outw.println(data);
-                    }
-                    outw.println();
-                }
-            }
-            outw.println("]]></system-out>");
-            outw.println("<system-err><![CDATA[");
-            for (TestResult r : sorted) {
-                if (!r.getVmErr().isEmpty()) {
-                    resultHeader(outw, r);
-                    TestConfig cfg = r.getConfig();
-                    for (String data : r.getVmErr()) {
-                        outw.println(data);
-                    }
-                    outw.println();
-                }
-            }
-            outw.println("]]></system-err>\n");
-
-            outw.println("</testcase>");
-        } else {
-            if (isTestsuiteUsed()) {
-                outw.println("  <testsuite name='"+suiteCandidate + "'>");
-            }
-            List<TestResult> sorted = new ArrayList<>(results);
-            HTMLReportPrinter.resultsOrder(sorted);
-            for (TestResult r : sorted) {
-                String testName=r.getConfig().toDetailedTest(false);
-                if (isTestsuiteUsed() && isStripNames()) {
-                    testName=r.getConfig().getTestVariant(false);
-                }
-                outw.println("  <testcase class='jcstress' name='" + testName + "'>");
-                outw.println("      <properties>");
-                printDescription(outw, test);
-                printRefs(outw, test);
-                printSeed(outw, r);
-                if (isDuplicateProperties()) {
-                    printBaseProperties(sorted, outw);
-                }
-
-                outw.println("      </properties>");
-
-                Set<String> keys = new TreeSet<>();
-                keys.addAll(r.getStateKeys());
-                outw.println("<failure><![CDATA[");//or error //or <!-- if pass?
-
-                TestConfig cfg = r.getConfig();
-                outw.println(r.getConfig().toDetailedTest(false));
-                printHtmlInfo(r, outw, keys);
-                outw.println("]]></failure>");//or error //or <!-- if pass?
-                outw.println("<system-out><![CDATA[");
-                if (!r.getMessages().isEmpty()) {
-                    resultHeader(outw, r);
-                    for (String data : r.getMessages()) {
-                        outw.println(data);
-                    }
-                    outw.println();
-                }
-                if (!r.getVmOut().isEmpty()) {
-                    resultHeader(outw, r);
-                    for (String data : r.getVmOut()) {
-                        outw.println(data);
-                    }
-                    outw.println();
-                }
-                outw.println("]]></system-out>");
-                outw.println("<system-err><![CDATA[");
-                if (!r.getVmErr().isEmpty()) {
-                    resultHeader(outw, r);
-                    for (String data : r.getVmErr()) {
-                        outw.println(data);
-                    }
-                    outw.println();
-                }
-                outw.println("]]></system-err>\n");
-
-                outw.println("</testcase>");
-            }
-            if (isTestsuiteUsed()) {
-                outw.println("  </testsuite>");
-            }
-        }
-
-    }
-
-    private static void printHtmlInfo(TestResult result, PrintWriter out, Set<String> keys) {
-        String color = ReportUtils.statusToPassed(result) ? "green" : "red";
-        String label = ReportUtils.statusToLabel(result);
-        out.println("html signatue: " + color + " - " + label);
-        getGradings(result, out, keys);
-    }
-
-    private static void getGradings(TestResult result, PrintWriter out, Set<String> keys) {
-        for (String key : keys) {
-            GradingResult c = result.grading().gradingResults.get(key);
-            if (c != null) {
-                out.println(selectHtmlGradingColor(c.expect, c.count == 0) + "/" + c.count + "");
-            } else {
-                out.println(selectHtmlGradingColor(Expect.ACCEPTABLE, true) + "/0");
-            }
-        }
-    }
-
-    private void resultHeader(PrintWriter o, TestResult r) {
-        TestConfig cfg = r.getConfig();
-        o.println("CompileMode: " + CompileMode.description(cfg.compileMode, cfg.actorNames));
-        o.println("SchedulingClass" + SchedulingClass.description(cfg.shClass, cfg.actorNames));
-        o.println("");
-        if (!cfg.jvmArgs.isEmpty()) {
-            o.println("jvmargs:" + cfg.jvmArgs);
-        }
-    }
-
-    private static String selectHtmlGradingColor(Expect type, boolean isZero) {
-        switch (type) {
-            case ACCEPTABLE:
-                return isZero ? "LIGHT_GRAY" : "GREEN";
-            case FORBIDDEN:
-                return isZero ? "LIGHT_GRAY" : "RED";
-            case ACCEPTABLE_INTERESTING:
-                return isZero ? "LIGHT_GRAY" : "CYAN";
-            case UNKNOWN:
-                return "RED";
-            default:
-                throw new IllegalStateException();
-        }
-    }
-
-    private void validate(String xml) {
-        try {
-            out.println("Checking: " + xml);
-            wellFormed(xml);
-            validByXsd(xml);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    private void wellFormed(String xml) throws ParserConfigurationException, SAXException, IOException {
-        out.println("Well formed?");
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setValidating(false);
-        factory.setNamespaceAware(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document document = builder.parse(new InputSource(xml));
-        out.println("Well formed!");
-    }
-
-    private void validByXsd(String xml) throws ParserConfigurationException, SAXException, IOException, URISyntaxException {
-        String url = "https://raw.githubusercontent.com/junit-team/junit5/refs/heads/main/platform-tests/src/test/resources/jenkins-junit.xsd";
-        out.println("Valid by " + url + " ?");
-        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        Schema schema = factory.newSchema(new URI(url).toURL());
-        Validator validator = schema.newValidator();
-        validator.validate(new StreamSource(new File(xml)));
-        out.println("Valid!");
-    }
-
-    public static JunitResult statusToJunitResult(TestResult result) {
-        switch (result.status()) {
-            case TIMEOUT_ERROR:
-                return JunitResult.error;
-            case CHECK_TEST_ERROR:
-                return JunitResult.error;
-            case TEST_ERROR:
-            case VM_ERROR:
-                return getHardErrorAs();
-            case API_MISMATCH:
-                return getSoftErrorAs();
-            case NORMAL:
-                return JunitResult.pass;
-            default:
-                throw new IllegalStateException("Illegal status: " + result.status());
         }
     }
 
