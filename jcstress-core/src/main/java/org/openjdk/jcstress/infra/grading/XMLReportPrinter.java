@@ -272,15 +272,7 @@ public class XMLReportPrinter {
 
             output.println("  <properties>");
             printBaseProperties(byName, output);
-            output.println("    <property name='sparse' value='" + sparse + "' />");
-            output.println("    <property name='" + USE_TESTSUITES + "' value='" + isTestsuiteUsed() + "' />");
-            output.println("    <property name='" + TESTSUITES_STRIPNAMES + "' value='" + isStripNames() + "' />");
-            output.println("    <property name='" + SOFT_ERROR_AS + "' value='" + getSoftErrorAs() + "' />");
-            output.println("    <property name='" + HARD_ERROR_AS + "' value='" + getHardErrorAs() + "' />");
-            output.println("    <property name='" + DUPLICATE_PROPERTIES + "' value='" + isDuplicateProperties() + "' />");
-            output.println("    <property name='" + NO_COMMENTS + "' value='" + isNoComments() + "' />");
-            output.println("    <property name='" + STDOUTERR_TO_FAILURE + "' value='" + isStdoutErrToFailure() + "' />");
-            output.println("    <property name='" + SPARSE + "' value='" + Objects.toString(getSparse(null)) + "' />");
+            printXmlReporterProperties(output);
             output.println("  </properties>");
         }
 // we have create dsummary, lets try to prnit the rest from merged info
@@ -311,6 +303,18 @@ public class XMLReportPrinter {
         if (isValidate()) {
             validate(filePath);
         }
+    }
+
+    private void printXmlReporterProperties(PrintWriter output) {
+        output.println("    <property name='sparse' value='" + sparse + "' />");
+        output.println("    <property name='" + USE_TESTSUITES + "' value='" + isTestsuiteUsed() + "' />");
+        output.println("    <property name='" + TESTSUITES_STRIPNAMES + "' value='" + isStripNames() + "' />");
+        output.println("    <property name='" + SOFT_ERROR_AS + "' value='" + getSoftErrorAs() + "' />");
+        output.println("    <property name='" + HARD_ERROR_AS + "' value='" + getHardErrorAs() + "' />");
+        output.println("    <property name='" + DUPLICATE_PROPERTIES + "' value='" + isDuplicateProperties() + "' />");
+        output.println("    <property name='" + NO_COMMENTS + "' value='" + isNoComments() + "' />");
+        output.println("    <property name='" + STDOUTERR_TO_FAILURE + "' value='" + isStdoutErrToFailure() + "' />");
+        output.println("    <property name='" + SPARSE + "' value='" + Objects.toString(getSparse(null)) + "' />");
     }
 
     private void emitTestReports(Multimap<String, TestResult> multiByName, PrintWriter local) {
