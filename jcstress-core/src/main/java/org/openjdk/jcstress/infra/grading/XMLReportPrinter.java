@@ -181,14 +181,6 @@ public class XMLReportPrinter {
         }
     }
 
-    private static String getRoughCount(TestResult r) {
-        long sum = r.getTotalCount();
-        if (sum > 10) {
-            return "10^" + (int) Math.floor(Math.log10(sum));
-        } else {
-            return String.valueOf(sum);
-        }
-    }
 
     private static void printSeed(PrintWriter o, TestResult r) {
         if (r.getConfig().getSeed() != null) {
@@ -567,6 +559,15 @@ public class XMLReportPrinter {
     /// /// /////////candidates to remove
     /// /// /////////candidates to remove
     /// /// /////////candidates to remove
+
+    private static String getRoughCount(TestResult r) {
+        long sum = r.getTotalCount();
+        if (sum > 10) {
+            return "10^" + (int) Math.floor(Math.log10(sum));
+        } else {
+            return String.valueOf(sum);
+        }
+    }
 
     private void printXTests(List<TestResult> byName,
                              PrintWriter output,
