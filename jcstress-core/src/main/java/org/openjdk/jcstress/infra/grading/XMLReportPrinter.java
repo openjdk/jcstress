@@ -48,6 +48,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -87,6 +88,7 @@ public class XMLReportPrinter {
     //only for full (non-saprse) output, will wrap each family by its <testsuite name> FIXME missing statistics/counters
     public static final String USE_TESTSUITES = "jcstress.report.xml.sparse.testsuites";
     //in case of sued testsuiotes, will not replicate the name of suite in test name.
+    //it is not stripped by default for sake of comparisns
     public static final String TESTSUITES_STRIPNAMES = "jcstress.report.xml.sparse.stripNames";
     //will repritn system and jvm info in each test (may significantly waste sapce)
     public static final String DUPLICATE_PROPERTIES = "jcstress.report.xml.properties.dupliate";
@@ -175,30 +177,46 @@ public class XMLReportPrinter {
         return System.getProperty(XMLReportPrinter.NO_COMMENTS) != null;
     }
 
-    private static void printBaseProperties(List<TestResult> sorted, PrintWriter o) {
+    private static String printProperty(String key, boolean value) {
+        return printProperty(key, "" + value);
+    }
+
+    private static String printProperty(String key, String value) {
+        return "<property name='" + key + "' value='" + value + "'/>";
+    }
+
+    private static String getBaseProperties(List<TestResult> sorted) {
+        StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : HTMLReportPrinter.getEnv(sorted).entrySet()) {
-            o.println("          <property name='" + entry.getKey() + "' value='" + entry.getValue() + "'/>");
+            sb.append("          " + printProperty(entry.getKey(), entry.getValue())).append("\n");
         }
+        return sb.toString();
     }
 
 
-    private static void printSeed(PrintWriter o, TestResult r) {
+    private static String getSeed(TestResult r) {
         if (r.getConfig().getSeed() != null) {
-            o.println("          <property name='seed' value='" + r.getConfig().getSeed() + "'/>");
+            return ("          " + printProperty("seed", r.getConfig().getSeed()) + "\n");
+        } else {
+            return null;
         }
     }
 
-    private static void printRefs(PrintWriter o, TestInfo test) {
+    private static String getRefs(TestInfo test) {
+        StringBuilder sb = new StringBuilder();
         for (String ref : test.refs()) {
             if (ref != null) {
-                o.println("          <property name='bug' value='" + ref + "'/>");
+                sb.append("          " + printProperty("bug", ref)).append("\n");
             }
         }
+        return sb.toString();
     }
 
-    private static void printDescription(PrintWriter o, TestInfo test) {
-        if (test.description() != null) {
-            o.println("          <property name='description' value='" + test.description() + "'/>");
+    private static String getTestDescription(TestInfo test) {
+        if (test.description() != null && !test.description().equals("null")) {
+            return "          " + printProperty("description", test.description() + "\n");
+        } else {
+            return null;
         }
     }
 
@@ -263,7 +281,8 @@ public class XMLReportPrinter {
         {
 
             output.println("  <properties>");
-            printBaseProperties(byName, output);
+            output.print(getBaseProperties(byName));
+            //FIXME print all properties, if 7903889 got ever implemented
             printXmlReporterProperties(output);
             output.println("  </properties>");
         }
@@ -298,15 +317,15 @@ public class XMLReportPrinter {
     }
 
     private void printXmlReporterProperties(PrintWriter output) {
-        output.println("    <property name='sparse' value='" + sparse + "' />");
-        output.println("    <property name='" + USE_TESTSUITES + "' value='" + isTestsuiteUsed() + "' />");
-        output.println("    <property name='" + TESTSUITES_STRIPNAMES + "' value='" + isStripNames() + "' />");
-        output.println("    <property name='" + SOFT_ERROR_AS + "' value='" + getSoftErrorAs() + "' />");
-        output.println("    <property name='" + HARD_ERROR_AS + "' value='" + getHardErrorAs() + "' />");
-        output.println("    <property name='" + DUPLICATE_PROPERTIES + "' value='" + isDuplicateProperties() + "' />");
-        output.println("    <property name='" + NO_COMMENTS + "' value='" + isNoComments() + "' />");
-        output.println("    <property name='" + STDOUTERR_TO_FAILURE + "' value='" + isStdoutErrToFailure() + "' />");
-        output.println("    <property name='" + SPARSE + "' value='" + Objects.toString(getSparse(null)) + "' />");
+        output.println("    " + printProperty("sparse", sparse));
+        output.println("    " + printProperty(USE_TESTSUITES, isTestsuiteUsed()));
+        output.println("    " + printProperty(TESTSUITES_STRIPNAMES, isStripNames()));
+        output.println("    " + printProperty(SOFT_ERROR_AS, getSoftErrorAs().toString()));
+        output.println("    " + printProperty(HARD_ERROR_AS, getHardErrorAs().toString()));
+        output.println("    " + printProperty(DUPLICATE_PROPERTIES, isDuplicateProperties()));
+        output.println("    " + printProperty(NO_COMMENTS, isNoComments()));
+        output.println("    " + printProperty(STDOUTERR_TO_FAILURE, isStdoutErrToFailure()));
+        output.println("    " + printProperty(SPARSE, Objects.toString(getSparse(null))));
     }
 
     private void emitTestReports(Multimap<String, TestResult> multiByName, PrintWriter local) {
@@ -323,13 +342,7 @@ public class XMLReportPrinter {
             List<TestResult> sorted = new ArrayList<>(results);
             HTMLReportPrinter.resultsOrder(sorted);
             outw.println("  <testcase class='jcstress' name='" + test.name() + "'>");
-            outw.println("      <properties>");
-            printDescription(outw, test);
-            printRefs(outw, test);
-            if (isDuplicateProperties()) {
-                printBaseProperties(sorted, outw);
-            }
-            outw.println("      </properties>");
+            printPropertiesPerTest(outw, test, null, sorted);
             printMainTestBody(outw, sorted, true);
             outw.println("</testcase>");
         } else {
@@ -344,14 +357,7 @@ public class XMLReportPrinter {
                     testName = r.getConfig().getTestVariant(false);
                 }
                 outw.println("  <testcase class='jcstress' name='" + testName + "'>");
-                outw.println("      <properties>");
-                printDescription(outw, test);
-                printRefs(outw, test);
-                printSeed(outw, r);
-                if (isDuplicateProperties()) {
-                    printBaseProperties(sorted, outw);
-                }
-                outw.println("      </properties>");
+                printPropertiesPerTest(outw, test, r, sorted);
                 printMainTestBody(outw, Arrays.asList(r), null);
                 outw.println("</testcase>");
             }
@@ -360,6 +366,40 @@ public class XMLReportPrinter {
             }
         }
 
+    }
+
+    private static void printPropertiesPerTest(PrintWriter outw, TestInfo test, TestResult result, List<TestResult> sorted) {
+        String props = printPropertiesPerTest(test, result, sorted);
+        if (!props.isEmpty()) {
+            outw.println("      <properties>");
+            outw.print(props);
+            outw.println("      </properties>");
+        }
+    }
+
+    private static String printPropertiesPerTest(TestInfo test, TestResult result, List<TestResult> sorted) {
+        StringBuilder sb = new StringBuilder();
+        String description = getTestDescription(test);
+        if (description != null && !description.isEmpty()) {
+            sb.append(description);
+        }
+        String refs = getRefs(test);
+        if (refs != null && !refs.isEmpty()) {
+            sb.append(refs);
+        }
+        if (result != null) {
+            String seed = getSeed(result);
+            if (seed != null && !seed.isEmpty()) {
+                sb.append(seed);
+            }
+        }
+        if (isDuplicateProperties()) {
+            String baseProps = getBaseProperties(sorted);
+            if (baseProps != null && !baseProps.isEmpty()) {
+                sb.append(baseProps);
+            }
+        }
+        return sb.toString();
     }
 
     private static void printMainTestBody(PrintWriter outw, List<TestResult> results, Boolean header) {
