@@ -196,10 +196,18 @@ public class XMLReportPrinter {
 
     private static String getSeed(TestResult r) {
         if (r.getConfig().getSeed() != null) {
-            return ("          " + printProperty("seed", r.getConfig().getSeed()) + "\n");
+            return ("          " + printProperty("seed", getCleanSeed(r)) + "\n");
         } else {
             return null;
         }
+    }
+
+    private static String getCleanSeed(TestResult r) {
+        String[] args = r.getConfig().getSeed().split("=");
+        if (args.length>1) {
+            return args[1];
+        }
+        return args[0];
     }
 
     private static String getRefs(TestInfo test) {
