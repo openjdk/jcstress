@@ -63,6 +63,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -204,7 +205,7 @@ public class XMLReportPrinter {
 
     private static String getCleanSeed(TestResult r) {
         String[] args = r.getConfig().getSeed().split("=");
-        if (args.length>1) {
+        if (args.length > 1) {
             return args[1];
         }
         return args[0];
@@ -243,49 +244,9 @@ public class XMLReportPrinter {
         String filePath = resultDir + File.separator + getMainFileName();
         PrintWriter output = new PrintWriter(filePath);
 
-        {
-            //FIXME not honouring user setup! use junit result
-            int passedCount = 0;
-            int failedCount = 0;
-            int sanityFailedCount = 0;
-            for (TestResult result : byName) {
-                if (result.status() == Status.NORMAL) {
-                    if (result.grading().isPassed) {
-                        passedCount++;
-                    } else {
-                        failedCount++;
-                    }
-                } else {
-                    if (result.status() == Status.API_MISMATCH) {
-                        sanityFailedCount++;
-                    } else {
-                        failedCount++;
-                    }
-                }
-            }
-
-            int totalCount = passedCount + failedCount + sanityFailedCount;
-
-            String hostname = "localhost";
-            try {
-                hostname = InetAddress.getLocalHost().getHostName();
-            } catch (Exception ex) {
-                //no interest
-            }
-            output.println("<?xml version='1.0' encoding='UTF-8'?>");
-            //in case of testsuites used
-            //consuilt <testsuites name="Test run" tests="8" failures="1" errors="1" skipped="1" time="16.082687" timestamp="2021-04-02T15:48:23">
-            //check whether both writings ar eok for jtreg plugin
-            output.println("<testsuite name='jcstress'" +
-                    " tests='" + totalCount + "'" +
-                    " failures='" + failedCount + "'" +
-                    " errors='" + 0/*fixme*/ + "'" +
-                    " skipped='" + sanityFailedCount + "' " +
-                    " time='" + 0/*fixme*/ + "'" +
-                    " timestamp='" + new Date().toString() + "' " +
-                    " hostname='" + hostname + "'>");
-
-        }
+        output.println("<?xml version='1.0' encoding='UTF-8'?>");
+        String header = printTestSuiteHeader(byName, "jcstress");
+        output.println(header);
         {
 
             output.println("  <properties>");
@@ -324,6 +285,60 @@ public class XMLReportPrinter {
         }
     }
 
+    private static String printTestSuiteHeader(List<TestResult> results, String name) {
+        Map<JunitResult, List<TestResult>> reordered = countJunitResults(results);
+        String hostname = "localhost";
+        try {
+            hostname = InetAddress.getLocalHost().getHostName();
+        } catch (Exception ex) {
+            //no interest
+        }
+        return "<testsuite name='" + name + "'" +
+                " tests='" + results.size() + "'" +
+                " failures='" + reordered.get(JunitResult.failure).size() + "'" +
+                " errors='" + reordered.get(JunitResult.error).size() + "'" +
+                " skipped='" + reordered.get(JunitResult.skipped).size() + "' " +
+                " passed='" + reordered.get(JunitResult.pass).size() + "'" +
+                " time='" + 0/*fixme getRoughCount?*/ + "'" +
+                " timestamp='" + new Date().toString() + "' " +
+                " hostname='" + hostname + "'>";
+    }
+
+    private static Map<JunitResult, List<TestResult>> countJunitResults(List<TestResult> results) {
+        List<TestResult> passed = new ArrayList<>();
+        List<TestResult> failed = new ArrayList<>();
+        List<TestResult> error = new ArrayList<>();
+        List<TestResult> skipped = new ArrayList<>();
+        Map<JunitResult, List<TestResult>> sorted = new HashMap<>();
+        sorted.put(JunitResult.pass, passed);
+        sorted.put(JunitResult.error, error);
+        sorted.put(JunitResult.failure, failed);
+        sorted.put(JunitResult.skipped, skipped);
+        for (TestResult result : results) {
+            switch (testToJunitResult(result)) {
+                case pass:
+                    passed.add(result);
+                    break;
+                case failure:
+                    failed.add(result);
+                    break;
+                case error:
+                    error.add(result);
+                    break;
+                case skipped:
+                    skipped.add(result);
+                    break;
+                default:
+                    throw new RuntimeException("Unknown JunitResult: " + result.status() + "/" + testToJunitResult(result));
+            }
+        }
+        int checksum = passed.size() + failed.size() + error.size() + skipped.size();
+        if (checksum != results.size()) {
+            throw new RuntimeException("Missed tests in summ-up: " + checksum + ", was supposed to be: " + results.size());
+        }
+        return sorted;
+    }
+
     private void printXmlReporterProperties(PrintWriter output) {
         output.println("    " + printProperty("sparse", sparse));
         output.println("    " + printProperty(USE_TESTSUITES, isTestsuiteUsed()));
@@ -354,11 +369,12 @@ public class XMLReportPrinter {
             printMainTestBody(outw, sorted, true);
             outw.println("</testcase>");
         } else {
-            if (isTestsuiteUsed()) {
-                outw.println("  <testsuite name='" + suiteCandidate + "'>");
-            }
             List<TestResult> sorted = new ArrayList<>(results);
             HTMLReportPrinter.resultsOrder(sorted);
+            if (isTestsuiteUsed()) {
+                String header = printTestSuiteHeader(sorted, suiteCandidate);
+                outw.println(header);
+            }
             for (TestResult r : sorted) {
                 String testName = r.getConfig().toDetailedTest(false);
                 if (isTestsuiteUsed() && isStripNames()) {
