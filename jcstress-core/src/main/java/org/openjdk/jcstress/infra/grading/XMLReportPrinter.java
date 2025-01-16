@@ -26,7 +26,6 @@ package org.openjdk.jcstress.infra.grading;
 
 
 import org.openjdk.jcstress.annotations.Expect;
-import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.InProcessCollector;
 import org.openjdk.jcstress.infra.collectors.TestResult;
@@ -34,7 +33,6 @@ import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.os.SchedulingClass;
 import org.openjdk.jcstress.util.Multimap;
-import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.vm.CompileMode;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -69,13 +67,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Predicate;
 
-/**
- * Prints HTML reports.
- *
- * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
- */
+
 public class XMLReportPrinter {
 
     private enum JunitResult {
@@ -86,7 +79,7 @@ public class XMLReportPrinter {
     public static final String SOFT_ERROR_AS = "jcstress.report.xml.softErrorAs"; //pass/fail/skip defaults to skip
     //how to deal with hard errors. Those may be timout, but also segfaulting vm
     public static final String HARD_ERROR_AS = "jcstress.report.xml.hardErrorAs"; //pass/fail defaults to fail
-    //only for full (non-saprse) output, will wrap each family by its <testsuite name> FIXME missing statistics/counters
+    //only for full (non-saprse) output, will wrap each family by its <testsuite name>
     public static final String USE_TESTSUITES = "jcstress.report.xml.sparse.testsuites";
     //in case of sued testsuiotes, will not replicate the name of suite in test name.
     //it is not stripped by default for sake of comparisns
@@ -255,26 +248,9 @@ public class XMLReportPrinter {
             printXmlReporterProperties(output);
             output.println("  </properties>");
         }
-// we have create dsummary, lets try to prnit the rest from merged info
+
         byName = ReportUtils.mergedByName(collector.getTestResults());
         Collections.sort(byName, Comparator.comparing(TestResult::getName));
-
-        output.println("<!--");
-        printXTests(byName, output,
-                "FAILED tests",
-                "Strong asserts were violated. Correct implementations should have no assert failures here.",
-                r -> r.status() == Status.NORMAL && !r.grading().isPassed);
-
-        printXTests(byName, output,
-                "ERROR tests",
-                "Tests break for some reason, other than failing the assert. Correct implementations should have none.",
-                r -> r.status() != Status.NORMAL && r.status() != Status.API_MISMATCH);
-
-        printXTests(byName, output,
-                "INTERESTING tests",
-                "Some interesting behaviors observed. This is for the plain curiosity.",
-                r -> r.status() == Status.NORMAL && r.grading().hasInteresting);
-        output.println("-->");
 
         emitTestReports(ReportUtils.byName(collector.getTestResults()), output);
         output.println("</testsuite>");
@@ -298,8 +274,8 @@ public class XMLReportPrinter {
                 " failures='" + reordered.get(JunitResult.failure).size() + "'" +
                 " errors='" + reordered.get(JunitResult.error).size() + "'" +
                 " skipped='" + reordered.get(JunitResult.skipped).size() + "' " +
-                " passed='" + reordered.get(JunitResult.pass).size() + "'" +
-                " time='" + 0/*fixme getRoughCount?*/ + "'" +
+                //" passed='" + reordered.get(JunitResult.pass).size() + "'" + would nto pass validation
+                " time='" + getTime(results, false) + "'" +
                 " timestamp='" + new Date().toString() + "' " +
                 " hostname='" + hostname + "'>";
     }
@@ -364,7 +340,7 @@ public class XMLReportPrinter {
         if (sparse) {
             List<TestResult> sorted = new ArrayList<>(results);
             HTMLReportPrinter.resultsOrder(sorted);
-            outw.println("  <testcase class='jcstress' name='" + test.name() + "'>");
+            outw.println("  <testcase class='jcstress' name='" + test.name() + "' time='" + getTime(results, false) + "'>");
             printPropertiesPerTest(outw, test, null, sorted);
             printMainTestBody(outw, sorted, true);
             outw.println("</testcase>");
@@ -380,7 +356,7 @@ public class XMLReportPrinter {
                 if (isTestsuiteUsed() && isStripNames()) {
                     testName = r.getConfig().getTestVariant(false);
                 }
-                outw.println("  <testcase class='jcstress' name='" + testName + "'>");
+                outw.println("  <testcase class='jcstress' name='" + testName + "' time='" + getTime(Arrays.asList(r), false) + "'>");
                 printPropertiesPerTest(outw, test, r, sorted);
                 printMainTestBody(outw, Arrays.asList(r), null);
                 outw.println("</testcase>");
@@ -390,6 +366,22 @@ public class XMLReportPrinter {
             }
         }
 
+    }
+
+    private static String getTime(Collection<TestResult> results, boolean toNicestring) {
+        double sum = 0;
+        for (TestResult resul : results) {
+            sum += resul.getTotalCount();
+        }
+        if (toNicestring) {
+            if (sum > 10) {
+                return "10^" + (long) Math.floor((Math.log10(sum)));
+            } else {
+                return String.valueOf(sum);
+            }
+        } else {
+            return ""+sum;
+        }
     }
 
     private static void printPropertiesPerTest(PrintWriter outw, TestInfo test, TestResult result, List<TestResult> sorted) {
@@ -417,6 +409,17 @@ public class XMLReportPrinter {
                 sb.append(seed);
             }
         }
+        if (result != null) {
+            if (result.grading().hasInteresting) {
+                sb.append("          " + printProperty("interesting", true) + "\n");
+            }
+        } else {
+            boolean anyIntresting = getAnyInteresting(sorted);
+            if (anyIntresting) {
+                sb.append("          " + printProperty("interesting", true) + "\n");
+            }
+        }
+
         if (isDuplicateProperties()) {
             String baseProps = getBaseProperties(sorted);
             if (baseProps != null && !baseProps.isEmpty()) {
@@ -424,6 +427,15 @@ public class XMLReportPrinter {
             }
         }
         return sb.toString();
+    }
+
+    private static boolean getAnyInteresting(List<TestResult> results) {
+        for (TestResult result : results) {
+            if (result.grading().hasInteresting) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void printMainTestBody(PrintWriter outw, List<TestResult> results, Boolean header) {
@@ -617,74 +629,6 @@ public class XMLReportPrinter {
                 return JunitResult.pass;
             default:
                 throw new IllegalStateException("Illegal status: " + result.status());
-        }
-    }
-
-    /// /// /////////candidates to remove
-    /// /// /////////candidates to remove
-    /// /// /////////candidates to remove
-
-    private static String getRoughCount(TestResult r) {
-        long sum = r.getTotalCount();
-        if (sum > 10) {
-            return "10^" + (int) Math.floor(Math.log10(sum));
-        } else {
-            return String.valueOf(sum);
-        }
-    }
-
-    private void printXTests(List<TestResult> byName,
-                             PrintWriter output,
-                             String header,
-                             String subheader,
-                             Predicate<TestResult> filterResults) {
-        output.println("*** " + header + " ***");
-        output.println("" + subheader + "");
-        boolean hadAnyTests = false;
-        for (TestResult result : byName) {
-            if (filterResults.test(result)) {
-                if (result.status() == Status.NORMAL) {
-                    emitTest(output, result);
-                } else {
-                    emitTestFailure(output, result);
-                }
-                hadAnyTests = true;
-            }
-        }
-        if (!hadAnyTests) {
-            output.println("None!");
-        }
-    }
-
-    private void emitTest(PrintWriter output, TestResult result) {
-        TestGrading grading = result.grading();
-        if (grading.isPassed) {
-            output.println("  Passed - " + StringUtils.chunkName(result.getName()) + " " + getRoughCount(result));
-        } else {
-            output.println("  FAILED - " + StringUtils.chunkName(result.getName()) + " " + getRoughCount(result));
-        }
-
-        if (grading.hasInteresting) {
-            output.println("    was interesting");
-        }
-    }
-
-    private void emitTestFailure(PrintWriter output, TestResult result) {
-        output.println("   FAILED - " + StringUtils.chunkName(result.getName()) + " " + getRoughCount(result));
-        switch (result.status()) {
-            case API_MISMATCH:
-                output.println("      API MISMATCH - Sanity check failed, API mismatch?");
-                break;
-            case TEST_ERROR:
-            case CHECK_TEST_ERROR:
-                output.println("      ERROR - Error while running the test");
-                break;
-            case TIMEOUT_ERROR:
-                output.println("      ERROR - Timeout while running the test");
-                break;
-            case VM_ERROR:
-                output.println("      VM ERROR - Error running the VM");
-                break;
         }
     }
 
