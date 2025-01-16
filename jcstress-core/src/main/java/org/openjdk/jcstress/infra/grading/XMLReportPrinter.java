@@ -340,7 +340,7 @@ public class XMLReportPrinter {
         if (sparse) {
             List<TestResult> sorted = new ArrayList<>(results);
             HTMLReportPrinter.resultsOrder(sorted);
-            outw.println("  <testcase class='jcstress' name='" + test.name() + "' time='" + getTime(results, false) + "'>");
+            outw.println("  " + getOpenTestcase(results, test.name()));
             printPropertiesPerTest(outw, test, null, sorted);
             printMainTestBody(outw, sorted, true);
             outw.println("</testcase>");
@@ -356,7 +356,7 @@ public class XMLReportPrinter {
                 if (isTestsuiteUsed() && isStripNames()) {
                     testName = r.getConfig().getTestVariant(false);
                 }
-                outw.println("  <testcase class='jcstress' name='" + testName + "' time='" + getTime(Arrays.asList(r), false) + "'>");
+                outw.println("  " + getOpenTestcase(Arrays.asList(r),testName));
                 printPropertiesPerTest(outw, test, r, sorted);
                 printMainTestBody(outw, Arrays.asList(r), null);
                 outw.println("</testcase>");
@@ -366,6 +366,10 @@ public class XMLReportPrinter {
             }
         }
 
+    }
+
+    private static String getOpenTestcase(Collection<TestResult> results, String test) {
+        return "<testcase classname='jcstress' name='" + test + "' time='" + getTime(results, false) + "'>";
     }
 
     private static String getTime(Collection<TestResult> results, boolean toNicestring) {
