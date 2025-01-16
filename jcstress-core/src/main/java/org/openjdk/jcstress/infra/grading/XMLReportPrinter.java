@@ -92,8 +92,8 @@ public class XMLReportPrinter {
     public static final String STDOUTERR_TO_FAILURE = "jcstress.report.xml.souterr2failure";
     //vill validate final xmls
     public static final String VALIDATE = "jcstress.report.xml.validate";
-    //will nto include comments (if any)
-    public static final String NO_COMMENTS = "jcstress.report.xml.nocomments";
+    //will keep non standart (but widelyused) elements uncomment
+    public static final String UNCOMMENT_NONSTANDART = "jcstress.report.xml.nonstandart";
     //by default both reprots are printed. By setting it to true or false, wil linclude only sparse ot full
     public static final String SPARSE = "jcstress.report.xml.sparse"; //true/false/null
 
@@ -168,7 +168,7 @@ public class XMLReportPrinter {
     }
 
     private static boolean isNoComments() {
-        return System.getProperty(XMLReportPrinter.NO_COMMENTS) != null;
+        return System.getProperty(XMLReportPrinter.UNCOMMENT_NONSTANDART) != null;
     }
 
     private static String printProperty(String key, boolean value) {
@@ -322,7 +322,7 @@ public class XMLReportPrinter {
         output.println("    " + printProperty(SOFT_ERROR_AS, getSoftErrorAs().toString()));
         output.println("    " + printProperty(HARD_ERROR_AS, getHardErrorAs().toString()));
         output.println("    " + printProperty(DUPLICATE_PROPERTIES, isDuplicateProperties()));
-        output.println("    " + printProperty(NO_COMMENTS, isNoComments()));
+        output.println("    " + printProperty(UNCOMMENT_NONSTANDART, isNoComments()));
         output.println("    " + printProperty(STDOUTERR_TO_FAILURE, isStdoutErrToFailure()));
         output.println("    " + printProperty(SPARSE, Objects.toString(getSparse(null))));
     }
