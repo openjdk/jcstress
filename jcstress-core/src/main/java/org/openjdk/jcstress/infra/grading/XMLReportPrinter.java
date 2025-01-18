@@ -167,7 +167,7 @@ public class XMLReportPrinter {
         return System.getProperty(XMLReportPrinter.DUPLICATE_PROPERTIES) != null;
     }
 
-    private static boolean isNoComments() {
+    private static boolean isXsdLenient() {
         return System.getProperty(XMLReportPrinter.UNCOMMENT_NONSTANDART) != null;
     }
 
@@ -238,26 +238,43 @@ public class XMLReportPrinter {
         PrintWriter output = new PrintWriter(filePath);
 
         output.println("<?xml version='1.0' encoding='UTF-8'?>");
-        String header = printTestSuiteHeader(byName, "jcstress");
-        output.println(header);
-        {
-
-            output.println("  <properties>");
-            output.print(getBaseProperties(byName));
-            //FIXME print all properties, if 7903889 got ever implemented
-            printXmlReporterProperties(output);
-            output.println("  </properties>");
+        output.println("<testsuites>");
+        if (isMainTestsuite()) {
+            String header = printTestSuiteHeader(byName, "jcstress");
+            output.println("  " + header);
+            printMainproperties(output, byName);
         }
-
         byName = ReportUtils.mergedByName(collector.getTestResults());
         Collections.sort(byName, Comparator.comparing(TestResult::getName));
-
         emitTestReports(ReportUtils.byName(collector.getTestResults()), output);
-        output.println("</testsuite>");
+        if (isMainTestsuite()) {
+            output.println("  </testsuite>");
+        }
+        output.println("</testsuites>");
         output.flush();
         output.close();
         if (isValidate()) {
             validate(filePath);
+        }
+    }
+
+    private void printMainproperties(PrintWriter output, List<TestResult> byName) {
+        output.println("  <properties>");
+        output.print(getBaseProperties(byName));
+        //FIXME print all properties, if 7903889 got ever implemented
+        printXmlReporterProperties(output);
+        output.println("  </properties>");
+    }
+
+    private boolean isMainTestsuite() {
+        if (sparse) {
+            return true;
+        } else {
+            if (!isTestsuiteUsed()) {
+                return true;
+            } else {
+                return isXsdLenient();
+            }
         }
     }
 
@@ -269,12 +286,18 @@ public class XMLReportPrinter {
         } catch (Exception ex) {
             //no interest
         }
-        return "<testsuite name='" + name + "'" +
+        String prefix = "";
+        String passed = " passed='" + reordered.get(JunitResult.pass).size() + "'";
+        if (!isXsdLenient()) {
+            prefix = "<!--" + passed + "-->\n";
+            passed = "";
+        }
+        return prefix + "<testsuite name='" + name + "'" +
                 " tests='" + results.size() + "'" +
                 " failures='" + reordered.get(JunitResult.failure).size() + "'" +
                 " errors='" + reordered.get(JunitResult.error).size() + "'" +
                 " skipped='" + reordered.get(JunitResult.skipped).size() + "' " +
-                //" passed='" + reordered.get(JunitResult.pass).size() + "'" + would nto pass validation
+                passed +
                 " time='" + getTime(results, false) + "'" +
                 " timestamp='" + new Date().toString() + "' " +
                 " hostname='" + hostname + "'>";
@@ -322,7 +345,7 @@ public class XMLReportPrinter {
         output.println("    " + printProperty(SOFT_ERROR_AS, getSoftErrorAs().toString()));
         output.println("    " + printProperty(HARD_ERROR_AS, getHardErrorAs().toString()));
         output.println("    " + printProperty(DUPLICATE_PROPERTIES, isDuplicateProperties()));
-        output.println("    " + printProperty(UNCOMMENT_NONSTANDART, isNoComments()));
+        output.println("    " + printProperty(UNCOMMENT_NONSTANDART, isXsdLenient()));
         output.println("    " + printProperty(STDOUTERR_TO_FAILURE, isStdoutErrToFailure()));
         output.println("    " + printProperty(SPARSE, Objects.toString(getSparse(null))));
     }
@@ -341,7 +364,9 @@ public class XMLReportPrinter {
             List<TestResult> sorted = new ArrayList<>(results);
             HTMLReportPrinter.resultsOrder(sorted);
             outw.println("  " + getOpenTestcase(results, test.name()));
-            printPropertiesPerTest(outw, test, null, sorted);
+            if (isXsdLenient()) {
+                printPropertiesPerTest(outw, test, null, sorted);
+            }
             printMainTestBody(outw, sorted, true);
             outw.println("</testcase>");
         } else {
@@ -350,14 +375,19 @@ public class XMLReportPrinter {
             if (isTestsuiteUsed()) {
                 String header = printTestSuiteHeader(sorted, suiteCandidate);
                 outw.println(header);
+                if (!isMainTestsuite()) {
+                    printMainproperties(outw, sorted);
+                }
             }
             for (TestResult r : sorted) {
                 String testName = r.getConfig().toDetailedTest(false);
                 if (isTestsuiteUsed() && isStripNames()) {
                     testName = r.getConfig().getTestVariant(false);
                 }
-                outw.println("  " + getOpenTestcase(Arrays.asList(r),testName));
-                printPropertiesPerTest(outw, test, r, sorted);
+                outw.println("  " + getOpenTestcase(Arrays.asList(r), testName));
+                if (isXsdLenient()) {
+                    printPropertiesPerTest(outw, test, r, sorted);
+                }
                 printMainTestBody(outw, Arrays.asList(r), null);
                 outw.println("</testcase>");
             }
@@ -384,7 +414,7 @@ public class XMLReportPrinter {
                 return String.valueOf(sum);
             }
         } else {
-            return ""+sum;
+            return "" + sum;
         }
     }
 
@@ -459,7 +489,15 @@ public class XMLReportPrinter {
         if (junitResult == JunitResult.failure || junitResult == JunitResult.error) {
             outw.println("<" + junitResult + "><![CDATA[");
             for (TestResult result : results) {
-                outw.println(result.getConfig().toDetailedTest(true));
+                if (!isXsdLenient()) {
+                    if (result.getConfig() != null && result.getConfig().getSeed() != null) {
+                        outw.println(result.getConfig().getSeed());
+                    }
+                    if (result.grading() != null && result.grading().hasInteresting) {
+                        outw.println("interesting");
+                    }
+                }
+                outw.println(result.getConfig().toDetailedTest(false));
                 printHtmlInfo(result, outw, keys);
                 if (isStdoutErrToFailure()) {
                     printMessages(outw, result, header);
@@ -470,7 +508,12 @@ public class XMLReportPrinter {
             outw.println("]]></" + junitResult + ">");
         }
         if (junitResult == JunitResult.skipped) {
-            outw.println(" <skipped message='api missmastch?' />");
+            if (isXsdLenient()) {
+                outw.println(" <skipped message='api missmastch?' />");
+            } else {
+                outw.println(" <!-- api missmastch -->");
+                outw.println(" <skipped/>");
+            }
         }
     }
 
