@@ -76,9 +76,9 @@ public class XMLReportPrinter {
     }
 
     //how to deal with sofrt errors like api mishmash or similar
-    public static final String SOFT_ERROR_AS = "jcstress.report.xml.softErrorAs"; //pass/fail/skip defaults to skip
+    public static final String SOFT_ERROR_AS = "jcstress.report.xml.softErrorAs"; //pass/fail/skip/error defaults to skip
     //how to deal with hard errors. Those may be timout, but also segfaulting vm
-    public static final String HARD_ERROR_AS = "jcstress.report.xml.hardErrorAs"; //pass/fail defaults to fail
+    public static final String HARD_ERROR_AS = "jcstress.report.xml.hardErrorAs"; //pass/fail/skip/error defaults to fail
     //only for full (non-saprse) output, will wrap each family by its <testsuite name>
     public static final String USE_TESTSUITES = "jcstress.report.xml.sparse.testsuites";
     //in case of sued testsuiotes, will not replicate the name of suite in test name.
@@ -90,11 +90,11 @@ public class XMLReportPrinter {
     //this is for tools,m which do nto show stdout/err properly
     //also it is saving a bit of space, but is loosing the granularity
     public static final String STDOUTERR_TO_FAILURE = "jcstress.report.xml.souterr2failure";
-    //vill validate final xmls
+    //will validate final xmls
     public static final String VALIDATE = "jcstress.report.xml.validate";
     //will keep non standart (but widelyused) elements uncomment
     public static final String UNCOMMENT_NONSTANDART = "jcstress.report.xml.nonstandart";
-    //by default both reprots are printed. By setting it to true or false, wil linclude only sparse ot full
+    //by default both reports are printed. By setting it to true or false, will include only sparse ot full
     public static final String SPARSE = "jcstress.report.xml.sparse"; //true/false/null
 
     private final String resultDir;
@@ -637,7 +637,7 @@ public class XMLReportPrinter {
 
     public static JunitResult testsToJunitResult(Collection<TestResult> results) {
         boolean hadError = false;
-        int coutSkipped = 0;
+        int countSkipped = 0;
         for (TestResult result : results) {
             if (testToJunitResult(result) == JunitResult.failure) {
                 //if there was failure in sub set, return whole group as failure
@@ -647,7 +647,7 @@ public class XMLReportPrinter {
                 hadError = true;
             }
             if (testToJunitResult(result) == JunitResult.skipped) {
-                coutSkipped++;
+                countSkipped++;
             }
         }
         //no failure, bute errors presented
@@ -655,7 +655,7 @@ public class XMLReportPrinter {
             return JunitResult.error;
         }
         //no failure, no error, was all skipped?
-        if (coutSkipped == results.size()) {
+        if (countSkipped == results.size()) {
             return JunitResult.skipped;
         }
         return JunitResult.pass;
