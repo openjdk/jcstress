@@ -39,7 +39,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
@@ -55,29 +54,15 @@ public class TestResult implements Serializable {
     private final List<String> vmErr;
     private transient TestGrading grading;
 
-    private static final Random r = new Random();
-    private final int failer;
-
     public TestResult(Status status) {
-        failer = r.nextInt(7);
-        switch (failer) {
-            case 0:  this.status=Status.TEST_ERROR; break;
-            case 1:  this.status=Status.NORMAL; break;
-            case 2:  this.status=Status.CHECK_TEST_ERROR; break;
-            case 3:  this.status=Status.API_MISMATCH; break;
-            case 4:  this.status=Status.TIMEOUT_ERROR; break;
-            case 5:  this.status=Status.VM_ERROR; break;
-            default: this.status = status;
-        }
+        this.status = status;
         this.states = new Counter<>();
         this.messages = new ArrayList<>();
         this.vmOut = new ArrayList<>();
         this.vmErr = new ArrayList<>();
-        fakeOutputs();
     }
 
     public TestResult(DataInputStream dis) throws IOException {
-        failer=10;
         status = Status.values()[dis.readInt()];
         states = new Counter<>(dis);
         messages = new ArrayList<>();
@@ -101,16 +86,6 @@ public class TestResult implements Serializable {
                 vmErr.add(dis.readUTF());
             }
         }
-        fakeOutputs();
-    }
-
-    private void fakeOutputs() {
-        messages.add("messages1");
-        messages.add("messages2");
-        vmOut.add("out1");
-        vmOut.add("out2");
-        vmErr.add("err1");
-        vmErr.add("err2");
     }
 
     public void write(DataOutputStream dos) throws IOException {
