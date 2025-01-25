@@ -34,7 +34,10 @@ import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.os.SchedulingClass;
 import org.openjdk.jcstress.util.Multimap;
 import org.openjdk.jcstress.vm.CompileMode;
+import org.w3c.dom.CDATASection;
+import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -42,6 +45,12 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
@@ -50,6 +59,7 @@ import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -677,6 +687,43 @@ public class XMLReportPrinter {
             default:
                 throw new IllegalStateException("Illegal status: " + result.status());
         }
+    }
+
+    public static void main(String... args) throws ParserConfigurationException, TransformerException {
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+
+        Document doc = docBuilder.newDocument();
+        Comment comment1 = doc.createComment("passed 4");
+        doc.appendChild(comment1);
+        Element testsuite = doc.createElement("testsuite");
+        testsuite.setAttribute("failed", "5");
+        testsuite.setAttribute("total", "10");
+        testsuite.setAttribute("error", "8");
+        testsuite.setAttribute("skipped", "9");
+        doc.appendChild(testsuite);
+        Comment comment2 = doc.createComment("passed 5");
+        testsuite.appendChild(comment2);
+        Element testcase = doc.createElement("testcase");
+        testsuite.appendChild(testcase);
+        testcase.setAttribute("classname", "jcstress");
+        testcase.setAttribute("name", "org.openjdk.jcstress.tests.copy.manual.objects.plain.StringTest");
+        Element failure = doc.createElement("failure");
+        CDATASection cdataSection = doc.createCDATASection("more\nlines\nhere");
+        failure.appendChild(cdataSection);
+        testcase.appendChild(failure);
+        writeXml(doc, System.out);
+
+    }
+
+    // write doc to output stream
+    private static void writeXml(Document doc, OutputStream output) throws TransformerException {
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        DOMSource source = new DOMSource(doc);
+        StreamResult result = new StreamResult(output);
+        transformer.transform(source, result);
     }
 
 }
