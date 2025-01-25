@@ -30,6 +30,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.openjdk.jcstress.infra.runners.SpinLoopStyle;
 import org.openjdk.jcstress.os.AffinityMode;
+import org.openjdk.jcstress.properties.UsedProperties;
 import org.openjdk.jcstress.util.OptionFormatter;
 import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.util.TimeValue;

@@ -25,6 +25,7 @@
 package org.openjdk.jcstress;
 
 import org.openjdk.jcstress.infra.grading.ReportUtils;
+import org.openjdk.jcstress.properties.UsedProperties;
 import org.openjdk.jcstress.util.TimeValue;
 import org.openjdk.jcstress.vm.VMSupport;
 

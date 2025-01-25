@@ -24,7 +24,7 @@
  */
 package org.openjdk.jcstress.link;
 
-import org.openjdk.jcstress.UsedProperties;
+import org.openjdk.jcstress.properties.UsedProperties;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 

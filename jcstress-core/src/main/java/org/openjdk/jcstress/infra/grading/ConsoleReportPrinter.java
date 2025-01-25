@@ -27,7 +27,7 @@ package org.openjdk.jcstress.infra.grading;
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.TestExecutor;
 import org.openjdk.jcstress.TimeBudget;
-import org.openjdk.jcstress.UsedProperties;
+import org.openjdk.jcstress.properties.UsedProperties;
 import org.openjdk.jcstress.Verbosity;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.collectors.TestResultCollector;
