@@ -49,7 +49,7 @@ import org.openjdk.jcstress.infra.results.$T$$T$$T$_Result;
 @State
 public class $TestClassName$ {
 
-    static final int OFF = $buffer_allocate$(128).alignmentOffset(0, 8);
+    static final int OFF = $buffer_allocate$(128).alignmentOffset(0, 1);
 
     static final VarHandle vh;
 

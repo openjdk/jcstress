@@ -44,7 +44,7 @@ import org.openjdk.jcstress.infra.results.*;
 @State
 public class $name$ {
 
-    static final int OFF = ByteBuffer.wrap(new byte[128]).alignmentOffset(0, 8);
+    static final int OFF = ByteBuffer.wrap(new byte[128]).alignmentOffset(0, 1);
     static final VarHandle VH = MethodHandles.byteArrayViewVarHandle($type$[].class, ByteOrder.$byteOrder$);
 
     byte[] xs = new byte[OFF + 8];

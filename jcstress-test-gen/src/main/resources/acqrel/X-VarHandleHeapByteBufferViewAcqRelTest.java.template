@@ -58,7 +58,7 @@ public class $name$ {
     static final VarHandle VH = MethodHandles.byteBufferViewVarHandle($typeG$[].class, ByteOrder.$byteOrder$);
 
     ByteBuffer g = ByteBuffer.allocate(16);
-    int off = g.alignmentOffset(0, 8);
+    int off = g.alignmentOffset(0, 1);
 
     $typeV$ v;
 

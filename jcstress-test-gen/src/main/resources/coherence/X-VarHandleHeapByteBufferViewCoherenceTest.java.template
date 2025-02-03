@@ -48,7 +48,7 @@ public class $name$ {
     static final VarHandle VH = MethodHandles.byteBufferViewVarHandle($type$[].class, ByteOrder.$byteOrder$);
 
     ByteBuffer buf = ByteBuffer.allocate(16);
-    int off = buf.alignmentOffset(0, 8);
+    int off = buf.alignmentOffset(0, 1);
 
     @Actor
     public void actor1() {
