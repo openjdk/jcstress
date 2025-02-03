@@ -131,6 +131,9 @@ public class FailFastKiller extends CountingResultCollector {
 
     private void verifyState(TestResult r) {
         long totalFailed = failed + hardErrors;
+        if (System.getProperty("jcstress.failfast.countsoft") != null) {
+            totalFailed += softErrors;
+        }
         if (superRelative) {
             double totalFinishedUpToNow;
             if (isFailFastAllVariants) {
