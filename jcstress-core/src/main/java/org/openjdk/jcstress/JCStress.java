@@ -40,6 +40,7 @@ import org.openjdk.jcstress.vm.VMSupport;
 import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * JCStress main entry point.
@@ -237,15 +238,46 @@ public class JCStress {
     public SortedSet<String> getTests() {
         String filter = opts.getTestFilter();
         SortedSet<String> s = new TreeSet<>();
-
+        Pattern byteArrayAndBufferExclusion = null;
+        if (VMSupport.getJdkVersionMajor() > 22) {
+            String regexPrefix = "org.openjdk.jcstress.tests".replace(".", "\\.");
+            String[] members = new String[]{
+                    "accessAtomic.varHandles.byteArray",
+                    "accessAtomic.varHandles.byteBuffer",
+                    "acqrel.varHandles.byteArray",
+                    "acqrel.vHandles.byteBuffer",
+                    "atomicity.varHandles.byteArray",
+                    "atomicity.varHandles.byteBuffer",
+                    "coherence.varHandles.byteArray",
+                    "coherence.varHandles.byteBuffer"};
+            String regexBody = "(" + Arrays.stream(members).map(ss -> ss.replace(".", "\\.")).collect(Collectors.joining("|")) + ")";
+            String regexSuffix = "(big|heap|little).*";
+            byteArrayAndBufferExclusion = Pattern.compile(regexPrefix + "\\." + regexBody + "\\." + regexSuffix);
+        }
         Pattern pattern = Pattern.compile(filter);
+        int excludedBuffersAndArrays = 0;
         for (String testName : TestList.tests()) {
             if (pattern.matcher(testName).find()) {
-                s.add(testName);
+                if (byteArrayAndBufferExclusion != null && byteArrayAndBufferExclusion.matcher(testName).find()) {
+                    excludedBuffersAndArrays++;
+                } else {
+                    s.add(testName);
+                }
             }
         }
+        if (excludedBuffersAndArrays > 0) {
+            out.println();
+            out.println("Warning! JDK 23 or newer detected and " + excludedBuffersAndArrays + " of selected " + (s.size() + excludedBuffersAndArrays) + " (from total " + TestList.tests().size() + ") tests were excluded by:");
+            out.println(byteArrayAndBufferExclusion.toString().replaceAll("\\\\", ""));
+            out.println("This is known bug: https://bugs.openjdk.org/browse/CODETOOLS-7903671");
+            out.println("This is temporarily workaround and issue should be fixed soon.");
+            if (s.isEmpty()) {
+                out.println("Warning! Nothing remained!");
+            }
+            out.println();
+        }
         return s;
-   }
+    }
 
     public int listTests(Options opts) {
         JCStress.ConfigsWithScheduler configsWithScheduler = getConfigs();
