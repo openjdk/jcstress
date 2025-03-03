@@ -59,11 +59,14 @@ public class TimeBudget {
         if (timeBudget != null) {
             return timeBudget;
         }
-
         // Assume the nearly worst case, all 4-actor tests taking the cores exclusively.
         long expectedTotalTime = (long) expectedTests * DEFAULT_PER_TEST_MS;
-        long expectedPerTest = expectedTotalTime / Math.max(1, VMSupport.figureOutHotCPUs() / 8);
+        long expectedPerTest = expectedTotalTime / getConcurentTestsFactor();
         return new TimeValue(expectedPerTest, TimeUnit.MILLISECONDS);
+    }
+
+    private static int getConcurentTestsFactor() {
+        return Math.max(1, VMSupport.figureOutHotCPUs() / 8);
     }
 
     public void finishTest() {
@@ -131,8 +134,24 @@ public class TimeBudget {
         } else {
             out.println("    Initial completion estimate: " + ReportUtils.msToDate(timeLeftMs(), true));
             out.println("    Initial test time: " + targetTestTimeMs() + " ms");
+            printOvertimeWarning();
         }
         out.println();
+    }
+
+    private void printOvertimeWarning() {
+        System.out.println("For "+expectedTests + " with concurrency factor of " + getConcurentTestsFactor() +" You have requested/been given time budget which have: " + ReportUtils.msToDate(budget.milliseconds(), false));
+        System.out.println("That is ~"  + budget.milliseconds()/expectedTests*getConcurentTestsFactor() + " ms per test");
+        moreAccurateValue(MIN_TIME_MS, "minimal");
+        moreAccurateValue(DEFAULT_PER_TEST_MS, "default");
+        moreAccurateValue(MAX_TIME_MS, "maximal");
+    }
+
+    private void moreAccurateValue(int val, String id) {
+        long expectedTotalTime = (long) expectedTests * val;
+        long expectedPerTest = expectedTotalTime / getConcurentTestsFactor();
+        System.out.println("However the real "+id+" time will have: " + ReportUtils.msToDate(expectedPerTest, false));
+        System.out.println("That is ~" + expectedPerTest/expectedTests*getConcurentTestsFactor() + " ms per test");
     }
 
     public boolean isZero() {
