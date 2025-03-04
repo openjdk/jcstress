@@ -139,19 +139,39 @@ public class TimeBudget {
         out.println();
     }
 
-    private void printOvertimeWarning() {
-        System.out.println("For "+expectedTests + " with concurrency factor of " + getConcurentTestsFactor() +" You have requested/been given time budget of: " + ReportUtils.getNiceMsTimeDate(budget.milliseconds()));
-        System.out.println("That is ~"  + budget.milliseconds()/expectedTests + " ms per test");
-        moreAccurateValue(MIN_TIME_MS, "minimal");
-        moreAccurateValue(DEFAULT_PER_TEST_MS, "default");
-        moreAccurateValue(MAX_TIME_MS, "maximal");
+    private long countEta(int msPerTest) {
+        long expectedTotalTime = (long) expectedTests * msPerTest;
+        long expectedPerTest = expectedTotalTime / getConcurentTestsFactor();
+        return expectedPerTest;
     }
 
-    private void moreAccurateValue(int val, String id) {
-        long expectedTotalTime = (long) expectedTests * val;
-        long expectedPerTest = expectedTotalTime / getConcurentTestsFactor();
-        System.out.println("However the real "+id+" time will be: " + ReportUtils.getNiceMsTimeDate(expectedPerTest));
-        System.out.println("which  is ~" + expectedPerTest/expectedTests*getConcurentTestsFactor() + " ms per test");
+    private boolean printOvertimeWarning() {
+        long expectedPerTest = countEta(DEFAULT_PER_TEST_MS);
+        boolean print=false;
+        if (expectedPerTest > budget.milliseconds() * 2l) {
+            System.out.println(" + +++ FATAL - your tests will never finish as expected. They will run much longer ");
+            print=true;
+        }
+        if (expectedPerTest * 2 < budget.milliseconds() * 2l) {
+            System.out.println(" + +++ WARNING - your time budget will not be used. Tests will end much sooner.");
+            print=true;
+        }
+        if (print) {
+            System.out.println(" | For " + expectedTests + " with concurrency factor of " + getConcurentTestsFactor()
+                    + " You have requested/been given time budget of: " + ReportUtils.getNiceMsTimeDate(budget.milliseconds()));
+            System.out.println(" | That is ~" + budget.milliseconds() / expectedTests + " ms per test");
+            System.out.println(" + +++ However the real time will be converging to: " + ReportUtils.getNiceMsTimeDate(expectedPerTest) + " +++");
+            System.out.println(" | You can play with internal properties name(value/eta):\n"
+                    + " |   jcstress.timeBudget.defaultPerTestMs(" + DEFAULT_PER_TEST_MS + "ms/" +
+                    ReportUtils.getNiceMsTimeDate(countEta(DEFAULT_PER_TEST_MS)) + ")\n"
+                    + " |   jcstress.timeBudget.minTimeMs(" + MIN_TIME_MS + "ms/" +
+                    ReportUtils.getNiceMsTimeDate(countEta(MIN_TIME_MS)) + ")\n"
+                    + " |   jcstress.timeBudget.maxTimeMs(" + MAX_TIME_MS + "ms/" +
+                    ReportUtils.getNiceMsTimeDate(countEta(MAX_TIME_MS)) + ")\n"
+                    + " | Which are setting up the exact times the individual tests are trying to converage to.\n"
+                    + " + Use with caution! Test run below 100ms is moreover jeopardize the purpose. And will not squeeze the time as you wish.");
+        }
+        return print;
     }
 
     public boolean isZero() {
