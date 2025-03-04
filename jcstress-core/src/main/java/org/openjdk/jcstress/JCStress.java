@@ -61,7 +61,7 @@ public class JCStress {
             return;
         }
 
-        TimeBudget timeBudget = new TimeBudget(config.configs.size(), opts.timeBudget());
+        TimeBudget timeBudget = getTimeBudget(config);
         timeBudget.printOn(out);
 
         ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), config.configs.size(), timeBudget);
@@ -83,6 +83,14 @@ public class JCStress {
         out.println();
 
         parseResults();
+    }
+
+    private TimeBudget getTimeBudget(ConfigsWithScheduler config) {
+        if (config == null) {
+            return null;
+        }
+        TimeBudget timeBudget = new TimeBudget(config.configs.size(), opts.timeBudget());
+        return timeBudget;
     }
 
     private ConfigsWithScheduler getConfigs() {
@@ -249,6 +257,10 @@ public class JCStress {
 
     public int listTests(Options opts) {
         JCStress.ConfigsWithScheduler configsWithScheduler = getConfigs();
+
+        TimeBudget timeBudget = getTimeBudget(configsWithScheduler);
+        timeBudget.printOn(out);
+
         Set<String> testsToPrint = new TreeSet<>();
         for (TestConfig test : configsWithScheduler.configs) {
             if (opts.verbosity().printAllTests()) {
