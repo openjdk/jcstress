@@ -149,11 +149,11 @@ public class TimeBudget {
         long expectedPerTest = countEta(DEFAULT_PER_TEST_MS);
         boolean print=false;
         if (expectedPerTest > budget.milliseconds() * 2l) {
-            out.println(" + +++ FATAL - your tests will never finish as expected. They will run much longer ");
+            out.println(" + FATAL: - your tests will never finish as expected. They will run much longer ");
             print=true;
         }
         if (expectedPerTest * 2 < budget.milliseconds() * 2l) {
-            out.println(" + +++ WARNING - your time budget will not be used. Tests will end much sooner.");
+            out.println(" + WARNING:  your time budget will not be used. Tests will end much sooner.");
             print=true;
         }
         if (print) {
