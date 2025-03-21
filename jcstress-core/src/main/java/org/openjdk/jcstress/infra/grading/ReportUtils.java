@@ -315,9 +315,7 @@ public class ReportUtils {
             ms -= TimeUnit.DAYS.toMillis(days);
         }
         long hours = TimeUnit.MILLISECONDS.toHours(ms);
-        ms -= TimeUnit.HOURS.toMillis(hours);
         long minutes = TimeUnit.MILLISECONDS.toMinutes(ms);
-        ms -= TimeUnit.MINUTES.toMillis(minutes);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(ms);
         result += String.format("%02d:%02d:%02d", hours, minutes, seconds);
         return result;

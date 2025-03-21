@@ -161,7 +161,7 @@ public class TimeBudget {
                     + " You have requested/been given time budget of: " + ReportUtils.formatMsToDaysAndTime(budget.milliseconds()));
             out.println(" | That is ~" + budget.milliseconds() / expectedTests + " ms per test");
             out.println(" + +++ However the real time will be converging to: " + ReportUtils.formatMsToDaysAndTime(expectedPerTest) + " +++");
-            out.println(" | You can play with internal properties name(value/eta):\n"
+            out.println(" | You can play with internal  properties name(value/eta):\n"
                     + " |   jcstress.timeBudget.defaultPerTestMs(" + DEFAULT_PER_TEST_MS + "ms/" +
                     ReportUtils.formatMsToDaysAndTime(countEta(DEFAULT_PER_TEST_MS)) + ")\n"
                     + " |   jcstress.timeBudget.minTimeMs(" + MIN_TIME_MS + "ms/" +
