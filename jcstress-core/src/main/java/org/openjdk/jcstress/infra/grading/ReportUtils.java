@@ -294,7 +294,7 @@ public class ReportUtils {
         if (overtime) {
             ms = -ms;
         }
-        String result = getNiceMsTimeDate(ms);
+        String result = formatMsToDaysAndTime(ms);
         if (overtime) {
             result = "overtime " + result;
         }
@@ -307,7 +307,7 @@ public class ReportUtils {
         return result;
     }
 
-    public static String getNiceMsTimeDate(long ms) {
+    public static String formatMsToDaysAndTime(long ms) {
         String result = "";
         long days = TimeUnit.MILLISECONDS.toDays(ms);
         if (days > 0) {

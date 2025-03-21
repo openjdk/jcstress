@@ -158,16 +158,16 @@ public class TimeBudget {
         }
         if (print) {
             out.println(" | For " + expectedTests + " with concurrency factor of " + getConcurentTestsFactor()
-                    + " You have requested/been given time budget of: " + ReportUtils.getNiceMsTimeDate(budget.milliseconds()));
+                    + " You have requested/been given time budget of: " + ReportUtils.formatMsToDaysAndTime(budget.milliseconds()));
             out.println(" | That is ~" + budget.milliseconds() / expectedTests + " ms per test");
-            out.println(" + +++ However the real time will be converging to: " + ReportUtils.getNiceMsTimeDate(expectedPerTest) + " +++");
+            out.println(" + +++ However the real time will be converging to: " + ReportUtils.formatMsToDaysAndTime(expectedPerTest) + " +++");
             out.println(" | You can play with internal properties name(value/eta):\n"
                     + " |   jcstress.timeBudget.defaultPerTestMs(" + DEFAULT_PER_TEST_MS + "ms/" +
-                    ReportUtils.getNiceMsTimeDate(countEta(DEFAULT_PER_TEST_MS)) + ")\n"
+                    ReportUtils.formatMsToDaysAndTime(countEta(DEFAULT_PER_TEST_MS)) + ")\n"
                     + " |   jcstress.timeBudget.minTimeMs(" + MIN_TIME_MS + "ms/" +
-                    ReportUtils.getNiceMsTimeDate(countEta(MIN_TIME_MS)) + ")\n"
+                    ReportUtils.formatMsToDaysAndTime(countEta(MIN_TIME_MS)) + ")\n"
                     + " |   jcstress.timeBudget.maxTimeMs(" + MAX_TIME_MS + "ms/" +
-                    ReportUtils.getNiceMsTimeDate(countEta(MAX_TIME_MS)) + ")\n"
+                    ReportUtils.formatMsToDaysAndTime(countEta(MAX_TIME_MS)) + ")\n"
                     + " | Which are setting up the exact times the individual tests are trying to converage to.\n"
                     + " + Use with caution! Test run below 100ms is moreover jeopardize the purpose. And will not squeeze the time as you wish.");
         }
