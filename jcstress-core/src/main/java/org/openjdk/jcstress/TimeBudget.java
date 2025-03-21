@@ -134,7 +134,7 @@ public class TimeBudget {
         } else {
             out.println("    Initial completion estimate: " + ReportUtils.msToDate(timeLeftMs(), true));
             out.println("    Initial test time: " + targetTestTimeMs() + " ms");
-            printOvertimeWarning();
+            printOvertimeWarning(out);
         }
         out.println();
     }
@@ -145,23 +145,23 @@ public class TimeBudget {
         return expectedPerTest;
     }
 
-    private boolean printOvertimeWarning() {
+    private boolean printOvertimeWarning(PrintStream out) {
         long expectedPerTest = countEta(DEFAULT_PER_TEST_MS);
         boolean print=false;
         if (expectedPerTest > budget.milliseconds() * 2l) {
-            System.out.println(" + +++ FATAL - your tests will never finish as expected. They will run much longer ");
+            out.println(" + +++ FATAL - your tests will never finish as expected. They will run much longer ");
             print=true;
         }
         if (expectedPerTest * 2 < budget.milliseconds() * 2l) {
-            System.out.println(" + +++ WARNING - your time budget will not be used. Tests will end much sooner.");
+            out.println(" + +++ WARNING - your time budget will not be used. Tests will end much sooner.");
             print=true;
         }
         if (print) {
-            System.out.println(" | For " + expectedTests + " with concurrency factor of " + getConcurentTestsFactor()
+            out.println(" | For " + expectedTests + " with concurrency factor of " + getConcurentTestsFactor()
                     + " You have requested/been given time budget of: " + ReportUtils.getNiceMsTimeDate(budget.milliseconds()));
-            System.out.println(" | That is ~" + budget.milliseconds() / expectedTests + " ms per test");
-            System.out.println(" + +++ However the real time will be converging to: " + ReportUtils.getNiceMsTimeDate(expectedPerTest) + " +++");
-            System.out.println(" | You can play with internal properties name(value/eta):\n"
+            out.println(" | That is ~" + budget.milliseconds() / expectedTests + " ms per test");
+            out.println(" + +++ However the real time will be converging to: " + ReportUtils.getNiceMsTimeDate(expectedPerTest) + " +++");
+            out.println(" | You can play with internal properties name(value/eta):\n"
                     + " |   jcstress.timeBudget.defaultPerTestMs(" + DEFAULT_PER_TEST_MS + "ms/" +
                     ReportUtils.getNiceMsTimeDate(countEta(DEFAULT_PER_TEST_MS)) + ")\n"
                     + " |   jcstress.timeBudget.minTimeMs(" + MIN_TIME_MS + "ms/" +
