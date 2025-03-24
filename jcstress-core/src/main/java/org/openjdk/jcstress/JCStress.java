@@ -87,7 +87,7 @@ public class JCStress {
 
     private TimeBudget getTimeBudget(ConfigsWithScheduler config) {
         TimeBudget timeBudget = new TimeBudget(config.configs.size(), opts.timeBudget());
-        return timeBudget;
+        return new TimeBudget(config.configs.size(), opts.timeBudget());
     }
 
     private ConfigsWithScheduler getConfigs() {
