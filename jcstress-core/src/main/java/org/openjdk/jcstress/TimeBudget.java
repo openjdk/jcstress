@@ -25,6 +25,7 @@
 package org.openjdk.jcstress;
 
 import org.openjdk.jcstress.infra.grading.ReportUtils;
+import org.openjdk.jcstress.properties.UsedProperties;
 import org.openjdk.jcstress.util.TimeValue;
 import org.openjdk.jcstress.vm.VMSupport;
 
@@ -34,9 +35,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class TimeBudget {
 
-    static final int DEFAULT_PER_TEST_MS = Integer.getInteger("jcstress.timeBudget.defaultPerTestMs", 3000);
-    static final int MIN_TIME_MS = Integer.getInteger("jcstress.timeBudget.minTimeMs", 30);
-    static final int MAX_TIME_MS = Integer.getInteger("jcstress.timeBudget.maxTimeMs", 60_000);
+    static final int DEFAULT_PER_TEST_MS =  UsedProperties.getJcstressTimeBudgetDefaultPerTestMs();
+    static final int MIN_TIME_MS = UsedProperties.getJcstressTimeBudgetMinTimeMs();
+    static final int MAX_TIME_MS = UsedProperties.getJcstressTimeBudgetMaxTimeMs();
 
     final long endTime;
     final int expectedTests;

@@ -35,7 +35,7 @@ public class OptionFormatter implements HelpFormatter {
 
     public String format(Map<String, ? extends OptionDescriptor> options) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Usage: java -jar jcstress.jar [options]");
+        sb.append("Usage: java [properties] -jar jcstress.jar [options]");
         sb.append(System.lineSeparator());
         sb.append(" [opt] means optional argument.");
         sb.append(System.lineSeparator());

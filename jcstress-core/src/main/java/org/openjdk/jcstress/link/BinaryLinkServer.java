@@ -24,6 +24,7 @@
  */
 package org.openjdk.jcstress.link;
 
+import org.openjdk.jcstress.properties.UsedProperties;
 import org.openjdk.jcstress.infra.collectors.TestResult;
 import org.openjdk.jcstress.infra.runners.ForkedTestConfig;
 
@@ -37,9 +38,8 @@ import java.net.*;
  */
 public final class BinaryLinkServer {
 
-    private static final String LINK_ADDRESS = System.getProperty("jcstress.link.address");
-    private static final int LINK_PORT = Integer.getInteger("jcstress.link.port", 0);
-    private static final int LINK_TIMEOUT_MS = Integer.getInteger("jcstress.link.timeoutMs", 30 * 1000);
+    private static final int LINK_PORT = UsedProperties.getJcstressLinkPort();
+    private static final int LINK_TIMEOUT_MS = UsedProperties.getJcstressLinkTimeoutMs();
 
     private final ServerSocket server;
     private final InetAddress listenAddress;
@@ -49,7 +49,7 @@ public final class BinaryLinkServer {
     public BinaryLinkServer(ServerListener listener) throws IOException {
         this.listener = listener;
 
-        listenAddress = getListenAddress();
+        listenAddress = UsedProperties.getListenAddress();
         server = new ServerSocket(LINK_PORT, 50, listenAddress);
         server.setSoTimeout(LINK_TIMEOUT_MS);
 
@@ -57,19 +57,7 @@ public final class BinaryLinkServer {
         handler.start();
     }
 
-    private InetAddress getListenAddress() {
-        // Try to use user-provided override first.
-        if (LINK_ADDRESS != null) {
-            try {
-                return InetAddress.getByName(LINK_ADDRESS);
-            } catch (UnknownHostException e) {
-                // override failed, notify user
-                throw new IllegalStateException("Can not initialize binary link.", e);
-            }
-        }
 
-        return InetAddress.getLoopbackAddress();
-    }
 
     public void terminate() {
         // set interrupt flag
