@@ -43,6 +43,7 @@ public class ShortFencedTest {
     public static class Shell {
         short x;
 
+        @SuppressWarnings("removal")
         public Shell() {
             this.x = (short) 0xFFFF;
             UNSAFE.storeFence();

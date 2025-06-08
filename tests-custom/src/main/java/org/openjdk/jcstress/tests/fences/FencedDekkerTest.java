@@ -49,6 +49,7 @@ public class FencedDekkerTest {
     int a;
     int b;
 
+    @SuppressWarnings("removal")
     @Actor
     public void actor1(II_Result r) {
         a = 1;
@@ -56,6 +57,7 @@ public class FencedDekkerTest {
         r.r1 = b;
     }
 
+    @SuppressWarnings("removal")
     @Actor
     public void actor2(II_Result r) {
         b = 1;

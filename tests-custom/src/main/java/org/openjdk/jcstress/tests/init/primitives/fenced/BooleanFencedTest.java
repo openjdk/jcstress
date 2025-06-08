@@ -43,6 +43,7 @@ public class BooleanFencedTest {
     public static class Shell {
         boolean x;
 
+        @SuppressWarnings("removal")
         public Shell() {
             this.x = true;
             UNSAFE.storeFence();

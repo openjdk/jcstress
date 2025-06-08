@@ -43,6 +43,7 @@ public class CharFencedTest {
     public static class Shell {
         char x;
 
+        @SuppressWarnings("removal")
         public Shell() {
             this.x = 1;
             UNSAFE.storeFence();

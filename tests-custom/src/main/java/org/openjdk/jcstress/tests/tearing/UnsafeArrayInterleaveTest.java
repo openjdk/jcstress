@@ -44,11 +44,14 @@ public class UnsafeArrayInterleaveTest {
     /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
     public static final int SIZE = 256;
 
+    @SuppressWarnings("removal")
     public static final int ARRAY_BASE_OFFSET = UNSAFE.arrayBaseOffset(byte[].class);
+    @SuppressWarnings("removal")
     public static final int ARRAY_BASE_SCALE = UNSAFE.arrayIndexScale(byte[].class);
 
     byte[] ss = new byte[SIZE];
 
+    @SuppressWarnings("removal")
     @Actor
     public void actor1() {
         for (int i = 0; i < ss.length; i += 2) {
@@ -56,6 +59,7 @@ public class UnsafeArrayInterleaveTest {
         }
     }
 
+    @SuppressWarnings("removal")
     @Actor
     public void actor2() {
         for (int i = 1; i < ss.length; i += 2) {

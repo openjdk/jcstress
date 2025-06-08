@@ -29,6 +29,7 @@ import org.openjdk.jcstress.infra.results.II_Result;
 
 import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
+@SuppressWarnings("removal")
 @JCStressTest
 @Description("Tests if Unsafe.putOrderedInt is in-order")
 @Outcome(id = "1, 1", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")

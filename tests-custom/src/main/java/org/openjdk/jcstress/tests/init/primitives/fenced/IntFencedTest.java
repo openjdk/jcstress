@@ -43,6 +43,7 @@ public class IntFencedTest {
     public static class Shell {
         int x;
 
+        @SuppressWarnings("removal")
         public Shell() {
             this.x = 0xFFFFFFFF;
             UNSAFE.storeFence();

@@ -43,6 +43,7 @@ public class FloatFencedTest {
     public static class Shell {
         float x;
 
+        @SuppressWarnings("removal")
         public Shell() {
             this.x = Float.intBitsToFloat(0xFFFFFFFF);
             UNSAFE.storeFence();

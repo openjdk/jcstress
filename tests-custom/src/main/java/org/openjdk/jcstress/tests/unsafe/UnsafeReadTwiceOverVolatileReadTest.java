@@ -34,6 +34,7 @@ import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
  *
  * @author Aleksey Shipilev (shade@redhat.com)
  */
+@SuppressWarnings("removal")
 @JCStressTest
 @Outcome(id = "0, 0, 0", expect = Expect.ACCEPTABLE, desc = "Default value for the fields. Observers are allowed to see the default value for the field, because there is the data race between reader and writer.")
 @Outcome(id = "0, 1, 0", expect = Expect.FORBIDDEN,  desc = "Volatile write to $y had happened, and update to $x had been lost.")

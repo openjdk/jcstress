@@ -53,6 +53,7 @@ public class FencedReadTwiceTest {
     int x;
     int y;
 
+    @SuppressWarnings("removal")
     @Actor
     public void actor1() {
         x = 1;
@@ -60,6 +61,7 @@ public class FencedReadTwiceTest {
         y = 1;
     }
 
+    @SuppressWarnings("removal")
     @Actor
     public void actor2(III_Result r) {
         r.r1 = x;

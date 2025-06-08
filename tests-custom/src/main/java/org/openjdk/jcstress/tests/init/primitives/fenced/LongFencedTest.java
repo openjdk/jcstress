@@ -43,6 +43,7 @@ public class LongFencedTest {
     public static class Shell {
         long x;
 
+        @SuppressWarnings("removal")
         public Shell() {
             this.x = 0xFFFFFFFFFFFFFFFFL;
             UNSAFE.storeFence();

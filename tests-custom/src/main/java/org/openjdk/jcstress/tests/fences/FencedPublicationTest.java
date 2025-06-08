@@ -52,6 +52,7 @@ public class FencedPublicationTest {
         int x;
     }
 
+    @SuppressWarnings("removal")
     @Actor
     public void actor1() {
         Data d = new Data();
