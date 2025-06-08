@@ -52,6 +52,9 @@ questions.
                 <configuration>
                     <source>11</source>
                     <target>11</target>
+                    <annotationProcessors>
+                        <annotationProcessor>org.openjdk.jcstress.infra.processors.JCStressTestProcessor</annotationProcessor>
+                    </annotationProcessors>
                 </configuration>
             </plugin>
         </plugins>

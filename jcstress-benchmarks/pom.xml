@@ -89,6 +89,9 @@ questions.
                     <compilerVersion>${javac.target}</compilerVersion>
                     <source>${javac.target}</source>
                     <target>${javac.target}</target>
+                    <annotationProcessors>
+                        <annotationProcessor>org.openjdk.jcstress.infra.processors.JCStressTestProcessor</annotationProcessor>
+                    </annotationProcessors>
                 </configuration>
             </plugin>
             <plugin>
