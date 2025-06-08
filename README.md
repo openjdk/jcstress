@@ -110,8 +110,8 @@ hardware, or something else. Share your results, discuss them, we will figure
 out what's wrong. Discuss the result on the relevant mailing lists first.
 
 Two usual options are:
-  * concurrency-interest@cs.oswego.edu: general discussion on concurrency
-  * jcstress-dev@openjdk.java.net: to discuss jcstress issues
+  * concurrency-discuss@openjdk.org: general discussion on concurrency
+  * jcstress-dev@openjdk.org: to discuss jcstress issues
 
 ## Reporting Harness and Test Bugs
 
