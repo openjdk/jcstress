@@ -47,7 +47,7 @@ import java.util.Random;
 @State
 public class DirectByteBufferIntAtomicityTest {
 
-    /**
+    /*
      * We don't have the alignment information, so we would try to read/write to the
      * random offset within the byte array.
      */
