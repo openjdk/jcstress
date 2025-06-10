@@ -181,18 +181,21 @@ public class AdvancedJMM_02_MultiCopyAtomic {
         public int x;
         public int y;
 
+        @SuppressWarnings("removal")
         @Actor
         public void actor1() {
             UNSAFE.fullFence(); // "SeqCst" store
             x = 1;
         }
 
+        @SuppressWarnings("removal")
         @Actor
         public void actor2() {
             UNSAFE.fullFence(); // "SeqCst" store
             y = 1;
         }
 
+        @SuppressWarnings("removal")
         @Actor
         public void actor3(IIII_Result r) {
             r.r1 = x;
@@ -201,6 +204,7 @@ public class AdvancedJMM_02_MultiCopyAtomic {
             UNSAFE.loadFence(); // "SeqCst" load y
         }
 
+        @SuppressWarnings("removal")
         @Actor
         public void actor4(IIII_Result r) {
             r.r3 = y;
@@ -247,18 +251,21 @@ public class AdvancedJMM_02_MultiCopyAtomic {
         public int x;
         public int y;
 
+        @SuppressWarnings("removal")
         @Actor
         public void actor1() {
             UNSAFE.fullFence(); // "SeqCst" store
             x = 1;
         }
 
+        @SuppressWarnings("removal")
         @Actor
         public void actor2() {
             UNSAFE.fullFence(); // "SeqCst" store
             y = 1;
         }
 
+        @SuppressWarnings("removal")
         @Actor
         public void actor3(IIII_Result r) {
             UNSAFE.fullFence(); // "SeqCst" load x, part 1
@@ -268,6 +275,7 @@ public class AdvancedJMM_02_MultiCopyAtomic {
             UNSAFE.loadFence(); // "SeqCst" load y, part 2
         }
 
+        @SuppressWarnings("removal")
         @Actor
         public void actor4(IIII_Result r) {
             UNSAFE.fullFence();

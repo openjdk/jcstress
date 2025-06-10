@@ -268,17 +268,21 @@ public class BasicJMM_02_AccessAtomicity {
     public static class UnsafeCrossCacheLine {
 
         public static final int SIZE = 256;
+        @SuppressWarnings("removal")
         public static final long ARRAY_BASE_OFFSET = UNSAFE.arrayBaseOffset(byte[].class);
+        @SuppressWarnings("removal")
         public static final long ARRAY_BASE_SCALE = UNSAFE.arrayIndexScale(byte[].class);
 
         byte[] ss = new byte[SIZE];
         long off = ARRAY_BASE_OFFSET + ARRAY_BASE_SCALE * ThreadLocalRandom.current().nextInt(SIZE - 4);
 
+        @SuppressWarnings("removal")
         @Actor
         public void writer() {
             UNSAFE.putInt(ss, off, 0xFFFFFFFF);
         }
 
+        @SuppressWarnings("removal")
         @Actor
         public void reader(I_Result r) {
             r.r1 = UNSAFE.getInt(ss, off);

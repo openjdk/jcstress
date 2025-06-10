@@ -53,6 +53,7 @@ public class FencedAcquireReleaseTest {
     int x;
     int y; // acq/rel var
 
+    @SuppressWarnings("removal")
     @Actor
     public void actor1() {
         x = 1;
@@ -62,6 +63,7 @@ public class FencedAcquireReleaseTest {
         x = 3;
     }
 
+    @SuppressWarnings("removal")
     @Actor
     public void actor2(II_Result r) {
         int sy = y;

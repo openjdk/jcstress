@@ -52,7 +52,9 @@ public class UnsafeIntAtomicityTest {
     public static final int SIZE = 256;
 
     public static final Random RANDOM = new Random();
+    @SuppressWarnings("removal")
     public static final long ARRAY_BASE_OFFSET = UNSAFE.arrayBaseOffset(byte[].class);
+    @SuppressWarnings("removal")
     public static final long ARRAY_BASE_SCALE = UNSAFE.arrayIndexScale(byte[].class);
     public static final int COMPONENT_SIZE = 4;
 
@@ -68,6 +70,7 @@ public class UnsafeIntAtomicityTest {
         offset = ARRAY_BASE_OFFSET + ARRAY_BASE_SCALE*index;
     }
 
+    @SuppressWarnings("removal")
     @Actor
     public void actor1() {
         UNSAFE.putInt(bytes, offset, 0xFFFFFFFF);
@@ -75,6 +78,7 @@ public class UnsafeIntAtomicityTest {
 
     @Actor
     public void actor2(BBBB_Result r) {
+        @SuppressWarnings("removal")
         int t = UNSAFE.getInt(bytes, offset);
         r.r1 = (byte) ((t >> 0) & 0xFF);
         r.r2 = (byte) ((t >> 8) & 0xFF);

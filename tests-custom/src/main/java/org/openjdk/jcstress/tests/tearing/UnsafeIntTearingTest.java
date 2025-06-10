@@ -52,7 +52,9 @@ public class UnsafeIntTearingTest {
     public static final int SIZE = 256;
 
     public static final Random RANDOM = new Random();
+    @SuppressWarnings("removal")
     public static final long ARRAY_BASE_OFFSET = UNSAFE.arrayBaseOffset(byte[].class);
+    @SuppressWarnings("removal")
     public static final long ARRAY_BASE_SCALE = UNSAFE.arrayIndexScale(byte[].class);
     public static final int COMPONENT_SIZE = 4;
 
@@ -70,16 +72,19 @@ public class UnsafeIntTearingTest {
         offset2 = offset1 + COMPONENT_SIZE;
     }
 
+    @SuppressWarnings("removal")
     @Actor
     public void actor1() {
         UNSAFE.putInt(bytes, offset1, 0xAAAAAAAA);
     }
 
+    @SuppressWarnings("removal")
     @Actor
     public void actor2() {
         UNSAFE.putInt(bytes, offset2, 0x55555555);
     }
 
+    @SuppressWarnings("removal")
     @Arbiter
     public void arbiter1(II_Result r) {
         r.r1 = UNSAFE.getInt(bytes, offset1);

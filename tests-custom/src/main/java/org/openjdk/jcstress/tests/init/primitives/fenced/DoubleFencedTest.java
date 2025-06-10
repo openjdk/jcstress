@@ -43,6 +43,7 @@ public class DoubleFencedTest {
     public static class Shell {
         double x;
 
+        @SuppressWarnings("removal")
         public Shell() {
             this.x = Double.longBitsToDouble(0xFFFFFFFFFFFFFFFFL);
             UNSAFE.storeFence();

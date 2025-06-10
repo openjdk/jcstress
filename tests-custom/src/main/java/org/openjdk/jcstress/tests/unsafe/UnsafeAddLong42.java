@@ -34,6 +34,7 @@ import org.openjdk.jcstress.infra.results.JJ_Result;
 
 import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
+@SuppressWarnings("removal")
 @JCStressTest
 @Description("Tests if Unsafe.getAndAddLong is racy")
 @Outcome(id = "1, 4398046511104", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")

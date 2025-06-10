@@ -43,6 +43,7 @@ public class ByteFencedTest {
     public static class Shell {
         byte x;
 
+        @SuppressWarnings("removal")
         public Shell() {
             this.x = (byte) 0xFF;
             UNSAFE.storeFence();

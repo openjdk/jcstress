@@ -103,6 +103,7 @@ public class AdvancedJMM_15_VolatilesAreNotFences {
     public static class Fences {
         int x, y;
 
+        @SuppressWarnings("removal")
         @Actor
         void thread1() {
             x = 1;
@@ -110,6 +111,7 @@ public class AdvancedJMM_15_VolatilesAreNotFences {
             y = 1;
         }
 
+        @SuppressWarnings("removal")
         @Actor
         void thread2(II_Result r) {
             r.r1 = y;

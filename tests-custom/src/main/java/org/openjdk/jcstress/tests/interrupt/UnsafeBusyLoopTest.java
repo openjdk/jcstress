@@ -34,6 +34,7 @@ import org.openjdk.jcstress.annotations.State;
 
 import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
+@SuppressWarnings("removal")
 @JCStressTest(Mode.Termination)
 @Outcome(id = "TERMINATED", expect = Expect.ACCEPTABLE, desc = "The thread had sucessfully terminated.")
 @Outcome(id = "STALE",      expect = Expect.ACCEPTABLE_INTERESTING, desc = "Thread had failed to respond.")
