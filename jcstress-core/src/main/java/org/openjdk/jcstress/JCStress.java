@@ -69,7 +69,7 @@ public class JCStress {
         DiskWriteCollector diskCollector = new DiskWriteCollector(opts.getResultFile());
         FailFastKiller failFastKiller = null;
         TestResultCollector mux;
-        if (opts.isFailFast()) {
+        if (opts.isFailOnError()) {
             failFastKiller = new FailFastKiller(opts, new PrintWriter(out, true), config.configs);
             mux = MuxCollector.of(printer, diskCollector, failFastKiller);
         } else {
@@ -79,7 +79,7 @@ public class JCStress {
 
         TestExecutor executor = new TestExecutor(opts.verbosity(), sink, config.scheduler, timeBudget);
         printer.setExecutor(executor);
-        if (failFastKiller!=null) {
+        if (failFastKiller != null) {
             failFastKiller.setExecutor(executor);
         }
 
