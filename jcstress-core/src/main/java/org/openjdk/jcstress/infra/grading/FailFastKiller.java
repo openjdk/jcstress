@@ -31,42 +31,29 @@ import org.openjdk.jcstress.infra.runners.TestConfig;
 
 import java.io.PrintWriter;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 
 
 public class FailFastKiller extends CountingResultCollector {
 
     private static final String INCLUDE_SOFT_ERRORS = "jcstress.foe.countsoft";
-    private static final String BREAK_IN_GROUP = "jcstress.foe.breakgroup";
     private static final String LIMIT = "jcstress.foe.limit";
-
-    private final Map<String, Integer> tests;
 
     private TestExecutor executor;
     private final double absoluteThreshold;
     private final double relativeThreshold;
 
-    private final boolean breakInGroup;
     private final boolean includeSoftErrors;
 
 
     public FailFastKiller(Options opts, PrintWriter output, List<TestConfig> finalVariants) {
         output.println("  Fail-on-error enabled as:");
         String originalValue = System.getProperty(LIMIT, "1");
-        breakInGroup = Boolean.parseBoolean(System.getProperty(BREAK_IN_GROUP, "true"));
         includeSoftErrors = Boolean.parseBoolean(System.getProperty(INCLUDE_SOFT_ERRORS, "false"));
         double userValue = Double.parseDouble(originalValue.replaceAll("%*", ""));
         boolean relative = originalValue.endsWith("%");
         List<TestConfig> variants = Collections.unmodifiableList(finalVariants);
-        this.tests = groupVariants(finalVariants);
         output.println("    all tests, " + originalValue);
-        output.println("    break in group: " + breakInGroup);
-        if (breakInGroup && variants.size() < 1000) {
-            output.println("       Warning, with lower number of tests and high concurrency, the whole suite may finish before the condition is met.");
-        }
         output.println("    include soft errors: " + includeSoftErrors);
         if (relative) {
             relativeThreshold = userValue;
@@ -79,25 +66,12 @@ public class FailFastKiller extends CountingResultCollector {
         output.println();
     }
 
-    private static Map<String, Integer> groupVariants(List<TestConfig> finalVariants) {
-        Map<String, Integer> tests = new HashMap<>();
-        for (TestConfig testVariant : finalVariants) {
-            int counter = tests.getOrDefault(testVariant.name, 0);
-            counter++;
-            tests.put(testVariant.name, counter);
-        }
-        return tests;
-    }
-
     @Override
     public synchronized void add(TestResult r) {
         addResult(r);
     }
 
     private void addResult(TestResult r) {
-        int groupCounter = tests.get(r.getName());
-        //we are counting each group down, so we can assure that the group is finished
-        tests.put(r.getName(), groupCounter-1);
         countResult(r);
         verifyState(r);
     }
@@ -107,14 +81,8 @@ public class FailFastKiller extends CountingResultCollector {
         if (includeSoftErrors) {
             totalFailed += softErrors;
         }
-        if (breakInGroup) {
-            if (totalFailed >= absoluteThreshold) {
-                executor.setDiedFast();
-            }
-        } else {
-            if (totalFailed > absoluteThreshold && tests.get(r.getName()) <= 0) {
-                executor.setDiedFast();
-            }
+       if (totalFailed >= absoluteThreshold) {
+            executor.setDiedFast();
         }
     }
 
