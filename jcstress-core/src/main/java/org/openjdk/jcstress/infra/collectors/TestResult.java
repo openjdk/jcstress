@@ -39,7 +39,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
@@ -64,9 +63,7 @@ public class TestResult implements Serializable {
     }
 
     public TestResult(DataInputStream dis) throws IOException {
-        //status = Status.values()[dis.readInt()];
-        dis.readInt();
-        status = Status.values()[new Random().nextInt(6)];
+        status = Status.values()[dis.readInt()];
         states = new Counter<>(dis);
         messages = new ArrayList<>();
         {
