@@ -35,6 +35,7 @@ import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TestConfig implements Serializable {
@@ -246,13 +247,13 @@ public class TestConfig implements Serializable {
     }
 
 
-    public String toDetailedTest() {
+    public String getTestVariant(boolean keepSeed) {
         //binaryName have correct $ instead of . in name; omitted
         //generatedRunnerName name with suffix (usually _Test_jcstress) omitted
         //super.toString() as TestConfig@hash - omitted
-        StringBuilder verboseOutput = new StringBuilder(name);
-        verboseOutput.append(" {")
-                .append(actorNames)
+        //cpumap - null in listing, no reasonable toString method => omitted
+        StringBuilder idString = new StringBuilder();
+        idString.append(actorNames)
                 .append(", spinLoopStyle: ").append(spinLoopStyle)
                 .append(", threads: ").append(threads)
                 .append(", forkId: ").append(forkId)
@@ -261,8 +262,35 @@ public class TestConfig implements Serializable {
                 .append(", shClass: ").append(shClass)
                 .append(", strideSize: ").append(strideSize)
                 .append(", strideCount: ").append(strideCount)
-                .append(", cpuMap: ").append(cpuMap)
-                .append(", ").append(jvmArgs)
+                .append(", ").append(keepSeed ? jvmArgs : maskSeed(jvmArgs)); //this is intentionally last to keep remaining prefix easily searchable
+        return idString.toString();
+    }
+
+    private List<String> maskSeed(List<String> jvmArgs) {
+        List<String> argsCopy = new ArrayList<>(jvmArgs.size());
+        for (String arg : jvmArgs) {
+            if (arg.startsWith("-XX:StressSeed=")) {
+                argsCopy.add(arg.replaceAll("[0-9]+", "yyyyyyyy"));
+            } else {
+                argsCopy.add(arg);
+            }
+        }
+        return argsCopy;
+    }
+
+    public String getSeed() {
+        for (String arg : jvmArgs) {
+            if (arg.startsWith("-XX:StressSeed=")) {
+                return arg;
+            }
+        }
+        return null;
+    }
+
+    public String toDetailedTest(boolean keepSeed) {
+        StringBuilder verboseOutput = new StringBuilder(name);
+        verboseOutput.append(" {")
+                .append(getTestVariant(keepSeed))
                 .append("}");
         return verboseOutput.toString();
     }

@@ -25,7 +25,6 @@
 package org.openjdk.jcstress.infra.grading;
 
 
-import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.infra.Status;
 import org.openjdk.jcstress.infra.TestInfo;
@@ -57,19 +56,23 @@ public class HTMLReportPrinter {
     private final InProcessCollector collector;
     private int cellStyle = 1;
 
-    public HTMLReportPrinter(Options opts, InProcessCollector collector, PrintStream out) {
+    public HTMLReportPrinter(String resultDir, InProcessCollector collector, PrintStream out) {
         this.collector = collector;
-        this.resultDir = opts.getResultDest();
+        this.resultDir = resultDir;
         File dir = new File(resultDir);
         dir.mkdirs();
-        out.println("  HTML report generated at " + dir.getAbsolutePath() + File.separator + "index.html");
+        out.println("  HTML report generated at " + dir.getAbsolutePath() + File.separator + getMainFileName());
+    }
+
+    private String getMainFileName() {
+        return "index.html";
     }
 
     public void work() throws FileNotFoundException {
         List<TestResult> byName = ReportUtils.mergedByName(collector.getTestResults());
         Collections.sort(byName, Comparator.comparing(TestResult::getName));
 
-        PrintWriter output = new PrintWriter(resultDir + "/index.html");
+        PrintWriter output = new PrintWriter(resultDir + File.separator + getMainFileName());
 
         printHeader(output);
 
@@ -171,7 +174,7 @@ public class HTMLReportPrinter {
         emitTestReports(ReportUtils.byName(collector.getTestResults()));
     }
 
-    private SortedMap<String, String> getEnv(List<TestResult> ts) {
+    static SortedMap<String, String> getEnv(List<TestResult> ts) {
         SortedMap<String, String> env = new TreeMap<>();
         for (TestResult result : ts) {
             if (result != null) {
@@ -353,10 +356,7 @@ public class HTMLReportPrinter {
         }
 
         List<TestResult> sorted = new ArrayList<>(results);
-        sorted.sort(Comparator
-                .comparing((TestResult t) -> t.getConfig().getCompileMode())
-                .thenComparing((TestResult t) -> t.getConfig().getSchedulingClass().toString())
-                .thenComparing((TestResult t) -> StringUtils.join(t.getConfig().jvmArgs, ",")));
+        resultsOrder(sorted);
 
         o.println("<h3>Environment</h3>");
         o.println("<table>");
@@ -490,6 +490,13 @@ public class HTMLReportPrinter {
         }
 
         printFooter(o);
+    }
+
+    static void resultsOrder(List<TestResult> sorted) {
+        sorted.sort(Comparator
+                .comparing((TestResult t) -> t.getConfig().getCompileMode())
+                .thenComparing((TestResult t) -> t.getConfig().getSchedulingClass().toString())
+                .thenComparing((TestResult t) -> StringUtils.join(t.getConfig().jvmArgs, ",")));
     }
 
     private void resultHeader(PrintWriter o, TestResult r) {
