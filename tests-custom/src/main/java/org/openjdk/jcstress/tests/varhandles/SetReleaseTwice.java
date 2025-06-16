@@ -22,42 +22,46 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.init.primitives.fenced;
+package org.openjdk.jcstress.tests.varhandles;
 
+import org.openjdk.jcstress.annotations.*;
+import org.openjdk.jcstress.infra.results.II_Result;
+
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
-import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.JCStressMeta;
-import org.openjdk.jcstress.annotations.JCStressTest;
-import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.B_Result;
-import org.openjdk.jcstress.tests.init.Grading_IntShouldSeeFull;
-
 @JCStressTest
-@JCStressMeta(Grading_IntShouldSeeFull.class)
+@Description("Tests if Unsafe.putOrderedInt is in-order")
+@Outcome(id = "1, 1", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")
+@Outcome(id = "0, 0", expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution")
+@Outcome(id = "0, 1", expect = Expect.ACCEPTABLE, desc = "T2 observes TOP early")
 @State
-public class ByteFencedTest {
+public class SetReleaseTwice {
 
-    Shell shell;
+    static final VarHandle VH_LOCK, VH_TOP;
 
-    public static class Shell {
-        byte x;
-
-        public Shell() {
-            this.x = (byte) 0xFF;
-            VarHandle.releaseFence();
+    static {
+        try {
+            VH_LOCK = MethodHandles.lookup().findVarHandle(SetReleaseTwice.class, "lock", int.class);
+            VH_TOP  = MethodHandles.lookup().findVarHandle(SetReleaseTwice.class, "top", int.class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
         }
     }
 
+    volatile int lock;
+    int top;
+
     @Actor
     public void actor1() {
-        shell = new Shell();
+        VH_TOP.setRelease(this, 1);
+        VH_LOCK.setRelease(this, 1);
     }
 
     @Actor
-    public void actor2(B_Result r) {
-        Shell sh = shell;
-        r.r1 = (sh == null) ? 42 : sh.x;
+    public void actor2(II_Result r) {
+        r.r1 = (int)VH_LOCK.getAcquire(this);
+        r.r2 = (int)VH_TOP.get(this);
     }
 
 }

@@ -24,14 +24,14 @@
  */
 package org.openjdk.jcstress.tests.init.primitives.fenced;
 
+import java.lang.invoke.VarHandle;
+
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.F_Result;
 import org.openjdk.jcstress.tests.init.Grading_FloatShouldSeeFull;
-
-import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 @JCStressTest
 @JCStressMeta(Grading_FloatShouldSeeFull.class)
@@ -45,7 +45,7 @@ public class FloatFencedTest {
 
         public Shell() {
             this.x = Float.intBitsToFloat(0xFFFFFFFF);
-            UNSAFE.storeFence();
+            VarHandle.releaseFence();
         }
     }
 

@@ -22,42 +22,48 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.init.primitives.fenced;
+package org.openjdk.jcstress.tests.atomicity.crosscache;
 
-import java.lang.invoke.VarHandle;
-
-import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.JCStressMeta;
-import org.openjdk.jcstress.annotations.JCStressTest;
-import org.openjdk.jcstress.annotations.State;
+import org.openjdk.jcstress.annotations.*;
+import org.openjdk.jcstress.infra.results.BBBB_Result;
 import org.openjdk.jcstress.infra.results.I_Result;
-import org.openjdk.jcstress.tests.init.Grading_IntShouldSeeFull;
+
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.nio.ByteOrder;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+
+import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 @JCStressTest
-@JCStressMeta(Grading_IntShouldSeeFull.class)
+@Description("Tests if VarHandle breaks the atomicity while doing cross cache-line reads/writes.")
+@Outcome(id = "0",  expect = Expect.ACCEPTABLE, desc = "Seeing the default value, this is a legal race.")
+@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "Seeing the full value, this is a legal behavior.")
 @State
-public class IntFencedTest {
+public class VarHandleIntAtomicityTest {
 
-    Shell shell;
+    private static final VarHandle VH = MethodHandles.byteArrayViewVarHandle(int[].class, ByteOrder.nativeOrder());
 
-    public static class Shell {
-        int x;
+    /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
+    public static final int SIZE = 256;
 
-        public Shell() {
-            this.x = 0xFFFFFFFF;
-            VarHandle.releaseFence();
-        }
+    public final byte[] bytes;
+    public final int offset;
+
+    public VarHandleIntAtomicityTest() {
+        bytes = new byte[SIZE];
+        offset = ThreadLocalRandom.current().nextInt(SIZE - Integer.BYTES) / Integer.BYTES * Integer.BYTES;
     }
 
     @Actor
     public void actor1() {
-        shell = new Shell();
+        VH.set(bytes, offset, 0xFFFFFFFF);
     }
 
     @Actor
     public void actor2(I_Result r) {
-        Shell sh = shell;
-        r.r1 = (sh == null) ? 42 : sh.x;
+        r.r1 = (int)VH.get(bytes, offset);
     }
 
 }

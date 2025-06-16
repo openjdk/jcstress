@@ -24,14 +24,14 @@
  */
 package org.openjdk.jcstress.tests.fences;
 
+import java.lang.invoke.VarHandle;
+
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
-
-import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 /**
  * Tests if release fence before publication ensures non-default read
@@ -56,7 +56,7 @@ public class FencedPublicationTest {
     public void actor1() {
         Data d = new Data();
         d.x = 1;
-        UNSAFE.storeFence();
+        VarHandle.releaseFence();
         data = d;
     }
 

@@ -24,6 +24,8 @@
  */
 package org.openjdk.jcstress.tests.fences;
 
+import java.lang.invoke.VarHandle;
+
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Description;
 import org.openjdk.jcstress.annotations.Expect;
@@ -31,8 +33,6 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
-
-import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 /**
  * Tests if read-after-write using fences preserves SC
@@ -52,14 +52,14 @@ public class FencedDekkerTest {
     @Actor
     public void actor1(II_Result r) {
         a = 1;
-        UNSAFE.fullFence();
+        VarHandle.fullFence();
         r.r1 = b;
     }
 
     @Actor
     public void actor2(II_Result r) {
         b = 1;
-        UNSAFE.fullFence();
+        VarHandle.fullFence();
         r.r2 = a;
     }
 

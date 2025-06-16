@@ -34,7 +34,6 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
 import static org.openjdk.jcstress.annotations.Expect.*;
-import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 public class AdvancedJMM_02_MultiCopyAtomic {
 
@@ -183,30 +182,30 @@ public class AdvancedJMM_02_MultiCopyAtomic {
 
         @Actor
         public void actor1() {
-            UNSAFE.fullFence(); // "SeqCst" store
+            VarHandle.fullFence(); // "SeqCst" store
             x = 1;
         }
 
         @Actor
         public void actor2() {
-            UNSAFE.fullFence(); // "SeqCst" store
+            VarHandle.fullFence(); // "SeqCst" store
             y = 1;
         }
 
         @Actor
         public void actor3(IIII_Result r) {
             r.r1 = x;
-            UNSAFE.loadFence(); // "SeqCst" load x
+            VarHandle.acquireFence(); // "SeqCst" load x
             r.r2 = y;
-            UNSAFE.loadFence(); // "SeqCst" load y
+            VarHandle.acquireFence(); // "SeqCst" load y
         }
 
         @Actor
         public void actor4(IIII_Result r) {
             r.r3 = y;
-            UNSAFE.loadFence(); // "SeqCst" load y
+            VarHandle.acquireFence(); // "SeqCst" load y
             r.r4 = x;
-            UNSAFE.loadFence(); // "SeqCst" load x
+            VarHandle.acquireFence(); // "SeqCst" load x
         }
 
     }
@@ -249,32 +248,32 @@ public class AdvancedJMM_02_MultiCopyAtomic {
 
         @Actor
         public void actor1() {
-            UNSAFE.fullFence(); // "SeqCst" store
+            VarHandle.fullFence(); // "SeqCst" store
             x = 1;
         }
 
         @Actor
         public void actor2() {
-            UNSAFE.fullFence(); // "SeqCst" store
+            VarHandle.fullFence(); // "SeqCst" store
             y = 1;
         }
 
         @Actor
         public void actor3(IIII_Result r) {
-            UNSAFE.fullFence(); // "SeqCst" load x, part 1
+            VarHandle.fullFence(); // "SeqCst" load x, part 1
             r.r1 = x;
-            UNSAFE.fullFence(); // "SeqCst" load x, part 2 (subsumed); "SeqCst" load y, part 1
+            VarHandle.fullFence(); // "SeqCst" load x, part 2 (subsumed); "SeqCst" load y, part 1
             r.r2 = y;
-            UNSAFE.loadFence(); // "SeqCst" load y, part 2
+            VarHandle.acquireFence(); // "SeqCst" load y, part 2
         }
 
         @Actor
         public void actor4(IIII_Result r) {
-            UNSAFE.fullFence();
+            VarHandle.fullFence();
             r.r3 = y;
-            UNSAFE.fullFence(); // subsumes loadFence
+            VarHandle.fullFence(); // subsumes loadFence
             r.r4 = x;
-            UNSAFE.loadFence();
+            VarHandle.acquireFence();
         }
 
     }
