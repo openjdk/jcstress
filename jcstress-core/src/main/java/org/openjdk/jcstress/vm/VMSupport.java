@@ -391,14 +391,14 @@ public class VMSupport {
         List<String> l = new ArrayList<>();
         l.addAll(args);
         l.addAll(orig.origArgs());
-        return new Config(l, orig.onlyIfC2(), orig.stress());
+        return new Config(l, orig.maxCompiler(), orig.stress());
     }
 
     private static Config cleanArgs(Config orig) {
         List<String> l = orig.args.stream()
             .filter(s -> !s.startsWith("-agentlib:jdwp"))
             .collect(Collectors.toList());
-        return new Config(l, orig.onlyIfC2(), orig.stress());
+        return new Config(l, orig.maxCompiler(), orig.stress());
     }
 
     public static void detectAvailableVMConfigs(boolean splitCompilation, List<String> jvmArgs, List<String> jvmArgsPrepend) {
@@ -408,27 +408,35 @@ public class VMSupport {
         LinkedHashSet<Config> configs = new LinkedHashSet<>();
 
         if (!jvmArgs.isEmpty()) {
-            configs.add(new Config(jvmArgs, false, false));
+            configs.add(new Config(jvmArgs, Config.Compiler.INT, Config.Compiler.C2, false));
         } else if (splitCompilation && COMPILER_DIRECTIVES_AVAILABLE) {
             System.out.println(" (split compilation is requested and compiler directives are available)");
-            // Default global
-            configs.add(new Config(Collections.emptyList(), false, false));
-            if (C2_AVAILABLE) {
-                // C2 compilations stress
-                configs.add(new Config(C2_STRESS_JVM_FLAGS, true, true));
-            }
-        } else {
             // Interpreted
-            configs.add(new Config(Arrays.asList("-Xint"), false, false));
+            configs.add(new Config(Arrays.asList("-Xint"), Config.Compiler.INT, false));
+            // Default global: both C1 and C2 are available
+            configs.add(new Config(Collections.emptyList(), Config.Compiler.C2, false));
             if (C1_AVAILABLE) {
                 // C1
-                configs.add(new Config(Arrays.asList("-XX:TieredStopAtLevel=1"), false, false));
+                configs.add(new Config(Arrays.asList("-XX:TieredStopAtLevel=1"), Config.Compiler.C1, false));
             }
             if (C2_AVAILABLE) {
                 // C2
-                configs.add(new Config(Arrays.asList("-XX:-TieredCompilation"), false, false));
+                configs.add(new Config(Arrays.asList("-XX:-TieredCompilation"), Config.Compiler.C2, false));
+                // C2 compilations stress
+                configs.add(new Config(C2_STRESS_JVM_FLAGS, Config.Compiler.C2, true));
+            }
+        } else {
+            // Interpreted
+            configs.add(new Config(Arrays.asList("-Xint"), Config.Compiler.INT, false));
+            if (C1_AVAILABLE) {
+                // C1
+                configs.add(new Config(Arrays.asList("-XX:TieredStopAtLevel=1"), Config.Compiler.C1, false));
+            }
+            if (C2_AVAILABLE) {
+                // C2
+                configs.add(new Config(Arrays.asList("-XX:-TieredCompilation"), Config.Compiler.C2, false));
                 // C2 only + stress
-                configs.add(new Config(C2_ONLY_STRESS_JVM_FLAGS, true, true));
+                configs.add(new Config(C2_ONLY_STRESS_JVM_FLAGS, Config.Compiler.C2, true));
             }
         }
 
@@ -622,14 +630,22 @@ public class VMSupport {
     public static class Config {
         private static final Random SEED_RANDOM = new Random();
 
+        public enum Compiler {
+            INT,
+            C1,
+            C2,
+        }
+
         private final List<String> args;
-        private final boolean onlyIfC2;
+        private final Compiler minCompiler;
+        private final Compiler maxCompiler;
         private final boolean stress;
         private final boolean addStressSeed;
 
-        private Config(List<String> args, boolean onlyIfC2, boolean stress) {
+        private Config(List<String> args, Compiler minCompiler, Compiler maxCompiler, boolean stress) {
             this.args = args;
-            this.onlyIfC2 = onlyIfC2;
+            this.minCompiler = minCompiler;
+            this.maxCompiler = maxCompiler;
             this.stress = stress;
             this.addStressSeed = shouldAddStressSeed();
         }
@@ -647,8 +663,11 @@ public class VMSupport {
             return false;
         }
 
-        public boolean onlyIfC2() {
-            return onlyIfC2;
+        public Compiler minCompiler() {
+            return minCompiler;
+        }
+        public Compiler maxCompiler() {
+            return maxCompiler;
         }
 
         public boolean stress() {
@@ -674,13 +693,13 @@ public class VMSupport {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Config config = (Config) o;
-            return onlyIfC2 == config.onlyIfC2 &&
+            return maxCompiler == config.maxCompiler &&
                     args.equals(config.args);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(args, onlyIfC2);
+            return Objects.hash(args, maxCompiler);
         }
     }
 
