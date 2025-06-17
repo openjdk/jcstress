@@ -391,14 +391,14 @@ public class VMSupport {
         List<String> l = new ArrayList<>();
         l.addAll(args);
         l.addAll(orig.origArgs());
-        return new Config(l, orig.runtimes(), orig.stress());
+        return new Config(l, orig.availableRuntimes(), orig.limitRuntimes(), orig.stress());
     }
 
     private static Config cleanArgs(Config orig) {
         List<String> l = orig.args.stream()
             .filter(s -> !s.startsWith("-agentlib:jdwp"))
             .collect(Collectors.toList());
-        return new Config(l, orig.runtimes(), orig.stress());
+        return new Config(l, orig.availableRuntimes(), orig.limitRuntimes(), orig.stress());
     }
 
     public static void detectAvailableVMConfigs(boolean splitCompilation, List<String> jvmArgs, List<String> jvmArgsPrepend) {
@@ -408,20 +408,20 @@ public class VMSupport {
         LinkedHashSet<Config> configs = new LinkedHashSet<>();
 
         if (!jvmArgs.isEmpty()) {
-            configs.add(new Config(jvmArgs, Runtimes.all(), false));
+            configs.add(new Config(jvmArgs, Runtimes.all(), Runtimes.none(), false));
         } else {
-            configs.add(new Config(Collections.singletonList("-Xint"), Runtimes.onlyInt(), false));
+            configs.add(new Config(Collections.singletonList("-Xint"), Runtimes.onlyInt(), Runtimes.none(), false));
             if (C1_AVAILABLE) {
-                configs.add(new Config(Collections.singletonList("-XX:TieredStopAtLevel=1"), Runtimes.onlyC1(), false));
+                configs.add(new Config(Collections.singletonList("-XX:TieredStopAtLevel=1"), Runtimes.intC1(), Runtimes.none(), false));
             }
             if (C2_AVAILABLE) {
-                configs.add(new Config(Collections.singletonList("-XX:-TieredCompilation"), Runtimes.onlyC2(), false));
+                configs.add(new Config(Collections.singletonList("-XX:-TieredCompilation"), Runtimes.intC2(), Runtimes.none(), false));
             }
 
             List<String> c2StressFlags;
             if (splitCompilation && COMPILER_DIRECTIVES_AVAILABLE) {
                 System.out.println(" (split compilation is requested and compiler directives are available)");
-                configs.add(new Config(Collections.emptyList(), Runtimes.all(), false));
+                configs.add(new Config(Collections.emptyList(), Runtimes.all(), Runtimes.none(), false));
                 c2StressFlags = C2_STRESS_JVM_FLAGS;
             } else {
                 c2StressFlags = C2_ONLY_STRESS_JVM_FLAGS;
@@ -429,7 +429,7 @@ public class VMSupport {
 
             // Mix in appropriate C2 stress options
             if (C2_AVAILABLE) {
-                configs.add(new Config(c2StressFlags, Runtimes.onlyC2(), true));
+                configs.add(new Config(c2StressFlags, Runtimes.all(), Runtimes.onlyC2(), true));
             }
         }
 
@@ -630,6 +630,10 @@ public class VMSupport {
             this.mod = mod;
         }
 
+        private static Runtimes none() {
+            return new Runtimes(0);
+        }
+
         private static Runtimes all() {
             return new Runtimes(INT | C1 | C2);
         }
@@ -639,10 +643,18 @@ public class VMSupport {
         }
 
         private static Runtimes onlyC1() {
-            return new Runtimes(INT | C1);
+            return new Runtimes(C1);
         }
 
         private static Runtimes onlyC2() {
+            return new Runtimes(C2);
+        }
+
+        private static Runtimes intC1() {
+            return new Runtimes(INT | C1);
+        }
+
+        private static Runtimes intC2() {
             return new Runtimes(INT | C2);
         }
 
@@ -659,13 +671,15 @@ public class VMSupport {
         private static final Random SEED_RANDOM = new Random();
 
         private final List<String> args;
-        private final Runtimes runtimes;
+        private final Runtimes availableRuntimes;
+        private final Runtimes limitRuntimes;
         private final boolean stress;
         private final boolean addStressSeed;
 
-        private Config(List<String> args, Runtimes runtimes, boolean stress) {
+        private Config(List<String> args, Runtimes availableRuntimes, Runtimes limitRuntimes, boolean stress) {
             this.args = args;
-            this.runtimes = runtimes;
+            this.availableRuntimes = availableRuntimes;
+            this.limitRuntimes = limitRuntimes;
             this.stress = stress;
             this.addStressSeed = shouldAddStressSeed();
         }
@@ -683,8 +697,12 @@ public class VMSupport {
             return false;
         }
 
-        public Runtimes runtimes() {
-            return runtimes;
+        public Runtimes availableRuntimes() {
+            return availableRuntimes;
+        }
+
+        public Runtimes limitRuntimes() {
+            return limitRuntimes;
         }
 
         public boolean stress() {
@@ -710,12 +728,14 @@ public class VMSupport {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Config config = (Config) o;
-            return (config.runtimes.mod == runtimes.mod);
+            if (config.availableRuntimes.mod != availableRuntimes.mod) return false;
+            if (config.limitRuntimes.mod != limitRuntimes.mod) return false;
+            return true;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(args, runtimes.mod);
+            return Objects.hash(args, availableRuntimes.mod);
         }
     }
 

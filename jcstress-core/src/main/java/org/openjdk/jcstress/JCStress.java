@@ -197,12 +197,18 @@ public class JCStress {
             // Do not skip unified modes
             return false;
         }
-        if (!config.runtimes().hasC2() && CompileMode.hasC2(cm, info.threads())) {
-            // No C2 runtime is available, skip split compilation tests with C2
+        // No C1/C2 runtime is available? Skip split compilation tests with C1/C2.
+        if (!config.availableRuntimes().hasC2() && CompileMode.hasC2(cm, info.threads())) {
             return true;
         }
-        if (!config.runtimes().hasC1() && CompileMode.hasC1(cm, info.threads())) {
-            // No C1 runtime is available, skip split compilation tests with C1
+        if (!config.availableRuntimes().hasC1() && CompileMode.hasC1(cm, info.threads())) {
+            return true;
+        }
+        // Config should be executed only when C1/C2 is available? Skip split compilation tests without them.
+        if (config.limitRuntimes().hasC2() && !CompileMode.hasC2(cm, info.threads())) {
+            return true;
+        }
+        if (config.limitRuntimes().hasC1() && !CompileMode.hasC1(cm, info.threads())) {
             return true;
         }
         // Do not skip by default.
