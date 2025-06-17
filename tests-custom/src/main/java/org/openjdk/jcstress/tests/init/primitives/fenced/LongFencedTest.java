@@ -24,14 +24,14 @@
  */
 package org.openjdk.jcstress.tests.init.primitives.fenced;
 
+import java.lang.invoke.VarHandle;
+
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.JCStressMeta;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.J_Result;
 import org.openjdk.jcstress.tests.init.Grading_LongShouldSeeFull;
-
-import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 @JCStressTest
 @JCStressMeta(Grading_LongShouldSeeFull.class)
@@ -45,7 +45,7 @@ public class LongFencedTest {
 
         public Shell() {
             this.x = 0xFFFFFFFFFFFFFFFFL;
-            UNSAFE.storeFence();
+            VarHandle.releaseFence();
         }
     }
 

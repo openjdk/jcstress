@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,42 +22,45 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.init.primitives.fenced;
+package org.openjdk.jcstress.tests.varhandles;
 
+import org.openjdk.jcstress.annotations.*;
+import org.openjdk.jcstress.infra.results.JJ_Result;
+
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
-import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.JCStressMeta;
-import org.openjdk.jcstress.annotations.JCStressTest;
-import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.B_Result;
-import org.openjdk.jcstress.tests.init.Grading_IntShouldSeeFull;
-
 @JCStressTest
-@JCStressMeta(Grading_IntShouldSeeFull.class)
+@Description("Tests if VarHandle.getAndAddLong is racy")
+@Outcome(id = "1, 4398046511104", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")
+@Outcome(id = "0, 0",             expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution")
+@Outcome(id = "0, 4398046511104", expect = Expect.ACCEPTABLE, desc = "T2 reads the result early")
 @State
-public class ByteFencedTest {
+public class AddLong42 {
 
-    Shell shell;
+    static final VarHandle VH;
 
-    public static class Shell {
-        byte x;
-
-        public Shell() {
-            this.x = (byte) 0xFF;
-            VarHandle.releaseFence();
+    static {
+        try {
+            VH = MethodHandles.lookup().findVarHandle(AddLong42.class, "x", long.class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
         }
     }
 
+    long x;
+    volatile int written;
+
     @Actor
     public void actor1() {
-        shell = new Shell();
+        VH.getAndAdd(this, 1L << 42);
+        written = 1;
     }
 
     @Actor
-    public void actor2(B_Result r) {
-        Shell sh = shell;
-        r.r1 = (sh == null) ? 42 : sh.x;
+    public void actor2(JJ_Result r) {
+        r.r1 = written;
+        r.r2 = (long)VH.get(this);
     }
 
 }

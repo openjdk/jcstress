@@ -30,8 +30,9 @@ import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
 
+import java.lang.invoke.VarHandle;
+
 import static org.openjdk.jcstress.annotations.Expect.*;
-import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 public class AdvancedJMM_14_SynchronizedAreNotFences {
 
@@ -83,7 +84,7 @@ public class AdvancedJMM_14_SynchronizedAreNotFences {
     /*
        ----------------------------------------------------------------------------------------------------------
 
-        If fence-like effects are required in low-level concurrency code, then Unsafe.*Fence should be used instead.
+        If fence-like effects are required in low-level concurrency code, then VarHandle.*Fence should be used instead.
 
         Indeed, this provides the effect we are after, on all platforms:
           RESULT        SAMPLES     FREQ      EXPECT  DESCRIPTION
@@ -104,14 +105,14 @@ public class AdvancedJMM_14_SynchronizedAreNotFences {
         @Actor
         public void actor1() {
             x = 1;
-            UNSAFE.storeFence();
+            VarHandle.releaseFence();
             y = 1;
         }
 
         @Actor
         public void actor2(II_Result r) {
             r.r1 = y;
-            UNSAFE.loadFence();
+            VarHandle.acquireFence();
             r.r2 = x;
         }
     }

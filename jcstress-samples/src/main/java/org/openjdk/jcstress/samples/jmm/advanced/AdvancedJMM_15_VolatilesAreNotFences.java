@@ -31,8 +31,9 @@ import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.III_Result;
 import org.openjdk.jcstress.infra.results.II_Result;
 
+import java.lang.invoke.VarHandle;
+
 import static org.openjdk.jcstress.annotations.Expect.*;
-import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 public class AdvancedJMM_15_VolatilesAreNotFences {
 
@@ -106,14 +107,14 @@ public class AdvancedJMM_15_VolatilesAreNotFences {
         @Actor
         void thread1() {
             x = 1;
-            UNSAFE.storeFence();
+            VarHandle.acquireFence();
             y = 1;
         }
 
         @Actor
         void thread2(II_Result r) {
             r.r1 = y;
-            UNSAFE.loadFence();
+            VarHandle.acquireFence();
             r.r2 = x;
         }
     }
