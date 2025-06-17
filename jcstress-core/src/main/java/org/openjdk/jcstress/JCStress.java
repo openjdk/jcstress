@@ -192,28 +192,32 @@ public class JCStress {
         return configs;
     }
 
-    private boolean skipMode(int cc, VMSupport.Config config, TestInfo info) {
-        switch (config.minCompiler()) {
-            case INT: {
-                if (!CompileMode.hasC2(cc, info.threads())
-            }
+    private boolean skipMode(int cm, VMSupport.Config config, TestInfo info) {
+        if (CompileMode.isUnified(cm)) {
+            // Do not skip unified modes
+            return false;
         }
+        if (!config.runtimes().hasC2() && CompileMode.hasC2(cm, info.threads())) {
+            // No C2 runtime is available, skip split compilation tests with C2
+            return true;
+        }
+        if (!config.runtimes().hasC1() && CompileMode.hasC1(cm, info.threads())) {
+            // No C1 runtime is available, skip split compilation tests with C1
+            return true;
+        }
+        // Do not skip by default.
+        return false;
     }
 
     private void forkedSplit(List<TestConfig> testConfigs, VMSupport.Config config, TestInfo info, SchedulingClass scl) {
-        for (int cc : CompileMode.casesFor(info.threads(), VMSupport.c1Available(), VMSupport.c2Available())) {
-            if (skipMode(cc, config)) {
-                continue;
-            }
-            if (config.minCompiler() == VMSupport.Config.Compiler.C2 && !CompileMode.hasC2(cc, info.threads())) {
-                // This configuration is expected to run only when C2 is enabled,
-                // but compilation mode does not include C2. Can skip it to optimize
-                // testing time.
+        for (int cm : CompileMode.casesFor(info.threads(), VMSupport.c1Available(), VMSupport.c2Available())) {
+            if (skipMode(cm, config, info)) {
+                // Skip unnecessary modes to optimize testing time.
                 continue;
             }
             int forks = opts.getForks() * (config.stress() ? opts.getForksStressMultiplier() : 1);
             for (int f = 0; f < forks; f++) {
-                testConfigs.add(new TestConfig(opts, info, f, config.args(), cc, scl));
+                testConfigs.add(new TestConfig(opts, info, f, config.args(), cm, scl));
             }
         }
     }

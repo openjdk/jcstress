@@ -391,14 +391,14 @@ public class VMSupport {
         List<String> l = new ArrayList<>();
         l.addAll(args);
         l.addAll(orig.origArgs());
-        return new Config(l, orig.maxCompiler(), orig.stress());
+        return new Config(l, orig.runtimes(), orig.stress());
     }
 
     private static Config cleanArgs(Config orig) {
         List<String> l = orig.args.stream()
             .filter(s -> !s.startsWith("-agentlib:jdwp"))
             .collect(Collectors.toList());
-        return new Config(l, orig.maxCompiler(), orig.stress());
+        return new Config(l, orig.runtimes(), orig.stress());
     }
 
     public static void detectAvailableVMConfigs(boolean splitCompilation, List<String> jvmArgs, List<String> jvmArgsPrepend) {
@@ -408,35 +408,28 @@ public class VMSupport {
         LinkedHashSet<Config> configs = new LinkedHashSet<>();
 
         if (!jvmArgs.isEmpty()) {
-            configs.add(new Config(jvmArgs, Config.Compiler.INT, Config.Compiler.C2, false));
-        } else if (splitCompilation && COMPILER_DIRECTIVES_AVAILABLE) {
-            System.out.println(" (split compilation is requested and compiler directives are available)");
-            // Interpreted
-            configs.add(new Config(Arrays.asList("-Xint"), Config.Compiler.INT, false));
-            // Default global: both C1 and C2 are available
-            configs.add(new Config(Collections.emptyList(), Config.Compiler.C2, false));
-            if (C1_AVAILABLE) {
-                // C1
-                configs.add(new Config(Arrays.asList("-XX:TieredStopAtLevel=1"), Config.Compiler.C1, false));
-            }
-            if (C2_AVAILABLE) {
-                // C2
-                configs.add(new Config(Arrays.asList("-XX:-TieredCompilation"), Config.Compiler.C2, false));
-                // C2 compilations stress
-                configs.add(new Config(C2_STRESS_JVM_FLAGS, Config.Compiler.C2, true));
-            }
+            configs.add(new Config(jvmArgs, Runtimes.all(), false));
         } else {
-            // Interpreted
-            configs.add(new Config(Arrays.asList("-Xint"), Config.Compiler.INT, false));
+            configs.add(new Config(Collections.singletonList("-Xint"), Runtimes.onlyInt(), false));
             if (C1_AVAILABLE) {
-                // C1
-                configs.add(new Config(Arrays.asList("-XX:TieredStopAtLevel=1"), Config.Compiler.C1, false));
+                configs.add(new Config(Collections.singletonList("-XX:TieredStopAtLevel=1"), Runtimes.onlyC1(), false));
             }
             if (C2_AVAILABLE) {
-                // C2
-                configs.add(new Config(Arrays.asList("-XX:-TieredCompilation"), Config.Compiler.C2, false));
-                // C2 only + stress
-                configs.add(new Config(C2_ONLY_STRESS_JVM_FLAGS, Config.Compiler.C2, true));
+                configs.add(new Config(Collections.singletonList("-XX:-TieredCompilation"), Runtimes.onlyC2(), false));
+            }
+
+            List<String> c2StressFlags;
+            if (splitCompilation && COMPILER_DIRECTIVES_AVAILABLE) {
+                System.out.println(" (split compilation is requested and compiler directives are available)");
+                configs.add(new Config(Collections.emptyList(), Runtimes.all(), false));
+                c2StressFlags = C2_STRESS_JVM_FLAGS;
+            } else {
+                c2StressFlags = C2_ONLY_STRESS_JVM_FLAGS;
+            }
+
+            // Mix in appropriate C2 stress options
+            if (C2_AVAILABLE) {
+                configs.add(new Config(c2StressFlags, Runtimes.onlyC2(), true));
             }
         }
 
@@ -627,25 +620,52 @@ public class VMSupport {
         }
     }
 
+    public static class Runtimes {
+        static final int INT = 1 << 0;
+        static final int C1 = 1 << 1;
+        static final int C2 = 1 << 2;
+        final int mod;
+
+        private Runtimes(int mod) {
+            this.mod = mod;
+        }
+
+        private static Runtimes all() {
+            return new Runtimes(INT | C1 | C2);
+        }
+
+        private static Runtimes onlyInt() {
+            return new Runtimes(INT);
+        }
+
+        private static Runtimes onlyC1() {
+            return new Runtimes(INT | C1);
+        }
+
+        private static Runtimes onlyC2() {
+            return new Runtimes(INT | C2);
+        }
+
+        public boolean hasC1() {
+            return (mod & C1) != 0;
+        }
+
+        public boolean hasC2() {
+            return (mod & C2) != 0;
+        }
+    }
+
     public static class Config {
         private static final Random SEED_RANDOM = new Random();
 
-        public enum Compiler {
-            INT,
-            C1,
-            C2,
-        }
-
         private final List<String> args;
-        private final Compiler minCompiler;
-        private final Compiler maxCompiler;
+        private final Runtimes runtimes;
         private final boolean stress;
         private final boolean addStressSeed;
 
-        private Config(List<String> args, Compiler minCompiler, Compiler maxCompiler, boolean stress) {
+        private Config(List<String> args, Runtimes runtimes, boolean stress) {
             this.args = args;
-            this.minCompiler = minCompiler;
-            this.maxCompiler = maxCompiler;
+            this.runtimes = runtimes;
             this.stress = stress;
             this.addStressSeed = shouldAddStressSeed();
         }
@@ -663,11 +683,8 @@ public class VMSupport {
             return false;
         }
 
-        public Compiler minCompiler() {
-            return minCompiler;
-        }
-        public Compiler maxCompiler() {
-            return maxCompiler;
+        public Runtimes runtimes() {
+            return runtimes;
         }
 
         public boolean stress() {
@@ -693,13 +710,12 @@ public class VMSupport {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Config config = (Config) o;
-            return maxCompiler == config.maxCompiler &&
-                    args.equals(config.args);
+            return (config.runtimes.mod == runtimes.mod);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(args, maxCompiler);
+            return Objects.hash(args, runtimes.mod);
         }
     }
 
