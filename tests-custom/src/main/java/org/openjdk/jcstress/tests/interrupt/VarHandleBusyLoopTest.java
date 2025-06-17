@@ -25,12 +25,9 @@
 package org.openjdk.jcstress.tests.interrupt;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.tests.varhandles.AddLong1;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
-
-import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 @Outcome(id = "TERMINATED", expect = Expect.ACCEPTABLE, desc = "The thread had successfully terminated.")
 @Outcome(id = "STALE",      expect = Expect.FORBIDDEN,  desc = "Thread had failed to respond.")

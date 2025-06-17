@@ -25,16 +25,12 @@
 package org.openjdk.jcstress.tests.atomicity.crosscache;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.BBBB_Result;
 import org.openjdk.jcstress.infra.results.I_Result;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.nio.ByteOrder;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-
-import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 @JCStressTest
 @Description("Tests if VarHandle breaks the atomicity while doing cross cache-line reads/writes.")

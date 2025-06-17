@@ -35,8 +35,6 @@ import org.openjdk.jcstress.infra.results.JJ_Result;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
-import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
-
 @JCStressTest
 @Description("Tests if VarHandle.getAndAddLong is racy")
 @Outcome(id = "1, 2", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")
