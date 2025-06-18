@@ -41,8 +41,12 @@ public class Chapter0bTestGenerator {
 
         SeqCstTraceGenerator.generate(
                 dst,
-                "org.openjdk.jcstress.tests.seqcst.volatiles",
-                Target.VOLATILE);
+                "org.openjdk.jcstress.tests.seqcst.volatiles.prim",
+                Target.VOLATILE_PRIM);
+        SeqCstTraceGenerator.generate(
+                dst,
+                "org.openjdk.jcstress.tests.seqcst.volatiles.ref",
+                Target.VOLATILE_REF);
     }
 
 }
