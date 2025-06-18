@@ -61,6 +61,9 @@ public class OSSupport {
 
             // Test the unpacked mode works...
             List<String> test = new ArrayList<>(AFFINITY_ADDITIONAL_OPTIONS);
+            if (VMSupport.enableNativeAccessAvailable()) {
+                test.add(VMSupport.enableNativeAccessOpt());
+            }
             test.add(AffinitySupportTestMain.class.getCanonicalName());
             VMSupport.tryWith(test.toArray(new String[0]));
 
