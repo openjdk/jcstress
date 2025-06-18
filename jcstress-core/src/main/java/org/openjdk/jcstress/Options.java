@@ -218,7 +218,7 @@ public class Options {
             this.pretouchHeap = false;
         } else {
             this.forks = 1;
-            this.forksStressMultiplier = 3;
+            this.forksStressMultiplier = 1;
             this.strideSize = 256;
             this.strideCount = 40;
             this.pretouchHeap = true;
