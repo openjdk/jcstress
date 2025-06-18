@@ -52,7 +52,7 @@ public class Options {
     private int strideCount;
     private final String[] args;
     private boolean parse;
-    private boolean list;
+    private TestListing.ListingTypes list = TestListing.ListingTypes.NONE;
     private Verbosity verbosity;
     private int cpuCount;
     private int heapPerFork;
@@ -81,9 +81,9 @@ public class Options {
         OptionSpec<String> parse = parser.accepts("p", "Re-run parser on the result file. This will not run any tests.")
                 .withRequiredArg().ofType(String.class).describedAs("result file");
 
-        OptionSpec<Boolean> list = parser.accepts("l", "List the available tests matching the requested settings, " +
-                        "after all filters (like CPU count) are applied. In verbose mode it prints all real combinations which will run.")
-                .withOptionalArg().ofType(Boolean.class).describedAs("bool");
+        OptionSpec<TestListing.ListingTypes> list = parser.accepts("l", "List the available tests. "
+                        + TestListing.ListingTypes.toDescription())
+                .withOptionalArg().ofType(TestListing.ListingTypes.class).describedAs("ListingTypes");
 
         OptionSpec<String> testFilter = parser.accepts("t", "Regexp selector for tests.")
                 .withRequiredArg().ofType(String.class).describedAs("regexp");
@@ -184,7 +184,7 @@ public class Options {
             String timestamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.ROOT).format(new Date());
             this.resultFile = "jcstress-results-" + timestamp + ".bin.gz";
         }
-        this.list = orDefault(set.has(list), false);
+        this.list = getList(set, list);
         if (set.has("vvv")) {
             this.verbosity = new Verbosity(3);
         } else if (set.has("vv")) {
@@ -263,6 +263,18 @@ public class Options {
         return true;
     }
 
+    private TestListing.ListingTypes getList(OptionSet set, OptionSpec<TestListing.ListingTypes> listSpec) {
+        if (set.has(listSpec)) {
+            if (set.hasArgument(listSpec)) {
+                return set.valueOf(listSpec);
+            } else {
+                return TestListing.ListingTypes.ALL_MATCHING;
+            }
+        } else {
+            return TestListing.ListingTypes.NONE;
+        }
+    }
+
     private List<String> processArgs(OptionSpec<String> op, OptionSet set) {
         if (set.hasArgument(op)) {
             try {
@@ -297,7 +309,7 @@ public class Options {
         out.printf("    Hardware CPUs in use: %d%n", getCPUCount());
         out.printf("    Spinning style: %s%n", getSpinStyle());
         out.printf("    Test selection: \"%s\"%n", getTestFilter());
-        out.printf("    Forks per test: %d normal, %d stress%n", getForks(), getForks()*getForksStressMultiplier());
+        out.printf("    Forks per test: %d normal, %d stress%n", getForks(), getForks() * getForksStressMultiplier());
         out.printf("    Test stride: %d strides x %d tests, but taking no more than %d Mb%n", getStrideCount(), getStrideSize(), getMaxFootprintMb());
         out.printf("    Test result blob: \"%s\"%n", resultFile);
         out.printf("    Test results: \"%s\"%n", resultDir);
@@ -338,6 +350,10 @@ public class Options {
     }
 
     public boolean shouldList() {
+        return list != TestListing.ListingTypes.NONE;
+    }
+
+    public TestListing.ListingTypes listingType() {
         return list;
     }
 
@@ -392,6 +408,8 @@ public class Options {
         return pretouchHeap;
     }
 
-    public TimeValue timeBudget() { return timeBudget; }
+    public TimeValue timeBudget() {
+        return timeBudget;
+    }
 
 }
