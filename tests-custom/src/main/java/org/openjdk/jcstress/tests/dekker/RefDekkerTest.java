@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,41 +22,28 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.volatiles;
+package org.openjdk.jcstress.tests.dekker;
 
-import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.Description;
-import org.openjdk.jcstress.annotations.JCStressTest;
-import org.openjdk.jcstress.annotations.Outcome;
-import org.openjdk.jcstress.annotations.Ref;
-import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.II_Result;
-
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
-import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
+import org.openjdk.jcstress.annotations.*;
+import org.openjdk.jcstress.infra.results.LL_Result;
 
 @JCStressTest
-@Description("Tests Dekker-lock-style idioms")
-@Outcome(id = {"0, 1", "1, 0", "1, 1"}, expect = ACCEPTABLE, desc = "Trivial under sequential consistency")
-@Outcome(id = "0, 0",                   expect = FORBIDDEN,  desc = "Violates sequential consistency")
-@Ref("http://mail.openjdk.java.net/pipermail/hotspot-compiler-dev/2013-February/009604.html")
-@Ref("http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=8007898")
+@Outcome(id = {"null, A", "B, null", "B, A"}, expect = Expect.ACCEPTABLE, desc = "Trivial under sequential consistency")
+@Outcome(id = "null, null",                   expect = Expect.FORBIDDEN,  desc = "Violates sequential consistency")
 @State
-public class DekkerTest {
-
-    volatile int a;
-    volatile int b;
+public class RefDekkerTest {
+    volatile Object a;
+    volatile Object b;
 
     @Actor
-    public void actor1(II_Result r) {
-        a = 1;
+    public void actor1(LL_Result r) {
+        a = new String("A");
         r.r1 = b;
     }
 
     @Actor
-    public void actor2(II_Result r) {
-        b = 1;
+    public void actor2(LL_Result r) {
+        b = new String("B");
         r.r2 = a;
     }
-
 }

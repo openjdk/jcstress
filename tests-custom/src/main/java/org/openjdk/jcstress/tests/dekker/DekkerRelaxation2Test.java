@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.varhandles;
+package org.openjdk.jcstress.tests.dekker;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.II_Result;
@@ -31,21 +31,21 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
-import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
+import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
 
 @JCStressTest
 @Description("Tests Dekker-lock-style idioms")
 @Outcome(id = {"0, 1", "1, 0", "1, 1"}, expect = ACCEPTABLE, desc = "Trivial under sequential consistency")
-@Outcome(id = "0, 0",                   expect = FORBIDDEN,  desc = "Violates sequential consistency")
+@Outcome(id = "0, 0",                   expect = ACCEPTABLE_INTERESTING,  desc = "Apparently violates sequential consistency")
 @State
-public class DekkerTest {
+public class DekkerRelaxation2Test {
 
     static final VarHandle VH_A, VH_B;
 
     static {
         try {
-            VH_A = MethodHandles.lookup().findVarHandle(DekkerTest.class, "a", int.class);
-            VH_B = MethodHandles.lookup().findVarHandle(DekkerTest.class, "b", int.class);
+            VH_A = MethodHandles.lookup().findVarHandle(DekkerRelaxation2Test.class, "a", int.class);
+            VH_B = MethodHandles.lookup().findVarHandle(DekkerRelaxation2Test.class, "b", int.class);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
@@ -57,7 +57,7 @@ public class DekkerTest {
     @Actor
     public void actor1(II_Result r) {
         VH_A.setVolatile(this, 1);
-        r.r1 = (int) VH_B.getVolatile(this);
+        r.r1 = (int) VH_B.getAcquire(this);  // relax to acquire
     }
 
     @Actor
