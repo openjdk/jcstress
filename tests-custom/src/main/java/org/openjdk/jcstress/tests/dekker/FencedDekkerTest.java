@@ -22,8 +22,9 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.fences;
+package org.openjdk.jcstress.tests.dekker;
 
+import java.lang.invoke.VarHandle;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Description;
@@ -34,16 +35,16 @@ import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
 
 /**
- * Baseline for FencedDekkerTest
+ * Tests if read-after-write using fences preserves SC
  *
  *  @author Doug Lea (dl@cs.oswego.edu)
  */
 @JCStressTest
 @Description("Tests the sequential consistency on Dekker-like construction using explicit fences, not volatiles")
 @Outcome(id = {"0, 1", "1, 0", "1, 1"}, expect = Expect.ACCEPTABLE, desc = "Acceptable under sequential consistency")
-@Outcome(id = {"0, 0"},                 expect = Expect.ACCEPTABLE_INTERESTING, desc = "Acceptable with no sequential consistency enforced")
+@Outcome(id = {"0, 0"},                 expect = Expect.FORBIDDEN,  desc = "Un-acceptable under sequential consistency")
 @State
-public class UnfencedDekkerTest {
+public class FencedDekkerTest {
 
     int a;
     int b;
@@ -51,12 +52,14 @@ public class UnfencedDekkerTest {
     @Actor
     public void actor1(II_Result r) {
         a = 1;
+        VarHandle.fullFence();
         r.r1 = b;
     }
 
     @Actor
     public void actor2(II_Result r) {
         b = 1;
+        VarHandle.fullFence();
         r.r2 = a;
     }
 
