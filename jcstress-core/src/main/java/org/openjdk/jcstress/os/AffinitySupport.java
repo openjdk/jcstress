@@ -71,8 +71,6 @@ public class AffinitySupport {
          */
         public static List<String> prepare() {
             System.setProperty("jnidispatch.preserve", "true");
-            // TODO: This causes native access warnings on JDK 25, but it is apparently required
-            // to figure out the JNA libraries paths.
             Native.load("c", CLibrary.class);
 
             File file = new File(System.getProperty("jnidispatch.path"));

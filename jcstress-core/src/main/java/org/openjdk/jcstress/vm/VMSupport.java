@@ -506,7 +506,7 @@ public class VMSupport {
         System.out.println();
     }
 
-    public static void tryWith(String... lines) throws VMSupportException {
+    public static String tryWith(String... lines) throws VMSupportException {
         try {
             List<String> commandString = getJavaInvokeLine();
             commandString.addAll(
@@ -530,8 +530,10 @@ public class VMSupport {
             errDrainer.join();
             outDrainer.join();
 
-            if (ecode != 0) {
-                String msg = new String(baos.toByteArray());
+            String msg = baos.toString();
+            if (ecode == 0) {
+                return msg;
+            } else {
                 throw new VMSupportException(msg);
             }
         } catch (IOException | InterruptedException ex) {

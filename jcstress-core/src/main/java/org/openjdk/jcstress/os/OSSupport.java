@@ -25,6 +25,7 @@
 package org.openjdk.jcstress.os;
 
 import org.openjdk.jcstress.util.InputStreamDrainer;
+import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.vm.VMSupport;
 import org.openjdk.jcstress.vm.VMSupportException;
 
@@ -34,6 +35,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class OSSupport {
+
+    static final String AFFINITY_PREPARE_PREFIX = "AFFINITY-SUPPORT-PREPARE: ";
 
     private static volatile boolean TASKSET_AVAILABLE;
     private static List<String> AFFINITY_ADDITIONAL_OPTIONS;
@@ -48,31 +51,48 @@ public class OSSupport {
     }
 
     public static void init() {
-        System.out.println("Probing the target OS:");
+        System.out.println("Initializing and probing the target OS:");
         System.out.println(" (all failures are non-fatal, but may affect testing accuracy)");
         System.out.println();
 
-        TASKSET_AVAILABLE = detectCommand("Trying to set global affinity with taskset",
+        TASKSET_AVAILABLE = detectCommand("Testing global affinity machinery (taskset)",
                 "taskset", "-c", "0");
 
         try {
-            // Prepare and dump affinity support collaterals
-            AFFINITY_ADDITIONAL_OPTIONS = AffinitySupport.prepare();
-
-            // Test the unpacked mode works...
-            List<String> test = new ArrayList<>(AFFINITY_ADDITIONAL_OPTIONS);
+            // Prepare and dump affinity support files. We need to fork out to separate
+            // JVM, because we need to set JVM flags.
+            List<String> test = new ArrayList<>();
             if (VMSupport.enableNativeAccessAvailable()) {
                 test.add(VMSupport.enableNativeAccessOpt());
             }
-            test.add(AffinitySupportTestMain.class.getCanonicalName());
-            VMSupport.tryWith(test.toArray(new String[0]));
+            test.add(AffinitySupportPrepareMain.class.getCanonicalName());
+            String reply = VMSupport.tryWith(test.toArray(new String[0]));
+            AFFINITY_ADDITIONAL_OPTIONS = StringUtils.select(AFFINITY_PREPARE_PREFIX, StringUtils.splitLines(reply));
 
-            System.out.printf("----- %s %s%n", "[OK]", "Trying to set per-thread affinity with syscalls");
+            System.out.printf("----- %s %s%n", "[OK]", "Preparing affinity support libraries");
             AFFINITY_SUPPORT_AVAILABLE = true;
         } catch (Throwable e) {
-            System.out.printf("----- %s %s%n", "[N/A]", "Trying to set per-thread affinity with syscalls");
+            System.out.printf("----- %s %s%n", "[N/A]", "Preparing affinity support libraries");
             System.out.println(e.getMessage());
             AFFINITY_SUPPORT_AVAILABLE = false;
+        }
+
+        if (AFFINITY_SUPPORT_AVAILABLE) {
+            try {
+                // Test the unpacked mode works...
+                List<String> test = new ArrayList<>(AFFINITY_ADDITIONAL_OPTIONS);
+                if (VMSupport.enableNativeAccessAvailable()) {
+                    test.add(VMSupport.enableNativeAccessOpt());
+                }
+                test.add(AffinitySupportTestMain.class.getCanonicalName());
+                VMSupport.tryWith(test.toArray(new String[0]));
+
+                System.out.printf("----- %s %s%n", "[OK]", "Testing local affinity machinery (syscalls)");
+            } catch (Throwable e) {
+                System.out.printf("----- %s %s%n", "[N/A]", "Testing local affinity machinery (syscalls)");
+                System.out.println(e.getMessage());
+                AFFINITY_SUPPORT_AVAILABLE = false;
+            }
         }
 
         System.out.println();
