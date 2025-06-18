@@ -40,4 +40,4 @@ jobs:
         java-version: ${{ matrix.run-java }}
         check-latest: true
     - name: Run a trial test
-      run: java -jar tests-custom/target/jcstress.jar -t UnfencedDekker -tb 1m
+      run: java -jar tests-custom/target/jcstress.jar -t RelaxedDekkerTest -tb 1m
