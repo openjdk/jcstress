@@ -107,7 +107,7 @@ public class AdvancedJMM_15_VolatilesAreNotFences {
         @Actor
         void thread1() {
             x = 1;
-            VarHandle.acquireFence();
+            VarHandle.releaseFence();
             y = 1;
         }
 
