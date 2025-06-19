@@ -28,6 +28,7 @@ import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.infra.collectors.*;
 import org.openjdk.jcstress.infra.grading.ConsoleReportPrinter;
 import org.openjdk.jcstress.infra.grading.ExceptionReportPrinter;
+import org.openjdk.jcstress.infra.grading.FailFastKiller;
 import org.openjdk.jcstress.infra.grading.TextReportPrinter;
 import org.openjdk.jcstress.infra.grading.HTMLReportPrinter;
 import org.openjdk.jcstress.infra.runners.TestConfig;
@@ -66,11 +67,21 @@ public class JCStress {
 
         ConsoleReportPrinter printer = new ConsoleReportPrinter(opts, new PrintWriter(out, true), config.configs.size(), timeBudget);
         DiskWriteCollector diskCollector = new DiskWriteCollector(opts.getResultFile());
-        TestResultCollector mux = MuxCollector.of(printer, diskCollector);
+        FailFastKiller failFastKiller = null;
+        TestResultCollector mux;
+        if (opts.isFailOnError()) {
+            failFastKiller = new FailFastKiller(opts, new PrintWriter(out, true), config.configs);
+            mux = MuxCollector.of(printer, diskCollector, failFastKiller);
+        } else {
+            mux = MuxCollector.of(printer, diskCollector);
+        }
         SerializedBufferCollector sink = new SerializedBufferCollector(mux);
 
         TestExecutor executor = new TestExecutor(opts.verbosity(), sink, config.scheduler, timeBudget);
         printer.setExecutor(executor);
+        if (failFastKiller != null) {
+            failFastKiller.setExecutor(executor);
+        }
 
         executor.runAll(config.configs);
 

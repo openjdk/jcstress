@@ -29,7 +29,6 @@ import org.openjdk.jcstress.TestExecutor;
 import org.openjdk.jcstress.TimeBudget;
 import org.openjdk.jcstress.Verbosity;
 import org.openjdk.jcstress.infra.collectors.TestResult;
-import org.openjdk.jcstress.infra.collectors.TestResultCollector;
 import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.PrintWriter;
@@ -41,7 +40,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
-public class ConsoleReportPrinter implements TestResultCollector {
+public class ConsoleReportPrinter extends CountingResultCollector {
 
     private static final Integer PRINT_INTERVAL_MS = Integer.getInteger("jcstress.console.printIntervalMs");
 
@@ -62,10 +61,6 @@ public class ConsoleReportPrinter implements TestResultCollector {
     private boolean progressFirstLine;
     private final int[] progressLen;
 
-    private long passed;
-    private long failed;
-    private long softErrors;
-    private long hardErrors;
     private TestExecutor executor;
     private final int totalCpuCount;
 
@@ -103,35 +98,11 @@ public class ConsoleReportPrinter implements TestResultCollector {
     }
 
     private void printResult(TestResult r) {
-        TestGrading grading = r.grading();
-
-        boolean inHardError = false;
-        switch (r.status()) {
-            case TIMEOUT_ERROR:
-            case CHECK_TEST_ERROR:
-            case TEST_ERROR:
-            case VM_ERROR:
-                hardErrors++;
-                inHardError = true;
-                break;
-            case API_MISMATCH:
-                softErrors++;
-                break;
-            case NORMAL:
-                if (grading.isPassed) {
-                    passed++;
-                } else {
-                    failed++;
-                }
-                break;
-            default:
-                throw new IllegalStateException("Illegal status: " + r.status());
-        }
-
+        boolean inHardError = countResult(r);
         boolean shouldPrintResults =
                 inHardError ||
-                !grading.isPassed ||
-                grading.hasInteresting ||
+                !r.grading().isPassed ||
+                r.grading().hasInteresting ||
                 verbosity.printAllTests();
 
         boolean shouldPrintStatusLine =
@@ -216,6 +187,11 @@ public class ConsoleReportPrinter implements TestResultCollector {
     public void printFinishLine() {
         clearStatusLine();
         printStatusLine();
+        if (executor.isDiedFast()) {
+            output.println("****************************************************");
+            output.println("To much failures occurred. Failing fast as requested");
+            output.println("****************************************************");
+        }
     }
 
     private String computeSpeed() {
