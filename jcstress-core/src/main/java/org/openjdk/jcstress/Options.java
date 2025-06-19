@@ -30,6 +30,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.openjdk.jcstress.infra.runners.SpinLoopStyle;
 import org.openjdk.jcstress.os.AffinityMode;
+import org.openjdk.jcstress.properties.UsedProperties;
 import org.openjdk.jcstress.util.OptionFormatter;
 import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.util.TimeValue;
@@ -46,6 +47,8 @@ import java.util.*;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class Options {
+    public static final String TIME_BUDGET_SWITCH = "tb";
+
     private String resultDir;
     private String testFilter;
     private int strideSize;
@@ -93,7 +96,7 @@ public class Options {
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
         OptionSpec<Integer> strideCount = parser.accepts("strideCount", "Internal stride count per epoch. " +
-                "Larger value increases cache footprint.")
+                 "Larger value increases cache footprint.")
                 .withRequiredArg().ofType(Integer.class).describedAs("N");
 
         OptionSpec<Integer> optTime = parser.accepts("time", "(Deprecated, to be removed in next releases.)")
@@ -144,13 +147,13 @@ public class Options {
         OptionSpec<Boolean> optPretouchHeap = parser.accepts("pth", "Pre-touch Java heap, if possible.")
                 .withOptionalArg().ofType(Boolean.class).describedAs("bool");
 
-        OptionSpec<TimeValue> optTimeBudget = parser.accepts("tb", "Time budget to run the tests. Harness code would try to fit the entire " +
+        OptionSpec<TimeValue> optTimeBudget = parser.accepts(TIME_BUDGET_SWITCH, "Time budget to run the tests. Harness code would try to fit the entire " +
                 "run in the desired timeframe. This value is expected to be reasonable, as it is not guaranteed that tests would succeed " +
                 "in arbitrarily low time budget. If not set, harness would try to decide a reasonable time, given the number of tests to run. " +
                 "Common time suffixes (s/m/h/d) are accepted.")
                 .withRequiredArg().ofType(TimeValue.class).describedAs("time");
 
-        parser.accepts("v", "Be verbose.");
+        parser.accepts("v", "Be verbose. Will print known properties in help");
         parser.accepts("vv", "Be extra verbose.");
         parser.accepts("vvv", "Be extra extra verbose.");
         parser.accepts("h", "Print this help.");
@@ -161,12 +164,13 @@ public class Options {
         } catch (OptionException e) {
             System.err.println("ERROR: " + e.getMessage());
             System.err.println();
-            parser.printHelpOn(System.err);
+            printHelp(parser, System.err);
             return false;
         }
+        setVerbosity(set);
 
         if (set.has("h")) {
-            parser.printHelpOn(System.out);
+            printHelp(parser, System.out);
             return false;
         }
 
@@ -185,15 +189,6 @@ public class Options {
             this.resultFile = "jcstress-results-" + timestamp + ".bin.gz";
         }
         this.list = orDefault(set.has(list), false);
-        if (set.has("vvv")) {
-            this.verbosity = new Verbosity(3);
-        } else if (set.has("vv")) {
-            this.verbosity = new Verbosity(2);
-        } else if (set.has("v")) {
-            this.verbosity = new Verbosity(1);
-        } else {
-            this.verbosity = new Verbosity(0);
-        }
 
         int totalCpuCount = VMSupport.figureOutHotCPUs();
         cpuCount = orDefault(set.valueOf(cpus), totalCpuCount);
@@ -201,7 +196,7 @@ public class Options {
         if (cpuCount > totalCpuCount) {
             System.err.println("Requested to use " + cpuCount + " CPUs, but system has only " + totalCpuCount + " CPUs.");
             System.err.println();
-            parser.printHelpOn(System.err);
+            printHelp(parser, System.err);
             return false;
         }
 
@@ -227,21 +222,21 @@ public class Options {
         if (optModeStr.value(set) != null) {
             System.err.println("-m option is not supported anymore, please use -tb.");
             System.err.println();
-            parser.printHelpOn(System.err);
+            printHelp(parser, System.err);
             return false;
         }
 
         if (optTime.value(set) != null) {
             System.err.println("-time option is not supported anymore, please use -tb.");
             System.err.println();
-            parser.printHelpOn(System.err);
+            printHelp(parser, System.err);
             return false;
         }
 
         if (optIters.value(set) != null) {
             System.err.println("-iters option is not supported anymore, please use -tb.");
             System.err.println();
-            parser.printHelpOn(System.err);
+            printHelp(parser, System.err);
             return false;
         }
 
@@ -261,6 +256,26 @@ public class Options {
         this.affinityMode = orDefault(set.valueOf(optAffinityMode), AffinityMode.LOCAL);
 
         return true;
+    }
+
+    private void setVerbosity(OptionSet set) {
+        if (set.has("vvv")) {
+            this.verbosity = new Verbosity(3);
+        } else if (set.has("vv")) {
+            this.verbosity = new Verbosity(2);
+        } else if (set.has("v")) {
+            this.verbosity = new Verbosity(1);
+        } else {
+            this.verbosity = new Verbosity(0);
+        }
+    }
+
+    private void printHelp(OptionParser parser, PrintStream ouer) throws IOException {
+        parser.printHelpOn(ouer);
+        ouer.println();
+        if (verbosity != null && verbosity.printAllTests()) {
+            UsedProperties.printHelpOn(ouer);
+        }
     }
 
     private List<String> processArgs(OptionSpec<String> op, OptionSet set) {
@@ -297,7 +312,7 @@ public class Options {
         out.printf("    Hardware CPUs in use: %d%n", getCPUCount());
         out.printf("    Spinning style: %s%n", getSpinStyle());
         out.printf("    Test selection: \"%s\"%n", getTestFilter());
-        out.printf("    Forks per test: %d normal, %d stress%n", getForks(), getForks()*getForksStressMultiplier());
+        out.printf("    Forks per test: %d normal, %d stress%n", getForks(), getForks() * getForksStressMultiplier());
         out.printf("    Test stride: %d strides x %d tests, but taking no more than %d Mb%n", getStrideCount(), getStrideSize(), getMaxFootprintMb());
         out.printf("    Test result blob: \"%s\"%n", resultFile);
         out.printf("    Test results: \"%s\"%n", resultDir);
@@ -392,6 +407,8 @@ public class Options {
         return pretouchHeap;
     }
 
-    public TimeValue timeBudget() { return timeBudget; }
+    public TimeValue timeBudget() {
+        return timeBudget;
+    }
 
 }
