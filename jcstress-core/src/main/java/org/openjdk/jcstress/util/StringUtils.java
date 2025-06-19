@@ -24,7 +24,9 @@
  */
 package org.openjdk.jcstress.util;
 
+import java.io.BufferedReader;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,6 +77,12 @@ public class StringUtils {
             results.add(s);
         }
 
+        return results;
+    }
+
+    public static List<String> splitLines(String src) {
+        List<String> results = new ArrayList<>();
+        new BufferedReader(new StringReader(src)).lines().forEach(results::add);
         return results;
     }
 
@@ -172,5 +180,15 @@ public class StringUtils {
         } else {
             return String.format("%." + prec + "f%%", p);
         }
+    }
+
+    public static List<String> select(String prefix, List<String> src) {
+        List<String> result = new ArrayList<>();
+        for (String s : src) {
+            if (s.startsWith(prefix)) {
+                result.add(s.substring(prefix.length()));
+            }
+        }
+        return result;
     }
 }

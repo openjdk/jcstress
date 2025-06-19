@@ -57,6 +57,9 @@ public class VMSupport {
 
     private static volatile boolean BIASED_LOCKING_AVAILABLE;
 
+    private static volatile boolean ENABLE_NATIVE_ACCESS_AVAILABLE;
+    private static final String ENABLE_NATIVE_ACCESS_OPT = "--enable-native-access=ALL-UNNAMED";
+
     public static boolean spinWaitHintAvailable() {
         return THREAD_SPIN_WAIT_AVAILABLE;
     }
@@ -75,6 +78,14 @@ public class VMSupport {
 
     public static boolean c2Available() {
         return C2_AVAILABLE;
+    }
+
+    public static boolean enableNativeAccessAvailable() {
+        return ENABLE_NATIVE_ACCESS_AVAILABLE;
+    }
+
+    public static String enableNativeAccessOpt() {
+        return ENABLE_NATIVE_ACCESS_OPT;
     }
 
     public static void initFlags(Options opts) {
@@ -117,6 +128,13 @@ public class VMSupport {
                 SimpleTestMain.class,
                 null,
                 "-XX:+UseBiasedLocking"
+        );
+
+        ENABLE_NATIVE_ACCESS_AVAILABLE = detect("Checking for native access warnings",
+                false,
+                SimpleTestMain.class,
+                null,
+                ENABLE_NATIVE_ACCESS_OPT
         );
 
         // Tests are supposed to run in a very tight memory constraints:
@@ -488,7 +506,7 @@ public class VMSupport {
         System.out.println();
     }
 
-    public static void tryWith(String... lines) throws VMSupportException {
+    public static String tryWith(String... lines) throws VMSupportException {
         try {
             List<String> commandString = getJavaInvokeLine();
             commandString.addAll(
@@ -512,8 +530,10 @@ public class VMSupport {
             errDrainer.join();
             outDrainer.join();
 
-            if (ecode != 0) {
-                String msg = new String(baos.toByteArray());
+            String msg = baos.toString();
+            if (ecode == 0) {
+                return msg;
+            } else {
                 throw new VMSupportException(msg);
             }
         } catch (IOException | InterruptedException ex) {

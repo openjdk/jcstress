@@ -86,9 +86,9 @@ public class JCStress {
     }
 
     private ConfigsWithScheduler getConfigs() {
-        OSSupport.init();
-
         VMSupport.initFlags(opts);
+
+        OSSupport.init();
 
         VMSupport.detectAvailableVMConfigs(opts.isSplitCompilation(), opts.getJvmArgs(), opts.getJvmArgsPrepend());
         if (VMSupport.getAvailableVMConfigs().isEmpty()) {
