@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,47 +22,44 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.varhandles;
+package org.openjdk.jcstress.tests.atomicity.crosscache;
 
 import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.II_Result;
+import org.openjdk.jcstress.infra.results.I_Result;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
-
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
-import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
+import java.nio.ByteOrder;
+import java.util.concurrent.ThreadLocalRandom;
 
 @JCStressTest
-@Description("Tests Dekker-lock-style idioms")
-@Outcome(id = {"0, 1", "1, 0", "1, 1"}, expect = ACCEPTABLE, desc = "Trivial under sequential consistency")
-@Outcome(id = "0, 0",                   expect = FORBIDDEN,  desc = "Violates sequential consistency")
+@Description("Tests if VarHandle breaks the atomicity while doing cross cache-line reads/writes.")
+@Outcome(id = "0",  expect = Expect.ACCEPTABLE, desc = "Seeing the default value, this is a legal race.")
+@Outcome(id = "-1", expect = Expect.ACCEPTABLE, desc = "Seeing the full value, this is a legal behavior.")
 @State
-public class DekkerTest {
+public class VarHandleIntAtomicityTest {
 
-    static final VarHandle VH_A, VH_B;
+    private static final VarHandle VH = MethodHandles.byteArrayViewVarHandle(int[].class, ByteOrder.nativeOrder());
 
-    static {
-        try {
-            VH_A = MethodHandles.lookup().findVarHandle(DekkerTest.class, "a", int.class);
-            VH_B = MethodHandles.lookup().findVarHandle(DekkerTest.class, "b", int.class);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
-    }
+    /** Array size: 256 bytes inevitably crosses the cache line on most implementations */
+    public static final int SIZE = 256;
 
-    volatile int a;
-    volatile int b;
+    public final byte[] bytes;
+    public final int offset;
 
-    @Actor
-    public void actor1(II_Result r) {
-        VH_A.setVolatile(this, 1);
-        r.r1 = (int) VH_B.getVolatile(this);
+    public VarHandleIntAtomicityTest() {
+        bytes = new byte[SIZE];
+        offset = ThreadLocalRandom.current().nextInt(SIZE - Integer.BYTES) / Integer.BYTES * Integer.BYTES;
     }
 
     @Actor
-    public void actor2(II_Result r) {
-        VH_B.setVolatile(this, 1);
-        r.r2 = (int) VH_A.getVolatile(this);
+    public void actor1() {
+        VH.set(bytes, offset, 0xFFFFFFFF);
     }
+
+    @Actor
+    public void actor2(I_Result r) {
+        r.r1 = (int)VH.get(bytes, offset);
+    }
+
 }

@@ -285,10 +285,15 @@ public class TestExecutor {
                     command.add("-XX:CompilerDirectivesFile=" + compilerDirectives.getAbsolutePath());
                 }
 
+                boolean localAffinity = task.shClass.mode() == AffinityMode.LOCAL;
+                if (localAffinity && VMSupport.enableNativeAccessAvailable()) {
+                    command.add(VMSupport.enableNativeAccessOpt());
+                }
+
                 command.add(ForkedMain.class.getName());
 
                 // notify the forked VM whether we want the local affinity initialized
-                command.add(Boolean.toString(task.shClass.mode() == AffinityMode.LOCAL));
+                command.add(Boolean.toString(localAffinity));
 
                 command.add(host);
                 command.add(String.valueOf(port));

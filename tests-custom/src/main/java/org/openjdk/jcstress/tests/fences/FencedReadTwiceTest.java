@@ -24,14 +24,14 @@
  */
 package org.openjdk.jcstress.tests.fences;
 
+import java.lang.invoke.VarHandle;
+
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.III_Result;
-
-import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 /**
  * Test if acquire/release forces re-read
@@ -53,20 +53,18 @@ public class FencedReadTwiceTest {
     int x;
     int y;
 
-    @SuppressWarnings("removal")
     @Actor
     public void actor1() {
         x = 1;
-        UNSAFE.storeFence();
+        VarHandle.releaseFence();
         y = 1;
     }
 
-    @SuppressWarnings("removal")
     @Actor
     public void actor2(III_Result r) {
         r.r1 = x;
         r.r2 = y;
-        UNSAFE.loadFence();
+        VarHandle.acquireFence();
         r.r3 = x;
     }
 

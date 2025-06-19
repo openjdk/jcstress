@@ -180,7 +180,17 @@ public class SeqCstTraceGenerator {
         String klass = mt.canonicalId() + "_Test";
 
         Class<?>[] klasses = new Class<?>[mt.loadCount() + mt.allVariables().size()];
-        Arrays.fill(klasses, int.class);
+        switch (target) {
+            case SYNCHRONIZED:
+            case VOLATILE_PRIM:
+                Arrays.fill(klasses, int.class);
+                break;
+            case VOLATILE_REF:
+                Arrays.fill(klasses, Object.class);
+                break;
+            default:
+                throw new IllegalStateException("Unknown target: " + target);
+        }
 
         String resultName = ResultUtils.resultName(klasses);
 
@@ -207,10 +217,10 @@ public class SeqCstTraceGenerator {
         for (TraceResult r : scResults) {
             List<String> mappedValues = new ArrayList<>();
             for (Value v : r.getResults().values()) {
-                mappedValues.add(v.toString());
+                mappedValues.add(convertValue(v));
             }
             for (Value v : r.getVars().values()) {
-                mappedValues.add(v.toString());
+                mappedValues.add(convertValue(v));
             }
             pw.println("            \"" + mappedValues.stream().collect(Collectors.joining(", ")) + "\",");
         }
@@ -225,8 +235,11 @@ public class SeqCstTraceGenerator {
             for (Op op : trace.ops()) {
                 if (exist.add(op.getVarId())) {
                     switch (target) {
-                        case VOLATILE:
+                        case VOLATILE_PRIM:
                             pw.println("    volatile int x" + op.getVarId() + ";");
+                            break;
+                        case VOLATILE_REF:
+                            pw.println("    volatile String x" + op.getVarId() + ";");
                             break;
                         case SYNCHRONIZED:
                             pw.println("    int x" + op.getVarId() + ";");
@@ -263,7 +276,8 @@ public class SeqCstTraceGenerator {
                             pw.println("        synchronized (this) {");
                             pw.print("    ");
                         }
-                        pw.println("        x" + op.getVarId() + " = " + op.getValue() + ";");
+                        String quotes = (target == Target.VOLATILE_REF) ? "\"" : "";
+                        pw.println("        x" + op.getVarId() + " = " + quotes + op.getValue() + quotes + ";");
                         if (target == Target.SYNCHRONIZED) {
                             pw.println("        }");
                         }
@@ -295,6 +309,18 @@ public class SeqCstTraceGenerator {
         pw.println("}");
 
         pw.close();
+    }
+
+    private String convertValue(Value v) {
+        switch (target) {
+            case SYNCHRONIZED:
+            case VOLATILE_PRIM:
+                return v.toString();
+            case VOLATILE_REF:
+                return v.equals(Value.defaultOne()) ? "null" : v.toString();
+            default:
+                throw new IllegalStateException("Unknown target: " + target);
+        }
     }
 
     private List<Trace> product(List<Trace> traces, List<Op> ops) {

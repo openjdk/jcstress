@@ -22,42 +22,42 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.init.primitives.fenced;
+package org.openjdk.jcstress.tests.dekker;
 
-import java.lang.invoke.VarHandle;
 
 import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.JCStressMeta;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.B_Result;
-import org.openjdk.jcstress.tests.init.Grading_IntShouldSeeFull;
+import org.openjdk.jcstress.infra.results.II_Result;
 
+/**
+ * Baseline for FencedDekkerTest
+ *
+ *  @author Doug Lea (dl@cs.oswego.edu)
+ */
 @JCStressTest
-@JCStressMeta(Grading_IntShouldSeeFull.class)
+@Description("Tests the sequential consistency on Dekker-like construction using explicit fences, not volatiles")
+@Outcome(id = {"0, 1", "1, 0", "1, 1"}, expect = Expect.ACCEPTABLE, desc = "Acceptable under sequential consistency")
+@Outcome(id = {"0, 0"},                 expect = Expect.ACCEPTABLE_INTERESTING, desc = "Acceptable with no sequential consistency enforced")
 @State
-public class ByteFencedTest {
+public class RelaxedDekkerTest {
 
-    Shell shell;
+    int a;
+    int b;
 
-    public static class Shell {
-        byte x;
-
-        public Shell() {
-            this.x = (byte) 0xFF;
-            VarHandle.releaseFence();
-        }
+    @Actor
+    public void actor1(II_Result r) {
+        a = 1;
+        r.r1 = b;
     }
 
     @Actor
-    public void actor1() {
-        shell = new Shell();
-    }
-
-    @Actor
-    public void actor2(B_Result r) {
-        Shell sh = shell;
-        r.r1 = (sh == null) ? 42 : sh.x;
+    public void actor2(II_Result r) {
+        b = 1;
+        r.r2 = a;
     }
 
 }

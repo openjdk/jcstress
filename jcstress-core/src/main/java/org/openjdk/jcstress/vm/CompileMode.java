@@ -75,6 +75,10 @@ public class CompileMode {
         return (mode != UNIFIED) && (actorMode(mode, actor) == MODE_C2);
     }
 
+    public static boolean isUnified(int mode) {
+        return mode == UNIFIED;
+    }
+
     public static boolean hasC2(int mode, int actors) {
         if (mode == UNIFIED) {
             return true;
@@ -85,7 +89,7 @@ public class CompileMode {
         return false;
     }
 
-    private static boolean hasC1(int mode, int actors) {
+    public static boolean hasC1(int mode, int actors) {
         if (mode == UNIFIED) {
             return true;
         }

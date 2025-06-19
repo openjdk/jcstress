@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,42 +22,45 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.fences;
+package org.openjdk.jcstress.tests.varhandles;
 
+import org.openjdk.jcstress.annotations.*;
+import org.openjdk.jcstress.infra.results.JJ_Result;
 
-import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.Description;
-import org.openjdk.jcstress.annotations.Expect;
-import org.openjdk.jcstress.annotations.JCStressTest;
-import org.openjdk.jcstress.annotations.Outcome;
-import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.II_Result;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 
-/**
- * Baseline for FencedDekkerTest
- *
- *  @author Doug Lea (dl@cs.oswego.edu)
- */
 @JCStressTest
-@Description("Tests the sequential consistency on Dekker-like construction using explicit fences, not volatiles")
-@Outcome(id = {"0, 1", "1, 0", "1, 1"}, expect = Expect.ACCEPTABLE, desc = "Acceptable under sequential consistency")
-@Outcome(id = {"0, 0"},                 expect = Expect.ACCEPTABLE_INTERESTING, desc = "Acceptable with no sequential consistency enforced")
+@Description("Tests if VarHandle.getAndAddLong is racy")
+@Outcome(id = "1, 4398046511104", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")
+@Outcome(id = "0, 0",             expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution")
+@Outcome(id = "0, 4398046511104", expect = Expect.ACCEPTABLE, desc = "T2 reads the result early")
 @State
-public class UnfencedDekkerTest {
+public class AddLong42 {
 
-    int a;
-    int b;
+    static final VarHandle VH;
+
+    static {
+        try {
+            VH = MethodHandles.lookup().findVarHandle(AddLong42.class, "x", long.class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    long x;
+    volatile int written;
 
     @Actor
-    public void actor1(II_Result r) {
-        a = 1;
-        r.r1 = b;
+    public void actor1() {
+        VH.getAndAdd(this, 1L << 42);
+        written = 1;
     }
 
     @Actor
-    public void actor2(II_Result r) {
-        b = 1;
-        r.r2 = a;
+    public void actor2(JJ_Result r) {
+        r.r1 = written;
+        r.r2 = (long)VH.get(this);
     }
 
 }

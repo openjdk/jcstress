@@ -25,6 +25,7 @@
 package org.openjdk.jcstress.generator.seqcst;
 
 public enum Target {
-    VOLATILE,
+    VOLATILE_PRIM,
+    VOLATILE_REF,
     SYNCHRONIZED,
 }

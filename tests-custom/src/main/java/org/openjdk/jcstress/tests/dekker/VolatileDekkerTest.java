@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.volatiles;
+package org.openjdk.jcstress.tests.dekker;
 
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Description;
@@ -42,7 +42,7 @@ import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
 @Ref("http://mail.openjdk.java.net/pipermail/hotspot-compiler-dev/2013-February/009604.html")
 @Ref("http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=8007898")
 @State
-public class DekkerTest {
+public class VolatileDekkerTest {
 
     volatile int a;
     volatile int b;

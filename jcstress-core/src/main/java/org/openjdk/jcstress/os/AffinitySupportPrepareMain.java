@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,42 +22,17 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jcstress.tests.init.primitives.fenced;
+package org.openjdk.jcstress.os;
 
-import java.lang.invoke.VarHandle;
+import java.util.List;
 
-import org.openjdk.jcstress.annotations.Actor;
-import org.openjdk.jcstress.annotations.JCStressMeta;
-import org.openjdk.jcstress.annotations.JCStressTest;
-import org.openjdk.jcstress.annotations.State;
-import org.openjdk.jcstress.infra.results.B_Result;
-import org.openjdk.jcstress.tests.init.Grading_IntShouldSeeFull;
+public class AffinitySupportPrepareMain {
 
-@JCStressTest
-@JCStressMeta(Grading_IntShouldSeeFull.class)
-@State
-public class ByteFencedTest {
-
-    Shell shell;
-
-    public static class Shell {
-        byte x;
-
-        public Shell() {
-            this.x = (byte) 0xFF;
-            VarHandle.releaseFence();
+    public static void main(String... args) {
+        List<String> list = AffinitySupport.prepare();
+        for (String s : list) {
+            System.out.println(OSSupport.AFFINITY_PREPARE_PREFIX + s);
         }
-    }
-
-    @Actor
-    public void actor1() {
-        shell = new Shell();
-    }
-
-    @Actor
-    public void actor2(B_Result r) {
-        Shell sh = shell;
-        r.r1 = (sh == null) ? 42 : sh.x;
     }
 
 }

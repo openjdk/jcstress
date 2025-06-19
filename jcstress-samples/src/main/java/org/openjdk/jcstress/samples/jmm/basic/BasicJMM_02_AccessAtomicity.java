@@ -31,10 +31,10 @@ import org.openjdk.jcstress.infra.results.J_Result;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.openjdk.jcstress.annotations.Expect.*;
-import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 public class BasicJMM_02_AccessAtomicity {
 
@@ -265,181 +265,24 @@ public class BasicJMM_02_AccessAtomicity {
     @Outcome(id = "-1", expect = ACCEPTABLE, desc = "Seeing the full value.")
     @Outcome(expect = ACCEPTABLE_INTERESTING, desc = "Other cases are allowed, because reads/writes are not atomic.")
     @State
-    public static class UnsafeCrossCacheLine {
+    public static class CrossCacheLine {
+        private static final VarHandle VH = MethodHandles.byteArrayViewVarHandle(int[].class, ByteOrder.nativeOrder());
 
-        public static final int SIZE = 256;
-        @SuppressWarnings("removal")
-        public static final long ARRAY_BASE_OFFSET = UNSAFE.arrayBaseOffset(byte[].class);
-        @SuppressWarnings("removal")
-        public static final long ARRAY_BASE_SCALE = UNSAFE.arrayIndexScale(byte[].class);
+        private static final int BYTE_SIZE = 256;
 
-        byte[] ss = new byte[SIZE];
-        long off = ARRAY_BASE_OFFSET + ARRAY_BASE_SCALE * ThreadLocalRandom.current().nextInt(SIZE - 4);
+        int off = ThreadLocalRandom.current().nextInt(BYTE_SIZE - Integer.BYTES);
 
-        @SuppressWarnings("removal")
+        byte[] ss = new byte[BYTE_SIZE];
+
         @Actor
         public void writer() {
-            UNSAFE.putInt(ss, off, 0xFFFFFFFF);
+            VH.set(ss, off, 0xFFFFFFFF);
         }
 
-        @SuppressWarnings("removal")
         @Actor
         public void reader(I_Result r) {
-            r.r1 = UNSAFE.getInt(ss, off);
+            r.r1 = (int)VH.get(ss, off);
         }
     }
-
-
-    // ======================================= EARLY VALHALLA EXAMPLES BELOW =======================================
-    // These require Valhalla JDK builds.
-
-    /*
-      ----------------------------------------------------------------------------------------------------------
-
-        While most modern hardware implementation provide access atomicity for all Java primitive types,
-        the issue with access atomicity raises it ugly head again with Project Valhalla, which strives
-        to introduce multi-field classes that behave like primitives. There, reading the entirety of
-        the "inlined" ("flattened") primitive type is sometimes not possible, because the effective
-        data type width is too large. Therefore, we would normally see access atomicity violations.
-
-        Indeed, on x86_64 this happens:
-          RESULT        SAMPLES     FREQ       EXPECT  DESCRIPTION
-            0, 0    790,816,955   22.90%   Acceptable  Seeing the default value: writer had not acted yet.
-            0, 1      2,154,875    0.06%  Interesting  Other cases are allowed, because reads/writes are not ato...
-            1, 0      2,385,714    0.07%  Interesting  Other cases are allowed, because reads/writes are not ato...
-            1, 1  2,658,516,120   76.97%   Acceptable  Seeing the full value.
-     */
-
-    /*
-    @JCStressTest
-    @Outcome(id = "0, 0", expect = ACCEPTABLE, desc = "Seeing the default value: writer had not acted yet.")
-    @Outcome(id = "1, 1", expect = ACCEPTABLE, desc = "Seeing the full value.")
-    @Outcome(expect = ACCEPTABLE_INTERESTING, desc = "Other cases are allowed, because reads/writes are not atomic.")
-    @State
-    public static class Values {
-        static primitive class Value {
-            long x;
-            long y;
-            public Value(long x, long y) {
-                this.x = x;
-                this.y = y;
-            }
-        }
-
-        Value v = Value.default;
-
-        @Actor
-        public void writer() {
-            v = new Value(1, 1);
-        }
-
-        @Actor
-        public void reader(JJ_Result r) {
-            Value tv = v;
-            r.r1 = tv.x;
-            r.r2 = tv.y;
-        }
-    }
-     */
-
-    /*
-      ----------------------------------------------------------------------------------------------------------
-
-        As usual, marking the primitive field "volatile" regains the access atomicity. In current implementations,
-        this happens by forbidding the "flattening" of the inline type.
-
-        x86_64:
-          RESULT        SAMPLES     FREQ      EXPECT  DESCRIPTION
-            0, 0  2,780,487,683   84.19%  Acceptable  Seeing the default value: writer had not acted yet.
-            1, 1    522,202,621   15.81%  Acceptable  Seeing the full value.
-     */
-
-    /*
-
-    @JCStressTest
-    @Outcome(id = "0, 0", expect = ACCEPTABLE, desc = "Seeing the default value: writer had not acted yet.")
-    @Outcome(id = "1, 1", expect = ACCEPTABLE, desc = "Seeing the full value.")
-    @Outcome(expect = FORBIDDEN, desc = "Other cases are forbidden.")
-    @State
-    public static class VolatileValues {
-        static primitive class Value {
-            long x;
-            long y;
-            public Value(long x, long y) {
-                this.x = x;
-                this.y = y;
-            }
-        }
-
-        volatile Value v = Value.default;
-
-        @Actor
-        public void writer() {
-            v = new Value(1, 1);
-        }
-
-        @Actor
-        public void reader(JJ_Result r) {
-            Value tv = v;
-            r.r1 = tv.x;
-            r.r2 = tv.y;
-        }
-    }
-     */
-
-    /*
-      ----------------------------------------------------------------------------------------------------------
-
-        The awkward case is when the primitive field is not marked specifically, so field layouter flattens
-        the type, but then the the primitive field is used as "opaque". In this case, the implementation
-        has to enforce atomicity by e.g. locking.
-
-        x86_64:
-            RESULT        SAMPLES     FREQ      EXPECT  DESCRIPTION
-              0, 0    542,416,624   25.36%  Acceptable  Seeing the default value: writer had not acted yet.
-              1, 1  1,596,364,560   74.64%  Acceptable  Seeing the full value.
-     */
-
-    /*
-    @JCStressTest
-    @Outcome(id = "0, 0", expect = ACCEPTABLE, desc = "Seeing the default value: writer had not acted yet.")
-    @Outcome(id = "1, 1", expect = ACCEPTABLE, desc = "Seeing the full value.")
-    @Outcome(expect = FORBIDDEN, desc = "Other cases are forbidden.")
-    @State
-    public static class OpaqueValues {
-        static primitive class Value {
-            long x;
-            long y;
-            public Value(long x, long y) {
-                this.x = x;
-                this.y = y;
-            }
-        }
-
-        Value v = Value.default;
-
-        static final VarHandle VH;
-
-        static {
-            try {
-                VH = MethodHandles.lookup().findVarHandle(OpaqueValues.class, "v", Value.class);
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-        @Actor
-        public void writer() {
-            VH.setOpaque(this, new Value(1, 1));
-        }
-
-        @Actor
-        public void reader(JJ_Result r) {
-            Value tv = (Value) VH.getOpaque(this);
-            r.r1 = tv.x;
-            r.r2 = tv.y;
-        }
-    }
-    */
 
 }

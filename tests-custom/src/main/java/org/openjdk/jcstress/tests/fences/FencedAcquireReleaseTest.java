@@ -24,14 +24,14 @@
  */
 package org.openjdk.jcstress.tests.fences;
 
+import java.lang.invoke.VarHandle;
+
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
-
-import static org.openjdk.jcstress.util.UnsafeHolder.UNSAFE;
 
 /**
  * Tests if acquire-release fences induce proper happens-before.
@@ -53,21 +53,19 @@ public class FencedAcquireReleaseTest {
     int x;
     int y; // acq/rel var
 
-    @SuppressWarnings("removal")
     @Actor
     public void actor1() {
         x = 1;
         x = 2;
-        UNSAFE.storeFence();
+        VarHandle.releaseFence();
         y = 1;
         x = 3;
     }
 
-    @SuppressWarnings("removal")
     @Actor
     public void actor2(II_Result r) {
         int sy = y;
-        UNSAFE.loadFence();
+        VarHandle.acquireFence();
         int sx = x;
         r.r1 = sy;
         r.r2 = sx;

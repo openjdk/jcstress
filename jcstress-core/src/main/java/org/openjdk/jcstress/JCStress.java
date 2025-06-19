@@ -86,9 +86,9 @@ public class JCStress {
     }
 
     private ConfigsWithScheduler getConfigs() {
-        OSSupport.init();
-
         VMSupport.initFlags(opts);
+
+        OSSupport.init();
 
         VMSupport.detectAvailableVMConfigs(opts.isSplitCompilation(), opts.getJvmArgs(), opts.getJvmArgsPrepend());
         if (VMSupport.getAvailableVMConfigs().isEmpty()) {
@@ -192,17 +192,37 @@ public class JCStress {
         return configs;
     }
 
+    private boolean skipMode(int cm, VMSupport.Config config, int threads) {
+        if (CompileMode.isUnified(cm)) {
+            // Do not skip unified modes.
+            return false;
+        }
+        // No C1/C2 runtime is available? Skip split compilation tests with C1/C2.
+        if (!config.availableRuntimes().hasC2() && CompileMode.hasC2(cm, threads)) {
+            return true;
+        }
+        if (!config.availableRuntimes().hasC1() && CompileMode.hasC1(cm, threads)) {
+            return true;
+        }
+        // Config should be executed only when C1/C2 is available? Skip split compilation tests without them.
+        if (config.requiredRuntimes().hasC2() && !CompileMode.hasC2(cm, threads)) {
+            return true;
+        }
+        if (config.requiredRuntimes().hasC1() && !CompileMode.hasC1(cm, threads)) {
+            return true;
+        }
+        // Do not skip by default.
+        return false;
+    }
+
     private void forkedSplit(List<TestConfig> testConfigs, VMSupport.Config config, TestInfo info, SchedulingClass scl) {
-        for (int cc : CompileMode.casesFor(info.threads(), VMSupport.c1Available(), VMSupport.c2Available())) {
-            if (config.onlyIfC2() && !CompileMode.hasC2(cc, info.threads())) {
-                // This configuration is expected to run only when C2 is enabled,
-                // but compilation mode does not include C2. Can skip it to optimize
-                // testing time.
+        for (int cm : CompileMode.casesFor(info.threads(), VMSupport.c1Available(), VMSupport.c2Available())) {
+            if (skipMode(cm, config, info.threads())) {
                 continue;
             }
             int forks = opts.getForks() * (config.stress() ? opts.getForksStressMultiplier() : 1);
             for (int f = 0; f < forks; f++) {
-                testConfigs.add(new TestConfig(opts, info, f, config.args(), cc, scl));
+                testConfigs.add(new TestConfig(opts, info, f, config.args(), cm, scl));
             }
         }
     }

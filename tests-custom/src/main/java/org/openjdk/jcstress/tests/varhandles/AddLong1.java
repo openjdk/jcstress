@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,46 +24,48 @@
  */
 package org.openjdk.jcstress.tests.varhandles;
 
-import org.openjdk.jcstress.annotations.*;
-import org.openjdk.jcstress.infra.results.II_Result;
+import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Description;
+import org.openjdk.jcstress.annotations.Expect;
+import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
+import org.openjdk.jcstress.annotations.State;
+import org.openjdk.jcstress.infra.results.JJ_Result;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
-import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
-import static org.openjdk.jcstress.annotations.Expect.FORBIDDEN;
-
 @JCStressTest
-@Description("Tests Dekker-lock-style idioms")
-@Outcome(id = {"0, 1", "1, 0", "1, 1"}, expect = ACCEPTABLE, desc = "Trivial under sequential consistency")
-@Outcome(id = "0, 0",                   expect = ACCEPTABLE_INTERESTING, desc = "Apparently violates sequential consistency")
+@Description("Tests if VarHandle.getAndAddLong is racy")
+@Outcome(id = "1, 2", expect = Expect.ACCEPTABLE, desc = "T1 -> T2 execution")
+@Outcome(id = "0, 0", expect = Expect.ACCEPTABLE, desc = "T2 -> T1 execution")
+@Outcome(id = "0, 2", expect = Expect.ACCEPTABLE, desc = "T2 reads the result early")
 @State
-public class DekkerRelaxation1Test {
+public class AddLong1 {
 
-    static final VarHandle VH_A, VH_B;
+    static final VarHandle VH;
 
     static {
         try {
-            VH_A = MethodHandles.lookup().findVarHandle(DekkerRelaxation1Test.class, "a", int.class);
-            VH_B = MethodHandles.lookup().findVarHandle(DekkerRelaxation1Test.class, "b", int.class);
+            VH = MethodHandles.lookup().findVarHandle(AddLong1.class, "x", long.class);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    volatile int a;
-    volatile int b;
+    long x;
+    volatile int written;
 
     @Actor
-    public void actor1(II_Result r) {
-        VH_A.setRelease(this, 1); // relax to release
-        r.r1 = (int) VH_B.getVolatile(this);
+    public void actor1() {
+        VH.getAndAdd(this, 1L << 1);
+        written = 1;
     }
 
     @Actor
-    public void actor2(II_Result r) {
-        VH_B.setVolatile(this, 1);
-        r.r2 = (int) VH_A.getVolatile(this);
+    public void actor2(JJ_Result r) {
+        r.r1 = written;
+        r.r2 = (long)VH.get(this);
     }
+
 }
