@@ -30,6 +30,7 @@ import org.openjdk.jcstress.infra.grading.ConsoleReportPrinter;
 import org.openjdk.jcstress.infra.grading.ExceptionReportPrinter;
 import org.openjdk.jcstress.infra.grading.TextReportPrinter;
 import org.openjdk.jcstress.infra.grading.HTMLReportPrinter;
+import org.openjdk.jcstress.infra.grading.XMLReportPrinter;
 import org.openjdk.jcstress.infra.runners.TestConfig;
 import org.openjdk.jcstress.infra.runners.TestList;
 import org.openjdk.jcstress.os.*;
@@ -157,10 +158,17 @@ public class JCStress {
         drc.dump();
         drc.close();
 
-        new TextReportPrinter(opts, collector).work();
-        new HTMLReportPrinter(opts, collector, out).work();
+        new TextReportPrinter(opts.verbosity(), collector).work();
+        new HTMLReportPrinter(opts.getResultDest(), collector, out).work();
+        if (XMLReportPrinter.getSparse(out)!=null) {
+            new XMLReportPrinter(opts.getResultDest(), collector, out, XMLReportPrinter.getSparse(out)).work();
+        } else {
+            new XMLReportPrinter(opts.getResultDest(), collector, out, false).work();
+            new XMLReportPrinter(opts.getResultDest(), collector, out, true).work();
+        }
         new ExceptionReportPrinter(collector).work();
     }
+
 
     private SortedSet<Integer> computeActorCounts(Set<String> tests) {
         SortedSet<Integer> counts = new TreeSet<>();
@@ -252,7 +260,7 @@ public class JCStress {
         Set<String> testsToPrint = new TreeSet<>();
         for (TestConfig test : configsWithScheduler.configs) {
             if (opts.verbosity().printAllTests()) {
-                testsToPrint.add(test.toDetailedTest());
+                testsToPrint.add(test.toDetailedTest(true));
             } else {
                 testsToPrint.add(test.name);
             }
