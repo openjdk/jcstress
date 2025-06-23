@@ -84,6 +84,13 @@ public class ReportUtils {
         }
         return result;
     }
+    public static Multimap<String, TestResult> byDetailedName(Collection<TestResult> src) {
+        Multimap<String, TestResult> result = new HashMultimap<>();
+        for (TestResult r : mergedByConfig(src)) {
+            result.put(r.getConfig().toDetailedTest(false), r);
+        }
+        return result;
+    }
 
     private static TestResult merged(TestConfig config, Collection<TestResult> mergeable) {
         Counter<String> counter = new Counter<>();
