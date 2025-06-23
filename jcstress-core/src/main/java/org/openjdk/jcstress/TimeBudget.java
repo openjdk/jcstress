@@ -59,11 +59,14 @@ public class TimeBudget {
         if (timeBudget != null) {
             return timeBudget;
         }
-
         // Assume the nearly worst case, all 4-actor tests taking the cores exclusively.
         long expectedTotalTime = (long) expectedTests * DEFAULT_PER_TEST_MS;
-        long expectedPerTest = expectedTotalTime / Math.max(1, VMSupport.figureOutHotCPUs() / 8);
+        long expectedPerTest = expectedTotalTime / getConcurentTestsFactor();
         return new TimeValue(expectedPerTest, TimeUnit.MILLISECONDS);
+    }
+
+    private static int getConcurentTestsFactor() {
+        return Math.max(1, VMSupport.figureOutHotCPUs() / 8);
     }
 
     public void finishTest() {
@@ -131,8 +134,44 @@ public class TimeBudget {
         } else {
             out.println("    Initial completion estimate: " + ReportUtils.msToDate(timeLeftMs(), true));
             out.println("    Initial test time: " + targetTestTimeMs() + " ms");
+            printOvertimeWarning(out);
         }
         out.println();
+    }
+
+    private long countEta(int msPerTest) {
+        long expectedTotalTime = (long) expectedTests * msPerTest;
+        long expectedPerTest = expectedTotalTime / getConcurentTestsFactor();
+        return expectedPerTest;
+    }
+
+    private boolean printOvertimeWarning(PrintStream out) {
+        long expectedPerTest = countEta(DEFAULT_PER_TEST_MS);
+        boolean print=false;
+        if (expectedPerTest > budget.milliseconds() * 2l) {
+            out.println("    FATAL: your tests will never finish as expected. They will run much longer ");
+            print=true;
+        }
+        if (expectedPerTest * 2 < budget.milliseconds() * 2l) {
+            out.println("    WARNING:  your time budget will not be used. Tests will end much sooner.");
+            print=true;
+        }
+        if (print) {
+            out.println("    For " + expectedTests + " with concurrency factor of " + getConcurentTestsFactor()
+                    + " You have requested/been given time budget of: " + ReportUtils.formatMsToDaysAndTime(budget.milliseconds()));
+            out.println("    That is ~" + budget.milliseconds() / expectedTests + " ms per test");
+            out.println("    However the real time will be converging to: " + ReportUtils.formatMsToDaysAndTime(expectedPerTest) + " +++");
+            out.println("    You can play with internal  properties name(value/eta):\n"
+                    + "        jcstress.timeBudget.defaultPerTestMs(" + DEFAULT_PER_TEST_MS + "ms/" +
+                    ReportUtils.formatMsToDaysAndTime(countEta(DEFAULT_PER_TEST_MS)) + ")\n"
+                    + "        jcstress.timeBudget.minTimeMs(" + MIN_TIME_MS + "ms/" +
+                    ReportUtils.formatMsToDaysAndTime(countEta(MIN_TIME_MS)) + ")\n"
+                    + "        jcstress.timeBudget.maxTimeMs(" + MAX_TIME_MS + "ms/" +
+                    ReportUtils.formatMsToDaysAndTime(countEta(MAX_TIME_MS)) + ")\n"
+                    + "      Which are setting up the exact times the individual tests are trying to converage to.\n"
+                    + "      Use with caution! Test run below 100ms is moreover jeopardize the purpose. And will not squeeze the time as you wish.");
+        }
+        return print;
     }
 
     public boolean isZero() {
