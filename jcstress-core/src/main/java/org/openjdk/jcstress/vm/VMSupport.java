@@ -41,6 +41,16 @@ import java.util.stream.Collectors;
 
 public class VMSupport {
 
+    private static class ResultWithMessage {
+        private final boolean result;
+        private final String message;
+
+        public ResultWithMessage(boolean result, String message) {
+            this.result = result;
+            this.message = message;
+        }
+    }
+
     private static final List<String> GLOBAL_JVM_FLAGS = new ArrayList<>();
     private static final List<String> C2_STRESS_JVM_FLAGS = new ArrayList<>();
     private static final List<String> C2_ONLY_STRESS_JVM_FLAGS = new ArrayList<>();
@@ -50,6 +60,8 @@ public class VMSupport {
     private static volatile boolean COMPILER_DIRECTIVES_AVAILABLE;
     private static volatile boolean PRINT_ASSEMBLY_AVAILABLE;
     private static volatile boolean STRESS_SEED_AVAILABLE;
+    private static volatile int JDK_VERSION_MAJOR;
+    private static volatile String JDK_VERSION_MAJOR_FULL = "undetected";
 
     private static volatile boolean C1_AVAILABLE;
     private static volatile boolean C2_AVAILABLE;
@@ -80,6 +92,10 @@ public class VMSupport {
         return C2_AVAILABLE;
     }
 
+    public static int getJdkVersionMajor() {
+        return JDK_VERSION_MAJOR;
+    }
+
     public static boolean enableNativeAccessAvailable() {
         return ENABLE_NATIVE_ACCESS_AVAILABLE;
     }
@@ -92,6 +108,14 @@ public class VMSupport {
         System.out.println("Initializing and probing the target VM:");
         System.out.println(" (all failures are non-fatal, but may affect testing accuracy)");
         System.out.println();
+
+        ResultWithMessage futureJdkVersionMajor =
+                detectWithMessage("Checking JVM feature version",
+                        true,
+                        TargetJvmVersion.class,
+                        null
+                );
+        setDetectedJdkVersion(futureJdkVersionMajor);
 
         detect("Unlocking diagnostic VM options",
                 true,
@@ -383,21 +407,40 @@ public class VMSupport {
         System.out.println();
     }
 
+    private static void setDetectedJdkVersion(ResultWithMessage futureJdkVersionMajor) {
+        if (futureJdkVersionMajor.result && futureJdkVersionMajor.message!=null){
+            try {
+                JDK_VERSION_MAJOR = Integer.parseInt(futureJdkVersionMajor.message.replaceAll(".*: ", "").replaceAll(" .*", "").trim());
+                JDK_VERSION_MAJOR_FULL=futureJdkVersionMajor.message.replaceAll(".*\\(", "").replaceAll("\\).*", "").trim();
+            }catch(Exception ex){
+                JDK_VERSION_MAJOR = 8;
+                JDK_VERSION_MAJOR_FULL=futureJdkVersionMajor.message;
+            }
+        } else {
+            JDK_VERSION_MAJOR = 8;
+        }
+    }
+
     private static boolean detect(String label, boolean expectPass, Class<?> mainClass, List<String> list, String... opts) {
+        return detectWithMessage(label, expectPass, mainClass, list, opts).result;
+    }
+
+    private static ResultWithMessage detectWithMessage(String label, boolean expectPass, Class<?> mainClass, List<String> list, String... opts) {
+        String msg = "Message not received";
         try {
             String[] arguments = ArrayUtils.concat(opts, mainClass.getName());
-            tryWith(arguments);
+            msg = tryWith(arguments);
             if (list != null) {
                 list.addAll(Arrays.asList(opts));
             }
             System.out.printf("----- %s %s%n", "[OK]", label);
-            return true;
+            return new ResultWithMessage(true, msg);
         } catch (VMSupportException ex) {
             System.out.printf("----- %s %s%n", "[N/A]", label);
             if (expectPass) {
                 System.out.println(ex.getMessage());
             }
-            return false;
+            return new ResultWithMessage(false, msg);
         }
     }
 
