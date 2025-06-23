@@ -85,7 +85,7 @@ public class JCStress {
         parseResults();
     }
 
-    private ConfigsWithScheduler getConfigs() {
+    ConfigsWithScheduler getConfigs() {
         VMSupport.initFlags(opts);
 
         OSSupport.init();
@@ -119,7 +119,7 @@ public class JCStress {
         return new ConfigsWithScheduler(scheduler, configs);
     }
 
-    private static class ConfigsWithScheduler {
+    static class ConfigsWithScheduler {
         public final Scheduler scheduler;
         public final List<TestConfig> configs;
 
@@ -236,8 +236,11 @@ public class JCStress {
 
     public SortedSet<String> getTests() {
         String filter = opts.getTestFilter();
-        SortedSet<String> s = new TreeSet<>();
+        return getTests(filter);
+    }
 
+    public SortedSet<String> getTests(String filter) {
+        SortedSet<String> s = new TreeSet<>();
         Pattern pattern = Pattern.compile(filter);
         for (String testName : TestList.tests()) {
             if (pattern.matcher(testName).find()) {
@@ -246,26 +249,5 @@ public class JCStress {
         }
         return s;
    }
-
-    public int listTests(Options opts) {
-        JCStress.ConfigsWithScheduler configsWithScheduler = getConfigs();
-        Set<String> testsToPrint = new TreeSet<>();
-        for (TestConfig test : configsWithScheduler.configs) {
-            if (opts.verbosity().printAllTests()) {
-                testsToPrint.add(test.toDetailedTest());
-            } else {
-                testsToPrint.add(test.name);
-            }
-        }
-        if (opts.verbosity().printAllTests()) {
-            out.println("All matching tests combinations - " + testsToPrint.size());
-        } else {
-            out.println("All matching tests - " + testsToPrint.size());
-        }
-        for (String test : testsToPrint) {
-            out.println(test);
-        }
-        return testsToPrint.size();
-    }
 
 }

@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class StringUtils {
 
@@ -190,5 +191,54 @@ public class StringUtils {
             }
         }
         return result;
+    }
+
+   public static String fieldToString(String name, boolean json, Collection<? extends Object> field) {
+        String value;
+        if (json) {
+            value = "\"" + (field.stream().map( a -> String.valueOf(a)).collect(Collectors.joining("\",\""))) + "\"";
+        } else {
+            value = field.toString();
+        }
+        return fieldToStringImpl(name, json, false, value, true);
+    }
+
+    public static String fieldToString(String name, boolean json, Object field) {
+        return fieldToString(name, json, true, String.valueOf(field));
+    }
+
+    public static String fieldToString(String name, boolean json, boolean showName, Object field) {
+        return fieldToStringImpl(name, json, showName, String.valueOf(field), false);
+    }
+
+    private static String fieldToStringImpl(String name, boolean json, boolean showName, String field, boolean arrayQuotes) {
+        String finalForm;
+        if (showName || json) {
+            finalForm = key(json, name);
+        } else {
+            finalForm = "";
+        }
+        if (json) {
+            if (arrayQuotes) {
+                return finalForm + "[" + field + "]";
+            } else {
+                if (field.chars().allMatch( Character::isDigit )) {
+                    //all known usages use only int as numbers
+                    return finalForm + field;
+                } else {
+                    return finalForm + "\"" + field + "\"";
+                }
+            }
+        } else {
+            return finalForm + field;
+        }
+    }
+
+    private static String key(boolean json, String title) {
+        if (json) {
+            return "\"" + title + "\": ";
+        } else {
+            return title + ": ";
+        }
     }
 }

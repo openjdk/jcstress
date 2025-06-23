@@ -30,12 +30,16 @@ import org.openjdk.jcstress.os.SchedulingClass;
 import org.openjdk.jcstress.Options;
 import org.openjdk.jcstress.infra.TestInfo;
 import org.openjdk.jcstress.os.CPUMap;
+import org.openjdk.jcstress.util.StringUtils;
 import org.openjdk.jcstress.vm.CompileMode;
 import org.openjdk.jcstress.vm.VMSupport;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TestConfig implements Serializable {
     public final SpinLoopStyle spinLoopStyle;
@@ -245,25 +249,54 @@ public class TestConfig implements Serializable {
         pw.flush();
     }
 
-
-    public String toDetailedTest() {
+    public String getTestVariant(boolean seed, boolean json) {
         //binaryName have correct $ instead of . in name; omitted
         //generatedRunnerName name with suffix (usually _Test_jcstress) omitted
         //super.toString() as TestConfig@hash - omitted
-        StringBuilder verboseOutput = new StringBuilder(name);
-        verboseOutput.append(" {")
-                .append(actorNames)
-                .append(", spinLoopStyle: ").append(spinLoopStyle)
-                .append(", threads: ").append(threads)
-                .append(", forkId: ").append(forkId)
-                .append(", maxFootprintMB: ").append(maxFootprintMB)
-                .append(", compileMode: ").append(compileMode)
-                .append(", shClass: ").append(shClass)
-                .append(", strideSize: ").append(strideSize)
-                .append(", strideCount: ").append(strideCount)
-                .append(", cpuMap: ").append(cpuMap)
-                .append(", ").append(jvmArgs)
-                .append("}");
+        StringBuilder idString = new StringBuilder();
+        idString.append(StringUtils.fieldToString("actorNames", json, actorNames))
+                .append(", ").append(StringUtils.fieldToString("spinLoopStyle", json, spinLoopStyle))
+                .append(", ").append(StringUtils.fieldToString("threads", json, threads))
+                .append(", ").append(StringUtils.fieldToString("forkId", json, forkId))
+                .append(", ").append(StringUtils.fieldToString("maxFootprintMB", json, maxFootprintMB))
+                .append(", ").append(StringUtils.fieldToString("compileMode", json, compileMode))
+                .append(", ").append(StringUtils.fieldToString("shClass", json, shClass))
+                .append(", ").append(StringUtils.fieldToString("strideSize", json, strideSize))
+                .append(", ").append(StringUtils.fieldToString("strideCount", json, strideCount))
+                .append(", ").append(StringUtils.fieldToString("cpuMap", json, cpuMap))
+                .append(", ").append(StringUtils.fieldToString("jvmArgs", json, (seed ? jvmArgs : maskSeed(jvmArgs))));
+        return idString.toString();
+    }
+
+    private List<String> maskSeed(List<String> jvmArgs) {
+        List<String> argsCopy = new ArrayList<>(jvmArgs.size());
+        for (String arg : jvmArgs) {
+            if (arg.startsWith("-XX:StressSeed=")) {
+                argsCopy.add(arg.replaceAll("[0-9]+", "yyyyyyyy"));
+            } else {
+                argsCopy.add(arg);
+            }
+        }
+        return argsCopy;
+    }
+
+    public String toDetailedTest(boolean json, boolean showName, boolean seed, boolean keepBrackets) {
+        StringBuilder verboseOutput = showName ? new StringBuilder(StringUtils.fieldToString("name", json, false, name)) : new StringBuilder();
+        if (json) {
+            if (showName) {
+                verboseOutput.append(", ");
+            }
+            verboseOutput.append("\"metadata\": ");
+        } else {
+            if (showName) {
+                verboseOutput.append(" ");
+            }
+        }
+        if (keepBrackets) {
+            verboseOutput.append("{").append(getTestVariant(seed, json)).append("}");
+        } else {
+            verboseOutput.append(getTestVariant(seed, json));
+        }
         return verboseOutput.toString();
     }
 }

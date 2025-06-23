@@ -50,7 +50,8 @@ public class Main {
 
         JCStress jcstress = new JCStress(opts);
         if (opts.shouldList()) {
-            jcstress.listTests(opts);
+            TestListing testListing = new TestListing(jcstress);
+            testListing.listTests();
         } else if (opts.shouldParse()) {
             jcstress.parseResults();
         } else {
