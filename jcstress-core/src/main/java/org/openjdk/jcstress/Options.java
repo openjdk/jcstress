@@ -46,6 +46,9 @@ import java.util.*;
  * @author Aleksey Shipilev (aleksey.shipilev@oracle.com)
  */
 public class Options {
+
+    public static final String FAIL_ON_ERROR = "foe";
+
     private String resultDir;
     private String testFilter;
     private int strideSize;
@@ -66,6 +69,7 @@ public class Options {
     private AffinityMode affinityMode;
     private boolean pretouchHeap;
     private TimeValue timeBudget;
+    private boolean failOnError;
 
     public Options(String[] args) {
         this.args = args;
@@ -149,6 +153,10 @@ public class Options {
                 "in arbitrarily low time budget. If not set, harness would try to decide a reasonable time, given the number of tests to run. " +
                 "Common time suffixes (s/m/h/d) are accepted.")
                 .withRequiredArg().ofType(TimeValue.class).describedAs("time");
+
+        parser.accepts(FAIL_ON_ERROR, "Tells the framework to exit after "
+                + "failure or error and no longer waste HW cycles. Soft errors do not count by default.");
+
 
         parser.accepts("v", "Be verbose.");
         parser.accepts("vv", "Be extra verbose.");
@@ -259,6 +267,8 @@ public class Options {
 
         this.splitCompilation = orDefault(set.valueOf(optSplitCompilation), true);
         this.affinityMode = orDefault(set.valueOf(optAffinityMode), AffinityMode.LOCAL);
+
+        this.failOnError = set.has(FAIL_ON_ERROR);
 
         return true;
     }
@@ -390,6 +400,10 @@ public class Options {
 
     public boolean isPretouchHeap() {
         return pretouchHeap;
+    }
+
+    public boolean isFailOnError() {
+        return failOnError;
     }
 
     public TimeValue timeBudget() { return timeBudget; }
